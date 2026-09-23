@@ -51,6 +51,10 @@ export function createApp(): express.Express {
     res.json({ success: true, data: { status: "ok", service: "edu-alt-tech-api", env: config.env } });
   });
 
+  app.get("/api/health", (_req, res) => {
+    res.json({ success: true, data: { status: "ok", service: "edu-alt-tech-api", env: config.env } });
+  });
+
   app.use("/api/auth", authRoutes);
   app.use("/api/courses", courseRoutes);
   app.use("/api/practice", practiceRoutes);
