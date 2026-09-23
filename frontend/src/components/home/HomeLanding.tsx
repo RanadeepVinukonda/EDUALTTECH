@@ -115,20 +115,20 @@ export default function HomeLanding() {
               every day. Kakinada first, the rest of Andhra Pradesh next.
             </p>
 
-            <div className="fade-up fade-up-2 flex flex-wrap gap-3 pt-2">
+            <div className="fade-up fade-up-2 flex flex-wrap items-center gap-3 pt-2">
               <Link
                 href="/register"
                 className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700 active:scale-[0.98]"
               >
-                Join EduAltTech
+                Join free — teach or learn
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
-              <Link
-                href="/courses"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-400 hover:text-brand-700"
-              >
-                Browse courses
-              </Link>
+              <span className="text-sm text-slate-500">
+                or{" "}
+                <Link href="/courses" className="font-semibold text-brand-700 underline-offset-4 hover:underline">
+                  browse courses
+                </Link>
+              </span>
             </div>
 
             <div className="fade-up fade-up-3 grid max-w-2xl grid-cols-2 gap-3 pt-6 sm:grid-cols-4">
@@ -227,19 +227,18 @@ export default function HomeLanding() {
           </div>
 
           <div className="grid items-stretch gap-5 md:grid-cols-2">
-            {/* Provider */}
             <div className="group flex flex-col gap-6 rounded-xl border border-black/5 bg-white p-8 shadow-elev1 transition-shadow duration-300 hover:shadow-elev3 md:p-10">
               <span className="self-start text-xs font-black uppercase tracking-widest text-brand-600">
-                Provider
+                Teach what you know
               </span>
-              <div className="font-display text-4xl font-black leading-[1.05] tracking-tight text-brand-600 md:text-[2.75rem]">
-                Teach what
+              <div className="font-display text-4xl font-black leading-[1.05] tracking-tight text-ink-700 md:text-[2.75rem]">
+                Any skill can
                 <br />
-                you do daily.
+                be taught.
               </div>
               <p className="text-sm leading-relaxed text-slate-600">
-                Apply per course — a skill test decides, not your degree. We train you to teach
-                interactively, and you get paid per class.
+                One account lets you teach what you do daily. A skill test decides, not your
+                degree, and you get paid per class.
               </p>
               <ul className="flex-1 space-y-2.5 text-sm text-slate-600">
                 {[
@@ -254,27 +253,26 @@ export default function HomeLanding() {
                 ))}
               </ul>
               <Link
-                href="/register"
-                className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700 active:scale-[0.98]"
+                href="/about"
+                className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700 active:scale-[0.98]"
               >
-                Join to apply
+                See how it works
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </div>
 
-            {/* Learner */}
             <div className="group flex flex-col gap-6 rounded-xl border border-black/5 bg-white p-8 shadow-elev1 transition-shadow duration-300 hover:shadow-elev3 md:p-10">
               <span className="self-start text-xs font-black uppercase tracking-widest text-slate-400">
-                Learner
+                Learn anything
               </span>
               <div className="font-display text-4xl font-black leading-[1.05] tracking-tight text-ink-700 md:text-[2.75rem]">
-                Learn from
+                Any skill can
                 <br />
-                practitioners.
+                be learned.
               </div>
               <p className="text-sm leading-relaxed text-slate-600">
-                Pay per course — no subscriptions. Mentors who do the work daily, with practice
-                labs and the AI tutor included.
+                Pay per course, no subscriptions. Mentors who do the work daily, practice labs
+                and the AI tutor — all in the same account.
               </p>
               <ul className="flex-1 space-y-2.5 text-sm text-slate-600">
                 {[
@@ -290,7 +288,7 @@ export default function HomeLanding() {
               </ul>
               <Link
                 href="/courses"
-                className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-ink-700 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-ink-800 active:scale-[0.98]"
+                className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700 active:scale-[0.98]"
               >
                 Browse courses free
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -358,10 +356,10 @@ export default function HomeLanding() {
               <div className="mt-8">
                 {allRevealed ? (
                   <Link
-                    href="/register"
-                    className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700 active:scale-[0.98]"
+                    href="/courses"
+                    className="group inline-flex h-12 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700"
                   >
-                    Join the marketplace
+                    Browse courses &amp; practice
                     <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 ) : (
@@ -467,30 +465,25 @@ export default function HomeLanding() {
       </section>
 
       {/* Final CTA — provider-first */}
-      <section className="px-6 py-16 md:py-24">
+      <section className="px-6 py-16 md:py-20">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col justify-between gap-8 rounded-xl bg-slate-50 px-8 py-14 shadow-elev2 md:px-12 md:py-16 lg:flex-row lg:items-center">
-            <div className="max-w-xl space-y-3">
+            <div className="max-w-2xl space-y-3">
               <h2 className="font-display text-3xl font-black tracking-tight text-ink-800 md:text-4xl">
-                Your skill belongs in a classroom.
+                One login. Every feature.
               </h2>
               <p className="leading-relaxed text-slate-600">
-                Join free. Prove your skill. We do the matching — you do what you&apos;re good at.
+                Courses, practice labs, study resources and the AI tutor — plus the option to
+                teach what you know. All in one account, no separate provider sign-up.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/register"
-                className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700 active:scale-[0.98]"
+                href="/courses"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700 active:scale-[0.98]"
               >
-                Become a provider
+                Explore the full platform
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700 active:scale-[0.98]"
-              >
-                Book a free audit
               </Link>
             </div>
           </div>

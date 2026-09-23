@@ -184,18 +184,12 @@ export default function FeaturedSections() {
       {/* Providers */}
       <section className="relative px-6 py-16" id="providers">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
             <SectionHeading
               kicker="Skill Marketplace"
               title="Providers already on the platform."
               body="Approved mentors — the faces behind the courses students love."
             />
-            <Link
-              href="/teachers/apply"
-              className="mb-10 inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-brand-600 px-5 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700"
-            >
-              Become a provider
-            </Link>
           </div>
 
           {providers === null ? (

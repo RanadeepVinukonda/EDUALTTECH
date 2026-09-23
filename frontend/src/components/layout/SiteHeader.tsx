@@ -130,13 +130,13 @@ export function SiteHeader() {
           ) : (
             <>
               <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-brand-700">
-                Sign in
+                Log in
               </Link>
               <Link
                 href="/register"
                 className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
               >
-                Get started
+                Sign up
               </Link>
             </>
           )}
