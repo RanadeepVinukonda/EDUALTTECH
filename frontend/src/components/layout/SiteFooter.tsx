@@ -1,4 +1,18 @@
 import Link from "next/link";
+import { Instagram, Mail, MessageCircle, Phone } from "lucide-react";
+
+const INSTAGRAM_URL = "https://www.instagram.com/edu_alt_tech/";
+const EMAIL = "info@edualttech.com";
+const PHONE = "";
+const WHATSAPP = "";
+
+function phoneHref(value: string): string {
+  return `tel:${value.replace(/[^+\d]/g, "")}`;
+}
+
+function whatsappHref(value: string): string {
+  return `https://wa.me/${value.replace(/[^+\d]/g, "")}`;
+}
 
 export function SiteFooter() {
   return (
@@ -29,11 +43,32 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <p className="text-sm font-semibold text-white">Setsuzoku group</p>
+          <p className="text-sm font-semibold text-white">Connect</p>
           <ul className="mt-3 space-y-2 text-sm text-ink-200">
-            <li>Edu-Alt-Tech — skill marketplace</li>
-            <li>Digital solutions</li>
-            <li>Marketing &amp; admissions</li>
+            <li>
+              <a href={`mailto:${EMAIL}`} className="inline-flex items-center gap-2 hover:text-brand-300">
+                <Mail className="h-4 w-4" aria-hidden /> {EMAIL}
+              </a>
+            </li>
+            <li>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-brand-300">
+                <Instagram className="h-4 w-4" aria-hidden /> @edu_alt_tech
+              </a>
+            </li>
+            {PHONE ? (
+              <li>
+                <a href={phoneHref(PHONE)} className="inline-flex items-center gap-2 hover:text-brand-300">
+                  <Phone className="h-4 w-4" aria-hidden /> {PHONE}
+                </a>
+              </li>
+            ) : null}
+            {WHATSAPP ? (
+              <li>
+                <a href={whatsappHref(WHATSAPP)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-brand-300">
+                  <MessageCircle className="h-4 w-4" aria-hidden /> WhatsApp
+                </a>
+              </li>
+            ) : null}
           </ul>
         </div>
       </div>

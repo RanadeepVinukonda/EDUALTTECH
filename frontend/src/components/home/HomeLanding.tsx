@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import {
-  ArrowDown,
   ArrowRight,
   ClipboardCheck,
   Presentation,
@@ -43,13 +41,6 @@ const howItWorks = [
   },
 ];
 
-const stepsImages = [
-  { src: "/static/EAT2.jpg", pos: "object-[center_25%]", alt: "EduAltTech hands-on skill assessment" },
-  { src: "/static/EAT3.jpg", pos: "object-[center_40%]", alt: "EduAltTech teacher training session" },
-  { src: "/static/EAT4.jpg", pos: "object-[center_60%]", alt: "EduAltTech student matching in action" },
-  { src: "/static/EAT2.jpg", pos: "object-[center_70%]", alt: "EduAltTech mentors growing and earning" },
-];
-
 const stats = [
   { value: 11, label: "Partner Schools" },
   { value: 1000, label: "Students Reached", suffix: "+" },
@@ -57,13 +48,14 @@ const stats = [
   { value: 98, label: "Satisfaction Rate", suffix: "%" },
 ];
 
-const proofCards = [
-  {
-    img: "/static/EAT4.jpg",
-    tag: "Student Build",
-    title: "AI attendance project by school students",
-    body: "Came from an idea in class → became a working prototype.",
-  },
+const proofFeature = {
+  img: "/static/EAT4.jpg",
+  tag: "Student Build",
+  title: "AI attendance project by school students",
+  body: "Came from an idea in class → became a working prototype. Students shipped it, mentored end to end.",
+};
+
+const proofRows = [
   {
     img: "/static/EAT2.jpg",
     tag: "Mentoring",
@@ -94,16 +86,16 @@ const institutionServices = [
 ];
 
 export default function HomeLanding() {
-  const [revealed, setRevealed] = useState(1);
-  const allRevealed = revealed === howItWorks.length;
-
   return (
     <div className="min-h-screen overflow-hidden bg-white text-slate-900">
       {/* Hero — marketplace first */}
-      <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden pb-20 pt-16">
+      <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden pb-16 pt-16">
         <div className="relative z-10 mx-auto grid w-full max-w-7xl items-start gap-12 px-6 lg:grid-cols-12">
           <div className="space-y-6 text-left lg:col-span-7">
-            <h1 className="fade-up font-display text-5xl font-black leading-[0.95] tracking-tighter text-ink-700 md:text-7xl lg:text-8xl">
+            <p className="fade-up text-xs font-bold uppercase tracking-widest text-brand-600">
+              Kakinada · Andhra Pradesh
+            </p>
+            <h1 className="fade-up fade-up-1 font-display text-5xl font-black leading-[0.95] tracking-tighter text-ink-700 md:text-6xl lg:text-7xl">
               Got skill?
               <br />
               <span className="text-brand-600">Got students.</span>
@@ -129,19 +121,6 @@ export default function HomeLanding() {
                   browse courses
                 </Link>
               </span>
-            </div>
-
-            <div className="fade-up fade-up-3 grid max-w-2xl grid-cols-2 gap-3 pt-6 sm:grid-cols-4">
-              {stats.map((stat) => (
-                <div key={stat.label} className="px-1">
-                  <div className="font-display text-3xl font-black text-ink-700 md:text-4xl">
-                    <AnimatedCounter value={stat.value} suffix={stat.suffix || ""} />
-                  </div>
-                  <div className="mt-1 text-[11px] font-semibold uppercase leading-tight tracking-wider text-slate-500">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -172,8 +151,26 @@ export default function HomeLanding() {
         </div>
       </section>
 
+      {/* Proof band — stats with editorial dividers, not cards */}
+      <section className="px-6">
+        <div className="mx-auto max-w-7xl border-y border-slate-200 py-8">
+          <dl className="grid grid-cols-2 divide-y divide-slate-200 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+            {stats.map((stat, i) => (
+              <div key={stat.label} className={`px-0 py-4 sm:py-0 ${i % 2 === 1 ? "pl-6 sm:pl-8" : "sm:pl-8"} ${i === 0 ? "sm:pl-0" : ""}`}>
+                <dd className="font-display text-3xl font-black text-ink-700 md:text-4xl">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix || ""} />
+                </dd>
+                <dt className="mt-1 text-[11px] font-semibold uppercase leading-tight tracking-wider text-slate-500">
+                  {stat.label}
+                </dt>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
       {/* Trust strip — logo marquee */}
-      <section className="relative z-10 -mt-6 px-6 pb-8 md:pb-12">
+      <section className="px-6 pb-10 pt-8 md:pb-14">
         <div className="mx-auto max-w-7xl">
           <div className="rounded-xl bg-white px-6 py-7 shadow-elev1">
             <div className="mb-6 w-full text-center text-xs font-bold uppercase tracking-widest text-brand-600">
@@ -211,7 +208,7 @@ export default function HomeLanding() {
       </section>
 
       {/* Provider / Seeker doors */}
-      <section className="relative px-6 pb-24 pt-12 md:pb-32 md:pt-16">
+      <section className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mb-14 max-w-2xl space-y-3">
             <div className="text-xs font-bold uppercase tracking-widest text-brand-600">
@@ -301,10 +298,10 @@ export default function HomeLanding() {
       {/* Featured courses + providers (live from backend) */}
       <FeaturedSections />
 
-      {/* How it works — 4 steps, reveal on demand */}
-      <section className="relative px-6 pb-16 pt-8 md:pb-24 md:pt-12">
+      {/* How it works — 4 steps, all visible, editorial top rules */}
+      <section className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-10 max-w-2xl space-y-3">
+          <div className="mb-12 max-w-2xl space-y-3">
             <div className="text-xs font-bold uppercase tracking-widest text-brand-600">
               How It Works
             </div>
@@ -313,89 +310,39 @@ export default function HomeLanding() {
             </h2>
           </div>
 
-          <div className="lg:grid lg:grid-cols-[1fr_360px] lg:items-start lg:gap-12">
-            <div className="max-w-3xl">
-              <div className="mb-8 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-brand-600 to-brand-700 transition-[width] duration-500 ease-out"
-                  style={{ width: `${(revealed / howItWorks.length) * 100}%` }}
-                />
+          <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            {howItWorks.map((item, i) => (
+              <div key={item.title} className="border-t-2 border-brand-600 pt-5">
+                <span className="text-[11px] font-black tracking-widest text-slate-400">
+                  0{i + 1}
+                </span>
+                <div className="mt-4 flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-ink-700">
+                  <item.icon className="h-5 w-5" aria-hidden />
+                </div>
+                <h3 className="mt-4 font-display text-lg font-bold leading-snug text-ink-700">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.body}</p>
               </div>
+            ))}
+          </div>
 
-              <div className="space-y-3">
-                {howItWorks.map((item, i) => (
-                  <div
-                    key={item.title}
-                    aria-hidden={i >= revealed}
-                    className={`rounded-xl border border-black/5 bg-white px-6 py-5 shadow-elev1 transition-all duration-400 ${
-                      i < revealed
-                        ? "translate-y-0 opacity-100"
-                        : "pointer-events-none translate-y-4 opacity-0"
-                    }`}
-                  >
-                    <div className="flex items-center gap-5">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-ink-700">
-                        <item.icon className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-base font-bold leading-snug text-ink-700">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1 text-sm leading-relaxed text-slate-600">
-                          {item.body}
-                        </p>
-                      </div>
-                      <span className="ml-auto shrink-0 text-[11px] font-black tracking-widest text-slate-400">
-                        0{i + 1}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8">
-                {allRevealed ? (
-                  <Link
-                    href="/courses"
-                    className="group inline-flex h-12 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700"
-                  >
-                    Browse courses &amp; practice
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setRevealed((n) => Math.min(n + 1, howItWorks.length))}
-                    className="group inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700 active:scale-[0.98]"
-                  >
-                    Reveal next step
-                    <ArrowDown className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="hidden lg:block">
-              <div className="sticky top-24 aspect-[4/5] overflow-hidden rounded-xl border border-black/5 shadow-elev2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  key={revealed}
-                  src={stepsImages[revealed - 1]!.src}
-                  loading="lazy"
-                  decoding="async"
-                  alt={stepsImages[revealed - 1]!.alt}
-                  className={`h-full w-full object-cover transition-opacity duration-400 ${stepsImages[revealed - 1]!.pos}`}
-                />
-              </div>
-            </div>
+          <div className="mt-10">
+            <Link
+              href="/courses"
+              className="group inline-flex h-12 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700"
+            >
+              Browse courses &amp; practice
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Proof from the field */}
-      <section className="relative px-6 pb-16 pt-8 md:pb-24 md:pt-12">
+      {/* Proof from the field — one feature, two supporting rows */}
+      <section className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-14 max-w-2xl space-y-3">
+          <div className="mb-12 max-w-2xl space-y-3">
             <div className="text-xs font-bold uppercase tracking-widest text-brand-600">
               Proof, Not Promises
             </div>
@@ -404,40 +351,62 @@ export default function HomeLanding() {
             </h2>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {proofCards.map((item) => (
-              <div
-                key={item.title}
-                className="flex flex-col overflow-hidden rounded-xl border border-black/5 bg-slate-50 shadow-elev1 transition-shadow duration-300 hover:shadow-elev3"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.img}
-                  loading="lazy"
-                  decoding="async"
-                  alt={item.title}
-                  className="h-48 w-full object-cover"
-                />
-                <div className="flex-1 space-y-2 p-5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                    {item.tag}
-                  </span>
-                  <h3 className="font-bold leading-snug text-ink-700">{item.title}</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">{item.body}</p>
-                </div>
+          <div className="grid gap-6 md:grid-cols-5">
+            <article className="flex flex-col overflow-hidden rounded-xl border border-black/5 bg-white shadow-elev1 transition-shadow duration-300 hover:shadow-elev3 md:col-span-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={proofFeature.img}
+                loading="lazy"
+                decoding="async"
+                alt={proofFeature.title}
+                className="h-72 w-full object-cover md:h-80"
+              />
+              <div className="flex-1 space-y-2 p-6">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  {proofFeature.tag}
+                </span>
+                <h3 className="font-display text-xl font-bold leading-snug text-ink-700">
+                  {proofFeature.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-600">{proofFeature.body}</p>
               </div>
-            ))}
+            </article>
+
+            <div className="flex flex-col gap-6 md:col-span-2">
+              {proofRows.map((item) => (
+                <article
+                  key={item.title}
+                  className="flex flex-1 overflow-hidden rounded-xl border border-black/5 bg-slate-50 shadow-elev1 transition-shadow duration-300 hover:shadow-elev3"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.img}
+                    loading="lazy"
+                    decoding="async"
+                    alt={item.title}
+                    className="w-32 shrink-0 object-cover sm:w-40"
+                  />
+                  <div className="flex-1 space-y-1.5 p-5">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      {item.tag}
+                    </span>
+                    <h3 className="font-bold leading-snug text-ink-700">{item.title}</h3>
+                    <p className="text-sm leading-relaxed text-slate-600">{item.body}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* The Setsuzoku group */}
-      <section className="relative px-6 py-16">
+      <section className="px-6 py-16">
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-center md:gap-10">
             <div className="space-y-2">
               <div className="text-xs font-bold uppercase tracking-widest text-brand-600">
-                Setsuzoku — part of reason we&apos;re here
+                Part of the Setsuzoku group
               </div>
               <h2 className="font-display text-2xl font-black text-ink-700 md:text-3xl">
                 Three businesses. One group.

@@ -28,6 +28,15 @@ export default function AssistantPage() {
     setMessages(d.chat.messages);
   }
 
+  async function deleteChat(id: string) {
+    await api(`/ai/chats/${id}`, { method: "DELETE" }).catch(() => undefined);
+    setChats((c) => c.filter((x) => x.id !== id));
+    if (activeId === id) {
+      setActiveId(null);
+      setMessages([]);
+    }
+  }
+
   async function send() {
     const message = input.trim();
     if (!message || busy) return;
@@ -57,14 +66,21 @@ export default function AssistantPage() {
         <ul className="mt-3 space-y-1">
           {chats.length === 0 && <li className="text-sm text-slate-400">No chats yet</li>}
           {chats.map((c) => (
-            <li key={c.id}>
+            <li key={c.id} className="group flex items-center gap-1">
               <button
                 onClick={() => openChat(c.id)}
-                className={`w-full truncate rounded-lg px-3 py-2 text-left text-sm ${
+                className={`flex-1 truncate rounded-lg px-3 py-2 text-left text-sm ${
                   activeId === c.id ? "bg-brand-50 text-brand-800" : "text-slate-600 hover:bg-slate-50"
                 }`}
               >
                 {c.title}
+              </button>
+              <button
+                onClick={() => deleteChat(c.id)}
+                aria-label={`Delete chat ${c.title}`}
+                className="rounded-md p-1.5 text-slate-300 hover:text-red-500 group-hover:text-slate-400"
+              >
+                ×
               </button>
             </li>
             ))}

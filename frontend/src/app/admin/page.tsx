@@ -60,6 +60,8 @@ export default function AdminPage() {
             <AdminLinkCard href="/admin/applications" title="Mentor applications" body="Review, interview and approve mentors." />
             <AdminLinkCard href="/admin/courses" title="Courses & mentors" body="Assign or remove mentors on any course." />
             <AdminLinkCard href="/admin/messages" title="Contact messages" body="Schools reaching out via the site form." />
+            <AdminLinkCard href="/admin/orders" title="Orders" body="Razorpay ledger — payments, plans and refunds." />
+            <AdminLinkCard href="/admin/webhooks" title="Webhook events" body="Append-only Razorpay event trail." />
             <AdminLinkCard href="/admin/settings" title="Platform settings" body="Keys, defaults and impact numbers." />
           </div>
         </>

@@ -50,6 +50,12 @@ export default function StudentDashboardPage() {
         <Link href="/assistant" className="font-semibold text-brand-700 hover:text-brand-800">
           Ask the AI guide
         </Link>
+        <Link href="/notifications" className="font-semibold text-brand-700 hover:text-brand-800">
+          Notifications
+        </Link>
+        <Link href="/orders" className="font-semibold text-brand-700 hover:text-brand-800">
+          My orders
+        </Link>
       </div>
 
       {/* Metric cards */}

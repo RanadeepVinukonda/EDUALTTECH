@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/api";
@@ -17,6 +18,8 @@ const USER_NAV = [
   { href: "/courses", label: "Courses" },
   { href: "/practice", label: "Practice" },
   { href: "/resources", label: "Resources" },
+  { href: "/chat", label: "Chat" },
+  { href: "/assistant", label: "Study assistant" },
   { href: "/teachers/apply", label: "Teach with us" },
 ];
 
@@ -25,6 +28,8 @@ const ADMIN_NAV = [
   { href: "/admin/users", label: "Users" },
   { href: "/admin/applications", label: "Applications" },
   { href: "/admin/courses", label: "Courses & mentors" },
+  { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/webhooks", label: "Webhooks" },
   { href: "/admin/messages", label: "Messages" },
   { href: "/admin/settings", label: "Settings" },
 ];
@@ -74,14 +79,17 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           {logoOk ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src="/brand/logo.png"
-              alt="Edu-Alt-Tech"
-              className="h-9 w-auto"
-              onError={() => setLogoOk(false)}
-              data-logo
-            />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/logo.png"
+                alt="Edu-Alt-Tech"
+                className="h-9 w-auto"
+                onError={() => setLogoOk(false)}
+                data-logo
+              />
+              <span className="font-display text-lg font-semibold text-slate-900">Edu-Alt-Tech</span>
+            </>
           ) : (
             <span className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 font-display text-lg font-bold text-white">
@@ -114,6 +122,14 @@ export function SiteHeader() {
                 }
               >
                 Dashboard
+              </Link>
+              <Link
+                href="/notifications"
+                aria-label="Notifications"
+                title="Notifications"
+                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+              >
+                <Bell className="h-5 w-5" />
               </Link>
               <button
                 onClick={async () => {

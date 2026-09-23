@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 
 interface Problem {
@@ -51,14 +52,19 @@ export default function PracticePage() {
       ) : (
         <ul className="mt-8 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
           {items.map((p) => (
-            <li key={p.id} className="flex items-center justify-between px-5 py-4">
-              <div>
-                <p className="font-medium text-slate-900">{p.title}</p>
-                <p className="text-xs text-slate-500">{p.topic} · {p.language}</p>
-              </div>
+            <li key={p.id}>
+              <Link
+                href={`/practice/${p.slug}`}
+                className="flex items-center justify-between px-5 py-4 hover:bg-slate-50"
+              >
+                <div>
+                  <p className="font-medium text-slate-900">{p.title}</p>
+                  <p className="text-xs text-slate-500">{p.topic} · {p.language}</p>
+                </div>
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${DIFFICULTY_COLOR[p.difficulty]}`}>
                 {DIFFICULTY[p.difficulty]}
               </span>
+              </Link>
             </li>
           ))}
         </ul>
