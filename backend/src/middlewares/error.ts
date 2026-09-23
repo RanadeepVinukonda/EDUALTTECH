@@ -11,18 +11,22 @@ export function notFoundHandler(req: Request, _res: Response, next: NextFunction
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
   let status = 500;
   let message = "Internal server error";
+  let code = "INTERNAL_ERROR";
   let details: unknown;
 
   if (err instanceof ApiError) {
     status = err.status;
     message = err.message;
+    code = err.code;
     details = err.details;
   } else if (err instanceof SyntaxError && "body" in err) {
     status = 400;
     message = "Malformed JSON body";
+    code = "VALIDATION_ERROR";
   } else if (err instanceof Error && isPrismaError(err)) {
     status = 400;
     message = clientMessageForPrisma(err);
+    code = "DATABASE_CONSTRAINT";
   } else if (err instanceof Error) {
     message = config.env === "production" ? message : err.message;
   }
@@ -35,7 +39,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
 
   res.status(status).json({
     success: false,
-    error: { message, details },
+    error: { code, message, details, requestId: req.requestId },
   });
 }
 

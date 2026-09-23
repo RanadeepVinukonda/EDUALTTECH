@@ -1,10 +1,12 @@
 export class ApiError extends Error {
   readonly status: number;
+  readonly code: string;
   readonly details?: unknown;
 
   constructor(status: number, message: string, details?: unknown) {
     super(message);
     this.status = status;
+    this.code = statusCodeMap[status] ?? "INTERNAL_ERROR";
     this.details = details;
     Error.captureStackTrace?.(this, ApiError);
   }
@@ -40,3 +42,16 @@ export class ApiError extends Error {
     return new ApiError(500, message);
   }
 }
+
+const statusCodeMap: Record<number, string> = {
+  400: "VALIDATION_ERROR",
+  401: "UNAUTHENTICATED",
+  402: "PAYMENT_REQUIRED",
+  403: "FORBIDDEN",
+  404: "NOT_FOUND",
+  409: "CONFLICT",
+  429: "RATE_LIMITED",
+  500: "INTERNAL_ERROR",
+  502: "BAD_GATEWAY",
+  503: "SERVICE_UNAVAILABLE",
+};

@@ -8,6 +8,7 @@ import { validate } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
 import { passwordSchema } from "../auth/auth.schemas.js";
+import { audit } from "../../lib/audit.js";
 
 const router = Router();
 
@@ -130,6 +131,7 @@ router.patch("/users/:id", validate(userPatchSchema), async (req, res, next) => 
       select: { id: true, name: true, email: true, role: true, isActive: true },
     });
     res.json({ success: true, data: { user: updated } });
+    audit(req.user!.id, "USER_UPDATED", "User", userId, { ...patch, from: { role: user.role, isActive: user.isActive } });
   } catch (err) {
     next(err);
   }
@@ -176,6 +178,7 @@ router.post("/users", validate(createUserSchema), async (req, res, next) => {
       select: { id: true, name: true, email: true, role: true, isActive: true, createdAt: true },
     });
     res.status(201).json({ success: true, data: { user } });
+    audit(req.user!.id, "USER_CREATED", "User", user.id, { email });
   } catch (err) {
     next(err);
   }
@@ -198,6 +201,7 @@ router.delete("/users/:id", async (req, res, next) => {
     // Remove the Supabase auth identity too, so the address can be reused.
     await admin.auth.admin.deleteUser(userId).catch(() => undefined);
     res.json({ success: true, data: { message: "Account deleted" } });
+    audit(req.user!.id, "USER_DELETED", "User", userId, { email: user.email });
   } catch (err) {
     next(err);
   }
@@ -257,6 +261,7 @@ router.post("/courses/:id/mentors", validate(assignMentorSchema), async (req, re
       include: { mentor: { select: { id: true, name: true, email: true } } },
     });
     res.status(201).json({ success: true, data: { assignment } });
+    audit(req.user!.id, "MENTOR_ASSIGNED", "CourseMentor", assignment.id, { courseId, mentorId });
   } catch (err) {
     next(err);
   }
@@ -271,6 +276,7 @@ router.delete("/courses/:id/mentors/:mentorId", async (req, res, next) => {
 
     await prisma.courseMentor.delete({ where: { id: assignment.id } });
     res.json({ success: true, data: { message: "Mentor removed from course" } });
+    audit(req.user!.id, "MENTOR_UNASSIGNED", "CourseMentor", assignment.id, { courseId, mentorId });
   } catch (err) {
     next(err);
   }
@@ -298,6 +304,36 @@ router.patch("/messages/:id", validate(messagePatchSchema), async (req, res, nex
       data: { isRead: req.body.isRead, handledAt: req.body.isRead ? new Date() : null },
     });
     res.json({ success: true, data: { message: updated } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── Audit trail ─────────────────────────────────────────────────────
+
+router.get("/audit", async (req, res, next) => {
+  try {
+    const q = z
+      .object({
+        targetType: z.string().optional(),
+        page: z.coerce.number().int().min(1).default(1),
+        limit: z.coerce.number().int().min(1).max(100).default(50),
+      })
+      .parse(req.query);
+
+    const where = { ...(q.targetType ? { targetType: q.targetType } : {}) };
+    const [items, total] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        include: { actor: { select: { id: true, name: true, role: true } } },
+        orderBy: { createdAt: "desc" },
+        skip: (q.page - 1) * q.limit,
+        take: q.limit,
+      }),
+      prisma.auditLog.count({ where }),
+    ]);
+
+    res.json({ success: true, data: { items, total, page: q.page, limit: q.limit } });
   } catch (err) {
     next(err);
   }

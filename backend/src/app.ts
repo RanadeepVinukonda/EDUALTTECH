@@ -21,6 +21,8 @@ import paymentRoutes from "./modules/payments/payments.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
 import contactRoutes from "./modules/contact/contact.routes.js";
 import chapterRoutes from "./modules/chapters/chapters.routes.js";
+import wishlistRoutes from "./modules/wishlist/wishlist.routes.js";
+import meetingRoutes from "./modules/meetings/meetings.routes.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -68,6 +70,8 @@ export function createApp(): express.Express {
   app.use("/api/admin", adminRoutes);
   app.use("/api/contact", contactRoutes);
   app.use("/api/chapters", chapterRoutes);
+  app.use("/api/wishlist", wishlistRoutes);
+  app.use("/api/meetings", meetingRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

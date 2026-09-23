@@ -56,6 +56,15 @@ export default function CourseDetailPage() {
   const [busy, setBusy] = useState(false);
   const [showPay, setShowPay] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [meetings, setMeetings] = useState<Array<{
+    id: string;
+    title: string;
+    scheduledAt: string;
+    durationMin: number;
+    meetingUrl: string;
+  }> | null>(null);
 
   useEffect(() => {
     api<{ course: CourseDetail }>(`/courses/${params.slug}`)
@@ -65,6 +74,54 @@ export default function CourseDetailPage() {
       })
       .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load course"));
   }, [params.slug]);
+
+  // Backfill status for returning visitors: enrolled, wishlist, upcoming meetings.
+  // All three are server-authoritative and quietly skipped when signed out.
+  useEffect(() => {
+    if (!course) return;
+    if (!getCachedUser()) return;
+    (async () => {
+      try {
+        const me = await api<{ enrollments: Array<{ course: { id: string } }> }>("/dashboard/me").catch(() => null);
+        if (me?.enrollments.some((e) => e.course.id === course.id)) setEnrolled(true);
+        const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
+        if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
+        const meets = await api<{ meetings: Array<{
+          id: string;
+          title: string;
+          scheduledAt: string;
+          durationMin: number;
+          meetingUrl: string;
+        }> }>(`/meetings/course/${course.id}`);
+        setMeetings(meets.meetings);
+      } catch {
+        // 401/403 — treat as "no access", leave defaults.
+      }
+    })();
+  }, [course]);
+
+  async function toggleWishlist() {
+    if (!course) return;
+    if (!getCachedUser()) {
+      router.push("/login");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      if (saved) {
+        await api(`/wishlist/${course.id}`, { method: "DELETE" });
+        setSaved(false);
+      } else {
+        await api(`/wishlist/${course.id}`, { method: "POST" });
+        setSaved(true);
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not update wishlist");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function enroll() {
     if (!course) return;
@@ -177,6 +234,30 @@ export default function CourseDetailPage() {
       <p className="mt-1 text-sm text-slate-500">Hosted by {course.teacher.name} · {course._count.enrollments} enrolled</p>
       <p className="mt-4 max-w-3xl text-lg text-slate-600">{course.description}</p>
 
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        {showPay ? null : (
+          <>
+            <button
+              onClick={enroll}
+              disabled={busy || enrolled || (course.mentors.length > 0 && !selected)}
+              className="rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+            >
+              {enrolled ? "Enrolled" : busy ? "Enrolling…" : course.mentors.length > 0 && !selected ? "Pick a mentor first" : "Enroll in this course"}
+            </button>
+            <button
+              onClick={toggleWishlist}
+              disabled={saving}
+              aria-pressed={saved}
+              className={`rounded-xl border px-4 py-3 text-sm font-semibold transition disabled:opacity-60 ${
+                saved ? "border-brand-600 bg-brand-50 text-brand-700" : "border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700"
+              }`}
+            >
+              {saved ? "Saved ✓" : "Save for later"}
+            </button>
+          </>
+        )}
+      </div>
+
       {course.mentors.length > 0 && (
         <section className="mt-8">
           <h2 className="font-display text-xl font-semibold text-slate-900">Choose your mentor</h2>
@@ -238,13 +319,30 @@ export default function CourseDetailPage() {
           </button>
         </div>
       ) : (
-        <button
-          onClick={enroll}
-          disabled={busy || enrolled || (course.mentors.length > 0 && !selected)}
-          className="mt-6 rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
-        >
-          {enrolled ? "Enrolled" : busy ? "Enrolling…" : course.mentors.length > 0 && !selected ? "Pick a mentor first" : "Enroll in this course"}
-        </button>
+        <p className="mt-6 text-sm text-slate-500">
+          {enrolled ? "You are enrolled in this course." : "Pick a plan above to confirm your seat."}
+        </p>
+      )}
+
+      {meetings && meetings.length > 0 && (
+        <section className="mt-10">
+          <h2 className="font-display text-xl font-semibold text-slate-900">Upcoming live classes</h2>
+          <ul className="mt-4 space-y-3">
+            {meetings.map((m) => (
+              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5">
+                <div>
+                  <p className="font-semibold text-slate-900">{m.title}</p>
+                  <p className="mt-0.5 text-sm text-slate-500">
+                    {new Date(m.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {m.durationMin} min
+                  </p>
+                </div>
+                <a href={m.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                  Join
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {activeMentor && activeMentor.chapters.length > 0 && (

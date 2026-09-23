@@ -34,6 +34,7 @@ interface Mentorship {
 }
 
 const EMPTY = { title: "", summary: "", meetingUrl: "", recordingUrl: "", resources: "" };
+const EMPTY_MEETING = { mtitle: "", mscheduledAt: "", mmeetingUrl: "" };
 
 export default function ProviderWorkspacePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -43,6 +44,10 @@ export default function ProviderWorkspacePage() {
   const [form, setForm] = useState({ ...EMPTY });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [meetOpen, setMeetOpen] = useState<string | null>(null);
+  const [meetingForm, setMeetingForm] = useState({ ...EMPTY_MEETING });
+  const [meetings, setMeetings] = useState<Record<string, Array<{ id: string; title: string; scheduledAt: string; durationMin: number }>>>({});
+  const [meetingBusy, setMeetingBusy] = useState(false);
 
   useEffect(() => {
     setUser(getCachedUser());
@@ -100,6 +105,37 @@ export default function ProviderWorkspacePage() {
     }
   }
 
+  function loadMeetings(courseId: string) {
+    api<{ meetings: Array<{ id: string; title: string; scheduledAt: string; durationMin: number }> }>(`/meetings/course/${courseId}`)
+      .then((d) => setMeetings((m) => ({ ...m, [courseId]: d.meetings })))
+      .catch(() => undefined);
+  }
+
+  async function addMeeting(e: FormEvent) {
+    e.preventDefault();
+    if (!meetOpen) return;
+    setMeetingBusy(true);
+    setError(null);
+    try {
+      await api("/meetings", {
+        method: "POST",
+        body: JSON.stringify({
+          courseId: meetOpen,
+          title: meetingForm.mtitle,
+          scheduledAt: new Date(meetingForm.mscheduledAt).toISOString(),
+          meetingUrl: meetingForm.mmeetingUrl,
+        }),
+      });
+      setMeetingForm({ ...EMPTY_MEETING });
+      setMeetOpen(null);
+      loadMeetings(meetOpen);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not schedule the live class");
+    } finally {
+      setMeetingBusy(false);
+    }
+  }
+
   if (error && !panel) return <div className="mx-auto max-w-6xl px-4 py-16 text-red-600">{error}</div>;
   if (!panel) return <div className="mx-auto max-w-6xl px-4 py-16 text-slate-500">Loading your workspace…</div>;
 
@@ -136,16 +172,59 @@ export default function ProviderWorkspacePage() {
               <h2 className="font-display text-xl font-semibold text-slate-900">{m.course.title}</h2>
               <p className="mt-1 text-sm text-slate-500">{m._count.enrollments} learners with you</p>
             </div>
-            <button
-              onClick={() => {
-                setOpenFor(openFor === m.id ? null : m.id);
-                setForm({ ...EMPTY });
-              }}
-              className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-            >
-              {openFor === m.id ? "Cancel" : "Add chapter"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setMeetOpen(meetOpen === m.course.id ? null : m.course.id);
+                  setMeetingForm({ ...EMPTY_MEETING });
+                }}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+              >
+                {meetOpen === m.course.id ? "Cancel" : "Schedule live class"}
+              </button>
+              <button
+                onClick={() => {
+                  setOpenFor(openFor === m.id ? null : m.id);
+                  setForm({ ...EMPTY });
+                }}
+                className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                {openFor === m.id ? "Cancel" : "Add chapter"}
+              </button>
+            </div>
           </div>
+
+          {meetOpen === m.course.id && (
+            <form onSubmit={addMeeting} className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:grid-cols-3">
+              <Input label="Title" value={meetingForm.mtitle} onChange={(v) => setMeetingForm((f) => ({ ...f, mtitle: v }))} required />
+              <Input label="Date & time" type="datetime-local" value={meetingForm.mscheduledAt} onChange={(v) => setMeetingForm((f) => ({ ...f, mscheduledAt: v }))} required />
+              <Input label="Meet link" value={meetingForm.mmeetingUrl} onChange={(v) => setMeetingForm((f) => ({ ...f, mmeetingUrl: v }))} required />
+              <div className="sm:col-span-3">
+                <button
+                  type="submit"
+                  disabled={meetingBusy}
+                  className="rounded-xl bg-slate-900 px-6 py-2.5 font-semibold text-white hover:bg-slate-700 disabled:opacity-50"
+                >
+                  {meetingBusy ? "Scheduling…" : "Schedule class"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {meetings[m.course.id] && meetings[m.course.id].length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {meetings[m.course.id].map((mt) => (
+                <li key={mt.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{mt.title}</p>
+                    <p className="text-xs text-slate-500">
+                      {new Date(mt.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {mt.durationMin} min
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
 
           {openFor === m.id && (
             <form onSubmit={(e) => addChapter(e, m.id)} className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:grid-cols-2">
@@ -278,12 +357,14 @@ function Input({
   onChange,
   placeholder,
   required,
+  type = "text",
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   required?: boolean;
+  type?: string;
 }) {
   const id = label.toLowerCase().replace(/[^a-z]+/g, "-");
   return (
@@ -291,6 +372,7 @@ function Input({
       <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
       <input
         id={id}
+        type={type}
         required={required}
         value={value}
         placeholder={placeholder}

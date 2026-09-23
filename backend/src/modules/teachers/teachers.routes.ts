@@ -6,6 +6,7 @@ import { validate } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
 import { applicationStatusEmail } from "../../lib/email.js";
+import { audit } from "../../lib/audit.js";
 import { logger } from "../../utils/logger.js";
 
 const router = Router();
@@ -209,6 +210,8 @@ router.post("/applications/:id/review", requireAuth, requireRole("ADMIN"), valid
           ]
         : []),
     ]);
+
+    audit(req.user!.id, "MENTOR_APPLICATION_REVIEWED", "TeacherApplication", app.id, { status, toStatus: status, fromStatus: app.status, courseId: app.courseId });
 
     try {
       await applicationStatusEmail(
