@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import AnimatedCounter from "./AnimatedCounter";
+import FeaturedSections from "./FeaturedSections";
 
 const partnerLogos = [
   { src: "/school_logos/genesis.png", alt: "Genesis school logo" },
@@ -302,6 +303,9 @@ export default function HomeLanding() {
           </div>
         </div>
       </section>
+
+      {/* Featured courses + providers (live from backend) */}
+      <FeaturedSections />
 
       {/* How it works — 4 steps, reveal on demand */}
       <section className="relative px-6 pb-16 pt-8 md:pb-24 md:pt-12">

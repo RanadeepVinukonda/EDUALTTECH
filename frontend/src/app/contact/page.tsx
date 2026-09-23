@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 export default function ContactPage() {
@@ -111,6 +112,16 @@ export default function ContactPage() {
           {loading ? "Sending…" : "Send message"}
         </button>
       </form>
+
+      <div className="mt-12 rounded-xl border border-black/5 bg-brand-50 p-8 text-center">
+        <p className="text-xs font-bold uppercase tracking-widest text-brand-700">The humans behind it</p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          A small team of educators, engineers and mentors answers every message.
+        </p>
+        <Link href="/about" className="mt-3 inline-block text-sm font-semibold text-brand-700 hover:text-brand-800">
+          Meet the team →
+        </Link>
+      </div>
     </div>
   );
 }

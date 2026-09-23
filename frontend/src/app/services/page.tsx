@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  ArrowRight,
   Brain,
   CheckCircle,
   Globe,
@@ -113,6 +114,19 @@ export default function ServicesPage() {
               </ul>
             </div>
           ))}
+        </div>
+
+        <div className="mb-16 rounded-xl border border-black/5 bg-slate-50 p-8 text-center shadow-elev1">
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-600">
+            Every service above is delivered by the <strong>Edu-Alt-Tech team</strong> — educators,
+            engineers and trained classroom providers, not outsourced agency work.
+          </p>
+          <Link
+            href="/about"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-800"
+          >
+            Meet the team <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
         </div>
 
         <div className="relative overflow-hidden rounded-xl bg-ink-800 p-14 text-center shadow-elev3 lg:p-20">

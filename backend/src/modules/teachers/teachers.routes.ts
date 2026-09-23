@@ -78,6 +78,46 @@ router.get("/me", requireAuth, async (req, res, next) => {
   }
 });
 
+// ── Public: showcase approved providers on the marketing site ───────
+// Mentors attached to published courses, most recent first, deduped by
+// mentor so the same person never appears twice across courses.
+
+router.get("/providers", async (_req, res, next) => {
+  try {
+    const rows = await prisma.courseMentor.findMany({
+      where: { course: { isPublished: true } },
+      select: {
+        mentor: { select: { id: true, name: true, avatarUrl: true, education: true, bio: true } },
+        course: { select: { title: true, subject: true, _count: { select: { enrollments: true } } } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 24,
+    });
+
+    const seen = new Set<string>();
+    const items = rows
+      .filter((r) => {
+        if (seen.has(r.mentor.id)) return false;
+        seen.add(r.mentor.id);
+        return true;
+      })
+      .map((r) => ({
+        id: r.mentor.id,
+        name: r.mentor.name,
+        avatarUrl: r.mentor.avatarUrl,
+        education: r.mentor.education,
+        bio: r.mentor.bio,
+        courseTitle: r.course.title,
+        subject: r.course.subject,
+        enrollments: r.course._count.enrollments,
+      }));
+
+    res.json({ success: true, data: { items } });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ── Provider panel: courses I own or mentor, plus my activity ───────
 
 router.get("/panel", requireAuth, async (req, res, next) => {
