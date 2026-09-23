@@ -7,7 +7,6 @@ import {
   Globe,
   GraduationCap,
   Smartphone,
-  Sparkles,
   BookOpen,
   Zap,
 } from "lucide-react";
@@ -72,10 +71,6 @@ export default function ServicesPage() {
     <div className="relative overflow-hidden bg-white px-6 pb-32 pt-16">
       <div className="mx-auto max-w-[1400px]">
         <div className="mx-auto mb-20 max-w-4xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-700">
-            <Sparkles className="h-4 w-4" />
-            Our Services
-          </div>
           <h1 className="mb-6 font-display text-5xl font-black leading-[0.9] tracking-tighter text-ink-700 md:text-7xl">
             Technology Solutions
             <br />

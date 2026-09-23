@@ -43,10 +43,6 @@ export default function AboutPage() {
         <div className="pointer-events-none absolute -right-32 -top-32 h-[480px] w-[480px] rounded-full bg-brand-100/50" />
         <div className="relative mx-auto max-w-7xl">
           <div className="max-w-3xl space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-700">
-              <Sparkles className="h-4 w-4" aria-hidden />
-              About Edu-Alt-Tech
-            </div>
             <h1 className="font-display text-5xl font-black leading-[0.95] tracking-tighter text-ink-700 md:text-6xl lg:text-7xl">
               Skills meet students.
               <br />
