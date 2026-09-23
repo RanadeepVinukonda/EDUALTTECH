@@ -1,0 +1,28 @@
+{
+  "name": "edu-alt-tech",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Edu-Alt-Tech — ed-tech platform: digital classrooms, practice zone, AI tutor, resources, teacher & admin panels",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "typecheck": "npm run typecheck -w backend && npm run typecheck -w frontend",
+    "db:generate": "npm run prisma:generate -w backend",
+    "db:push": "npm run prisma:push -w backend",
+    "db:migrate": "npm run prisma:migrate -w backend",
+    "db:studio": "npm run prisma:studio -w backend",
+    "db:seed": "npm run seed -w backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}

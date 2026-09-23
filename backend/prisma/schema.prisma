@@ -1,0 +1,557 @@
+// Edu-Alt-Tech — Prisma schema (Supabase Postgres)
+// Students: courses, practice, AI tutor, resources, dashboard
+// Teachers: application flow, courses, classroom chats, notifications
+// Admins:   full platform management, Razorpay payments + order ledger
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Enums
+// ────────────────────────────────────────────────────────────────────
+
+// Only two account types. A USER is a learner in courses they join and a
+// provider in courses they own or mentor — there is no separate teacher role.
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TeacherApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  INTERVIEW
+  APPROVED
+  REJECTED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+  SUSPENDED
+}
+
+enum LessonType {
+  VIDEO
+  READING
+  QUIZ
+  ASSIGNMENT
+}
+
+enum PracticeLanguage {
+  JAVASCRIPT
+  TYPESCRIPT
+  PYTHON
+  JAVA
+  CPP
+  SQL
+  OTHER
+}
+
+enum AttemptResult {
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT
+  RUNTIME_ERROR
+  COMPILE_ERROR
+}
+
+enum MessageRoomType {
+  CLASSROOM
+  DIRECT
+}
+
+enum OrderStatus {
+  CREATED
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// Trial → full-plan lifecycle
+enum PlanType {
+  TRIAL
+  FULL
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Identity
+// ────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  role          Role      @default(USER)
+  avatarUrl     String?
+  schoolName    String?
+  className     String?
+  isActive      Boolean   @default(true)
+
+  // Verification & onboarding
+  emailVerifiedAt DateTime?
+  phone           String?
+  phoneVerifiedAt DateTime?
+  phoneOtpHash    String?
+  phoneOtpExpiresAt DateTime?
+  interestedTopics String[]  @default([])
+  education       String?
+  bio             String?
+  onboardingDone  Boolean   @default(false)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  enrollments        Enrollment[]
+  quizAttempts       QuizAttempt[]
+  practiceAttempts   PracticeAttempt[]
+  activityLogs       ActivityLog[]
+  streaks            Streak?
+  aiChats            AiChat[]
+  taughtCourses      Course[]          @relation("CourseTeacher")
+  teacherApplication TeacherApplication?
+  mentorships        CourseMentor[]    @relation("CourseMentorUser")
+  classroomMessages  ClassroomMessage[]
+  notificationsSent  Notification[]     @relation("NotificationSender")
+  resources          Resource[]
+  orders             Order[]
+  subscriptions      Subscription[]
+
+  @@index([role])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Teacher onboarding
+// ────────────────────────────────────────────────────────────────────
+
+model TeacherApplication {
+  id          String                  @id @default(cuid())
+  userId      String                  @unique
+  user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      TeacherApplicationStatus @default(PENDING)
+  subject     String
+  experience  Int                     // years
+  education   String?
+  qualifications String?              // detailed qualifications / why they fit
+  courseId    String?                 // optional: course they want to mentor
+  course      Course?                 @relation(fields: [courseId], references: [id])
+  resumeUrl   String?
+  message     String?
+  meetingLink String?                 // set by admin when scheduling an interview
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  reviewNote  String?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Courses & digital classrooms
+// ────────────────────────────────────────────────────────────────────
+
+model Course {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  description  String
+  thumbnailUrl String?
+  subject      String
+  gradeLevel   String?
+  isPublished  Boolean  @default(false)
+  teacherId    String
+  teacher      User     @relation("CourseTeacher", fields: [teacherId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  modules       Module[]
+  enrollments   Enrollment[]
+  lessons       Lesson[]
+  chats         ChatRoom[]
+  mentors       CourseMentor[]
+  teacherApplications TeacherApplication[]
+
+  @@index([teacherId])
+  @@index([subject])
+}
+
+// A member of the course's teaching team. A course can have several mentors
+// (approved via applications or assigned by an admin); each mentor owns their
+// own roadmap (CourseChapter) and their own cohort of students.
+model CourseMentor {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  mentorId  String
+  mentor    User     @relation("CourseMentorUser", fields: [mentorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  chapters  CourseChapter[]
+  enrollments Enrollment[]
+
+  @@unique([courseId, mentorId])
+  @@index([mentorId])
+}
+
+// Single chapter of a mentor's roadmap inside a course: one live meeting,
+// recorded video / YouTube link, and a list of attached resources (Drive links).
+model CourseChapter {
+  id             String   @id @default(cuid())
+  courseMentorId String
+  courseMentor   CourseMentor @relation(fields: [courseMentorId], references: [id], onDelete: Cascade)
+  title          String
+  summary        String?
+  order          Int
+  meetingUrl     String?
+  recordingUrl   String?
+  resources      Json     @default("[]") // [{ label, url }]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([courseMentorId, order])
+  @@index([courseMentorId])
+}
+
+model Module {
+  id        String  @id @default(cuid())
+  courseId  String
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  position  Int
+  lessons   Lesson[]
+
+  @@unique([courseId, position])
+}
+
+model Lesson {
+  id          String     @id @default(cuid())
+  moduleId    String
+  module      Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  type        LessonType @default(READING)
+  contentUrl  String?
+  textContent String?
+  position    Int
+  isPublished Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+
+  quiz          Quiz?
+  progressItems LessonProgress[]
+
+  @@unique([moduleId, position])
+  @@index([courseId])
+}
+
+model Enrollment {
+  id          String           @id @default(cuid())
+  studentId   String
+  student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseMentorId String?        // the mentor the seeker chose to learn from
+  courseMentor   CourseMentor? @relation(fields: [courseMentorId], references: [id])
+  status      EnrollmentStatus @default(ACTIVE)
+  progressPct Float            @default(0)
+  enrolledAt    DateTime         @default(now())
+  completedAt   DateTime?
+  progressItems LessonProgress[]
+
+  @@unique([studentId, courseId])
+  @@index([courseId])
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  enrollmentId String
+  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completedAt DateTime @default(now())
+
+  @@unique([enrollmentId, lessonId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Quizzes
+// ────────────────────────────────────────────────────────────────────
+
+model Quiz {
+  id          String  @id @default(cuid())
+  lessonId    String  @unique
+  lesson      Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title       String
+  passScore   Int     @default(60) // percent
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+}
+
+model QuizQuestion {
+  id       String @id @default(cuid())
+  quizId   String
+  quiz     Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  prompt   String
+  options  String[] // 2–6 options; correct index stored below
+  correct  Int
+  position Int
+
+  @@unique([quizId, position])
+}
+
+model QuizAttempt {
+  id         String   @id @default(cuid())
+  quizId     String
+  quiz       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  score      Float
+  passed     Boolean
+  answers    Json     // { questionId: selectedIndex }
+  createdAt  DateTime @default(now())
+
+  @@index([studentId])
+  @@index([quizId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Practice zone
+// ────────────────────────────────────────────────────────────────────
+
+model PracticeProblem {
+  id          String           @id @default(cuid())
+  slug        String           @unique
+  title       String
+  description String
+  topic       String
+  difficulty  Int              @default(1) // 1 easy, 2 medium, 3 hard
+  language    PracticeLanguage @default(JAVASCRIPT)
+  starterCode String?
+  solution    String?
+  testCases   Json             @default("[]")
+  createdAt   DateTime         @default(now())
+
+  attempts PracticeAttempt[]
+
+  @@index([topic])
+  @@index([language])
+}
+
+model PracticeAttempt {
+  id         String        @id @default(cuid())
+  problemId  String
+  problem    PracticeProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  result     AttemptResult
+  code       String
+  runtimeMs  Int?
+  createdAt  DateTime      @default(now())
+
+  @@index([studentId, problemId])
+}
+
+// Daily activity + streaks (personal dashboard)
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  day       DateTime @db.Date
+  kind      String   // "lesson" | "quiz" | "practice" | "ai" | "resource"
+  count     Int      @default(1)
+
+  @@unique([userId, day, kind])
+  @@index([userId, day])
+}
+
+model Streak {
+  userId       String   @id
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  current      Int      @default(0)
+  longest      Int      @default(0)
+  lastActiveOn DateTime @db.Date
+}
+
+// ────────────────────────────────────────────────────────────────────
+// AI assistant
+// ────────────────────────────────────────────────────────────────────
+
+model AiChat {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String    @default("New chat")
+  isSaved   Boolean   @default(false) // pinned to saved history
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  messages  AiMessage[]
+
+  @@index([userId])
+}
+
+model AiMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      AiChat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role      String   // "user" | "assistant" | "system"
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([chatId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Resources library (100+ study materials)
+// ────────────────────────────────────────────────────────────────────
+
+model Resource {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  subject       String
+  kind          String   @default("pdf") // pdf | doc | slides | video | link
+  fileUrl       String
+  fileSizeBytes Int?     // uploaded bytes — used for per-user quota
+  mimeType      String?
+  storagePath   String?  // Supabase Storage object key (uploads only)
+  ownerId       String?
+  owner         User?    @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  downloads     Int      @default(0)
+  isPublished   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([subject])
+  @@index([ownerId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Classroom / chat / notifications
+// ────────────────────────────────────────────────────────────────────
+
+model ChatRoom {
+  id        String         @id @default(cuid())
+  courseId  String
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  type      MessageRoomType @default(CLASSROOM)
+  title     String?
+  createdAt DateTime       @default(now())
+  messages  ClassroomMessage[]
+
+  @@index([courseId])
+}
+
+model ClassroomMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([roomId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  senderId  String?
+  sender    User?    @relation("NotificationSender", fields: [senderId], references: [id])
+  title     String
+  body      String
+  scope     String   @default("ALL") // ALL | COURSE | USER
+  courseId  String?
+  createdAt DateTime @default(now())
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Payments — Razorpay with tamper-proof order ledger
+// ────────────────────────────────────────────────────────────────────
+
+model Order {
+  id             String      @id @default(cuid())
+  orderNumber    String      @unique @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  razorpayOrderId String     @unique
+  amountPaise    Int
+  currency       String      @default("INR")
+  plan           PlanType    @default(FULL)
+  status         OrderStatus @default(CREATED)
+  idempotencyKey String?     @unique
+  notes          Json?
+  receiptUrl     String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  payments Payment[]
+
+  @@index([userId])
+}
+
+model Payment {
+  id               String   @id @default(cuid())
+  orderId          String
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  razorpayPaymentId String  @unique
+  signature        String
+  method           String?
+  verified         Boolean  @default(false)
+  rawPayload       Json?
+  createdAt        DateTime @default(now())
+}
+
+// Webhook events — append-only, never mutated (tamper-proof trail)
+model WebhookEvent {
+  id           String   @id @default(cuid())
+  provider     String   @default("razorpay")
+  eventId      String   @unique
+  eventType    String
+  signature    String
+  processed    Boolean  @default(false)
+  processedAt  DateTime?
+  payload      Json
+  receivedAt   DateTime @default(now())
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  plan      PlanType
+  startsAt  DateTime @default(now())
+  expiresAt DateTime?
+  orderRef  String?
+  isActive  Boolean  @default(true)
+
+  @@index([userId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Admin — contact messages & platform settings
+// ────────────────────────────────────────────────────────────────────
+
+model ContactMessage {
+  id        String    @id @default(cuid())
+  name      String
+  email     String
+  school    String?
+  subject   String?
+  body      String
+  isRead    Boolean   @default(false)
+  handledAt DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
