@@ -6,12 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/api";
 
 const GUEST_NAV = [
-  { href: "/courses", label: "Courses" },
-  { href: "/practice", label: "Practice" },
-  { href: "/resources", label: "Resources" },
-  { href: "/services", label: "Services" },
-  { href: "/teachers/apply", label: "Teach with us" },
+  { href: "/", label: "Home" },
   { href: "/about", label: "About" },
+  { href: "/services", label: "Services" },
+  { href: "/contact", label: "Contact us" },
 ];
 
 const USER_NAV = [
