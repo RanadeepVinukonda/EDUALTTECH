@@ -113,8 +113,8 @@ export default function ContactPage() {
         </button>
       </form>
 
-      <div className="mt-12 rounded-xl border border-black/5 bg-brand-50 p-8 text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-brand-700">The humans behind it</p>
+      <div className="mt-12 rounded-xl border border-black/5 bg-slate-50 p-8 text-center">
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">The humans behind it</p>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
           A small team of educators, engineers and mentors answers every message.
         </p>

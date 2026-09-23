@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   ArrowDown,
   ArrowRight,
-  CheckCircle,
   ClipboardCheck,
   Presentation,
   TrendingUp,
@@ -81,16 +80,16 @@ const proofCards = [
 
 const institutionServices = [
   {
+    title: "EduAltTech",
+    body: "The skill marketplace — students learn, providers teach. Classroom programs, mentoring and hands-on AI & coding classes.",
+  },
+  {
     title: "Digital solutions",
-    body: "Websites, apps, ERP, AI tools — built, documented, deployed.",
+    body: "Websites, apps, ERP, AI tools — built, documented, deployed for schools and businesses.",
   },
   {
     title: "Marketing & admissions",
-    body: "Ads, social creatives and local listings that fill school seats.",
-  },
-  {
-    title: "Classroom programs",
-    body: "AI, coding and problem-solving classes in your classrooms, taught by our trained providers.",
+    body: "Ads, social creatives and local listings that fill school seats and grow brands.",
   },
 ];
 
@@ -102,9 +101,6 @@ export default function HomeLanding() {
     <div className="min-h-screen overflow-hidden bg-white text-slate-900">
       {/* Hero — marketplace first */}
       <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden pb-20 pt-16">
-        <div className="pointer-events-none absolute -right-32 -top-32 h-[560px] w-[560px] rounded-full bg-brand-100/60" />
-        <div className="pointer-events-none absolute -bottom-40 -left-32 h-[420px] w-[420px] rounded-full bg-ink-100/70" />
-
         <div className="relative z-10 mx-auto grid w-full max-w-7xl items-start gap-12 px-6 lg:grid-cols-12">
           <div className="space-y-6 text-left lg:col-span-7">
             <h1 className="fade-up font-display text-5xl font-black leading-[0.95] tracking-tighter text-ink-700 md:text-7xl lg:text-8xl">
@@ -233,7 +229,7 @@ export default function HomeLanding() {
           <div className="grid items-stretch gap-5 md:grid-cols-2">
             {/* Provider */}
             <div className="group flex flex-col gap-6 rounded-xl border border-black/5 bg-white p-8 shadow-elev1 transition-shadow duration-300 hover:shadow-elev3 md:p-10">
-              <span className="inline-flex self-start rounded-full border border-brand-300 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-600">
+              <span className="self-start text-xs font-black uppercase tracking-widest text-brand-600">
                 Provider
               </span>
               <div className="font-display text-4xl font-black leading-[1.05] tracking-tight text-brand-600 md:text-[2.75rem]">
@@ -252,7 +248,7 @@ export default function HomeLanding() {
                   "Paid per class. Ratings grow your reputation.",
                 ].map((line) => (
                   <li key={line} className="flex items-start gap-3">
-                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" aria-hidden />
                     <span className="leading-relaxed">{line}</span>
                   </li>
                 ))}
@@ -268,7 +264,7 @@ export default function HomeLanding() {
 
             {/* Learner */}
             <div className="group flex flex-col gap-6 rounded-xl border border-black/5 bg-white p-8 shadow-elev1 transition-shadow duration-300 hover:shadow-elev3 md:p-10">
-              <span className="inline-flex self-start rounded-full border border-slate-300 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              <span className="self-start text-xs font-black uppercase tracking-widest text-slate-400">
                 Learner
               </span>
               <div className="font-display text-4xl font-black leading-[1.05] tracking-tight text-ink-700 md:text-[2.75rem]">
@@ -287,7 +283,7 @@ export default function HomeLanding() {
                   "Practice labs + AI tutor included",
                 ].map((line) => (
                   <li key={line} className="flex items-start gap-3">
-                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" aria-hidden />
                     <span className="leading-relaxed">{line}</span>
                   </li>
                 ))}
@@ -340,7 +336,7 @@ export default function HomeLanding() {
                     }`}
                   >
                     <div className="flex items-center gap-5">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-ink-700">
                         <item.icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
@@ -425,7 +421,7 @@ export default function HomeLanding() {
                   className="h-48 w-full object-cover"
                 />
                 <div className="flex-1 space-y-2 p-5">
-                  <span className="inline-flex rounded-full bg-brand-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-800">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     {item.tag}
                   </span>
                   <h3 className="font-bold leading-snug text-ink-700">{item.title}</h3>
@@ -437,16 +433,16 @@ export default function HomeLanding() {
         </div>
       </section>
 
-      {/* For schools & franchises */}
+      {/* The Setsuzoku group */}
       <section className="relative px-6 py-16">
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-center md:gap-10">
             <div className="space-y-2">
               <div className="text-xs font-bold uppercase tracking-widest text-brand-600">
-                Also for institutions
+                Setsuzoku — part of reason we&apos;re here
               </div>
               <h2 className="font-display text-2xl font-black text-ink-700 md:text-3xl">
-                For schools &amp; franchises
+                Three businesses. One group.
               </h2>
             </div>
             <Link
@@ -473,12 +469,12 @@ export default function HomeLanding() {
       {/* Final CTA — provider-first */}
       <section className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col justify-between gap-8 rounded-xl bg-brand-100 px-8 py-14 shadow-elev2 md:px-12 md:py-16 lg:flex-row lg:items-center">
+          <div className="flex flex-col justify-between gap-8 rounded-xl bg-slate-50 px-8 py-14 shadow-elev2 md:px-12 md:py-16 lg:flex-row lg:items-center">
             <div className="max-w-xl space-y-3">
-              <h2 className="font-display text-3xl font-black tracking-tight text-brand-900 md:text-4xl">
+              <h2 className="font-display text-3xl font-black tracking-tight text-ink-800 md:text-4xl">
                 Your skill belongs in a classroom.
               </h2>
-              <p className="leading-relaxed text-brand-800/80">
+              <p className="leading-relaxed text-slate-600">
                 Join free. Prove your skill. We do the matching — you do what you&apos;re good at.
               </p>
             </div>
@@ -492,7 +488,7 @@ export default function HomeLanding() {
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-brand-800/30 px-6 text-sm font-semibold text-brand-900 transition-all hover:bg-white/60 active:scale-[0.98]"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700 active:scale-[0.98]"
               >
                 Book a free audit
               </Link>

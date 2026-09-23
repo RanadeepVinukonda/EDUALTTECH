@@ -90,10 +90,10 @@ function ProviderCard({ p }: { p: ProviderItem }) {
           loading="lazy"
           decoding="async"
           onError={() => setImgOk(false)}
-          className="h-20 w-20 rounded-full object-cover ring-2 ring-brand-100"
+          className="h-20 w-20 rounded-full object-cover ring-2 ring-slate-200"
         />
       ) : (
-        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-100 font-display text-2xl font-black text-brand-700 ring-2 ring-brand-200">
+        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 font-display text-2xl font-black text-ink-700 ring-2 ring-slate-200">
           {initials}
         </span>
       )}
@@ -153,8 +153,9 @@ export default function FeaturedSections() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <SectionHeading
-              kicker="Learn from Practitioners"
-              title="Famous courses, taught by who does it daily."
+              kicker="Popular Courses"
+              title="What students are learning right now."
+              body="Taught by providers who do the work daily — picked fresh from the platform."
             />
             <Link
               href="/courses"

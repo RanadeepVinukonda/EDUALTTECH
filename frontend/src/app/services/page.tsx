@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   Brain,
-  CheckCircle,
   Globe,
   GraduationCap,
   Smartphone,
@@ -14,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Digital solutions, marketing and classroom programs for schools and franchises — websites, apps, ERP, AI tools, admissions campaigns and hands-on AI & coding classes.",
+    "Services of the Setsuzoku group — EduAltTech skill marketplace plus digital solutions, marketing and admissions for schools and franchises.",
   alternates: { canonical: "https://www.edualttech.com/services" },
 };
 
@@ -77,8 +76,9 @@ export default function ServicesPage() {
             for <span className="text-brand-600">Modern Schools</span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg font-medium text-slate-600">
-            Comprehensive digital solutions designed to empower educational institutions with
-            cutting-edge technology.
+            We are the <span className="font-semibold text-ink-700">Setsuzoku group</span> — an
+            education skill marketplace, digital solutions built in-house, and the marketing that
+            gets both in front of the right students.
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export default function ServicesPage() {
               className="group rounded-xl border border-slate-200 bg-white p-10 transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-elev3"
             >
               <div className="mb-8 flex items-start gap-6">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition-transform group-hover:scale-110">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-ink-700 transition-transform group-hover:scale-110">
                   {iconMap[service.icon]}
                 </div>
                 <div>
@@ -102,7 +102,7 @@ export default function ServicesPage() {
               <ul className="grid grid-cols-2 gap-3">
                 {service.features.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="h-4 w-4 shrink-0 text-brand-600" />
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" aria-hidden />
                     {f}
                   </li>
                 ))}

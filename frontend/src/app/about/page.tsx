@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, HeartHandshake, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, HeartHandshake, ShieldCheck, Sparkles } from "lucide-react";
 import TeamGrid from "@/components/team/TeamGrid";
 
 export const metadata: Metadata = {
@@ -40,7 +40,6 @@ export default function AboutPage() {
     <div className="overflow-hidden bg-white">
       {/* Hero */}
       <section className="relative px-6 pb-20 pt-16">
-        <div className="pointer-events-none absolute -right-32 -top-32 h-[480px] w-[480px] rounded-full bg-brand-100/50" />
         <div className="relative mx-auto max-w-7xl">
           <div className="max-w-3xl space-y-6">
             <h1 className="font-display text-5xl font-black leading-[0.95] tracking-tighter text-ink-700 md:text-6xl lg:text-7xl">
@@ -56,7 +55,9 @@ export default function AboutPage() {
             </p>
             <p className="max-w-2xl text-lg leading-relaxed text-slate-600">
               For schools, we build the digital layer too — websites, ERP, admissions marketing and
-              classroom programs — always together with the school, never just sold to it.
+              classroom programs — always together with the school, never just sold to it. We&apos;re
+              part of the <strong className="font-semibold text-ink-700">Setsuzoku group</strong>,
+              which also runs digital solutions and marketing services.
             </p>
           </div>
         </div>
@@ -79,7 +80,7 @@ export default function AboutPage() {
                 key={p.title}
                 className="group rounded-xl border border-black/5 bg-white p-8 shadow-elev1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev3"
               >
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition-transform group-hover:scale-110">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-ink-700 transition-transform group-hover:scale-110">
                   <p.icon className="h-7 w-7" aria-hidden />
                 </div>
                 <h3 className="font-display text-xl font-bold text-ink-700">{p.title}</h3>
@@ -104,7 +105,7 @@ export default function AboutPage() {
               <ul className="space-y-3">
                 {VALUES.map((v) => (
                   <li key={v} className="flex items-start gap-3 text-ink-100">
-                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" aria-hidden />
+                    <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-slate-500" aria-hidden />
                     <span className="leading-relaxed">{v}</span>
                   </li>
                 ))}
@@ -155,12 +156,12 @@ export default function AboutPage() {
 
       {/* CTA */}
       <section className="px-6 pb-20">
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-8 rounded-xl bg-brand-100 px-8 py-14 shadow-elev2 md:px-12 md:py-16 lg:flex-row lg:items-center">
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-8 rounded-xl bg-slate-50 px-8 py-14 shadow-elev2 md:px-12 md:py-16 lg:flex-row lg:items-center">
           <div className="max-w-xl space-y-3">
-            <h2 className="font-display text-3xl font-black tracking-tight text-brand-900 md:text-4xl">
+            <h2 className="font-display text-3xl font-black tracking-tight text-ink-800 md:text-4xl">
               Want in?
             </h2>
-            <p className="leading-relaxed text-brand-800/80">
+            <p className="leading-relaxed text-slate-600">
               Bring a skill, bring a school, or bring both. The marketplace is open from day one.
             </p>
           </div>
@@ -173,7 +174,7 @@ export default function AboutPage() {
             </Link>
             <Link
               href="/contact"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-brand-800/30 px-6 text-sm font-semibold text-brand-900 transition-all hover:bg-white/60"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-700 transition-all hover:border-brand-500 hover:text-brand-700"
             >
               Book a free audit
             </Link>

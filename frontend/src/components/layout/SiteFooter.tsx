@@ -7,7 +7,7 @@ export function SiteFooter() {
         <div>
           <p className="font-display text-lg font-semibold text-white">Edu-Alt-Tech</p>
           <p className="mt-2 text-sm text-ink-200">
-            Technology for schools that students actually use — developed with the schools, not just sold to them.
+            The skill marketplace of the <span className="font-semibold text-white">Setsuzoku</span> group — digital solutions and marketing &amp; admissions alongside.
           </p>
         </div>
         <div>
@@ -29,15 +29,16 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <p className="text-sm font-semibold text-white">Reach us</p>
+          <p className="text-sm font-semibold text-white">Setsuzoku group</p>
           <ul className="mt-3 space-y-2 text-sm text-ink-200">
-            <li>info@edualttech.com</li>
-            <li>edualttech.com</li>
+            <li>Edu-Alt-Tech — skill marketplace</li>
+            <li>Digital solutions</li>
+            <li>Marketing &amp; admissions</li>
           </ul>
         </div>
       </div>
       <div className="border-t border-ink-900 py-4 text-center text-xs text-ink-300">
-        © {new Date().getFullYear()} Edu-Alt-Tech. All rights reserved.
+        © {new Date().getFullYear()} Setsuzoku · Edu-Alt-Tech. All rights reserved.
       </div>
     </footer>
   );

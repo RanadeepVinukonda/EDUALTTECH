@@ -283,7 +283,7 @@ export default function CourseDetailPage() {
             <ul className="divide-y divide-slate-50">
               {mod.lessons.map((l) => (
                 <li key={l.id} className="flex items-center gap-3 px-6 py-3 text-sm">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
                     {l.position}
                   </span>
                   <span className="text-slate-700">{l.title}</span>
