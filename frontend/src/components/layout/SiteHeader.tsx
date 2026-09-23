@@ -9,6 +9,7 @@ const GUEST_NAV = [
   { href: "/courses", label: "Courses" },
   { href: "/practice", label: "Practice" },
   { href: "/resources", label: "Resources" },
+  { href: "/services", label: "Services" },
   { href: "/teachers/apply", label: "Teach with us" },
   { href: "/about", label: "About" },
 ];
@@ -77,7 +78,7 @@ export function SiteHeader() {
           {logoOk ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src="/brand/logo.svg"
+              src="/brand/logo.png"
               alt="Edu-Alt-Tech"
               className="h-9 w-auto"
               onError={() => setLogoOk(false)}
