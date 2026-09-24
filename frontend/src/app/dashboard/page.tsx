@@ -16,7 +16,6 @@ interface DashboardData {
   avgQuizScore: number;
   streak: { current: number; longest: number };
   activity: Array<{ day: string; kind: string; count: number }>;
-  aiChats: number;
 }
 
 export default function StudentDashboardPage() {
@@ -46,9 +45,6 @@ export default function StudentDashboardPage() {
         </Link>
         <Link href="/teacher" className="font-semibold text-brand-700 hover:text-brand-800">
           Mentor workspace
-        </Link>
-        <Link href="/assistant" className="font-semibold text-brand-700 hover:text-brand-800">
-          Ask the AI guide
         </Link>
         <Link href="/notifications" className="font-semibold text-brand-700 hover:text-brand-800">
           Notifications

@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-import { logger } from "../utils/logger.js";
 
 dotenv.config();
 
@@ -18,11 +17,6 @@ function optional(name: string, fallback = ""): string {
 export const env = process.env.NODE_ENV ?? "development";
 export const isProd = env === "production";
 
-const aiConfigured = Boolean(optional("AI_PROVIDER_API_KEY")) || Boolean(optional("AI_PROVIDER_BASE_URL"));
-if (isProd && !aiConfigured) {
-  logger.warn("AI assistant started WITHOUT a provider — /api/ai/chat will return 503 until AI_PROVIDER_* is configured");
-}
-
 export const config = {
   env,
   isProd,
@@ -37,12 +31,6 @@ export const config = {
     keyId: optional("RAZORPAY_KEY_ID"),
     keySecret: optional("RAZORPAY_KEY_SECRET"),
     webhookSecret: optional("RAZORPAY_WEBHOOK_SECRET"),
-  },
-
-  ai: {
-    apiKey: optional("AI_PROVIDER_API_KEY"),
-    baseUrl: optional("AI_PROVIDER_BASE_URL"),
-    model: optional("AI_MODEL"),
   },
 
   email: {

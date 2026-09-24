@@ -269,13 +269,13 @@ export default function HomeLanding() {
               </div>
               <p className="text-sm leading-relaxed text-slate-600">
                 Pay per course, no subscriptions. Mentors who do the work daily, practice labs
-                and the AI tutor — all in the same account.
+                and study resources — all in the same account.
               </p>
               <ul className="flex-1 space-y-2.5 text-sm text-slate-600">
                 {[
                   "Pay per course you enroll in",
                   "Practitioners, not PhD walls",
-                  "Practice labs + AI tutor included",
+                  "Practice labs + study resources included",
                 ].map((line) => (
                   <li key={line} className="flex items-start gap-3">
                     <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" aria-hidden />
@@ -442,7 +442,7 @@ export default function HomeLanding() {
                 One login. Every feature.
               </h2>
               <p className="leading-relaxed text-slate-600">
-                Courses, practice labs, study resources and the AI tutor — plus the option to
+                Courses, practice labs and study resources — plus the option to
                 teach what you know. All in one account, no separate provider sign-up.
               </p>
             </div>

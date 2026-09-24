@@ -123,7 +123,6 @@ model User {
   practiceAttempts   PracticeAttempt[]
   activityLogs       ActivityLog[]
   streaks            Streak?
-  aiChats            AiChat[]
   taughtCourses      Course[]          @relation("CourseTeacher")
   teacherApplication TeacherApplication?
   mentorships        CourseMentor[]    @relation("CourseMentorUser")
@@ -477,39 +476,6 @@ model Streak {
   longest      Int      @default(0)
   lastActiveOn DateTime @db.Date
 }
-
-// ────────────────────────────────────────────────────────────────────
-// AI assistant
-// ────────────────────────────────────────────────────────────────────
-
-model AiChat {
-  id        String    @id @default(cuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String    @default("New chat")
-  isSaved   Boolean   @default(false) // pinned to saved history
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  messages  AiMessage[]
-
-  @@index([userId])
-}
-
-model AiMessage {
-  id        String   @id @default(cuid())
-  chatId    String
-  chat      AiChat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  role      String   // "user" | "assistant" | "system"
-  content   String
-  createdAt DateTime @default(now())
-
-  @@index([chatId])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Resources library (100+ study materials)
-// ────────────────────────────────────────────────────────────────────
 
 model Resource {
   id            String   @id @default(cuid())

@@ -11,7 +11,6 @@ import { requestId } from "./middlewares/request-id.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import courseRoutes from "./modules/courses/courses.routes.js";
 import practiceRoutes from "./modules/practice/practice.routes.js";
-import aiRoutes from "./modules/ai/ai.routes.js";
 import resourceRoutes from "./modules/resources/resources.routes.js";
 import chatRoutes from "./modules/chat/chat.routes.js";
 import notificationRoutes from "./modules/notifications/notifications.routes.js";
@@ -60,7 +59,6 @@ export function createApp(): express.Express {
   app.use("/api/auth", authRoutes);
   app.use("/api/courses", courseRoutes);
   app.use("/api/practice", practiceRoutes);
-  app.use("/api/ai", aiRoutes);
   app.use("/api/resources", resourceRoutes);
   app.use("/api/chat", chatRoutes);
   app.use("/api/notifications", notificationRoutes);

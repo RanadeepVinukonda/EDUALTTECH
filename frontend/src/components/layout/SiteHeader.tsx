@@ -19,7 +19,6 @@ const USER_NAV = [
   { href: "/practice", label: "Practice" },
   { href: "/resources", label: "Resources" },
   { href: "/chat", label: "Chat" },
-  { href: "/assistant", label: "Study assistant" },
 ];
 
 const ADMIN_NAV = [

@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Sora } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { GuideBubble } from "@/components/guide/GuideBubble";
 
 const sora = Sora({ subsets: ["latin"], variable: "--font-display", display: "swap" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />
+        <GuideBubble />
       </body>
     </html>
   );

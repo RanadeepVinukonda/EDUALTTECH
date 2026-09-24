@@ -30,7 +30,6 @@ export function SiteFooter() {
             <li><Link href="/courses" className="hover:text-brand-300">Courses</Link></li>
             <li><Link href="/practice" className="hover:text-brand-300">Practice zone</Link></li>
             <li><Link href="/resources" className="hover:text-brand-300">Resources</Link></li>
-            <li><Link href="/assistant" className="hover:text-brand-300">AI assistant</Link></li>
           </ul>
         </div>
         <div>

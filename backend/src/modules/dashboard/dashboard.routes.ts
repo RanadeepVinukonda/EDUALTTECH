@@ -11,7 +11,7 @@ router.get("/me", async (req, res, next) => {
   try {
     const userId = req.user!.id;
 
-    const [enrollments, quizAttempts, practiceAttempts, streak, activity, aiChats] = await Promise.all([
+    const [enrollments, quizAttempts, practiceAttempts, streak, activity] = await Promise.all([
       prisma.enrollment.findMany({
         where: { studentId: userId },
         include: { course: { select: { id: true, title: true, slug: true, thumbnailUrl: true, subject: true } } },
@@ -34,7 +34,6 @@ router.get("/me", async (req, res, next) => {
         orderBy: { day: "desc" },
         take: 30,
       }),
-      prisma.aiChat.count({ where: { userId, deletedAt: null } }),
     ]);
 
     const avgQuizScore =
@@ -49,7 +48,6 @@ router.get("/me", async (req, res, next) => {
         avgQuizScore,
         streak: streak ?? { current: 0, longest: 0 },
         activity,
-        aiChats,
       },
     });
   } catch (err) {
