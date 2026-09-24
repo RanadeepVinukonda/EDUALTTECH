@@ -1,14 +1,16 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api, persistAuthTokens, nextAuthPath, type AuthResponse } from "@/lib/api";
 import PasswordInput from "@/components/ui/PasswordInput";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const created = searchParams.get("created");
+  const [email, setEmail] = useState(() => searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,6 +38,12 @@ export default function LoginPage() {
     <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
       <h1 className="font-display text-2xl font-bold text-slate-900">Welcome back</h1>
       <p className="mt-1 text-sm text-slate-600">Sign in to your Edu-Alt-Tech account.</p>
+
+      {created && (
+        <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">
+          Account created — your email is verified. Welcome aboard, sign in to continue.
+        </p>
+      )}
 
       {error && (
         <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
@@ -88,5 +96,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="rounded-xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-elev2">Loading…</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

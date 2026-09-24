@@ -90,6 +90,8 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String
+  firstName     String?
+  lastName      String?
   role          Role      @default(USER)
   avatarUrl     String?
   schoolName    String?
@@ -129,6 +131,29 @@ model User {
   auditLogs          AuditLog[]
 
   @@index([role])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Identity verification codes — email code entered on the signup page,
+// BEFORE the account exists, so rows are keyed by identifier not userId.
+// Hash the code; attempts cap = brute-force protection on top of rate limit.
+// ────────────────────────────────────────────────────────────────────
+
+enum VerificationChannel {
+  EMAIL
+}
+
+model VerificationCode {
+  id         String              @id @default(cuid())
+  channel    VerificationChannel @default(EMAIL)
+  identifier String              // email address
+  codeHash   String              // sha256(`${identifier}:${code}`)
+  attempts   Int                 @default(0)
+  verifiedAt DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime            @default(now())
+
+  @@index([channel, identifier])
 }
 
 // ────────────────────────────────────────────────────────────────────

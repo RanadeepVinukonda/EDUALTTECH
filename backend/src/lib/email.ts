@@ -61,3 +61,11 @@ export function otpEmail(to: string, otp: string): Promise<void> {
     text: `Your phone verification code is ${otp}. It expires in 10 minutes.\n\n— The Edu-Alt-Tech team`,
   });
 }
+
+export function emailCodeEmail(to: string, code: string): Promise<void> {
+  return sendEmail({
+    to,
+    subject: "Your Edu-Alt-Tech email verification code",
+    text: `Your email verification code is ${code}. It expires in 10 minutes.\n\n— The Edu-Alt-Tech team`,
+  });
+}

@@ -2,9 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import crypto from "node:crypto";
 import { prisma } from "../../lib/prisma.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { config, isProd } from "../../config/env.js";
+import { isProd } from "../../config/env.js";
 import { logger } from "../../utils/logger.js";
-import { otpEmail } from "../../lib/email.js";
+import { otpEmail, emailCodeEmail } from "../../lib/email.js";
 import { admin, anon, getUserByToken } from "../../lib/supabase.js";
 import type { Role } from "@prisma/client";
 import {
@@ -16,6 +16,8 @@ import {
   sendPhoneOtpSchema,
   verifyPhoneOtpSchema,
   resendVerificationSchema,
+  sendCodeSchema,
+  verifyCodeSchema,
   completeOnboardingSchema,
 } from "./auth.schemas.js";
 
@@ -163,45 +165,139 @@ export async function register(req: Request, res: Response, next: NextFunction):
     const data = registerSchema.parse(req.body);
     const email = data.email.toLowerCase().trim();
 
-    let signUp: Awaited<ReturnType<typeof anon.auth.signUp>>["data"];
-    const { data: signUpResult, error: signUpError } = await anon.auth.signUp({
-      email,
-      password: data.password,
-      options: {
-        data: { name: data.name.trim() },
-        emailRedirectTo: `${config.appBaseUrl.replace(/\/+$/, "")}/auth/callback`,
-      },
+    const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (existing) throw ApiError.conflict("An account with this email already exists");
+
+    // Proof of ownership: a live, verified email code — the user typed the
+    // 6-digit code we emailed, not merely "an email". Without it: no account.
+    const code = await prisma.verificationCode.findFirst({
+      where: { channel: "EMAIL", identifier: email, verifiedAt: { not: null }, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: "desc" },
     });
-    signUp = signUpResult as typeof signUp;
-    if (signUpError) {
-      // Production must not hide a real SMTP outage. In dev the Resend
-      // shared sender rejects non-owner inboxes, so create the account
-      // anyway — the dev confirm endpoint replaces the emailed link.
-      if (isProd) throw translateAuthError(signUpError);
-      const fallback = await admin.auth.admin.createUser({
-        email,
-        password: data.password,
-        email_confirm: false,
-        user_metadata: { name: data.name.trim() },
-      });
-      if (fallback.error || !fallback.data.user) throw translateAuthError(signUpError);
-      signUp = fallback.data as unknown as typeof signUp;
+    if (!code) {
+      throw ApiError.badRequest("Please verify your email first — enter the 6-digit code we emailed you");
     }
 
-    const authUser = signUp.user;
-    if (!authUser) throw ApiError.unavailable("Could not create the account — try again");
+    const fullName = `${data.firstName} ${data.lastName}`.replace(/\s+/g, " ").trim();
+    const { data: created, error } = await admin.auth.admin.createUser({
+      email,
+      password: data.password,
+      email_confirm: true, // already verified by the code above — no confirmation link sent
+      user_metadata: { name: fullName, firstName: data.firstName, lastName: data.lastName },
+    });
+    if (error) throw translateAuthError(error);
+    if (!created.user) throw ApiError.unavailable("Could not create the account — try again");
 
-    const profile = await syncProfile(authUser);
-    // Supabase's "confirm email" setting is on by default → no session until the link is clicked.
+    const profile = await prisma.user.create({
+      data: {
+        id: created.user.id,
+        email,
+        name: fullName,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        emailVerifiedAt: new Date(),
+        phone: data.phone ?? null,
+        phoneVerifiedAt: null,
+      },
+      select: PUBLIC_SELECT,
+    });
+
+    // Codes are single-use; once the account exists emailVerifiedAt owns the truth.
+    await prisma.verificationCode.deleteMany({ where: { identifier: email } });
+
     res.status(201).json({
       success: true,
       data: {
         user: stripUser(profile),
-        requiresEmailConfirmation: true,
-        accessToken: signUp.session?.access_token ?? null,
-        refreshToken: signUp.session?.refresh_token ?? null,
+        requiresEmailConfirmation: false,
+        accessToken: null,
+        refreshToken: null,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+}
+
+const CODE_TTL_MS = 10 * 60 * 1000;
+
+function hashCode(identifier: string, code: string) {
+  return crypto.createHash("sha256").update(`${identifier}:${code}`).digest("hex");
+}
+
+export async function sendEmailCode(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email: raw } = sendCodeSchema.parse(req.body);
+    const email = raw.toLowerCase().trim();
+
+    const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (existing) throw ApiError.conflict("An account with this email already exists");
+
+    const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
+    const now = new Date();
+    const expiresAt = new Date(Date.now() + CODE_TTL_MS);
+
+    // Replace any pending code for this email — a fresh request invalidates the old one.
+    await prisma.$transaction([
+      prisma.verificationCode.deleteMany({ where: { identifier: email, verifiedAt: null } }),
+      prisma.verificationCode.deleteMany({ where: { expiresAt: { lt: now } } }),
+      prisma.verificationCode.create({
+        data: { channel: "EMAIL", identifier: email, codeHash: hashCode(email, code), expiresAt },
+      }),
+    ]);
+
+    let emailSent = false;
+    try {
+      await emailCodeEmail(email, code);
+      emailSent = true;
+    } catch (err) {
+      logger.warn("Email verification code not sent", { email: () => "***", err });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        message: emailSent ? "We emailed you a 6-digit code" : "Code generated",
+        emailSent,
+        ...(isProd ? {} : { devOtp: code }),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function verifyEmailCode(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email: raw, code } = verifyCodeSchema.parse(req.body);
+    const email = raw.toLowerCase().trim();
+
+    const row = await prisma.verificationCode.findFirst({
+      where: { channel: "EMAIL", identifier: email },
+      orderBy: { createdAt: "desc" },
+    });
+    if (!row || row.expiresAt < new Date()) {
+      throw ApiError.badRequest("That code has expired — request a new one");
+    }
+    if (row.verifiedAt) {
+      res.json({ success: true, data: { verified: true } });
+      return;
+    }
+    if (row.attempts >= 5) {
+      await prisma.verificationCode.delete({ where: { id: row.id } });
+      throw ApiError.badRequest("Too many wrong attempts — request a new code");
+    }
+
+    const provided = Buffer.from(hashCode(email, code));
+    const stored = Buffer.from(row.codeHash);
+    const ok = provided.length === stored.length && crypto.timingSafeEqual(provided, stored);
+    if (!ok) {
+      await prisma.verificationCode.update({ where: { id: row.id }, data: { attempts: { increment: 1 } } });
+      throw ApiError.badRequest("That code is incorrect");
+    }
+
+    await prisma.verificationCode.update({ where: { id: row.id }, data: { verifiedAt: new Date() } });
+    res.json({ success: true, data: { verified: true } });
   } catch (err) {
     next(err);
   }

@@ -9,6 +9,8 @@ import {
   updateProfile,
   changePassword,
   resendVerification,
+  sendEmailCode,
+  verifyEmailCode,
   sendPhoneOtp,
   verifyPhoneOtp,
   completeOnboarding,
@@ -22,6 +24,8 @@ import {
   updateProfileSchema,
   changePasswordSchema,
   resendVerificationSchema,
+  sendCodeSchema,
+  verifyCodeSchema,
   sendPhoneOtpSchema,
   verifyPhoneOtpSchema,
   completeOnboardingSchema,
@@ -41,6 +45,8 @@ const router = Router();
 router.post("/register", authLimiter, validate(registerSchema), register);
 router.post("/login", authLimiter, validate(loginSchema), login);
 router.post("/resend-verification", authLimiter, validate(resendVerificationSchema), resendVerification);
+router.post("/send-email-code", authLimiter, validate(sendCodeSchema), sendEmailCode);
+router.post("/verify-email-code", validate(verifyCodeSchema), verifyEmailCode);
 router.post("/refresh", validate(refreshSchema), refresh);
 router.post("/logout", requireAuth, logout);
 router.post("/dev/confirm-email", validate(resendVerificationSchema), devConfirmEmail);

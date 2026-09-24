@@ -3,44 +3,46 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { api, type AuthResponse } from "@/lib/api";
+import { api } from "@/lib/api";
 import PasswordInput from "@/components/ui/PasswordInput";
+import EmailVerifyModal from "@/components/auth/EmailVerifyModal";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
+    phone: "",
     password: "",
-    schoolName: "",
-    className: "",
   });
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [showVerify, setShowVerify] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
+  const phoneValid = form.phone === "" || /^\+?\d{7,15}$/.test(form.phone.replace(/[\s-()]/g, ""));
+  const canSubmit =
+    emailVerified &&
+    form.firstName.trim().length > 0 &&
+    form.lastName.trim().length > 0 &&
+    form.password.length >= 8 &&
+    phoneValid;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const payload: Record<string, string> = {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-      };
-      if (form.schoolName) payload.schoolName = form.schoolName;
-      if (form.className) payload.className = form.className;
+      const payload: Record<string, string> = { firstName: form.firstName.trim(), lastName: form.lastName.trim(), email: form.email.trim() };
+      if (form.phone.trim()) payload.phone = form.phone.trim();
+      payload.password = form.password;
 
-      const data = await api<AuthResponse>("/auth/register", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      void data;
+      await api("/auth/register", { method: "POST", body: JSON.stringify(payload) });
 
-      // No auto-login: Supabase emails a confirmation link, and once the
-      // user clicks it they sign in on the login page themselves.
-      localStorage.setItem("eat:pending-verify", form.email);
-      router.push(`/verify-email?email=${encodeURIComponent(form.email)}`);
+      // Email is already verified by code, so straight to sign-in.
+      router.push("/login?created=1&email=" + encodeURIComponent(form.email.trim()));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -66,46 +68,101 @@ export default function RegisterPage() {
       )}
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="firstName" className="mb-1 block text-sm font-medium text-slate-700">First name</label>
+            <input
+              id="firstName"
+              required
+              placeholder="Ravi"
+              value={form.firstName}
+              onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="mb-1 block text-sm font-medium text-slate-700">Last name</label>
+            <input
+              id="lastName"
+              required
+              placeholder="Kumar"
+              value={form.lastName}
+              onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            />
+          </div>
+        </div>
 
-        <input
-          required
-          placeholder="Full name"
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-        />
-        <input
-          required
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-        />
-        <PasswordInput
-          required
-          minLength={8}
-          placeholder="Password (min 8 characters)"
-          value={form.password}
-          onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-          className="w-full"
-        />
-        <input
-          placeholder="School name (optional)"
-          value={form.schoolName}
-          onChange={(e) => setForm((f) => ({ ...f, schoolName: e.target.value }))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-        />
-        <input
-          placeholder="Class / section (e.g. 9-A)"
-          value={form.className}
-          onChange={(e) => setForm((f) => ({ ...f, className: e.target.value }))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-        />
+        <div>
+          <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+          <div className="flex gap-2">
+            <input
+              id="email"
+              type="email"
+              required
+              placeholder="you@school.in"
+              value={form.email}
+              disabled={emailVerified}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, email: e.target.value }));
+                setEmailVerified(false);
+              }}
+              className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-200 disabled:bg-slate-50 ${
+                emailVerified ? "border-emerald-400 bg-emerald-50 text-emerald-900" : "border-slate-300 focus:border-brand-500"
+              }`}
+            />
+            <button
+              type="button"
+              disabled={!emailValid || emailVerified}
+              onClick={() => setShowVerify(true)}
+              className={`shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${
+                emailVerified ? "bg-emerald-100 text-emerald-800" : "bg-brand-600 text-white hover:bg-brand-700"
+              }`}
+            >
+              {emailVerified ? "Verified ✓" : "Verify"}
+            </button>
+          </div>
+          {emailVerified && (
+            <p className="mt-1 text-xs text-emerald-700">Email confirmed. You&apos;re all set to create the account.</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="phone" className="mb-1 block text-sm font-medium text-slate-700">Phone (optional)</label>
+          <div className="flex gap-2">
+            <input
+              id="phone"
+              type="tel"
+              placeholder="+91 98765 43210"
+              value={form.phone}
+              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            />
+            <span className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-400">
+              OTP coming soon
+            </span>
+          </div>
+          {!phoneValid && <p className="mt-1 text-xs text-red-600">Enter a valid mobile number</p>}
+        </div>
+
+        <div>
+          <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
+            Password (min 8 characters, one letter + one number)
+          </label>
+          <PasswordInput
+            id="password"
+            required
+            minLength={8}
+            placeholder="••••••••"
+            value={form.password}
+            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+            className="w-full"
+          />
+        </div>
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !canSubmit}
           className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {loading ? "Creating account…" : "Create account"}
@@ -118,6 +175,17 @@ export default function RegisterPage() {
           Sign in
         </Link>
       </p>
+
+      {showVerify && (
+        <EmailVerifyModal
+          email={form.email.trim()}
+          onVerified={() => {
+            setEmailVerified(true);
+            setShowVerify(false);
+          }}
+          onClose={() => setShowVerify(false)}
+        />
+      )}
     </div>
   );
 }

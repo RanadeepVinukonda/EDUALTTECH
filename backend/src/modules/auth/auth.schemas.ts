@@ -9,10 +9,19 @@ export const passwordSchema = z
     message: "Password must contain at least one letter and one number",
   });
 
+/** E.164-ish: optional +, 7–15 digits. Spaces/dashes are stripped before validating. */
+export const phoneSchema = z
+  .string()
+  .trim()
+  .transform((p) => p.replace(/[\s-()]/g, ""))
+  .refine((p) => /^\+?\d{7,15}$/.test(p), { message: "Enter a valid mobile number" });
+
 export const registerSchema = z.object({
-  name: z.string().trim().min(2).max(80),
+  firstName: z.string().trim().min(1, "Enter your first name").max(40),
+  lastName: z.string().trim().min(1, "Enter your last name").max(40),
   email: z.string().email().max(160),
   password: passwordSchema,
+  phone: phoneSchema.optional(),
   schoolName: z.string().trim().max(120).optional(),
   className: z.string().trim().max(40).optional(),
 });
@@ -42,13 +51,6 @@ export const changePasswordSchema = z.object({
   // caller already holds a live session token.
 });
 
-/** E.164-ish: optional +, 7–15 digits. Spaces/dashes are stripped before validating. */
-export const phoneSchema = z
-  .string()
-  .trim()
-  .transform((p) => p.replace(/[\s-()]/g, ""))
-  .refine((p) => /^\+?\d{7,15}$/.test(p), { message: "Enter a valid mobile number" });
-
 export const sendPhoneOtpSchema = z.object({ phone: phoneSchema });
 
 export const verifyPhoneOtpSchema = z.object({
@@ -56,6 +58,13 @@ export const verifyPhoneOtpSchema = z.object({
 });
 
 export const resendVerificationSchema = z.object({ email: z.string().email().max(160) });
+
+export const sendCodeSchema = z.object({ email: z.string().email().max(160) });
+
+export const verifyCodeSchema = z.object({
+  email: z.string().email().max(160),
+  code: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code"),
+});
 
 export const completeOnboardingSchema = z.object({
   interestedTopics: z.array(z.string().trim().min(1).max(40)).min(1).max(20),
