@@ -42,7 +42,7 @@ router.post("/", requireAuth, validate(sendSchema), async (req, res, next) => {
   }
 });
 
-router.get("/", async (req, res, next) => {
+router.get("/", requireAuth, async (req, res, next) => {
   try {
     const where =
       req.user!.role === "ADMIN"

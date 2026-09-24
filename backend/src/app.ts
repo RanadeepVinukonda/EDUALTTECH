@@ -22,6 +22,7 @@ import contactRoutes from "./modules/contact/contact.routes.js";
 import chapterRoutes from "./modules/chapters/chapters.routes.js";
 import wishlistRoutes from "./modules/wishlist/wishlist.routes.js";
 import meetingRoutes from "./modules/meetings/meetings.routes.js";
+import cmsRoutes from "./modules/cms/cms.routes.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -70,6 +71,7 @@ export function createApp(): express.Express {
   app.use("/api/chapters", chapterRoutes);
   app.use("/api/wishlist", wishlistRoutes);
   app.use("/api/meetings", meetingRoutes);
+  app.use("/api/cms", cmsRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

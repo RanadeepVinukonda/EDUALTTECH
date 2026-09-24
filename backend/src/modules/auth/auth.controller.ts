@@ -2,10 +2,12 @@ import type { Request, Response, NextFunction } from "express";
 import crypto from "node:crypto";
 import { prisma } from "../../lib/prisma.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { isProd } from "../../config/env.js";
+import { isProd, config } from "../../config/env.js";
 import { logger } from "../../utils/logger.js";
 import { otpEmail, emailCodeEmail } from "../../lib/email.js";
 import { admin, anon, getUserByToken } from "../../lib/supabase.js";
+import { setAuthCookies, clearAuthCookies, getCookie } from "../../lib/cookies.js";
+import { sendSmsVerification, checkSmsVerification, smsEnabled } from "../../lib/sms.js";
 import type { Role } from "@prisma/client";
 import {
   registerSchema,
@@ -19,6 +21,8 @@ import {
   sendCodeSchema,
   verifyCodeSchema,
   completeOnboardingSchema,
+  oauthSchema,
+  oauthImportSchema,
 } from "./auth.schemas.js";
 
 const PUBLIC_SELECT = {
@@ -343,6 +347,10 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     const profile = await syncProfile(authUser);
     if (!profile.isActive) throw ApiError.forbidden("This account has been deactivated");
 
+    if (signIn.session && config.authCookie) {
+      setAuthCookies(res, signIn.session.access_token, signIn.session.refresh_token);
+    }
+
     res.json({
       success: true,
       data: {
@@ -356,15 +364,78 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   }
 }
 
+export async function forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email } = resendVerificationSchema.parse(req.body);
+    // Never reveal whether the address exists. Supabase emails the reset link
+    // when the account is real; the response is identical either way.
+    await anon.auth.resetPasswordForEmail(email, {
+      redirectTo: `${config.appBaseUrl}/reset-password?re=1`,
+    });
+    res.json({ success: true, data: { message: "If that account exists, a reset link is on its way" } });
+  } catch (err) {
+    logger.warn("Forgot-password request failed", { email: () => "***", err });
+    res.json({ success: true, data: { message: "If that account exists, a reset link is on its way" } });
+  }
+}
+
+const OAUTH_PROVIDERS = new Set(["google", "microsoft"]);
+
+export async function oauthUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { provider } = oauthSchema.parse(req.body);
+    if (!OAUTH_PROVIDERS.has(provider)) throw ApiError.badRequest("Unsupported provider");
+    const { data, error } = await anon.auth.signInWithOAuth({
+      provider: provider as Parameters<typeof anon.auth.signInWithOAuth>[0]["provider"],
+      options: { redirectTo: `${config.appBaseUrl}/auth/callback?oa=1` },
+    });
+    if (error) throw translateAuthError(error);
+    if (!data.url) throw ApiError.unavailable("That provider is not configured yet");
+    res.json({ success: true, data: { url: data.url } });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function resendVerification(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email } = resendVerificationSchema.parse(req.body.toLowerCase());
+    const { email } = resendVerificationSchema.parse(req.body);
     // Never reveal whether an address exists.
     const { error } = await anon.auth.resend({ type: "signup", email });
     if (error && !/already/i.test(error.message)) {
       logger.warn("Resend verification failed", { email: () => "***", err: error.message });
     }
     res.json({ success: true, data: { message: "If that account needs verifying, a new link is on its way" } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/** After the browser exchanges an OAuth code for tokens, sync the profile and
+ *  (in cookie mode) set the HttpOnly session cookies server-side. */
+export async function oauthImport(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { accessToken, refreshToken } = oauthImportSchema.parse(req.body);
+    const auth = await getUserByToken(accessToken);
+    if (!auth) throw ApiError.unauthorized("Session expired — please sign in again");
+
+    const profile = await syncProfile({
+      id: auth.id,
+      email: auth.email,
+      email_confirmed_at: auth.confirmedAt?.toISOString(),
+    });
+    if (!profile.isActive) throw ApiError.forbidden("This account has been deactivated");
+
+    if (config.authCookie) setAuthCookies(res, accessToken, refreshToken);
+
+    res.json({
+      success: true,
+      data: {
+        user: await augmentUser(profile),
+        accessToken,
+        refreshToken,
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -395,6 +466,28 @@ function hashOtp(userId: string, otp: string): string {
 export async function sendPhoneOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { phone } = sendPhoneOtpSchema.parse(req.body);
+
+    // Real SMS carrier configured? Use it; otherwise the code goes by email
+    // and development still shows it directly in the response.
+    if (smsEnabled()) {
+      await prisma.user.update({ where: { id: req.user!.id }, data: { phone } });
+      try {
+        await sendSmsVerification(phone);
+      } catch (err) {
+        logger.warn("SMS OTP could not be sent", { err });
+      }
+      res.json({
+        success: true,
+        data: {
+          message: "We texted you a 6-digit code",
+          emailSent: false,
+          delivery: "sms",
+          ...(isProd ? {} : { devOtp: null }),
+        },
+      });
+      return;
+    }
+
     const otp = String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
 
     await prisma.user.update({
@@ -430,6 +523,19 @@ export async function verifyPhoneOtp(req: Request, res: Response, next: NextFunc
     const { otp } = verifyPhoneOtpSchema.parse(req.body);
     const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
     if (!user) throw ApiError.notFound("User not found");
+
+    if (smsEnabled()) {
+      if (!user.phone) throw ApiError.badRequest("That code has expired — request a new one");
+      const ok = await checkSmsVerification(user.phone, otp).catch(() => false);
+      if (!ok) throw ApiError.badRequest("That code is incorrect");
+      const updated = await prisma.user.update({
+        where: { id: user.id },
+        data: { phoneVerifiedAt: new Date(), phoneOtpHash: null, phoneOtpExpiresAt: null },
+        select: PUBLIC_SELECT,
+      });
+      res.json({ success: true, data: { user: stripUser(updated) } });
+      return;
+    }
 
     if (!user.phoneOtpHash || !user.phoneOtpExpiresAt || user.phoneOtpExpiresAt < new Date()) {
       throw ApiError.badRequest("That code has expired — request a new one");
@@ -479,7 +585,11 @@ export async function completeOnboarding(req: Request, res: Response, next: Next
 
 export async function refresh(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { refreshToken } = refreshSchema.parse(req.body);
+    let refreshToken = (req.body as { refreshToken?: string } | undefined)?.refreshToken;
+    if (!refreshToken && config.authCookie) {
+      refreshToken = getCookie(req, "eat.refresh") ?? undefined;
+    }
+    if (!refreshToken) throw ApiError.unauthorized("Missing refresh token");
     const { data, error } = await anon.auth.refreshSession({ refresh_token: refreshToken });
     if (error) throw translateAuthError(error);
 
@@ -487,6 +597,10 @@ export async function refresh(req: Request, res: Response, next: NextFunction): 
     if (!authUser) throw ApiError.unauthorized("Session expired — please sign in again");
     const profile = await syncProfile(authUser);
     if (!profile.isActive) throw ApiError.forbidden("This account has been deactivated");
+
+    if (data.session && config.authCookie) {
+      setAuthCookies(res, data.session.access_token, data.session.refresh_token);
+    }
 
     res.json({
       success: true,
@@ -507,6 +621,7 @@ export async function logout(req: Request, res: Response, next: NextFunction): P
     if (header?.startsWith("Bearer ")) {
       await admin.auth.admin.signOut(header.slice("Bearer ".length)).catch(() => undefined);
     }
+    if (config.authCookie) clearAuthCookies(res);
     res.json({ success: true, data: { message: "Logged out" } });
   } catch (err) {
     next(err);

@@ -6,6 +6,11 @@
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3000/backend";
 
+// When "1", the backend issues HttpOnly cookies (eat.access/eat.refresh) and
+// the client never touches the tokens: no localStorage, credentials sent with
+// every request. Requires the matching AUTH_COOKIE=true server-side.
+export const COOKIE_MODE = process.env.NEXT_PUBLIC_AUTH_COOKIE === "1";
+
 const ACCESS_KEY = "eat.access";
 const REFRESH_KEY = "eat.refresh";
 const USER_KEY = "eat.user";
@@ -88,8 +93,10 @@ export function getCachedUser(): User | null {
 function persistAuth(auth: AuthResponse | null): void {
   if (typeof window === "undefined") return;
   if (auth) {
-    localStorage.setItem(ACCESS_KEY, auth.accessToken);
-    localStorage.setItem(REFRESH_KEY, auth.refreshToken);
+    if (!COOKIE_MODE) {
+      localStorage.setItem(ACCESS_KEY, auth.accessToken);
+      localStorage.setItem(REFRESH_KEY, auth.refreshToken);
+    }
     localStorage.setItem(USER_KEY, JSON.stringify(auth.user));
   } else {
     localStorage.removeItem(ACCESS_KEY);
@@ -106,12 +113,17 @@ export function persistAuthTokens(auth: AuthResponse): void {
 /** Store access/refresh tokens without a cached profile yet (auth callback). */
 export function persistSessionTokens(accessToken: string, refreshToken: string): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(ACCESS_KEY, accessToken);
-  localStorage.setItem(REFRESH_KEY, refreshToken);
+  if (!COOKIE_MODE) {
+    localStorage.setItem(ACCESS_KEY, accessToken);
+    localStorage.setItem(REFRESH_KEY, refreshToken);
+  }
   window.dispatchEvent(new Event(AUTH_EVENT));
 }
 
 export function clearAuth(): void {
+  if (COOKIE_MODE && typeof window !== "undefined") {
+    fetch(`${API_BASE}/auth/logout`, { method: "POST", credentials: "include" }).catch(() => undefined);
+  }
   persistAuth(null);
 }
 
@@ -142,7 +154,8 @@ async function tryRefresh(): Promise<boolean> {
       const res = await fetch(`${API_BASE}/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify(refreshToken ? { refreshToken } : {}),
+        credentials: COOKIE_MODE ? "include" : undefined,
       });
       if (!res.ok) return false;
 
@@ -162,10 +175,14 @@ export async function api<T>(path: string, init: RequestInit = {}, retry = true)
   if (!(init.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  const token = getAccessToken();
+  const token = COOKIE_MODE ? null : getAccessToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers,
+    credentials: COOKIE_MODE ? "include" : init.credentials,
+  });
 
   if (res.status === 401 && retry && !path.startsWith("/auth/")) {
     const ok = await tryRefresh();

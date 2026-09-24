@@ -33,7 +33,6 @@ export default function RegisterPage() {
     email: "",
     phone: "",
     password: "",
-    educationLevel: "School (class 6-12)",
     educationBoard: "",
     educationClass: "",
     qualification: "",

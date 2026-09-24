@@ -3,8 +3,22 @@ import type { Order, Payment, Prisma } from "@prisma/client";
 import { config } from "../../config/env.js";
 import { getRazorpay, verifyPaymentSignature } from "../../lib/razorpay.js";
 import { prisma } from "../../lib/prisma.js";
+import { planConfirmationEmail } from "../../lib/email.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { logger } from "../../utils/logger.js";
+
+/** Fire-and-forget plan confirmation email — never blocks the payment path. */
+function sendPlanConfirmation(userId: string, plan: PlanType): void {
+  void (async () => {
+    try {
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+      if (user) await planConfirmationEmail(user.email, user.name, PLANS[plan].label);
+      else logger.warn("Skipped plan email — user not found", { userId });
+    } catch (err) {
+      logger.warn("Plan confirmation email failed", { userId, error: err });
+    }
+  })();
+}
 
 // Plans are defined once and validated against the ledger everywhere.
 export const PLANS = {
@@ -144,6 +158,8 @@ export async function verifyPayment(userId: string, v: VerifyPayload): Promise<V
     return { order: { ...order, status: "PAID" as const }, payment, alreadyPaid: false };
   });
 
+  if (!result.alreadyPaid) sendPlanConfirmation(userId, order.plan);
+
   return result;
 }
 
@@ -193,6 +209,7 @@ export async function handleWebhook(rawBody: string, signature: string): Promise
   const paymentEntity = event.payload?.payment?.entity as { id?: string; order_id?: string } | undefined;
   const rpOrderId = paymentEntity?.order_id ?? rpEntity?.id;
 
+  let activated: { userId: string; plan: PlanType } | undefined;
   await prisma.$transaction(async (tx) => {
     if (rpOrderId) {
       const target = await tx.order.findUnique({ where: { razorpayOrderId: rpOrderId } });
@@ -202,6 +219,7 @@ export async function handleWebhook(rawBody: string, signature: string): Promise
           data: { status: "PAID" },
         });
         if (transition.count === 1) {
+          activated = { userId: target.userId, plan: target.plan };
           await tx.subscription.create({
             data: { userId: target.userId, plan: target.plan, orderRef: target.orderNumber },
           });
@@ -225,6 +243,8 @@ export async function handleWebhook(rawBody: string, signature: string): Promise
 
     await tx.webhookEvent.update({ where: { eventId }, data: { processed: true, processedAt: new Date() } });
   });
+
+  if (activated) sendPlanConfirmation(activated.userId, activated.plan);
 
   return { processed: true, duplicate: false };
 }

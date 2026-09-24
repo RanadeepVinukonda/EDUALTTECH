@@ -8,6 +8,8 @@ import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
 import { config } from "../../config/env.js";
 import { uploadFile, publicFileUrl, storageKey } from "../../lib/storage.js";
+import { enrollmentConfirmationEmail } from "../../lib/email.js";
+import { logger } from "../../utils/logger.js";
 
 const router = Router();
 
@@ -221,10 +223,19 @@ router.post("/:id/enroll", requireAuth, validate(enrollSchema), async (req, res,
     });
 
     await prisma.activityLog.upsert({
-      where: { userId_day_kind: { userId: req.user!.id, day: new Date(), kind: "lesson" } },
+      where: { userId_day_kind: { userId: req.user!.id, day: new Date(), kind: "enroll" } },
       update: { count: { increment: 1 } },
-      create: { userId: req.user!.id, day: new Date(), kind: "lesson" },
+      create: { userId: req.user!.id, day: new Date(), kind: "enroll" },
     });
+
+    void (async () => {
+      try {
+        const user = await prisma.user.findUnique({ where: { id: req.user!.id }, select: { email: true, name: true } });
+        if (user) await enrollmentConfirmationEmail(user.email, user.name, course.title);
+      } catch (err) {
+        logger.warn("Enrollment email failed", { error: err });
+      }
+    })();
 
     res.status(201).json({ success: true, data: { enrollment } });
   } catch (err) {

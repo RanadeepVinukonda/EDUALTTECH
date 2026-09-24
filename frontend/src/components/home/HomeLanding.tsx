@@ -118,7 +118,11 @@ export default function HomeLanding() {
               <span className="text-sm text-slate-500">
                 or{" "}
                 <Link href="/courses" className="font-semibold text-brand-700 underline-offset-4 hover:underline">
-                  browse courses
+                  explore courses
+                </Link>
+                {" · "}
+                <Link href="/work" className="font-semibold text-brand-700 underline-offset-4 hover:underline">
+                  see our work
                 </Link>
               </span>
             </div>

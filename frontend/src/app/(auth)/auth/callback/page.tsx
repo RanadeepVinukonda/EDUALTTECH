@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { api, persistAuthTokens, nextAuthPath, type AuthResponse } from "@/lib/api";
 
 function CallbackInner() {
   const router = useRouter();
@@ -13,20 +14,48 @@ function CallbackInner() {
 
   useEffect(() => {
     (async () => {
-      // Do NOT auto-sign-in. Supabase confirms the address here; the user
-      // then signs in on the login page and lands on their dashboard.
+      const oauth = params.get("oa") === "1";
       const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
       const code = params.get("code");
       const err = hash.get("error_description") ?? hash.get("error") ?? params.get("error");
       if (err) {
         setState("failed");
-        setMessage(typeof err === "string" ? err : "The confirmation link failed.");
+        setMessage(typeof err === "string" ? err : "The link failed.");
+        return;
+      }
+
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (oauth) {
+        if (!url || !anon || !code) {
+          setState("failed");
+          setMessage("The sign-in link is incomplete. Try again.");
+          return;
+        }
+        const supabase = createClient(url, anon);
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error || !data.session) {
+          setState("failed");
+          setMessage(error?.message ?? "Could not complete the sign-in.");
+          return;
+        }
+        // Sync the profile row (first-time OAuth users) and set session cookies
+        // when the backend runs in cookie mode; otherwise returns the tokens.
+        const imported = await api<AuthResponse>("/auth/oauth/import", {
+          method: "POST",
+          body: JSON.stringify({
+            accessToken: data.session.access_token,
+            refreshToken: data.session.refresh_token,
+          }),
+        });
+        persistAuthTokens(imported);
+        router.replace(nextAuthPath(imported.user));
+        router.refresh();
         return;
       }
 
       if (code) {
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
         if (url && anon) {
           const supabase = createClient(url, anon);
           await supabase.auth.exchangeCodeForSession(code); // marks confirmed at Supabase
@@ -46,7 +75,7 @@ function CallbackInner() {
 
       setState("verified");
     })();
-  }, [params]);
+  }, [params, router]);
 
   if (state === "working") {
     return (

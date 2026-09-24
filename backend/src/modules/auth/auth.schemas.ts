@@ -45,7 +45,7 @@ export const loginSchema = z.object({
 });
 
 export const refreshSchema = z.object({
-  refreshToken: z.string().min(10).max(512),
+  refreshToken: z.string().min(10).max(512).optional(),
 });
 
 export const updateProfileSchema = z.object({
@@ -83,4 +83,15 @@ export const completeOnboardingSchema = z.object({
   ...educationFields,
   interestedTopics: z.array(z.string().trim().min(1).max(40)).min(1).max(20),
   education: z.string().trim().min(2).max(80),
+});
+
+export const oauthSchema = z.object({
+  provider: z.enum(["google", "microsoft"]),
+});
+
+export const forgotPasswordSchema = z.object({ email: z.string().email().max(160) });
+
+export const oauthImportSchema = z.object({
+  accessToken: z.string().min(10).max(4096),
+  refreshToken: z.string().min(10).max(4096),
 });

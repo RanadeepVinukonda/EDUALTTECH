@@ -69,3 +69,31 @@ export function emailCodeEmail(to: string, code: string): Promise<void> {
     text: `Your email verification code is ${code}. It expires in 10 minutes.\n\n— The Edu-Alt-Tech team`,
   });
 }
+
+export function planConfirmationEmail(to: string, name: string, plan: string): Promise<void> {
+  return sendEmail({
+    to,
+    subject: `Your ${plan} plan is active`,
+    text: [
+      `Hi ${name},`,
+      "",
+      `Your ${plan} plan is now active — you can enroll in any published course.`,
+      "",
+      "— The Edu-Alt-Tech team",
+    ].join("\n"),
+  });
+}
+
+export function enrollmentConfirmationEmail(to: string, name: string, courseTitle: string): Promise<void> {
+  return sendEmail({
+    to,
+    subject: `You're enrolled in "${courseTitle}"`,
+    text: [
+      `Hi ${name},`,
+      "",
+      `You're enrolled in "${courseTitle}". Start learning from your dashboard.`,
+      "",
+      "— The Edu-Alt-Tech team",
+    ].join("\n"),
+  });
+}

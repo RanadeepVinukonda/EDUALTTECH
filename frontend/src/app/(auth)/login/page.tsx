@@ -14,6 +14,8 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [forgotMsg, setForgotMsg] = useState<string | null>(null);
+  const [showForgot, setShowForgot] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -31,6 +33,39 @@ function LoginForm() {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function onForgot(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setForgotMsg(null);
+    setLoading(true);
+    try {
+      const data = await api<{ message: string }>("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      setForgotMsg(data.message);
+      setShowForgot(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send reset link");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onOAuth(provider: "google" | "microsoft") {
+    setError(null);
+    try {
+      const data = await api<{ url: string }>("/auth/oauth/url", {
+        method: "POST",
+        body: JSON.stringify({ provider }),
+      });
+      if (!data.url) throw new Error("That provider is not configured yet");
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `${provider} sign-in failed`);
     }
   }
 
@@ -80,6 +115,15 @@ function LoginForm() {
             placeholder="••••••••"
           />
         </div>
+        <div className="flex items-center justify-between text-sm">
+          <button
+            type="button"
+            onClick={() => { setForgotMsg(null); setShowForgot((v) => !v); }}
+            className="font-medium text-brand-700 hover:text-brand-800"
+          >
+            Forgot password?
+          </button>
+        </div>
         <button
           type="submit"
           disabled={loading}
@@ -88,6 +132,47 @@ function LoginForm() {
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
+
+      {showForgot && !forgotMsg && (
+        <form onSubmit={onForgot} className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-sm font-medium text-slate-700">Reset your password</p>
+          <p className="mt-1 text-xs text-slate-500">We&apos;ll email you a secure reset link.</p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-3 w-full rounded-lg bg-slate-800 py-2 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-50"
+          >
+            {loading ? "Sending…" : "Send reset link"}
+          </button>
+        </form>
+      )}
+      {forgotMsg && (
+        <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">{forgotMsg}</p>
+      )}
+
+      <div className="mt-6">
+        <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-slate-400">
+          <span className="h-px flex-1 bg-slate-200" /> or continue with <span className="h-px flex-1 bg-slate-200" />
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => onOAuth("google")}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          >
+            Google
+          </button>
+          <button
+            type="button"
+            onClick={() => onOAuth("microsoft")}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          >
+            Microsoft
+          </button>
+        </div>
+      </div>
 
       <p className="mt-6 text-center text-sm text-slate-600">
         New here?{" "}

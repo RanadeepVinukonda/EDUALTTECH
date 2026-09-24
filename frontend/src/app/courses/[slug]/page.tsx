@@ -54,6 +54,7 @@ export default function CourseDetailPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [enrolled, setEnrolled] = useState(false);
+  const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [showPay, setShowPay] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -83,8 +84,12 @@ export default function CourseDetailPage() {
     if (!getCachedUser()) return;
     (async () => {
       try {
-        const me = await api<{ enrollments: Array<{ course: { id: string } }> }>("/dashboard/me").catch(() => null);
-        if (me?.enrollments.some((e) => e.course.id === course.id)) setEnrolled(true);
+        const me = await api<{ enrollments: Array<{ id: string; course: { id: string } }> }>("/dashboard/me").catch(() => null);
+        const mine = me?.enrollments.find((e) => e.course.id === course.id);
+        if (mine) {
+          setEnrolled(true);
+          setEnrollmentId(mine.id);
+        }
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
         const meets = await api<{ meetings: Array<{
@@ -208,17 +213,22 @@ export default function CourseDetailPage() {
           razorpay_signature: handlerResp.razorpay_signature,
         }),
       });
+
+      try {
+        await api(`/courses/${course.id}/enroll`, { method: "POST", body: JSON.stringify(selected ? { courseMentorId: selected } : {}) });
+        const me = await api<{ user: import("@/lib/api").User }>("/auth/me").catch(() => null);
+        if (me) updateCachedUser(me.user);
+        setShowPay(false);
+        setEnrolled(true);
+      } catch {
+        setError("Payment received — click Enroll to finish and start learning.");
+        setShowPay(false);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Payment could not be completed");
+    } finally {
       setPaying(false);
-      return;
     }
-    await api(`/courses/${course.id}/enroll`, { method: "POST", body: JSON.stringify(selected ? { courseMentorId: selected } : {}) });
-    const me = await api<{ user: import("@/lib/api").User }>("/auth/me").catch(() => null);
-    if (me) updateCachedUser(me.user);
-    setShowPay(false);
-    setPaying(false);
-    setEnrolled(true);
   }
 
   if (error && !course) return <div className="mx-auto max-w-5xl px-4 py-16 text-red-600">{error}</div>;
@@ -253,6 +263,14 @@ export default function CourseDetailPage() {
             >
               {enrolled ? "Enrolled" : busy ? "Enrolling…" : course.mentors.length > 0 && !selected ? "Pick a mentor first" : "Enroll in this course"}
             </button>
+            {enrolled && enrollmentId && (
+              <Link
+                href={`/messages?enrollment=${enrollmentId}`}
+                className="rounded-xl border border-brand-600 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-100"
+              >
+                Message your mentor
+              </Link>
+            )}
             <button
               onClick={toggleWishlist}
               disabled={saving}

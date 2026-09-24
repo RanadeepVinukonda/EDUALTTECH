@@ -7,18 +7,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/api";
 
 const GUEST_NAV = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/services", label: "Services" },
-  { href: "/contact", label: "Contact us" },
+  { href: "/courses", label: "Learn" },
+  { href: "/services", label: "Mentorship" },
+  { href: "/work", label: "Work" },
+  { href: "/about", label: "Company" },
 ];
 
 const USER_NAV = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/courses", label: "Courses" },
   { href: "/practice", label: "Practice" },
-  { href: "/resources", label: "Resources" },
-  { href: "/chat", label: "Chat" },
+  { href: "/messages", label: "Messages" },
 ];
 
 const ADMIN_NAV = [
@@ -27,6 +26,7 @@ const ADMIN_NAV = [
   { href: "/admin/applications", label: "Applications" },
   { href: "/admin/courses", label: "Courses & mentors" },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/content", label: "Content" },
   { href: "/admin/webhooks", label: "Webhooks" },
   { href: "/admin/messages", label: "Messages" },
   { href: "/admin/settings", label: "Settings" },

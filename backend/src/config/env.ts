@@ -55,5 +55,17 @@ export const config = {
 
   appBaseUrl: optional("APP_BASE_URL", process.env.APP_ORIGIN ?? "http://localhost:3000"),
 
+  // When "true", auth session tokens move into HttpOnly cookies ("eat.access" /
+  // "eat.refresh") and the API accepts them instead of the Authorization header.
+  // Only enable when API and web app share a site (or site + subdomain); the
+  // CORS setup must allow credentials for cross-origin apps.
+  authCookie: optional("AUTH_COOKIE", "false") === "true",
+
+  sms: {
+    accountSid: optional("TWILIO_ACCOUNT_SID"),
+    authToken: optional("TWILIO_AUTH_TOKEN"),
+    verifyServiceSid: optional("TWILIO_VERIFY_SERVICE_SID"),
+  },
+
   logLevel: process.env.LOG_LEVEL ?? "info",
 } as const;

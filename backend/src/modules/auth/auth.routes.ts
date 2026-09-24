@@ -15,6 +15,9 @@ import {
   verifyPhoneOtp,
   completeOnboarding,
   devConfirmEmail,
+  forgotPassword,
+  oauthUrl,
+  oauthImport,
 } from "./auth.controller.js";
 import { validate } from "./auth.validator.js";
 import {
@@ -29,6 +32,9 @@ import {
   sendPhoneOtpSchema,
   verifyPhoneOtpSchema,
   completeOnboardingSchema,
+  oauthSchema,
+  forgotPasswordSchema,
+  oauthImportSchema,
 } from "./auth.schemas.js";
 import { requireAuth } from "../../middlewares/auth.js";
 
@@ -44,6 +50,9 @@ const router = Router();
 
 router.post("/register", authLimiter, validate(registerSchema), register);
 router.post("/login", authLimiter, validate(loginSchema), login);
+router.post("/forgot-password", authLimiter, validate(forgotPasswordSchema), forgotPassword);
+router.post("/oauth/url", authLimiter, validate(oauthSchema), oauthUrl);
+router.post("/oauth/import", authLimiter, validate(oauthImportSchema), oauthImport);
 router.post("/resend-verification", authLimiter, validate(resendVerificationSchema), resendVerification);
 router.post("/send-email-code", authLimiter, validate(sendCodeSchema), sendEmailCode);
 router.post("/verify-email-code", validate(verifyCodeSchema), verifyEmailCode);
