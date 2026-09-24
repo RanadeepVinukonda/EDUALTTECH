@@ -51,6 +51,7 @@ const UPLOAD_SELECT = {
   title: true,
   subject: true,
   kind: true,
+  thumbnailUrl: true,
   fileUrl: true,
   fileSizeBytes: true,
   mimeType: true,
@@ -106,6 +107,7 @@ router.post(
       const kindRaw = (req.headers["x-resource-kind"] ?? "pdf").toString();
       const fileName = (req.headers["x-resource-file"] ?? "file").toString().trim() || "file";
       const mimeType = (req.headers["x-resource-mime"] ?? "application/octet-stream").toString();
+      const thumbnailUrl = req.headers["x-resource-thumb"]?.toString().trim().slice(0, 500) || null;
 
       if (!title) throw ApiError.badRequest("x-resource-title header is required");
       if (!KINDS.includes(kindRaw)) throw ApiError.badRequest(`Kind must be one of: ${KINDS.join(", ")}`);
@@ -137,6 +139,7 @@ router.post(
           title,
           subject,
           kind: kindRaw,
+          thumbnailUrl,
           fileUrl: publicFileUrl(config.supabase.storageBucket, path),
           fileSizeBytes: length,
           mimeType,

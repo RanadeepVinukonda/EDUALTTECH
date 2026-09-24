@@ -7,6 +7,7 @@ interface CourseOption {
   id: string;
   title: string;
   subject: string;
+  slug: string;
 }
 
 interface Application {
@@ -35,7 +36,14 @@ export default function MentorApplyPage() {
 
   useEffect(() => {
     api<{ items: CourseOption[] }>("/courses?limit=50")
-      .then((d) => setCourses(d.items))
+      .then((d) => {
+        setCourses(d.items);
+        const slug = new URLSearchParams(window.location.search).get("course");
+        const preselected = slug ? d.items.find((c) => c.slug === slug) : undefined;
+        if (preselected) {
+          setForm((f) => ({ ...f, courseId: preselected.id, subject: preselected.subject }));
+        }
+      })
       .catch(() => undefined);
 
     if (user) {
@@ -60,8 +68,8 @@ export default function MentorApplyPage() {
     try {
       const payload: Record<string, unknown> = {
         subject: form.subject,
-        experience: Number(form.experience) || 0,
       };
+      if (form.experience.trim()) payload.experience = Number(form.experience);
       for (const key of ["courseId", "qualifications", "resumeUrl", "message"] as const) {
         if (form[key].trim()) payload[key] = form[key].trim();
       }
@@ -166,10 +174,9 @@ export default function MentorApplyPage() {
         </div>
 
         <div>
-          <label htmlFor="experience" className="mb-1 block text-sm font-medium text-slate-700">Years of experience</label>
+          <label htmlFor="experience" className="mb-1 block text-sm font-medium text-slate-700">Years of experience (optional)</label>
           <input
             id="experience"
-            required
             type="number"
             min={0}
             max={60}

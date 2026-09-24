@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { api, ApiError, getCachedUser, updateCachedUser } from "@/lib/api";
+import { CourseChat } from "@/components/courses/CourseChat";
 
 const PLANS = [
   { plan: "TRIAL", label: "First-Class Trial", price: "₹1", note: "Try the platform for ₹1" },
@@ -227,6 +228,14 @@ export default function CourseDetailPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+      {course.thumbnailUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={course.thumbnailUrl}
+          alt=""
+          className="mb-6 h-56 w-full rounded-2xl object-cover"
+        />
+      )}
       <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
         {course.subject}{course.gradeLevel ? ` · ${course.gradeLevel}` : ""}
       </p>
@@ -254,6 +263,12 @@ export default function CourseDetailPage() {
             >
               {saved ? "Saved ✓" : "Save for later"}
             </button>
+            <Link
+              href={`/teachers/apply?course=${course.slug}`}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 hover:border-brand-400 hover:text-brand-700"
+            >
+              Mentor this course
+            </Link>
           </>
         )}
       </div>
@@ -370,6 +385,8 @@ export default function CourseDetailPage() {
           </ol>
         </section>
       )}
+
+      <CourseChat courseId={course.id} />
 
       <div className="mt-10 space-y-6">
         {course.modules.map((mod) => (

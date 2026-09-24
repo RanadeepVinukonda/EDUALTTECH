@@ -153,15 +153,9 @@ export default function ProviderWorkspacePage() {
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
       {!isProvider && (
-        <div className="mt-8 rounded-3xl border border-brand-200 bg-brand-50 p-8">
-          <h2 className="font-display text-lg font-semibold text-brand-900">Want to guide learners?</h2>
-          <p className="mt-1 text-sm text-brand-800">
-            Apply to mentor any course. Once an admin approves, that course and its chapter builder show up here.
-          </p>
-          <Link href="/teachers/apply" className="mt-4 inline-block rounded-xl bg-brand-600 px-6 py-2.5 font-semibold text-white hover:bg-brand-700">
-            Apply to mentor
-          </Link>
-        </div>
+        <p className="mt-4 text-sm text-slate-500">
+          Want to guide learners? Open any course and apply to mentor it from its page.
+        </p>
       )}
 
       {mentorship.map((m) => (

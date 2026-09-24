@@ -69,6 +69,29 @@ router.get("/rooms", async (req, res, next) => {
   }
 });
 
+router.get("/rooms/course/:courseId", async (req, res, next) => {
+  try {
+    const courseId = param(req, "courseId");
+    const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true, title: true } });
+    if (!course) throw ApiError.notFound("Course not found");
+    if (!(await isParticipant(req.user!, { courseId }))) {
+      throw ApiError.forbidden("Join the course to access its classroom chat");
+    }
+
+    // Lazy-create the classroom room on first visit — live courses get a room
+    // without needing a seed or an admin step.
+    const room = await prisma.chatRoom.upsert({
+      where: { courseId },
+      update: {},
+      create: { courseId, type: "CLASSROOM", title: `${course.title} — Classroom` },
+    });
+
+    res.json({ success: true, data: { room } });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/rooms/:id/messages", async (req, res, next) => {
   try {
     const q = z

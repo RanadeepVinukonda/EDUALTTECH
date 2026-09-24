@@ -11,6 +11,7 @@ interface CourseItem {
   description: string;
   subject: string;
   gradeLevel: string | null;
+  thumbnailUrl: string | null;
   teacher: { name: string };
   _count: { enrollments: number; modules: number };
 }
@@ -54,14 +55,24 @@ export default function CoursesPage() {
             <Link
               key={c.id}
               href={`/courses/${c.slug}`}
-              className="group rounded-2xl border border-slate-200 bg-white p-6 hover:border-brand-300 hover:shadow-sm"
+              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-brand-300 hover:shadow-sm"
             >
+              {c.thumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={c.thumbnailUrl} alt="" className="h-40 w-full object-cover" />
+              ) : (
+                <div className="flex h-40 items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100">
+                  <span className="rounded-xl bg-brand-600 px-3 py-1.5 text-sm font-bold text-white">{c.subject[0]}</span>
+                </div>
+              )}
+              <div className="p-6">
               <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{c.subject}</p>
               <h2 className="font-display mt-2 text-lg font-semibold text-slate-900 group-hover:text-brand-800">{c.title}</h2>
               <p className="mt-2 line-clamp-2 text-sm text-slate-600">{c.description}</p>
               <p className="mt-4 text-xs text-slate-500">
                 {c.teacher.name} · {c._count.modules} modules · {c._count.enrollments} enrolled
               </p>
+              </div>
             </Link>
           ))}
         </div>

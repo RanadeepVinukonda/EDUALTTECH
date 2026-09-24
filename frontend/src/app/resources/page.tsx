@@ -9,6 +9,7 @@ interface Resource {
   description: string | null;
   subject: string;
   kind: string;
+  thumbnailUrl: string | null;
   fileUrl: string;
   fileSizeBytes: number | null;
   downloads: number;
@@ -218,7 +219,12 @@ export default function ResourcesPage() {
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((r) => (
-            <div key={r.id} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5">
+            <div key={r.id} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              {r.thumbnailUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={r.thumbnailUrl} alt="" className="h-32 w-full object-cover" />
+              )}
+              <div className="flex flex-1 flex-col p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{r.subject} · {r.kind}</p>
               <h2 className="mt-1 font-semibold text-slate-900">{r.title}</h2>
               {r.description && <p className="mt-1 text-sm text-slate-600">{r.description}</p>}
@@ -229,6 +235,7 @@ export default function ResourcesPage() {
               >
                 Download ↓ <span className="font-normal text-slate-400">({r.downloads})</span>
               </button>
+              </div>
             </div>
           ))}
         </div>

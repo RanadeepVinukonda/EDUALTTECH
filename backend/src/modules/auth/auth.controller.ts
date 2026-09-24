@@ -35,6 +35,12 @@ const PUBLIC_SELECT = {
   phoneVerifiedAt: true,
   interestedTopics: true,
   education: true,
+  educationBoard: true,
+  educationClass: true,
+  qualification: true,
+  degree: true,
+  college: true,
+  gradYear: true,
   bio: true,
   onboardingDone: true,
   createdAt: true,
@@ -54,6 +60,12 @@ type PublicUser = {
   phoneVerifiedAt: Date | null;
   interestedTopics: string[];
   education: string | null;
+  educationBoard: string | null;
+  educationClass: string | null;
+  qualification: string | null;
+  degree: string | null;
+  college: string | null;
+  gradYear: number | null;
   bio: string | null;
   onboardingDone: boolean;
   createdAt: Date;
@@ -74,6 +86,12 @@ function stripUser(user: PublicUser): PublicUser {
     phoneVerifiedAt: user.phoneVerifiedAt,
     interestedTopics: user.interestedTopics,
     education: user.education,
+    educationBoard: user.educationBoard,
+    educationClass: user.educationClass,
+    qualification: user.qualification,
+    degree: user.degree,
+    college: user.college,
+    gradYear: user.gradYear,
     bio: user.bio,
     onboardingDone: user.onboardingDone,
     createdAt: user.createdAt,
@@ -198,6 +216,14 @@ export async function register(req: Request, res: Response, next: NextFunction):
         emailVerifiedAt: new Date(),
         phone: data.phone ?? null,
         phoneVerifiedAt: null,
+        interestedTopics: data.interestedTopics ?? [],
+        education: data.education ?? null,
+        educationBoard: data.educationBoard ?? null,
+        educationClass: data.educationClass ?? null,
+        qualification: data.qualification ?? null,
+        degree: data.degree ?? null,
+        college: data.college ?? null,
+        gradYear: data.gradYear ?? null,
       },
       select: PUBLIC_SELECT,
     });
@@ -434,6 +460,12 @@ export async function completeOnboarding(req: Request, res: Response, next: Next
       data: {
         interestedTopics: data.interestedTopics,
         education: data.education,
+        educationBoard: data.educationBoard ?? undefined,
+        educationClass: data.educationClass ?? undefined,
+        qualification: data.qualification ?? undefined,
+        degree: data.degree ?? undefined,
+        college: data.college ?? undefined,
+        gradYear: data.gradYear ?? undefined,
         ...(data.bio ? { bio: data.bio } : {}),
         onboardingDone: true,
       },

@@ -15,7 +15,7 @@ const router = Router();
 
 const applySchema = z.object({
   subject: z.string().min(2).max(80),
-  experience: z.number().int().min(0).max(60),
+  experience: z.number().int().min(0).max(60).optional(),
   qualifications: z.string().max(1_000).optional(),
   courseId: z.string().min(1).max(40).optional(),
   resumeUrl: z.string().url().optional(),

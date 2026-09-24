@@ -16,6 +16,18 @@ export const phoneSchema = z
   .transform((p) => p.replace(/[\s-()]/g, ""))
   .refine((p) => /^\+?\d{7,15}$/.test(p), { message: "Enter a valid mobile number" });
 
+/** Education profile — used at signup and in profile/onboarding. */
+export const educationFields = {
+  interestedTopics: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
+  education: z.string().trim().max(80).optional(),
+  educationBoard: z.string().trim().max(60).optional(),
+  educationClass: z.string().trim().max(40).optional(),
+  qualification: z.string().trim().max(60).optional(),
+  degree: z.string().trim().max(80).optional(),
+  college: z.string().trim().max(120).optional(),
+  gradYear: z.number().int().min(1960).max(2100).optional(),
+} as const;
+
 export const registerSchema = z.object({
   firstName: z.string().trim().min(1, "Enter your first name").max(40),
   lastName: z.string().trim().min(1, "Enter your last name").max(40),
@@ -24,6 +36,7 @@ export const registerSchema = z.object({
   phone: phoneSchema.optional(),
   schoolName: z.string().trim().max(120).optional(),
   className: z.string().trim().max(40).optional(),
+  ...educationFields,
 });
 
 export const loginSchema = z.object({
@@ -41,8 +54,7 @@ export const updateProfileSchema = z.object({
   schoolName: z.string().trim().max(120).optional(),
   className: z.string().trim().max(40).optional(),
   bio: z.string().trim().max(600).optional(),
-  education: z.string().trim().max(80).optional(),
-  interestedTopics: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
+  ...educationFields,
 });
 
 export const changePasswordSchema = z.object({
@@ -67,7 +79,8 @@ export const verifyCodeSchema = z.object({
 });
 
 export const completeOnboardingSchema = z.object({
+  bio: z.string().trim().max(600).optional(),
+  ...educationFields,
   interestedTopics: z.array(z.string().trim().min(1).max(40)).min(1).max(20),
   education: z.string().trim().min(2).max(80),
-  bio: z.string().trim().max(600).optional(),
 });

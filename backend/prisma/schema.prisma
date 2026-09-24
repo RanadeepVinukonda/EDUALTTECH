@@ -106,6 +106,12 @@ model User {
   phoneOtpExpiresAt DateTime?
   interestedTopics String[]  @default([])
   education       String?
+  educationBoard  String?
+  educationClass  String?
+  qualification   String?
+  degree          String?
+  college         String?
+  gradYear        Int?
   bio             String?
   onboardingDone  Boolean   @default(false)
 
@@ -225,7 +231,7 @@ model TeacherApplication {
   user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   status      TeacherApplicationStatus @default(PENDING)
   subject     String
-  experience  Int                     // years
+  experience  Int?                    // years (optional — mentoring experience)
   education   String?
   qualifications String?              // detailed qualifications / why they fit
   courseId    String?                 // optional: course they want to mentor
@@ -422,7 +428,8 @@ model PracticeProblem {
   title       String
   description String
   topic       String
-  difficulty  Int              @default(1) // 1 easy, 2 medium, 3 hard
+  category    String          @default("DSA") // DSA | Aptitude | Exam Prep | Science | Math | English
+  difficulty  Int             @default(1) // 1 easy, 2 medium, 3 hard
   language    PracticeLanguage @default(JAVASCRIPT)
   starterCode String?
   solution    String?
@@ -432,6 +439,7 @@ model PracticeProblem {
   attempts PracticeAttempt[]
 
   @@index([topic])
+  @@index([category])
   @@index([language])
 }
 
@@ -509,6 +517,7 @@ model Resource {
   description   String?
   subject       String
   kind          String   @default("pdf") // pdf | doc | slides | video | link
+  thumbnailUrl  String?
   fileUrl       String
   fileSizeBytes Int?     // uploaded bytes — used for per-user quota
   mimeType      String?
@@ -529,14 +538,12 @@ model Resource {
 
 model ChatRoom {
   id        String         @id @default(cuid())
-  courseId  String
+  courseId  String         @unique // one classroom per course
   course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   type      MessageRoomType @default(CLASSROOM)
   title     String?
   createdAt DateTime       @default(now())
   messages  ClassroomMessage[]
-
-  @@index([courseId])
 }
 
 model ClassroomMessage {

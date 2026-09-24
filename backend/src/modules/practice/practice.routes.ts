@@ -15,6 +15,7 @@ router.get("/", async (req, res, next) => {
     const q = z
       .object({
         topic: z.string().optional(),
+        category: z.string().optional(),
         language: z.string().optional(),
         difficulty: z.coerce.number().int().min(1).max(3).optional(),
         page: z.coerce.number().int().min(1).default(1),
@@ -24,6 +25,7 @@ router.get("/", async (req, res, next) => {
 
     const where = {
       ...(q.topic ? { topic: q.topic } : {}),
+      ...(q.category ? { category: q.category } : {}),
       ...(q.language ? { language: q.language as PracticeLanguage } : {}),
       ...(q.difficulty ? { difficulty: q.difficulty } : {}),
     };
@@ -31,7 +33,7 @@ router.get("/", async (req, res, next) => {
     const [items, total] = await Promise.all([
       prisma.practiceProblem.findMany({
         where,
-        select: { id: true, slug: true, title: true, topic: true, difficulty: true, language: true },
+        select: { id: true, slug: true, title: true, topic: true, category: true, difficulty: true, language: true },
         orderBy: [{ difficulty: "asc" }, { title: "asc" }],
         skip: (q.page - 1) * q.limit,
         take: q.limit,

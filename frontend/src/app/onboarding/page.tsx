@@ -135,9 +135,6 @@ export default function OnboardingPage() {
         >
           {busy ? "Saving…" : "Finish setup"}
         </button>
-        <p className="text-center text-xs text-slate-400">
-          Want to mentor a course? <Link href="/teachers/apply" className="font-medium text-brand-700 hover:text-brand-800">Apply here</Link>
-        </p>
       </form>
     </div>
   );

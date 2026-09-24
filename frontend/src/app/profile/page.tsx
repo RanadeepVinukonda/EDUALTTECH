@@ -134,19 +134,6 @@ export default function ProfilePage() {
           Update password
         </button>
       </form>
-
-      <div className="mt-6 rounded-3xl border border-brand-200 bg-brand-50 p-8">
-        <h2 className="font-display text-lg font-semibold text-brand-900">Become a mentor</h2>
-        <p className="mt-1 text-sm text-brand-800">
-          Take the other seat: guide learners in any course, set your own chapters and live sessions.
-        </p>
-        <Link
-          href="/teachers/apply"
-          className="mt-4 inline-block rounded-xl bg-brand-600 px-6 py-2.5 font-semibold text-white hover:bg-brand-700"
-        >
-          Mentor a course
-        </Link>
-      </div>
     </div>
   );
 }

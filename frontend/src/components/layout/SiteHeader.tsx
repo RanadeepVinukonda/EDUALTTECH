@@ -20,7 +20,6 @@ const USER_NAV = [
   { href: "/resources", label: "Resources" },
   { href: "/chat", label: "Chat" },
   { href: "/assistant", label: "Study assistant" },
-  { href: "/teachers/apply", label: "Teach with us" },
 ];
 
 const ADMIN_NAV = [
@@ -109,9 +108,6 @@ export function SiteHeader() {
             <>
               <span className="hidden flex-col items-end leading-tight md:flex">
                 <span className="max-w-[140px] truncate text-sm font-semibold text-slate-800">{user.name}</span>
-                <span className="text-xs text-slate-400">
-                  {user.role === "ADMIN" ? "Admin" : user.isProvider ? "Mentor · Learner" : "Learner"}
-                </span>
               </span>
               <Link
                 href={home}
