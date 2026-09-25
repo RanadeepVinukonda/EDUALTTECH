@@ -123,7 +123,7 @@ export default function AdminApplicationsPage() {
                     disabled={busyId === app.id || app.status === status}
                     className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-40 ${
                       status === "APPROVED"
-                        ? "bg-brand-600 text-white hover:bg-brand-700"
+                        ? "brand-grad text-white hover:bg-brand-700"
                         : status === "REJECTED"
                           ? "border border-red-300 text-red-600 hover:bg-red-50"
                           : "border border-slate-300 text-slate-700 hover:border-brand-400 hover:text-brand-700"

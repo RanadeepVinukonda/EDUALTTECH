@@ -84,7 +84,7 @@ export default function SetsuzokuPage() {
           </p>
           <Link
             href="/services"
-            className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700"
+            className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-full brand-grad px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700"
           >
             All services <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>

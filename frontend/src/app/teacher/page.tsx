@@ -181,7 +181,7 @@ export default function ProviderWorkspacePage() {
                   setOpenFor(openFor === m.id ? null : m.id);
                   setForm({ ...EMPTY });
                 }}
-                className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+                className="rounded-xl brand-grad px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
               >
                 {openFor === m.id ? "Cancel" : "Add chapter"}
               </button>
@@ -244,7 +244,7 @@ export default function ProviderWorkspacePage() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-xl bg-brand-600 px-6 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+                  className="rounded-xl brand-grad px-6 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                 >
                   {busy ? "Saving…" : "Save chapter"}
                 </button>

@@ -115,7 +115,7 @@ export default function ProfilePage() {
         <button
           type="submit"
           disabled={busy}
-          className="rounded-xl bg-brand-600 px-6 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="rounded-xl brand-grad px-6 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           Save changes
         </button>

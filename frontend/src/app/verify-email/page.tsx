@@ -80,7 +80,7 @@ function VerifyEmailInner() {
           <button
             type="button"
             onClick={() => router.push("/login")}
-            className="mt-6 w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700"
+            className="mt-6 w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700"
           >
             Go to login
           </button>
@@ -114,7 +114,7 @@ function VerifyEmailInner() {
           <button
             type="submit"
             disabled={busy || remaining > 0}
-            className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             {busy ? "Sending…" : remaining > 0 ? `Resend in ${remaining}s` : "Send another link"}
           </button>

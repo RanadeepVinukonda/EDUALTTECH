@@ -135,7 +135,7 @@ export default function ServicesPage() {
           <div className="relative z-10 flex flex-wrap justify-center gap-4">
             <Link
               href="/contact"
-              className="rounded-xl bg-brand-600 px-10 py-5 font-semibold text-white shadow-elev2 transition-all hover:bg-brand-700"
+              className="rounded-xl brand-grad px-10 py-5 font-semibold text-white shadow-elev2 transition-all hover:bg-brand-700"
             >
               Get a Free Consultation
             </Link>

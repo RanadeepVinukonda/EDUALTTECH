@@ -259,7 +259,7 @@ export default function CourseDetailPage() {
             <button
               onClick={enroll}
               disabled={busy || enrolled || (course.mentors.length > 0 && !selected)}
-              className="rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+              className="rounded-xl brand-grad px-6 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
             >
               {enrolled ? "Enrolled" : busy ? "Enrolling…" : course.mentors.length > 0 && !selected ? "Pick a mentor first" : "Enroll in this course"}
             </button>

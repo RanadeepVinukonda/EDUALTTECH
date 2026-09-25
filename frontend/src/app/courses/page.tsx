@@ -62,7 +62,7 @@ export default function CoursesPage() {
                 <img src={c.thumbnailUrl} alt="" className="h-40 w-full object-cover" />
               ) : (
                 <div className="flex h-40 items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100">
-                  <span className="rounded-xl bg-brand-600 px-3 py-1.5 text-sm font-bold text-white">{c.subject[0]}</span>
+                  <span className="rounded-xl brand-grad px-3 py-1.5 text-sm font-bold text-white">{c.subject[0]}</span>
                 </div>
               )}
               <div className="p-6">

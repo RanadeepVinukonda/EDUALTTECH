@@ -46,7 +46,7 @@ export default function PracticePage() {
             key={c || "all"}
             onClick={() => setCategory(c)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium ${
-              category === c ? "bg-brand-600 text-white" : "border border-slate-300 text-slate-600 hover:border-brand-400"
+              category === c ? "brand-grad text-white" : "border border-slate-300 text-slate-600 hover:border-brand-400"
             }`}
           >
             {c || "All categories"}
@@ -60,7 +60,7 @@ export default function PracticePage() {
             key={t || "all"}
             onClick={() => setTopic(t)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium ${
-              topic === t ? "bg-brand-600 text-white" : "border border-slate-300 text-slate-600 hover:border-brand-400"
+              topic === t ? "brand-grad text-white" : "border border-slate-300 text-slate-600 hover:border-brand-400"
             }`}
           >
             {t || "All topics"}

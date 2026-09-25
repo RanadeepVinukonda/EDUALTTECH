@@ -172,7 +172,7 @@ export default function ResourcesPage() {
           <button
             type="submit"
             disabled={uploading || !title}
-            className="rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-40"
+            className="rounded-lg brand-grad px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-40"
           >
             {uploading ? "Uploading…" : "Upload"}
           </button>
@@ -190,7 +190,7 @@ export default function ResourcesPage() {
             </p>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full rounded-full bg-brand-600" style={{ width: `${usedPct}%` }} />
+            <div className="h-full rounded-full brand-grad" style={{ width: `${usedPct}%` }} />
           </div>
           <ul className="mt-4 divide-y divide-slate-100">
             {mine.items.map((r) => (

@@ -55,7 +55,7 @@ export default function AdminSettingsPage() {
           placeholder='JSON value, e.g. {"amount": 49900}'
           className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm focus:border-brand-500 focus:outline-none"
         />
-        <button onClick={save} className="rounded-xl bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700">
+        <button onClick={save} className="rounded-xl brand-grad px-5 py-2.5 font-semibold text-white hover:bg-brand-700">
           Save setting
         </button>
       </div>

@@ -114,7 +114,7 @@ export default function AdminCoursesPage() {
             <button
               type="submit"
               disabled={creating}
-              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+              className="rounded-lg brand-grad px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {creating ? "Creating…" : "Create course"}
             </button>

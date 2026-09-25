@@ -79,7 +79,7 @@ export function SiteHeader() {
             </>
           ) : (
             <span className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 font-display text-lg font-bold text-white">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg brand-grad font-display text-lg font-bold text-white">
                 E
               </span>
               <span className="font-display text-lg font-semibold text-slate-900">Edu-Alt-Tech</span>
@@ -101,8 +101,8 @@ export function SiteHeader() {
                 href={home}
                 className={
                   isActive(home, pathname)
-                    ? "hidden sm:inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white opacity-90"
-                    : "hidden sm:inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+                    ? "hidden sm:inline-block rounded-lg brand-grad px-4 py-2 text-sm font-semibold text-white opacity-90"
+                    : "hidden sm:inline-block rounded-lg brand-grad px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 }
               >
                 Dashboard
@@ -134,7 +134,7 @@ export function SiteHeader() {
               </Link>
               <Link
                 href="/register"
-                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+                className="rounded-lg brand-grad px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
               >
                 Sign up
               </Link>

@@ -77,7 +77,7 @@ function ResetForm() {
         <Link
           href="/login"
           replace
-          className="mt-5 inline-block rounded-xl bg-brand-600 px-6 py-2.5 font-semibold text-white hover:bg-brand-700"
+          className="mt-5 inline-block rounded-xl brand-grad px-6 py-2.5 font-semibold text-white hover:bg-brand-700"
         >
           Go to login
         </Link>
@@ -129,7 +129,7 @@ function ResetForm() {
         <button
           type="submit"
           disabled={!ready || saving}
-          className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {ready ? (saving ? "Updating…" : "Update password") : "Checking your link…"}
         </button>

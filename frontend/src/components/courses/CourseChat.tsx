@@ -97,7 +97,7 @@ export function CourseChat({ courseId }: { courseId: string }) {
           const mine = me?.id === m.sender.id;
           return (
             <li key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${mine ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-800"}`}>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${mine ? "brand-grad text-white" : "bg-slate-100 text-slate-800"}`}>
                 <p className={`text-xs font-semibold ${mine ? "text-brand-100" : "text-slate-500"}`}>{m.sender.name}</p>
                 <p className="text-sm whitespace-pre-wrap">{m.body}</p>
                 <p className={`mt-0.5 text-[10px] ${mine ? "text-brand-200" : "text-slate-400"}`}>
@@ -121,7 +121,7 @@ export function CourseChat({ courseId }: { courseId: string }) {
         <button
           type="submit"
           disabled={!body.trim()}
-          className="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="shrink-0 rounded-lg brand-grad px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           Send
         </button>

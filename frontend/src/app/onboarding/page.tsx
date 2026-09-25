@@ -93,7 +93,7 @@ export default function OnboardingPage() {
                   aria-pressed={active}
                   className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
                     active
-                      ? "border-brand-600 bg-brand-600 text-white"
+                      ? "border-brand-600 brand-grad text-white"
                       : "border-slate-300 text-slate-600 hover:border-brand-400 hover:text-brand-700"
                   }`}
                 >
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
         <button
           type="submit"
           disabled={busy || topics.length === 0 || education.trim().length < 2}
-          className="w-full rounded-xl bg-brand-600 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="w-full rounded-xl brand-grad py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {busy ? "Saving…" : "Finish setup"}
         </button>

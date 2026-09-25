@@ -136,7 +136,7 @@ const gallery: GalleryLogo[] = logos.length > 0
             <div className="fade-up fade-up-2 flex flex-wrap items-center gap-3 pt-2">
               <Link
                 href="/register"
-                className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700 active:scale-[0.98]"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-full brand-grad px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700 active:scale-[0.98]"
               >
                 Join free — teach or learn
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />

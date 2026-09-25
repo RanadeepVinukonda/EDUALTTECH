@@ -131,7 +131,7 @@ export default function AdminContentPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
-              tab === t ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              tab === t ? "brand-grad text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
             {t === "logos" ? "Logos (school / franchise)" : "Photos (website sections)"}
@@ -193,7 +193,7 @@ export default function AdminContentPage() {
             )}
             <button
               disabled={busy || uploading || !draft.url}
-              className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+              className="rounded-lg brand-grad px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {uploading ? "Uploading…" : busy ? "Saving…" : "Save"}
             </button>

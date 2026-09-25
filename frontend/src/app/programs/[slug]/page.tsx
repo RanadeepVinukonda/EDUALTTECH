@@ -23,7 +23,7 @@ export default function ProgramDetailPage() {
       <div className="mx-auto max-w-3xl px-4 py-24 text-center">
         <p className="font-display text-2xl font-bold text-ink-700">Not found</p>
         <p className="mt-2 text-slate-600">That program is not published (or never existed).</p>
-        <Link href="/programs" className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-brand-600 px-5 text-sm font-semibold text-white">
+        <Link href="/programs" className="mt-6 inline-flex h-11 items-center gap-2 rounded-full brand-grad px-5 text-sm font-semibold text-white">
           <ArrowLeft className="h-4 w-4" aria-hidden /> Back to programs
         </Link>
       </div>
@@ -53,7 +53,7 @@ export default function ProgramDetailPage() {
         {item.summary && <p>{item.summary}</p>}
         {item.body ? item.body.split("\n\n").map((p, i) => <p key={i}>{p}</p>) : null}
       </div>
-      <Link href="/contact" className="mt-10 inline-flex h-12 items-center justify-center rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 hover:bg-brand-700">
+      <Link href="/contact" className="mt-10 inline-flex h-12 items-center justify-center rounded-full brand-grad px-6 text-sm font-semibold text-white shadow-elev1 hover:bg-brand-700">
         Enquire about this program
       </Link>
     </div>

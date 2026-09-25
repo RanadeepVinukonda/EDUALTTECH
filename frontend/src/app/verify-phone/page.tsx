@@ -103,7 +103,7 @@ export default function VerifyPhonePage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+              className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {busy ? "Sending…" : "Send code"}
             </button>
@@ -126,7 +126,7 @@ export default function VerifyPhonePage() {
             <button
               type="submit"
               disabled={busy || otp.length !== 6}
-              className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+              className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {busy ? "Verifying…" : "Verify phone"}
             </button>

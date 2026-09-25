@@ -50,7 +50,7 @@ export default function AdminOrdersPage() {
             key={s || "all"}
             onClick={() => setStatus(s)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium ${
-              status === s ? "bg-brand-600 text-white" : "border border-slate-300 text-slate-600 hover:border-brand-400"
+              status === s ? "brand-grad text-white" : "border border-slate-300 text-slate-600 hover:border-brand-400"
             }`}
           >
             {s || "All statuses"}

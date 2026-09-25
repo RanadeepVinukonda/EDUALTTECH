@@ -126,7 +126,7 @@ function Messages() {
                 <button
                   onClick={() => setActive(c.id)}
                   className={`w-full rounded-xl p-3 text-left text-sm transition ${
-                    active === c.id ? "bg-brand-600 text-white" : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                    active === c.id ? "brand-grad text-white" : "bg-slate-50 text-slate-700 hover:bg-slate-100"
                   }`}
                 >
                   <span className="block font-semibold">{c.title ?? c.enrollment.course.title}</span>
@@ -153,7 +153,7 @@ function Messages() {
                 <div key={m.id} className={`flex ${m.senderId === meId ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                      m.senderId === meId ? "bg-brand-600 text-white" : "bg-white text-slate-800"
+                      m.senderId === meId ? "brand-grad text-white" : "bg-white text-slate-800"
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{m.body}</p>
@@ -174,7 +174,7 @@ function Messages() {
               />
               <button
                 disabled={sending || !draft.trim()}
-                className="rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+                className="rounded-xl brand-grad px-5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
               >
                 Send
               </button>

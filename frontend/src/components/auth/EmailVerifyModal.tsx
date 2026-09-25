@@ -89,7 +89,7 @@ export default function EmailVerifyModal({
             <button
               type="submit"
               disabled={sending}
-              className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+              className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {sending ? "Sending…" : "Send the code"}
             </button>
@@ -114,7 +114,7 @@ export default function EmailVerifyModal({
             <button
               type="submit"
               disabled={verifying || code.length !== 6}
-              className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+              className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {verifying ? "Checking…" : "Verify"}
             </button>

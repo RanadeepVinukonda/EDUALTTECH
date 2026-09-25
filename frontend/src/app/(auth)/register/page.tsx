@@ -165,7 +165,7 @@ export default function RegisterPage() {
               disabled={!emailValid || emailVerified}
               onClick={() => setShowVerify(true)}
               className={`shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${
-                emailVerified ? "bg-emerald-100 text-emerald-800" : "bg-brand-600 text-white hover:bg-brand-700"
+                emailVerified ? "bg-emerald-100 text-emerald-800" : "brand-grad text-white hover:bg-brand-700"
               }`}
             >
               {emailVerified ? "Verified ✓" : "Verify"}
@@ -280,7 +280,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading || !canSubmit}
-          className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {loading ? "Creating account…" : "Create account"}
         </button>

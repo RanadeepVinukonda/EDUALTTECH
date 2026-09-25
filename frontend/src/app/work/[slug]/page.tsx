@@ -23,7 +23,7 @@ export default function WorkDetailPage() {
       <div className="mx-auto max-w-3xl px-4 py-24 text-center">
         <p className="font-display text-2xl font-bold text-ink-700">Not found</p>
         <p className="mt-2 text-slate-600">That project is not published (or never existed).</p>
-        <Link href="/work" className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-brand-600 px-5 text-sm font-semibold text-white">
+        <Link href="/work" className="mt-6 inline-flex h-11 items-center gap-2 rounded-full brand-grad px-5 text-sm font-semibold text-white">
           <ArrowLeft className="h-4 w-4" aria-hidden /> Back to our work
         </Link>
       </div>

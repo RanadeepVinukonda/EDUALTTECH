@@ -59,7 +59,7 @@ export function GuideBubble() {
     <div className="fixed bottom-5 right-5 z-40">
       {open && (
         <div className="mb-3 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-          <header className="flex items-center justify-between bg-brand-600 px-4 py-3">
+          <header className="flex items-center justify-between brand-grad px-4 py-3">
             <p className="flex items-center gap-2 text-sm font-semibold text-white">
               <Compass className="h-4 w-4" /> {user ? `Hi ${firstName} — your guide` : "New around here?"}
             </p>
@@ -87,7 +87,7 @@ export function GuideBubble() {
                   </li>
                 </ol>
                 <div className="flex gap-2">
-                  <Link href="/register" onClick={() => setOpen(false)} className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-center font-semibold text-white hover:bg-brand-700">
+                  <Link href="/register" onClick={() => setOpen(false)} className="flex-1 rounded-lg brand-grad px-3 py-2 text-center font-semibold text-white hover:bg-brand-700">
                     Sign up
                   </Link>
                   <Link href="/courses" onClick={() => setOpen(false)} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-600 hover:border-brand-400">
@@ -152,7 +152,7 @@ export function GuideBubble() {
         onClick={() => setOpen((o) => !o)}
         aria-label="Open guide"
         aria-expanded={open}
-        className="ml-auto flex items-center gap-2 rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 hover:bg-brand-700"
+        className="ml-auto flex items-center gap-2 rounded-full brand-grad px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 hover:bg-brand-700"
       >
         <Compass className="h-5 w-5" />
         {open ? "Close" : "Guide"}

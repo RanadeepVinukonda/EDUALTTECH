@@ -90,7 +90,7 @@ export default function MentorApplyPage() {
       <div className="mx-auto max-w-2xl px-4 py-20 text-center">
         <h1 className="font-display text-2xl font-bold text-slate-900">Mentor a course</h1>
         <p className="mt-3 text-slate-600">Create an account first, then apply to mentor any course.</p>
-        <a href="/register" className="mt-6 inline-block rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700">
+        <a href="/register" className="mt-6 inline-block rounded-xl brand-grad px-6 py-3 font-semibold text-white hover:bg-brand-700">
           Create account
         </a>
       </div>
@@ -113,7 +113,7 @@ export default function MentorApplyPage() {
           {application.status === "INTERVIEW" && application.meetingLink && (
             <a
               href={application.meetingLink}
-              className="mt-6 inline-block rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700"
+              className="mt-6 inline-block rounded-xl brand-grad px-6 py-3 font-semibold text-white hover:bg-brand-700"
             >
               Join interview
             </a>
@@ -224,7 +224,7 @@ export default function MentorApplyPage() {
         <button
           type="submit"
           disabled={loading || !form.courseId}
-          className="w-full rounded-xl bg-brand-600 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="w-full rounded-xl brand-grad py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {loading ? "Submitting…" : "Submit application"}
         </button>

@@ -43,7 +43,7 @@ export default function AdminMessagesPage() {
               <div>
                 <p className="font-semibold text-slate-900">
                   {m.subject || "(no subject)"}
-                  {!m.isRead && <span className="ml-2 rounded-full bg-brand-600 px-2 py-0.5 text-xs text-white">NEW</span>}
+                  {!m.isRead && <span className="ml-2 rounded-full brand-grad px-2 py-0.5 text-xs text-white">NEW</span>}
                 </p>
                 <p className="text-sm text-slate-500">
                   {m.name} · {m.email}{m.school ? ` · ${m.school}` : ""}

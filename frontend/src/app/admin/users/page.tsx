@@ -98,7 +98,7 @@ export default function AdminUsersPage() {
         <button
           type="submit"
           disabled={busy}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="rounded-lg brand-grad px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {busy ? "Creating…" : "Create account"}
         </button>

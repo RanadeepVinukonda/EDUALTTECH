@@ -112,7 +112,7 @@ export default function AboutPage() {
               </ul>
               <Link
                 href="/register"
-                className="group mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700"
+                className="group mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-full brand-grad px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700"
               >
                 Join us — learn or teach
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
@@ -168,7 +168,7 @@ export default function AboutPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/register"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-brand-600 px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700"
+              className="inline-flex h-12 items-center justify-center rounded-full brand-grad px-6 text-sm font-semibold text-white shadow-elev1 transition-all hover:bg-brand-700"
             >
               Join free
             </Link>
