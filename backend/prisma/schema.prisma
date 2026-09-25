@@ -671,14 +671,21 @@ model OrganizationMembership {
 }
 
 // Reusable asset: logos, covers, screenshots, marketing media.
+// kind: image | video | logo | screenshot
+// category: for logos — SCHOOL | FRANCHISE | NGO | OTHER; for photos — SCHOOLS | DIGITAL | MARKETING
+// position: named homepage slot the photo fills (hero, proof-feature, …)
 model MediaAsset {
   id        String   @id @default(cuid())
   alt       String?
   url       String
-  kind      String   @default("image") // image | video | logo | screenshot
+  kind      String   @default("image")
+  category  String?
+  position  String?
   width     Int?
   height    Int?
   createdAt DateTime @default(now())
+
+  @@index([kind, category])
 }
 
 // Portfolio item shown on /work and /work/[slug].

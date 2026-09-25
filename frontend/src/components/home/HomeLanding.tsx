@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   ClipboardCheck,
@@ -10,13 +11,33 @@ import {
 } from "lucide-react";
 import AnimatedCounter from "./AnimatedCounter";
 import FeaturedSections from "./FeaturedSections";
+import { api } from "@/lib/api";
 
-const partnerLogos = [
+const STATIC_LOGOS = [
   { src: "/school_logos/genesis.png", alt: "Genesis school logo" },
   { src: "/school_logos/new_era.jpg", alt: "New Era school logo" },
   { src: "/school_logos/sharada_vidhyalaya.jpeg", alt: "Sharada Vidhyalaya school logo" },
-  { src: "/school_logos/mamasparsh.png", alt: "Mamasparsh logo", xl: true },
+  { src: "/school_logos/mamasparsh.png", alt: "Mamasparsh logo" },
 ];
+
+// Named photo slots on the homepage. Admin fills these via the Media manager.
+// Each key is a `position` value on a MediaAsset; fallback is the static file.
+const PHOTO_SLOTS = {
+  "hero-1": "/static/EAT3.jpg",
+  "hero-2": "/static/EAT4.jpg",
+  "proof-feature": "/static/EAT4.jpg",
+  "proof-1": "/static/EAT2.jpg",
+  "proof-2": "/static/EAT3.jpg",
+} as const;
+
+interface MediaItem {
+  id: string;
+  alt: string | null;
+  url: string;
+  kind: string;
+  category: string | null;
+  position: string | null;
+}
 
 const howItWorks = [
   {
@@ -48,28 +69,6 @@ const stats = [
   { value: 98, label: "Satisfaction Rate", suffix: "%" },
 ];
 
-const proofFeature = {
-  img: "/static/EAT4.jpg",
-  tag: "Student Build",
-  title: "AI attendance project by school students",
-  body: "Came from an idea in class → became a working prototype. Students shipped it, mentored end to end.",
-};
-
-const proofRows = [
-  {
-    img: "/static/EAT2.jpg",
-    tag: "Mentoring",
-    title: "Sector mentor coaching batch",
-    body: "Working professional + weekly sessions, real problems.",
-  },
-  {
-    img: "/static/EAT3.jpg",
-    tag: "School Work",
-    title: "Admissions portal for a school",
-    body: "One of our digital-solutions builds. See all services below.",
-  },
-];
-
 const institutionServices = [
   {
     title: "EduAltTech",
@@ -86,6 +85,26 @@ const institutionServices = [
 ];
 
 export default function HomeLanding() {
+  const [logos, setLogos] = useState<MediaItem[]>([]);
+  const [photos, setPhotos] = useState<MediaItem[]>([]);
+
+  useEffect(() => {
+    api<{ items: MediaItem[] }>("/cms/public/media?kind=logo")
+      .then((d) => setLogos(d.items))
+      .catch(() => setLogos([]));
+    api<{ items: MediaItem[] }>("/cms/public/media?kind=image")
+      .then((d) => setPhotos(d.items))
+      .catch(() => setPhotos([]));
+  }, []);
+
+  const gallery = logos.length > 0 ? logos.map((l) => ({ src: l.url, alt: l.alt ?? l.category ?? "Partner" })) : STATIC_LOGOS;
+  const img = (slot: keyof typeof PHOTO_SLOTS) => photos.find((p) => p.position === slot)?.url ?? PHOTO_SLOTS[slot];
+  const proofFeature = { img: img("proof-feature"), tag: "Student Build", title: "AI attendance project by school students", body: "Came from an idea in class → became a working prototype. Students shipped it, mentored end to end." };
+  const proofRows = [
+    { img: img("proof-1"), tag: "Mentoring", title: "Sector mentor coaching batch", body: "Working professional + weekly sessions, real problems." },
+    { img: img("proof-2"), tag: "School Work", title: "Admissions portal for a school", body: "One of our digital-solutions builds. See all services below." },
+  ];
+
   return (
     <div className="min-h-screen overflow-hidden bg-white text-slate-900">
       {/* Hero — marketplace first */}
@@ -133,7 +152,7 @@ export default function HomeLanding() {
               <div className="fade-up fade-up-2 h-80 overflow-hidden rounded-xl bg-slate-100 shadow-elev2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/static/EAT3.jpg"
+                  src={img("hero-1")}
                   loading="lazy"
                   decoding="async"
                   alt="EduAltTech classroom and training"
@@ -143,7 +162,7 @@ export default function HomeLanding() {
               <div className="fade-up fade-up-3 h-64 overflow-hidden rounded-xl bg-slate-100 shadow-elev1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/static/EAT4.jpg"
+                  src={img("hero-2")}
                   loading="lazy"
                   decoding="async"
                   alt="EduAltTech workshop and projects"
@@ -188,18 +207,15 @@ export default function HomeLanding() {
                     aria-hidden={copy === 1}
                     className="flex min-w-full items-center justify-around gap-x-10 px-10"
                   >
-                    {partnerLogos.map((logo) => (
-                      <div
-                        key={logo.src}
-                        className={`flex shrink-0 items-center justify-center ${logo.xl ? "h-36 w-44" : "h-24"}`}
-                      >
+                    {gallery.map((logo) => (
+                      <div key={logo.src} className="flex h-24 shrink-0 items-center justify-center">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={logo.src}
                           loading="lazy"
                           decoding="async"
                           alt={logo.alt}
-                          className={`object-contain mix-blend-multiply ${logo.xl ? "h-full w-full" : "max-h-20 w-auto"}`}
+                          className="max-h-20 w-auto object-contain mix-blend-multiply"
                         />
                       </div>
                     ))}

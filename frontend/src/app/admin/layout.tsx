@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Wrench, Menu, Users, LayoutDashboard, GraduationCap, ShoppingBag, LayoutGrid, Webhook, MessageSquare, Settings, LogOut, ChevronLeft } from "lucide-react";
+import { Wrench, Menu, Users, LayoutDashboard, GraduationCap, ShoppingBag, LayoutGrid, CreditCard, MessageSquare, Settings, LogOut, ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { api, clearAuth, getCachedUser, subscribeAuth, type User } from "@/lib/api";
@@ -19,20 +19,20 @@ const NAV: { section: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin/users", label: "Users", icon: Users },
       { href: "/admin/applications", label: "Applications", icon: GraduationCap },
-      { href: "/admin/courses", label: "Courses & mentors", icon: Wrench },
+      { href: "/admin/courses", label: "Courses", icon: Wrench },
     ],
   },
   {
     section: "Content",
     items: [
-      { href: "/admin/content", label: "Content", icon: LayoutGrid },
+      { href: "/admin/content", label: "Media & logos", icon: LayoutGrid },
       { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
     ],
   },
   {
     section: "Operations",
     items: [
-      { href: "/admin/webhooks", label: "Webhooks", icon: Webhook },
+      { href: "/admin/webhooks", label: "Payments log", icon: CreditCard },
       { href: "/admin/messages", label: "Messages", icon: MessageSquare },
       { href: "/admin/settings", label: "Settings", icon: Settings },
     ],
@@ -81,10 +81,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebar = (
     <nav className="flex h-full flex-col overflow-y-auto border-r border-slate-200 bg-white px-3 py-4">
       <div className="flex items-center justify-between px-2">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 font-display text-sm font-bold text-white">
-            E
-          </span>
+        <Link href="/admin" className="flex items-center gap-2" onClick={() => setOpen(false)}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo.png" alt="Edu Alt Tech" className="h-8 w-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
           <span className="font-display text-sm font-semibold text-slate-900">Admin</span>
         </Link>
         <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 lg:hidden">
@@ -158,12 +157,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden max-w-[160px] truncate text-sm font-medium text-slate-600 sm:inline">{user.name}</span>
-            <Link
-              href="/dashboard"
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-slate-400 hover:text-slate-900"
-            >
-              View site
-            </Link>
           </div>
         </header>
 

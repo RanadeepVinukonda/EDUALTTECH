@@ -40,7 +40,6 @@ export function SiteFooter() {
         <div>
           <p className="text-sm font-semibold text-white">For schools</p>
           <ul className="mt-3 space-y-2 text-sm text-ink-200">
-            <li><Link href="/organizations" className="hover:text-brand-300">Partner schools</Link></li>
             <li><Link href="/about" className="hover:text-brand-300">What we offer</Link></li>
             <li><Link href="/services" className="hover:text-brand-300">Services</Link></li>
             <li><Link href="/contact" className="hover:text-brand-300">Contact</Link></li>

@@ -19,19 +19,9 @@ interface CourseRow {
   _count: { enrollments: number };
 }
 
-interface MentorOption {
-  id: string;
-  name: string;
-  email: string;
-  _count: { mentorships: number };
-}
-
 export default function AdminCoursesPage() {
   const [courses, setCourses] = useState<CourseRow[]>([]);
-  const [mentors, setMentors] = useState<MentorOption[]>([]);
-  const [picks, setPicks] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
   const [newCourse, setNewCourse] = useState({
     title: "",
     description: "",
@@ -55,7 +45,7 @@ export default function AdminCoursesPage() {
       });
       void course;
       setNewCourse({ title: "", description: "", subject: "", gradeLevel: "", thumbnailUrl: "", isPublished: true });
-      setCreateMsg("Course created.");
+      setCreateMsg("Course created. Mentors are added when you approve their application.");
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the course");
@@ -68,47 +58,15 @@ export default function AdminCoursesPage() {
     api<{ courses: CourseRow[] }>("/admin/courses")
       .then((d) => setCourses(d.courses))
       .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load courses"));
-    api<{ mentors: MentorOption[] }>("/admin/mentors")
-      .then((d) => setMentors(d.mentors))
-      .catch(() => undefined);
   }, []);
 
   useEffect(load, [load]);
 
-  async function assign(courseId: string) {
-    const mentorId = picks[courseId];
-    if (!mentorId) return;
-    setBusy(courseId);
-    setError(null);
-    try {
-      await api(`/admin/courses/${courseId}/mentors`, { method: "POST", body: JSON.stringify({ mentorId }) });
-      setPicks((p) => ({ ...p, [courseId]: "" }));
-      load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not assign the mentor");
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function unassign(courseId: string, mentorId: string) {
-    setBusy(courseId);
-    setError(null);
-    try {
-      await api(`/admin/courses/${courseId}/mentors/${mentorId}`, { method: "DELETE" });
-      load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not remove the mentor");
-    } finally {
-      setBusy(null);
-    }
-  }
-
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-2xl font-bold text-slate-900">Courses & mentors</h1>
+      <h1 className="font-display text-2xl font-bold text-slate-900">Courses</h1>
       <p className="mt-1 text-sm text-slate-600">
-        A course can have several mentors. Mentors add their own chapters; learners pick who to learn from.
+        Create courses here. Mentors only get attached by approving their mentor application — no manual assignment.
       </p>
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
       {createMsg && <p className="mt-4 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{createMsg}</p>}
@@ -134,12 +92,6 @@ export default function AdminCoursesPage() {
             value={newCourse.gradeLevel}
             onChange={(e) => setNewCourse((s) => ({ ...s, gradeLevel: e.target.value }))}
             placeholder="Grade level"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-          />
-          <input
-            value={newCourse.thumbnailUrl}
-            onChange={(e) => setNewCourse((s) => ({ ...s, thumbnailUrl: e.target.value }))}
-            placeholder="Thumbnail URL (optional)"
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
           />
           <textarea
@@ -189,49 +141,18 @@ export default function AdminCoursesPage() {
               </div>
 
               <ul className="mt-4 space-y-2">
-                {course.mentors.length === 0 && <li className="text-sm text-slate-400">No mentors assigned.</li>}
+                {course.mentors.length === 0 && <li className="text-sm text-slate-400">No mentors yet — they join by applying.</li>}
                 {course.mentors.map((m) => (
                   <li key={m.id} className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-2 text-sm">
                     <span className="text-slate-700">
                       {m.mentor.name} <span className="text-slate-400">· {m.mentor.email}</span>
                     </span>
-                    <span className="flex items-center gap-4">
-                      <span className="text-xs text-slate-500">
-                        {m._count.chapters} chapters · {m._count.enrollments} learners
-                      </span>
-                      <button
-                        onClick={() => unassign(course.id, m.mentor.id)}
-                        disabled={busy === course.id}
-                        className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-40"
-                      >
-                        Remove
-                      </button>
+                    <span className="text-xs text-slate-500">
+                      {m._count.chapters} chapters · {m._count.enrollments} learners
                     </span>
                   </li>
                 ))}
               </ul>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <select
-                  value={picks[course.id] ?? ""}
-                  onChange={(e) => setPicks((p) => ({ ...p, [course.id]: e.target.value }))}
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                >
-                  <option value="">Assign a mentor…</option>
-                  {mentors.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} ({m.email})
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => assign(course.id)}
-                  disabled={busy === course.id || !picks[course.id]}
-                  className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
-                >
-                  {busy === course.id ? "Saving…" : "Assign mentor"}
-                </button>
-              </div>
             </article>
           ))}
         </div>

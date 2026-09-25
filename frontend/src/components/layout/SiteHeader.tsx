@@ -9,8 +9,6 @@ import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/a
 const GUEST_NAV = [
   { href: "/courses", label: "Learn" },
   { href: "/services", label: "Mentorship" },
-  { href: "/work", label: "Work" },
-  { href: "/organizations", label: "Schools" },
   { href: "/about", label: "Company" },
 ];
 

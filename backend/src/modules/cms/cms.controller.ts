@@ -86,6 +86,24 @@ export async function getPublished(req: Request, res: Response, next: NextFuncti
   }
 }
 
+// Public media: logos drive the homepage marquee, photos fill homepage slots.
+export async function listMedia(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { kind, category } = req.query as { kind?: string; category?: string };
+    const items = await prisma.mediaAsset.findMany({
+      where: {
+        ...(kind ? { kind } : {}),
+        ...(category ? { category } : {}),
+      },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, alt: true, url: true, kind: true, category: true, position: true },
+    });
+    res.json({ success: true, data: { items } });
+  } catch (err) {
+    next(err);
+  }
+}
+
 // ─────────────────────────── Admin CRUD ───────────────────────────
 
 export async function adminList(req: Request, res: Response, next: NextFunction): Promise<void> {

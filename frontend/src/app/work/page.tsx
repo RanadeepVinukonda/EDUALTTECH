@@ -94,9 +94,7 @@ export default function WorkPage() {
                 </div>
               </Link>
               {p.org && (
-                <Link href={`/organizations/${p.org.slug}`} className="mt-2 text-xs font-medium text-slate-500 hover:text-brand-600">
-                  {p.org.name} →
-                </Link>
+                <span className="mt-2 text-xs font-medium text-slate-500">{p.org.name}</span>
               )}
             </div>
           ))}

@@ -73,9 +73,7 @@ export default function ProgramsPage() {
                   </div>
                 </Link>
                 {p.organization && (
-                  <Link href={`/organizations/${p.organization.slug}`} className="mt-2 text-xs font-medium text-slate-500 hover:text-brand-600">
-                    {p.organization.name} →
-                  </Link>
+                  <span className="mt-2 text-xs font-medium text-slate-500">{p.organization.name}</span>
                 )}
               </div>
             ))}

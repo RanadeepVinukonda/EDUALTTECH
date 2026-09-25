@@ -42,13 +42,7 @@ export default function ProgramDetailPage() {
       )}
       <h1 className="mt-8 font-display text-4xl font-black leading-tight tracking-tighter text-ink-700 md:text-5xl">{item.title}</h1>
       <p className="mt-3 text-sm font-medium text-slate-500">
-        {item.organization ? (
-          <Link href={`/organizations/${item.organization.slug}`} className="text-brand-600 hover:underline">
-            {item.organization.name}
-          </Link>
-        ) : (
-          "Edu-Alt-Tech"
-        )}
+{item.organization ? item.organization.name : "Edu Alt Tech"}
       </p>
       {item.pricePaise != null && (
         <p className="mt-4 inline-block rounded-full bg-brand-50 px-4 py-1.5 text-sm font-bold text-brand-700">

@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import {
   listPublished,
   getPublished,
+  listMedia,
   adminList,
   adminCreate,
   adminUpdate,
@@ -42,10 +43,13 @@ router.post(
     try {
       const type = req.headers["content-type"]!.toLowerCase();
       const file = (req.headers["x-cms-file"] ?? "image").toString().slice(0, 80) || "image";
+      // Folders: logos → "school_logos", everything else → "media"
+      const folderRaw = (req.headers["x-cms-folder"] ?? "media").toString();
+      const folder = /^[a-z0-9_-]{1,50}$/.test(folderRaw) ? folderRaw : "media";
       const chunks: Buffer[] = [];
       for await (const chunk of req) chunks.push(chunk as Buffer);
       const body = Buffer.concat(chunks);
-      const path = storageKey("cms", file, type);
+      const path = storageKey(folder, file, type);
       await uploadFile(config.supabase.storageBucket, path, body, type);
       res.status(201).json({ success: true, data: { url: publicFileUrl(config.supabase.storageBucket, path) } });
     } catch (err) {
@@ -55,6 +59,7 @@ router.post(
 );
 
 // Public marketing pages
+router.get("/public/media", listMedia);
 router.get("/public/:kind", listPublished);
 router.get("/public/:kind/:slug", getPublished);
 

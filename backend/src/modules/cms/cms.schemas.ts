@@ -54,6 +54,8 @@ export const mediaAssetSchema = z.object({
   url: z.string().url(),
   alt: z.string().trim().max(200).optional(),
   kind: z.enum(["image", "video", "logo", "screenshot"]).default("image"),
+  category: z.string().trim().max(40).optional(),
+  position: z.string().trim().max(40).optional(),
   width: z.number().int().min(0).optional(),
   height: z.number().int().min(0).optional(),
 });

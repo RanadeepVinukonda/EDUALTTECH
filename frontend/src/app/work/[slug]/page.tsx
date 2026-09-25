@@ -39,9 +39,7 @@ export default function WorkDetailPage() {
       <span className="mt-6 block text-[10px] font-bold uppercase tracking-widest text-brand-600">{item.category}</span>
       <h1 className="mt-2 font-display text-4xl font-black leading-tight tracking-tighter text-ink-700 md:text-5xl">{item.title}</h1>
       {item.organization && (
-        <Link href={`/organizations/${item.organization.slug}`} className="mt-3 inline-block text-sm font-medium text-brand-600 hover:underline">
-          By {item.organization.name}
-        </Link>
+        <span className="mt-3 inline-block text-sm font-medium text-brand-600">By {item.organization.name}</span>
       )}
       {item.coverUrl && (
         /* eslint-disable-next-line @next/next/no-img-element */

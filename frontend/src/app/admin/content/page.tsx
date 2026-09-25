@@ -1,120 +1,104 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 
-type Kind = "work" | "programs" | "organizations" | "media";
+type Tab = "logos" | "photos";
 
-interface Row {
+interface MediaRow {
   id: string;
-  slug?: string;
-  title?: string;
-  name?: string;
-  summary?: string;
-  isPublished?: boolean;
-  pricePaise?: number | null;
-  category?: string;
-  url?: string;
-  alt?: string;
+  alt: string | null;
+  url: string;
+  kind: string;
+  category: string | null;
+  position: string | null;
 }
 
-const LABELS: Record<Kind, string> = {
-  work: "Work items",
-  programs: "Programs",
-  organizations: "Organizations",
-  media: "Media",
-};
+const LOGO_CATEGORIES = ["SCHOOL", "FRANCHISE", "NGO", "OTHER"] as const;
+const PHOTO_CATEGORIES = ["SCHOOLS", "DIGITAL", "MARKETING"] as const;
 
-interface Draft {
-  slug?: string;
-  title?: string;
-  summary?: string;
-  category?: string;
-  coverUrl?: string;
-  pricePaise?: string;
-  name?: string;
-  type?: string;
-  description?: string;
-  contactEmail?: string;
-  websiteUrl?: string;
-  logoUrl?: string;
-  url?: string;
-  alt?: string;
-  kind?: string;
-  organizationId?: string;
-  isPublished?: boolean;
-}
+// Homepage photo slots the admin can fill — mirrors HomeLanding.
+const POSITIONS = [
+  { value: "hero-1", label: "Hero — left image" },
+  { value: "hero-2", label: "Hero — right image" },
+  { value: "proof-feature", label: "Proof section — feature card" },
+  { value: "proof-1", label: "Proof section — row 1" },
+  { value: "proof-2", label: "Proof section — row 2" },
+] as const;
 
 export default function AdminContentPage() {
-  const [kind, setKind] = useState<Kind>("work");
-  const [rows, setRows] = useState<Row[]>([]);
+  const [tab, setTab] = useState<Tab>("logos");
+  const [rows, setRows] = useState<MediaRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [draft, setDraft] = useState({ alt: "", category: LOGO_CATEGORIES[0] as string, position: "", url: "" });
+  const [uploading, setUploading] = useState(false);
+
+  const kind = tab === "logos" ? "logo" : "image";
 
   const load = useCallback(() => {
-    api<{ items: Row[] }>(`/cms/admin/${kind}`)
-      .then((d) => setRows(d.items))
+    api<{ items: MediaRow[] }>("/cms/admin/media")
+      .then((d) => setRows(d.items.filter((m) => m.kind === kind)))
       .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load"));
   }, [kind]);
 
   useEffect(load, [load]);
 
-  const form = (() => {
-    if (kind === "work") return { slug: "", title: "", summary: "", category: "Digital Solution", coverUrl: "", isPublished: true };
-    if (kind === "programs") return { slug: "", title: "", summary: "", pricePaise: "", coverUrl: "", isPublished: true };
-    if (kind === "organizations") return { slug: "", name: "", type: "SCHOOL", summary: "", description: "", contactEmail: "", websiteUrl: "", logoUrl: "", isPublished: true };
-    return { url: "", alt: "", kind: "image" };
-  })();
-  const [draft, setDraft] = useState<Draft>(form as Draft);
-  const [orgs, setOrgs] = useState<Array<{ id: string; name: string }>>([]);
-
-  useEffect(() => setDraft(form), [kind]); // eslint-disable-line react-hooks/exhaustive-deps
-
   useEffect(() => {
-    if (kind === "work" || kind === "programs") {
-      api<{ items: Array<{ id: string; name: string }> }>("/cms/admin/organizations")
-        .then((d) => setOrgs(d.items))
-        .catch(() => setOrgs([]));
-    }
-  }, [kind]);
+    setDraft({ alt: "", category: tab === "logos" ? LOGO_CATEGORIES[0] : PHOTO_CATEGORIES[0], position: "", url: "" });
+  }, [tab]);
 
-  const create = async (e: FormEvent) => {
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const url = await api<{ url: string }>("/cms/admin/upload", {
+        method: "POST",
+        headers: { "Content-Type": file.type, "x-cms-file": file.name, "x-cms-folder": tab === "logos" ? "school_logos" : "site_photos" },
+        body: file,
+      }).then((d) => d.url);
+      setDraft((d) => ({ ...d, url }));
+      setMessage("Uploaded — press Save to add it.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setMessage(null);
     setError(null);
     try {
-      const body: Record<string, unknown> = { ...(draft as unknown as Record<string, unknown>) };
-      if (kind === "programs" && draft.pricePaise) body.pricePaise = Math.round(parseFloat(draft.pricePaise) * 100);
-      await api(`/cms/admin/${kind}`, { method: "POST", body: JSON.stringify(body) });
-      setMessage("Created.");
-      setDraft(form);
+      await api("/cms/admin/media", {
+        method: "POST",
+        body: JSON.stringify({
+          url: draft.url,
+          alt: draft.alt || (tab === "logos" ? draft.category : POSITIONS.find((p) => p.value === draft.position)?.label),
+          kind,
+          category: draft.category,
+          ...(tab === "photos" && draft.position ? { position: draft.position } : {}),
+        }),
+      });
+      setMessage("Saved.");
+      setDraft({ alt: "", category: tab === "logos" ? LOGO_CATEGORIES[0] : PHOTO_CATEGORIES[0], position: "", url: "" });
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create");
+      setError(err instanceof Error ? err.message : "Could not save");
     } finally {
       setBusy(false);
     }
   };
 
-  const toggle = async (row: Row) => {
-    if (row.isPublished === undefined) return;
+  const remove = async (row: MediaRow) => {
+    if (!confirm(`Delete this ${kind}?`)) return;
     try {
-      await api(`/cms/admin/${kind}/${row.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ isPublished: !row.isPublished }),
-      });
-      load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update");
-    }
-  };
-
-  const remove = async (row: Row) => {
-    if (!confirm(`Delete "${row.title || row.name || row.alt || row.slug}"?`)) return;
-    try {
-      await api(`/cms/admin/${kind}/${row.id}`, { method: "DELETE" });
+      await api(`/cms/admin/media/${row.id}`, { method: "DELETE" });
       setMessage("Deleted.");
       load();
     } catch (err) {
@@ -122,175 +106,123 @@ export default function AdminContentPage() {
     }
   };
 
-  const input = (key: string, label: string, required = false) => (
-    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-      {label}
-      <input
-        value={String((draft as unknown as Record<string, string>)[key] ?? "")}
-        required={required}
-        onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
-        className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
-      />
-    </label>
-  );
-
-  const orgSelect = () => (
-    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-      Organization (links to its school page)
-      <select
-        value={String((draft as unknown as Record<string, string>).organizationId ?? "")}
-        onChange={(e) => setDraft({ ...draft, organizationId: e.target.value })}
-        className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
-      >
-        <option value="">None</option>
-        {orgs.map((o) => (
-          <option key={o.id} value={o.id}>{o.name}</option>
-        ))}
-      </select>
-    </label>
-  );
-
-  const upload = (key: string, label: string) => (
-    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-      {label}
-      <input
-        type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          setBusy(true);
-          setMessage(null);
-          setError(null);
-          try {
-            const url = await api<{ url: string }>("/cms/admin/upload", {
-              method: "POST",
-              headers: { "Content-Type": file.type, "x-cms-file": file.name },
-              body: file,
-            }).then((d) => d.url);
-            setDraft({ ...draft, [key]: url });
-            setMessage(`Uploaded — URL filled in for ${label}.`);
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "Upload failed");
-          } finally {
-            setBusy(false);
-          }
-        }}
-        className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
-      />
-      <span className="text-[10px] text-slate-400">PNG / JPEG / WebP / GIF / AVIF, max 25MB.</span>
-    </label>
-  );
-
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="font-display text-2xl font-bold text-slate-900">Content manager</h1>
-      <p className="mt-1 text-sm text-slate-500">Work, programs, organizations and media shown on the public site.</p>
+    <main className="mx-auto max-w-6xl px-4 py-10">
+      <h1 className="font-display text-2xl font-bold text-slate-900">Media manager</h1>
+      <p className="mt-1 text-sm text-slate-500">
+        Upload school / franchise logos for the homepage scroller, and photos to fill website sections.
+      </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {(Object.keys(LABELS) as Kind[]).map((k) => (
+        {(["logos", "photos"] as Tab[]).map((t) => (
           <button
-            key={k}
-            onClick={() => setKind(k)}
+            key={t}
+            onClick={() => setTab(t)}
             className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
-              kind === k ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              tab === t ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            {LABELS[k]}
+            {t === "logos" ? "Logos (school / franchise)" : "Photos (website sections)"}
           </button>
         ))}
       </div>
 
-      <form onSubmit={create} className="mt-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2 lg:grid-cols-3">
-        {kind === "work" && (
-          <>
-            {input("title", "Title", true)}
-            {input("slug", "Slug", true)}
-            {input("summary", "Summary", true)}
-            {input("category", "Category")}
-            {upload("coverUrl", "Cover image")}
-            {orgSelect()}
-          </>
-        )}
-        {kind === "programs" && (
-          <>
-            {input("title", "Title", true)}
-            {input("slug", "Slug", true)}
-            {input("summary", "Summary", true)}
-            {input("pricePaise", "Price (₹)")}
-            {upload("coverUrl", "Cover image")}
-            {orgSelect()}
-          </>
-        )}
-        {kind === "organizations" && (
-          <>
-            {input("name", "Name", true)}
-            {input("slug", "Slug", true)}
-            {input("type", "Type (SCHOOL/PARTNER/FRANCHISE/NGO/OTHER)")}
-            {input("summary", "Summary")}
-            {input("description", "Description")}
-            {input("contactEmail", "Contact email")}
-            {input("websiteUrl", "Website URL")}
-            {upload("logoUrl", "Logo image")}
-          </>
-        )}
-        {kind === "media" && (
-          <>
-            {upload("url", "Image/Video file")}
-            {input("alt", "Alt text")}
-            {input("kind", "Kind (image/video/logo/screenshot)")}
-          </>
-        )}
-        <div className="flex items-end">
-          <button disabled={busy} className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50">
-            {busy ? "Saving…" : "Create"}
-          </button>
-        </div>
-      </form>
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <form onSubmit={save} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+            {tab === "logos" ? "Name (school / franchise)" : "Caption"}
+            <input
+              value={draft.alt}
+              onChange={(e) => setDraft((d) => ({ ...d, alt: e.target.value }))}
+              placeholder={tab === "logos" ? "e.g. Genesis Public School" : "e.g. Classroom session"}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+            Category
+            <select
+              value={draft.category}
+              onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value }))}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
+            >
+              {(tab === "logos" ? LOGO_CATEGORIES : PHOTO_CATEGORIES).map((c) => (
+                <option key={c} value={c}>{c.charAt(0) + c.slice(1).toLowerCase()}</option>
+              ))}
+            </select>
+          </label>
+          {tab === "photos" && (
+            <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+              Where on the site?
+              <select
+                value={draft.position}
+                onChange={(e) => setDraft((d) => ({ ...d, position: e.target.value }))}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
+              >
+                <option value="">Unplaced</option>
+                {POSITIONS.map((p) => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className={`flex flex-col gap-1 text-xs font-medium text-slate-600 ${tab === "logos" ? "" : "lg:col-span-1"}`}>
+            {tab === "logos" ? "Logo image" : "Photo"}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+              onChange={onFile}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
+            />
+          </label>
+          <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
+            {draft.url && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={draft.url} alt="preview" className="h-16 w-16 rounded-lg border border-slate-200 object-cover" />
+            )}
+            <button
+              disabled={busy || uploading || !draft.url}
+              className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+            >
+              {uploading ? "Uploading…" : busy ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </form>
+      </section>
 
       {message && <p className="mt-3 text-sm font-medium text-green-600">{message}</p>}
       {error && <p className="mt-3 text-sm font-medium text-red-600">{error}</p>}
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Title</th>
-              <th className="px-4 py-3">Slug</th>
-              <th className="px-4 py-3">Published</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-slate-400">Nothing here yet.</td>
-              </tr>
-            ) : (
-              rows.map((r) => (
-                <tr key={r.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-3 font-medium text-slate-800">{r.title || r.name || r.alt || "—"}</td>
-                  <td className="px-4 py-3 text-slate-500">{r.slug || r.id.slice(0, 8)}</td>
-                  <td className="px-4 py-3">
-                    {r.isPublished !== undefined && (
-                      <button
-                        onClick={() => toggle(r)}
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${r.isPublished ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}
-                      >
-                        {r.isPublished ? "Live" : "Draft"}
-                      </button>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button onClick={() => remove(r)} className="text-sm font-semibold text-red-600 hover:underline">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {rows.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500 sm:col-span-2 lg:col-span-3">
+            Nothing here yet — upload and save your first {tab === "logos" ? "logo" : "photo"}.
+          </p>
+        ) : (
+          rows.map((r) => (
+            <article key={r.id} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={r.url} alt={r.alt ?? ""} className="h-16 w-16 shrink-0 rounded-lg border border-slate-100 object-cover" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-slate-900">{r.alt ?? "Untitled"}</p>
+                <p className="text-xs text-slate-500">
+                  {r.category ?? "—"}
+                  {r.position ? ` · ${POSITIONS.find((p) => p.value === r.position)?.label ?? r.position}` : ""}
+                </p>
+              </div>
+              <button onClick={() => remove(r)} className="shrink-0 text-sm font-semibold text-red-600 hover:underline">
+                Delete
+              </button>
+            </article>
+          ))
+        )}
+      </div>
+
+      <div className="mt-10">
+        <h2 className="font-display text-lg font-bold text-slate-900">Site preview</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Live view of the homepage — refresh after saving to see your logo scroller and photo placement.
+        </p>
+        <iframe src="/" title="Website preview" className="mt-3 h-[600px] w-full rounded-2xl border border-slate-200 bg-white" />
       </div>
     </main>
   );
