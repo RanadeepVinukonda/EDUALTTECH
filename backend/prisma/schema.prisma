@@ -681,8 +681,6 @@ model MediaAsset {
   kind      String   @default("image")
   category  String?
   position  String?
-  width     Int?
-  height    Int?
   createdAt DateTime @default(now())
 
   @@index([kind, category])

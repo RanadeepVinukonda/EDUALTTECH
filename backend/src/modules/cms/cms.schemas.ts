@@ -56,8 +56,6 @@ export const mediaAssetSchema = z.object({
   kind: z.enum(["image", "video", "logo", "screenshot"]).default("image"),
   category: z.string().trim().max(40).optional(),
   position: z.string().trim().max(40).optional(),
-  width: z.number().int().min(0).optional(),
-  height: z.number().int().min(0).optional(),
 });
 
 export const conversationSendSchema = z.object({
