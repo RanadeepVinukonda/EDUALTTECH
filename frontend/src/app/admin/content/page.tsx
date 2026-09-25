@@ -28,6 +28,14 @@ const POSITIONS = [
   { value: "proof-2", label: "Proof section — row 2" },
 ] as const;
 
+const FALLBACKS = {
+  "hero-1": "/static/EAT3.jpg",
+  "hero-2": "/static/EAT4.jpg",
+  "proof-feature": "/static/EAT4.jpg",
+  "proof-1": "/static/EAT2.jpg",
+  "proof-2": "/static/EAT3.jpg",
+} as const;
+
 export default function AdminContentPage() {
   const [tab, setTab] = useState<Tab>("logos");
   const [rows, setRows] = useState<MediaRow[]>([]);
@@ -40,6 +48,16 @@ export default function AdminContentPage() {
   const [savingDim, setSavingDim] = useState<string | null>(null);
 
   const kind = tab === "logos" ? "logo" : "image";
+
+  // Live preview data — mirrors HomeLanding. Saves/resizes re-render these instantly.
+  const previewLogos = rows.filter((m) => m.kind === "logo");
+  const logoStyle = (logo: MediaRow): React.CSSProperties => {
+    const style: React.CSSProperties = {};
+    if (logo.height && logo.height > 0) style.height = `${logo.height}px`;
+    if (logo.width && logo.width > 0) style.width = `${logo.width}px`;
+    return style;
+  };
+  const photosFor = (slot: string) => rows.find((m) => m.kind === "image" && m.position === slot);
 
   const load = useCallback(() => {
     api<{ items: MediaRow[] }>("/cms/admin/media")
@@ -305,9 +323,51 @@ export default function AdminContentPage() {
       <div className="mt-10">
         <h2 className="font-display text-lg font-bold text-slate-900">Site preview</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Live view of the homepage — refresh after saving to see your logo scroller and photo placement.
+          Live view — saves and size edits apply instantly.
         </p>
-        <iframe src="/" title="Website preview" className="mt-3 h-[600px] w-full rounded-2xl border border-slate-200 bg-white" />
+        <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="mb-6 w-full text-center text-xs font-bold uppercase tracking-widest text-brand-600">
+            Trusted by schools across India
+          </div>
+          <div className="overflow-hidden">
+            <div className="marquee-track flex w-max">
+              {[0, 1].map((copy) => (
+                <div key={copy} aria-hidden={copy === 1} className="flex min-w-full items-center justify-around gap-x-10 px-10">
+                  {previewLogos.map((logo) => (
+                    <div key={logo.id} className="flex shrink-0 items-center justify-center" style={logoStyle(logo)}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={logo.url} alt={logo.alt ?? ""} className="max-h-24 w-auto object-contain mix-blend-multiply" />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {["hero-1", "hero-2", "proof-feature", "proof-1", "proof-2"].map((slot) => {
+            const photo = photosFor(slot);
+            return (
+              <div key={slot} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo?.url ?? FALLBACKS[slot as keyof typeof FALLBACKS]}
+                  alt={photo?.alt ?? slot}
+                  className="h-20 w-32 shrink-0 rounded-lg border border-slate-100 object-cover"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900">
+                    {POSITIONS.find((p) => p.value === slot)?.label ?? slot}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {photo ? `${photo.category ?? "Photo"} · uploaded` : "Fallback image showing"}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </main>
   );
