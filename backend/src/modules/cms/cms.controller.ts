@@ -57,7 +57,21 @@ export async function getPublished(req: Request, res: Response, next: NextFuncti
     } else if (kind === "programs") {
       item = await prisma.program.findFirst({ where: { slug, isPublished: true } });
     } else if (kind === "organizations") {
-      item = await prisma.organization.findFirst({ where: { slug, isPublished: true } });
+      item = await prisma.organization.findFirst({
+        where: { slug, isPublished: true },
+        include: {
+          workItems: {
+            where: { isPublished: true, publishedAt: { not: null } },
+            orderBy: { publishedAt: "desc" },
+            select: { id: true, slug: true, title: true, summary: true, category: true, coverUrl: true, publishedAt: true },
+          },
+          programs: {
+            where: { isPublished: true },
+            orderBy: { createdAt: "desc" },
+            select: { id: true, slug: true, title: true, summary: true, pricePaise: true, currency: true, coverUrl: true },
+          },
+        },
+      });
     }
     if (!item) throw ApiError.notFound("Not found");
     res.json({ success: true, data: { item } });
