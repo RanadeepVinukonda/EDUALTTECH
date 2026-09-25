@@ -96,7 +96,7 @@ export async function listMedia(req: Request, res: Response, next: NextFunction)
         ...(category ? { category } : {}),
       },
       orderBy: { createdAt: "asc" },
-      select: { id: true, alt: true, url: true, kind: true, category: true, position: true },
+      select: { id: true, alt: true, url: true, kind: true, category: true, position: true, width: true, height: true },
     });
     res.json({ success: true, data: { items } });
   } catch (err) {

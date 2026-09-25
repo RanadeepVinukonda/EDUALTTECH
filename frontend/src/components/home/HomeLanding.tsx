@@ -37,6 +37,8 @@ interface MediaItem {
   kind: string;
   category: string | null;
   position: string | null;
+  width: number | null;
+  height: number | null;
 }
 
 const howItWorks = [
@@ -97,7 +99,22 @@ export default function HomeLanding() {
       .catch(() => setPhotos([]));
   }, []);
 
-  const gallery = logos.length > 0 ? logos.map((l) => ({ src: l.url, alt: l.alt ?? l.category ?? "Partner" })) : STATIC_LOGOS;
+  interface GalleryLogo {
+  src: string;
+  alt: string;
+  width?: number | null;
+  height?: number | null;
+}
+
+const gallery: GalleryLogo[] = logos.length > 0
+    ? logos.map((l) => ({ src: l.url, alt: l.alt ?? l.category ?? "Partner", width: l.width, height: l.height }))
+    : STATIC_LOGOS;
+  const logoStyle = (l: GalleryLogo): React.CSSProperties => {
+    const style: React.CSSProperties = {};
+    if (l.height && l.height > 0) style.height = `${l.height}px`;
+    if (l.width && l.width > 0) style.width = `${l.width}px`;
+    return style;
+  };
   const img = (slot: keyof typeof PHOTO_SLOTS) => photos.find((p) => p.position === slot)?.url ?? PHOTO_SLOTS[slot];
   const proofFeature = { img: img("proof-feature"), tag: "Student Build", title: "AI attendance project by school students", body: "Came from an idea in class → became a working prototype. Students shipped it, mentored end to end." };
   const proofRows = [
@@ -208,14 +225,18 @@ export default function HomeLanding() {
                     className="flex min-w-full items-center justify-around gap-x-10 px-10"
                   >
                     {gallery.map((logo) => (
-                      <div key={logo.src} className="flex h-24 shrink-0 items-center justify-center">
+                      <div
+                        key={logo.src}
+                        className="flex shrink-0 items-center justify-center"
+                        style={logoStyle(logo)}
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={logo.src}
                           loading="lazy"
                           decoding="async"
                           alt={logo.alt}
-                          className="max-h-20 w-auto object-contain mix-blend-multiply"
+                          className="max-h-24 w-auto object-contain mix-blend-multiply"
                         />
                       </div>
                     ))}

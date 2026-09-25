@@ -12,6 +12,8 @@ interface MediaRow {
   kind: string;
   category: string | null;
   position: string | null;
+  width: number | null;
+  height: number | null;
 }
 
 const LOGO_CATEGORIES = ["SCHOOL", "FRANCHISE", "NGO", "OTHER"] as const;
@@ -32,8 +34,10 @@ export default function AdminContentPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [draft, setDraft] = useState({ alt: "", category: LOGO_CATEGORIES[0] as string, position: "", url: "" });
+  const [draft, setDraft] = useState({ alt: "", category: LOGO_CATEGORIES[0] as string, position: "", url: "", width: "", height: "" });
   const [uploading, setUploading] = useState(false);
+  const [editDim, setEditDim] = useState<Record<string, { width: string; height: string }>>({});
+  const [savingDim, setSavingDim] = useState<string | null>(null);
 
   const kind = tab === "logos" ? "logo" : "image";
 
@@ -46,7 +50,7 @@ export default function AdminContentPage() {
   useEffect(load, [load]);
 
   useEffect(() => {
-    setDraft({ alt: "", category: tab === "logos" ? LOGO_CATEGORIES[0] : PHOTO_CATEGORIES[0], position: "", url: "" });
+    setDraft({ alt: "", category: tab === "logos" ? LOGO_CATEGORIES[0] : PHOTO_CATEGORIES[0], position: "", url: "", width: "", height: "" });
   }, [tab]);
 
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,15 +87,36 @@ export default function AdminContentPage() {
           kind,
           category: draft.category,
           ...(tab === "photos" && draft.position ? { position: draft.position } : {}),
+          ...(tab === "logos" && draft.width ? { width: Number(draft.width) } : {}),
+          ...(tab === "logos" && draft.height ? { height: Number(draft.height) } : {}),
         }),
       });
       setMessage("Saved.");
-      setDraft({ alt: "", category: tab === "logos" ? LOGO_CATEGORIES[0] : PHOTO_CATEGORIES[0], position: "", url: "" });
+      setDraft({ alt: "", category: tab === "logos" ? LOGO_CATEGORIES[0] : PHOTO_CATEGORIES[0], position: "", url: "", width: "", height: "" });
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const saveDims = async (row: MediaRow) => {
+    const d = editDim[row.id];
+    if (!d) return;
+    setSavingDim(row.id);
+    try {
+      const data: { width?: number; height?: number } = {};
+      if (d.width !== "") data.width = Number(d.width);
+      if (d.height !== "") data.height = Number(d.height);
+      await api(`/cms/admin/media/${row.id}`, { method: "PATCH", body: JSON.stringify(data) });
+      setMessage("Size updated — refresh the preview.");
+      setEditDim((m) => { const n = { ...m }; delete n[row.id]; return n; });
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update size");
+    } finally {
+      setSavingDim(null);
     }
   };
 
@@ -165,6 +190,32 @@ export default function AdminContentPage() {
               </select>
             </label>
           )}
+          {tab === "logos" && (
+            <>
+              <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+                Display width (px, optional)
+                <input
+                  type="number"
+                  min={0}
+                  value={draft.width}
+                  onChange={(e) => setDraft((d) => ({ ...d, width: e.target.value }))}
+                  placeholder="e.g. 160"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+                Display height (px, optional)
+                <input
+                  type="number"
+                  min={0}
+                  value={draft.height}
+                  onChange={(e) => setDraft((d) => ({ ...d, height: e.target.value }))}
+                  placeholder="e.g. 60"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
+                />
+              </label>
+            </>
+          )}
           <label className={`flex flex-col gap-1 text-xs font-medium text-slate-600 ${tab === "logos" ? "" : "lg:col-span-1"}`}>
             {tab === "logos" ? "Logo image" : "Photo"}
             <input
@@ -201,13 +252,47 @@ export default function AdminContentPage() {
           rows.map((r) => (
             <article key={r.id} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={r.url} alt={r.alt ?? ""} className="h-16 w-16 shrink-0 rounded-lg border border-slate-100 object-cover" />
+              <img
+                src={r.url}
+                alt={r.alt ?? ""}
+                style={r.width || r.height ? { width: r.width ?? undefined, height: r.height ?? undefined } : undefined}
+                className="max-h-16 max-w-16 shrink-0 rounded-lg border border-slate-100 object-contain"
+              />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-slate-900">{r.alt ?? "Untitled"}</p>
                 <p className="text-xs text-slate-500">
                   {r.category ?? "—"}
                   {r.position ? ` · ${POSITIONS.find((p) => p.value === r.position)?.label ?? r.position}` : ""}
+                  {r.kind === "logo" && (r.width ?? r.height) ? ` · ${r.width ?? "auto"}×${r.height ?? "auto"}px` : ""}
                 </p>
+                {tab === "logos" && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="W"
+                      value={editDim[r.id]?.width ?? r.width ?? ""}
+                      onChange={(e) => setEditDim((m) => ({ ...m, [r.id]: { ...(m[r.id] ?? { width: String(r.width ?? ""), height: String(r.height ?? "") }), width: e.target.value } }))}
+                      className="w-16 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-900 focus:border-brand-500 focus:outline-none"
+                    />
+                    <span className="text-xs text-slate-400">×</span>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="H"
+                      value={editDim[r.id]?.height ?? r.height ?? ""}
+                      onChange={(e) => setEditDim((m) => ({ ...m, [r.id]: { ...(m[r.id] ?? { width: String(r.width ?? ""), height: String(r.height ?? "") }), height: e.target.value } }))}
+                      className="w-16 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-900 focus:border-brand-500 focus:outline-none"
+                    />
+                    <button
+                      onClick={() => saveDims(r)}
+                      disabled={savingDim === r.id || !editDim[r.id]}
+                      className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200 disabled:opacity-50"
+                    >
+                      {savingDim === r.id ? "Saving…" : "Save"}
+                    </button>
+                  </div>
+                )}
               </div>
               <button onClick={() => remove(r)} className="shrink-0 text-sm font-semibold text-red-600 hover:underline">
                 Delete
