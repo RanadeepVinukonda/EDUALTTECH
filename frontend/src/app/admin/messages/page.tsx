@@ -33,7 +33,7 @@ export default function AdminMessagesPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-2xl font-bold text-slate-900">Contact messages</h1>
+      <h1 className="font-display text-2xl font-bold text-ink-700">Contact messages</h1>
       {error && <p className="mt-4 text-red-600">{error}</p>}
       <div className="mt-6 space-y-3">
         {messages.length === 0 && <p className="text-slate-500">Inbox is empty.</p>}

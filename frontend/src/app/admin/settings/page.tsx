@@ -38,7 +38,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-2xl font-bold text-slate-900">Platform settings</h1>
+      <h1 className="font-display text-2xl font-bold text-ink-700">Platform settings</h1>
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-red-700">{error}</p>}
 
       <div className="mt-6 space-y-3 rounded-2xl border border-slate-200 bg-white p-6">

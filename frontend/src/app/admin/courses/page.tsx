@@ -64,7 +64,7 @@ export default function AdminCoursesPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-2xl font-bold text-slate-900">Courses</h1>
+      <h1 className="font-display text-2xl font-bold text-ink-700">Courses</h1>
       <p className="mt-1 text-sm text-slate-600">
         Create courses here. Mentors only get attached by approving their mentor application — no manual assignment.
       </p>
@@ -72,7 +72,7 @@ export default function AdminCoursesPage() {
       {createMsg && <p className="mt-4 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{createMsg}</p>}
 
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-display text-lg font-semibold text-slate-900">Create a course</h2>
+        <h2 className="font-display text-lg font-semibold text-ink-700">Create a course</h2>
         <form onSubmit={createCourse} className="mt-3 grid gap-3 sm:grid-cols-2">
           <input
             required

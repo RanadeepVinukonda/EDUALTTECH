@@ -59,7 +59,7 @@ export default function AdminApplicationsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-2xl font-bold text-slate-900">Mentor applications</h1>
+      <h1 className="font-display text-2xl font-bold text-ink-700">Mentor applications</h1>
       <p className="mt-1 text-sm text-slate-600">
         Review each application, schedule an interview, then approve to attach the mentor to their course.
       </p>

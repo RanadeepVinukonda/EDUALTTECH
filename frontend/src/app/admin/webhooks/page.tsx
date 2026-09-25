@@ -23,7 +23,7 @@ export default function AdminWebhooksPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-3xl font-bold text-slate-900">Webhook events</h1>
+      <h1 className="font-display text-3xl font-bold text-ink-700">Webhook events</h1>
       <p className="mt-1 text-slate-600">
         Append-only Razorpay webhook ledger. Every event is stored once and never mutated.
       </p>

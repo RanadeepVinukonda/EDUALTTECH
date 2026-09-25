@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/logo.png" alt="Edu Alt Tech" className="h-8 w-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-          <span className="font-display text-sm font-semibold text-slate-900">Admin</span>
+          <span className="font-display text-sm font-semibold text-ink-700">Admin</span>
         </Link>
         <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 lg:hidden">
           <ChevronLeft className="h-4 w-4" />
@@ -148,19 +148,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <div className="lg:pl-60">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6">
           <div className="flex items-center gap-2">
-            <button onClick={() => setOpen(true)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden">
+            <button onClick={() => setOpen(true)} className="rounded-lg p-2 text-brand-700 hover:bg-brand-50 lg:hidden">
               <Menu className="h-5 w-5" />
             </button>
-            <h1 className="font-display text-base font-bold text-slate-900">{current?.label ?? "Admin"}</h1>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/logo.png" alt="Edu Alt Tech" className="h-8 w-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            <h1 className="font-display text-base font-bold text-ink-700">{current?.label ?? "Admin"}</h1>
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden max-w-[160px] truncate text-sm font-medium text-slate-600 sm:inline">{user.name}</span>
           </div>
         </header>
 
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="grow p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

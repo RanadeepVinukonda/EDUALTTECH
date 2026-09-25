@@ -36,7 +36,7 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-3xl font-bold text-slate-900">Admin dashboard</h1>
+      <h1 className="font-display text-3xl font-bold text-ink-700">Admin dashboard</h1>
       <p className="mt-1 text-slate-600">Courses, users, enrollments, payments and messages — the whole platform.</p>
 
       {error && <div className="mt-8 rounded-xl bg-red-50 p-4 text-red-700">{error}</div>}
@@ -74,7 +74,7 @@ function Stat({ label, value, highlight }: { label: string; value: number; highl
   return (
     <div className={`rounded-2xl border p-5 ${highlight ? "border-brand-300 bg-m3-surface-alt" : "border-slate-200 bg-white"}`}>
       <p className="text-sm text-slate-500">{label}</p>
-      <p className="font-display mt-1 text-3xl font-bold text-slate-900">{value}</p>
+      <p className="font-display mt-1 text-3xl font-bold text-ink-700">{value}</p>
     </div>
   );
 }
@@ -82,7 +82,7 @@ function Stat({ label, value, highlight }: { label: string; value: number; highl
 function AdminLinkCard({ href, title, body }: { href: string; title: string; body: string }) {
   return (
     <Link href={href} className="rounded-2xl border border-slate-200 bg-white p-6 hover:border-brand-300 hover:shadow-sm">
-      <p className="font-display text-lg font-semibold text-slate-900">{title}</p>
+      <p className="font-display text-lg font-semibold text-ink-700">{title}</p>
       <p className="mt-1 text-sm text-slate-600">{body}</p>
     </Link>
   );

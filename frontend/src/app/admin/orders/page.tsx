@@ -41,7 +41,7 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-3xl font-bold text-slate-900">Orders</h1>
+      <h1 className="font-display text-3xl font-bold text-ink-700">Orders</h1>
       <p className="mt-1 text-slate-600">Razorpay order ledger — paid, failed, refunded and in flight.</p>
 
       <div className="mt-6 flex flex-wrap gap-2">
