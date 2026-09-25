@@ -49,32 +49,35 @@ export default function ProgramsPage() {
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((p) => (
-              <Link
-                key={p.id}
-                href={`/programs/${p.slug}`}
-                className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-elev1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev3"
-              >
-                {p.coverUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={p.coverUrl} alt={p.title} loading="lazy" decoding="async" className="h-48 w-full object-cover" />
-                ) : (
-                  <div className="flex h-48 w-full items-center justify-center bg-gradient-to-br from-brand-100 to-brand-50 font-display text-4xl font-black text-brand-400">
-                    {p.title[0]?.toUpperCase()}
-                  </div>
-                )}
-                <div className="flex flex-1 flex-col gap-2 p-6">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-600">
-                    {p.organization?.name ?? "Edu-Alt-Tech"}
-                  </span>
-                  <h2 className="font-display text-xl font-bold leading-snug text-ink-700">{p.title}</h2>
-                  <p className="text-sm leading-relaxed text-slate-600">{p.summary}</p>
-                  {p.pricePaise != null && (
-                    <p className="mt-auto pt-3 text-sm font-bold text-ink-700">
-                      {p.currency} {(p.pricePaise / 100).toLocaleString("en-IN")}
-                    </p>
+              <div key={p.id} className="flex flex-col">
+                <Link
+                  href={`/programs/${p.slug}`}
+                  className="group flex flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-elev1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev3"
+                >
+                  {p.coverUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={p.coverUrl} alt={p.title} loading="lazy" decoding="async" className="h-48 w-full object-cover" />
+                  ) : (
+                    <div className="flex h-48 w-full items-center justify-center bg-gradient-to-br from-brand-100 to-brand-50 font-display text-4xl font-black text-brand-400">
+                      {p.title[0]?.toUpperCase()}
+                    </div>
                   )}
-                </div>
-              </Link>
+                  <div className="flex flex-1 flex-col gap-2 p-6">
+                    <h2 className="font-display text-xl font-bold leading-snug text-ink-700">{p.title}</h2>
+                    <p className="text-sm leading-relaxed text-slate-600">{p.summary}</p>
+                    {p.pricePaise != null && (
+                      <p className="mt-auto pt-3 text-sm font-bold text-ink-700">
+                        {p.currency} {(p.pricePaise / 100).toLocaleString("en-IN")}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+                {p.organization && (
+                  <Link href={`/organizations/${p.organization.slug}`} className="mt-2 text-xs font-medium text-slate-500 hover:text-brand-600">
+                    {p.organization.name} →
+                  </Link>
+                )}
+              </div>
             ))}
           </div>
         )}

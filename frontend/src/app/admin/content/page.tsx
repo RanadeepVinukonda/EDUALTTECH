@@ -25,7 +25,25 @@ const LABELS: Record<Kind, string> = {
   media: "Media",
 };
 
-const roles = ["ADMIN"];
+interface Draft {
+  slug?: string;
+  title?: string;
+  summary?: string;
+  category?: string;
+  coverUrl?: string;
+  pricePaise?: string;
+  name?: string;
+  type?: string;
+  description?: string;
+  contactEmail?: string;
+  websiteUrl?: string;
+  logoUrl?: string;
+  url?: string;
+  alt?: string;
+  kind?: string;
+  organizationId?: string;
+  isPublished?: boolean;
+}
 
 export default function AdminContentPage() {
   const [kind, setKind] = useState<Kind>("work");
@@ -45,12 +63,21 @@ export default function AdminContentPage() {
   const form = (() => {
     if (kind === "work") return { slug: "", title: "", summary: "", category: "Digital Solution", coverUrl: "", isPublished: true };
     if (kind === "programs") return { slug: "", title: "", summary: "", pricePaise: "", coverUrl: "", isPublished: true };
-    if (kind === "organizations") return { slug: "", name: "", type: "SCHOOL", summary: "", isPublished: true };
+    if (kind === "organizations") return { slug: "", name: "", type: "SCHOOL", summary: "", description: "", contactEmail: "", websiteUrl: "", logoUrl: "", isPublished: true };
     return { url: "", alt: "", kind: "image" };
   })();
-  const [draft, setDraft] = useState(form);
+  const [draft, setDraft] = useState<Draft>(form as Draft);
+  const [orgs, setOrgs] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => setDraft(form), [kind]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (kind === "work" || kind === "programs") {
+      api<{ items: Array<{ id: string; name: string }> }>("/cms/admin/organizations")
+        .then((d) => setOrgs(d.items))
+        .catch(() => setOrgs([]));
+    }
+  }, [kind]);
 
   const create = async (e: FormEvent) => {
     e.preventDefault();
@@ -107,6 +134,54 @@ export default function AdminContentPage() {
     </label>
   );
 
+  const orgSelect = () => (
+    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+      Organization (links to its school page)
+      <select
+        value={String((draft as unknown as Record<string, string>).organizationId ?? "")}
+        onChange={(e) => setDraft({ ...draft, organizationId: e.target.value })}
+        className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
+      >
+        <option value="">None</option>
+        {orgs.map((o) => (
+          <option key={o.id} value={o.id}>{o.name}</option>
+        ))}
+      </select>
+    </label>
+  );
+
+  const upload = (key: string, label: string) => (
+    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+      {label}
+      <input
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setBusy(true);
+          setMessage(null);
+          setError(null);
+          try {
+            const url = await api<{ url: string }>("/cms/admin/upload", {
+              method: "POST",
+              headers: { "Content-Type": file.type, "x-cms-file": file.name },
+              body: file,
+            }).then((d) => d.url);
+            setDraft({ ...draft, [key]: url });
+            setMessage(`Uploaded — URL filled in for ${label}.`);
+          } catch (err) {
+            setError(err instanceof Error ? err.message : "Upload failed");
+          } finally {
+            setBusy(false);
+          }
+        }}
+        className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+      />
+      <span className="text-[10px] text-slate-400">PNG / JPEG / WebP / GIF / AVIF, max 25MB.</span>
+    </label>
+  );
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <h1 className="font-display text-2xl font-bold text-slate-900">Content manager</h1>
@@ -133,7 +208,8 @@ export default function AdminContentPage() {
             {input("slug", "Slug", true)}
             {input("summary", "Summary", true)}
             {input("category", "Category")}
-            {input("coverUrl", "Cover URL")}
+            {upload("coverUrl", "Cover image")}
+            {orgSelect()}
           </>
         )}
         {kind === "programs" && (
@@ -142,7 +218,8 @@ export default function AdminContentPage() {
             {input("slug", "Slug", true)}
             {input("summary", "Summary", true)}
             {input("pricePaise", "Price (₹)")}
-            {input("coverUrl", "Cover URL")}
+            {upload("coverUrl", "Cover image")}
+            {orgSelect()}
           </>
         )}
         {kind === "organizations" && (
@@ -151,12 +228,15 @@ export default function AdminContentPage() {
             {input("slug", "Slug", true)}
             {input("type", "Type (SCHOOL/PARTNER/FRANCHISE/NGO/OTHER)")}
             {input("summary", "Summary")}
+            {input("description", "Description")}
+            {input("contactEmail", "Contact email")}
             {input("websiteUrl", "Website URL")}
+            {upload("logoUrl", "Logo image")}
           </>
         )}
         {kind === "media" && (
           <>
-            {input("url", "URL", true)}
+            {upload("url", "Image/Video file")}
             {input("alt", "Alt text")}
             {input("kind", "Kind (image/video/logo/screenshot)")}
           </>

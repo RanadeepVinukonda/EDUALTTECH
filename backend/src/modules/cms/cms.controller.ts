@@ -53,9 +53,15 @@ export async function getPublished(req: Request, res: Response, next: NextFuncti
     const slug = req.params.slug as string;
     let item: unknown = null;
     if (kind === "work") {
-      item = await prisma.workItem.findFirst({ where: { slug, isPublished: true } });
+      item = await prisma.workItem.findFirst({
+        where: { slug, isPublished: true },
+        include: { organization: { select: { name: true, slug: true } } },
+      });
     } else if (kind === "programs") {
-      item = await prisma.program.findFirst({ where: { slug, isPublished: true } });
+      item = await prisma.program.findFirst({
+        where: { slug, isPublished: true },
+        include: { organization: { select: { name: true, slug: true } } },
+      });
     } else if (kind === "organizations") {
       item = await prisma.organization.findFirst({
         where: { slug, isPublished: true },

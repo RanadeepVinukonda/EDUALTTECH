@@ -24,6 +24,7 @@ const FALLBACK = [
     title: "Sector mentor coaching batch",
     summary: "Working professionals run weekly sessions with students on real problems — not textbook theory.",
     coverUrl: "/static/EAT2.jpg",
+    org: null,
   },
   {
     slug: "school-admissions-portal",
@@ -31,6 +32,7 @@ const FALLBACK = [
     title: "Admissions portal for a school",
     summary: "A school admissions portal designed, built and deployed — enquiry capture to seat confirmation.",
     coverUrl: "/static/EAT3.jpg",
+    org: null,
   },
   {
     slug: "ai-attendance-project",
@@ -38,8 +40,9 @@ const FALLBACK = [
     title: "AI attendance project by school students",
     summary: "Started as an idea in class, shipped as a working prototype — mentored end to end by our team.",
     coverUrl: "/static/EAT4.jpg",
+    org: null,
   },
-];
+] as const;
 
 export default function WorkPage() {
   const [items, setItems] = useState<WorkItem[]>([]);
@@ -52,7 +55,7 @@ export default function WorkPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const shown = items.length > 0 ? items.map((i) => ({ slug: i.slug, category: i.category, title: i.title, summary: i.summary, coverUrl: i.coverUrl })) : FALLBACK;
+  const shown = items.length > 0 ? items.map((i) => ({ slug: i.slug, category: i.category, title: i.title, summary: i.summary, coverUrl: i.coverUrl, org: i.organization })) : FALLBACK;
 
   return (
     <div className="relative overflow-hidden bg-white px-6 pb-32 pt-16">
@@ -71,25 +74,31 @@ export default function WorkPage() {
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((p) => (
-            <Link
-              key={p.slug}
-              href={items.length > 0 ? `/work/${p.slug}` : "#"}
-              className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-elev1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev3"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={p.coverUrl || "/static/EAT2.jpg"}
-                alt={p.title}
-                loading="lazy"
-                decoding="async"
-                className="h-56 w-full object-cover"
-              />
-              <div className="flex flex-1 flex-col gap-2 p-6">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-600">{p.category}</span>
-                <h2 className="font-display text-xl font-bold leading-snug text-ink-700">{p.title}</h2>
-                <p className="text-sm leading-relaxed text-slate-600">{p.summary}</p>
-              </div>
-            </Link>
+            <div key={p.slug} className="flex flex-col">
+              <Link
+                href={items.length > 0 ? `/work/${p.slug}` : "#"}
+                className="group flex flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-elev1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev3"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={p.coverUrl || "/static/EAT2.jpg"}
+                  alt={p.title}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-56 w-full object-cover"
+                />
+                <div className="flex flex-1 flex-col gap-2 p-6">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-600">{p.category}</span>
+                  <h2 className="font-display text-xl font-bold leading-snug text-ink-700">{p.title}</h2>
+                  <p className="text-sm leading-relaxed text-slate-600">{p.summary}</p>
+                </div>
+              </Link>
+              {p.org && (
+                <Link href={`/organizations/${p.org.slug}`} className="mt-2 text-xs font-medium text-slate-500 hover:text-brand-600">
+                  {p.org.name} →
+                </Link>
+              )}
+            </div>
           ))}
         </div>
 
