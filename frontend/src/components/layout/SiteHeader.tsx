@@ -20,24 +20,12 @@ const USER_NAV = [
   { href: "/messages", label: "Messages" },
 ];
 
-const ADMIN_NAV = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/applications", label: "Applications" },
-  { href: "/admin/courses", label: "Courses & mentors" },
-  { href: "/admin/orders", label: "Orders" },
-  { href: "/admin/content", label: "Content" },
-  { href: "/admin/webhooks", label: "Webhooks" },
-  { href: "/admin/messages", label: "Messages" },
-  { href: "/admin/settings", label: "Settings" },
-];
-
 function isActive(href: string, pathname: string): boolean {
   return pathname === href || pathname.startsWith(href.replace(/\/$/, "") + "/");
 }
 
 function NavLinks({ user, pathname }: { user: User | null; pathname: string }) {
-  const items = user?.role === "ADMIN" ? ADMIN_NAV : user ? USER_NAV : GUEST_NAV;
+  const items = user ? USER_NAV : GUEST_NAV;
   return (
     <>
       {items.map((item) => (
@@ -69,6 +57,8 @@ export function SiteHeader() {
     refresh();
     return subscribeAuth(refresh);
   }, [pathname, router]);
+
+  if (pathname.startsWith("/admin")) return null;
 
   const home = user?.role === "ADMIN" ? "/admin" : "/dashboard";
 

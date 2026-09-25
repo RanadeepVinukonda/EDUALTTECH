@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Instagram, Mail, MessageCircle, Phone } from "lucide-react";
 
 const INSTAGRAM_URL = "https://www.instagram.com/edu_alt_tech/";
@@ -15,6 +18,8 @@ function whatsappHref(value: string): string {
 }
 
 export function SiteFooter() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
   return (
     <footer className="bg-ink-800">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
