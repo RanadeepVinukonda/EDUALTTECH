@@ -28,16 +28,25 @@ function CallbackInner() {
       const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
       if (oauth) {
-        if (!url || !anon || !code) {
+        const accessToken = hash.get("access_token") ?? (url && anon ? null : null);
+        // PKCE flow returns a ?code= to exchange; implicit flow (default for
+        // server-initiated OAuth) returns #access_token directly.
+        let importToken: string | null = accessToken;
+        let importRefresh: string | null = hash.get("refresh_token");
+        if (!importToken && code && url && anon) {
+          const supabase = createClient(url, anon, { auth: { flowType: "pkce" } });
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error || !data.session) {
+            setState("failed");
+            setMessage(error?.message ?? "Could not complete the sign-in.");
+            return;
+          }
+          importToken = data.session.access_token;
+          importRefresh = data.session.refresh_token;
+        }
+        if (!importToken) {
           setState("failed");
           setMessage("The sign-in link is incomplete. Try again.");
-          return;
-        }
-        const supabase = createClient(url, anon);
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error || !data.session) {
-          setState("failed");
-          setMessage(error?.message ?? "Could not complete the sign-in.");
           return;
         }
         // Sync the profile row (first-time OAuth users) and set session cookies
@@ -45,8 +54,8 @@ function CallbackInner() {
         const imported = await api<AuthResponse>("/auth/oauth/import", {
           method: "POST",
           body: JSON.stringify({
-            accessToken: data.session.access_token,
-            refreshToken: data.session.refresh_token,
+            accessToken: importToken,
+            refreshToken: importRefresh,
           }),
         });
         persistAuthTokens(imported);
