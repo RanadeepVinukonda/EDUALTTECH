@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 
@@ -22,6 +22,14 @@ interface Message {
 }
 
 export default function MessagesPage() {
+  return (
+    <Suspense fallback={<p className="py-20 text-center text-sm text-slate-500">Loading messages…</p>}>
+      <Messages />
+    </Suspense>
+  );
+}
+
+function Messages() {
   const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [active, setActive] = useState<string | null>(null);
