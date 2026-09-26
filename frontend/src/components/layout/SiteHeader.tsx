@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, LogOut, ShoppingBag, User as UserIcon } from "lucide-react";
+import { Bell, ChevronDown, LogOut, ShoppingBag, User as UserIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/api";
@@ -12,13 +12,27 @@ const GUEST_NAV = [
   { href: "/about", label: "Company" },
 ];
 
-const USER_NAV = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/courses", label: "Courses" },
-  { href: "/saved", label: "Saved" },
-  { href: "/practice", label: "Practice" },
-  { href: "/messages", label: "Messages" },
-  { href: "/teacher", label: "Mentor" },
+interface MenuGroup {
+  label: string;
+  items: { title: string; href: string; description: string }[];
+}
+
+const USER_MENU_GROUPS: MenuGroup[] = [
+  {
+    label: "Learn",
+    items: [
+      { title: "Courses", href: "/courses", description: "Browse all digital classrooms" },
+      { title: "Saved", href: "/saved", description: "Courses you bookmarked" },
+      { title: "Resources", href: "/resources", description: "Learning guides & library" },
+    ],
+  },
+  {
+    label: "Mentor",
+    items: [
+      { title: "Mentor workspace", href: "/teacher", description: "Teach & manage your classes" },
+      { title: "Practice", href: "/practice", description: "Solve problems & track scores" },
+    ],
+  },
 ];
 
 const ACCOUNT_MENU = [
@@ -31,18 +45,67 @@ function isActive(href: string, pathname: string): boolean {
   return pathname === href || pathname.startsWith(href.replace(/\/$/, "") + "/");
 }
 
-function NavLink({ item, pathname }: { item: { href: string; label: string }; pathname: string }) {
+function DropdownMenu({
+  label,
+  items,
+  pathname,
+}: {
+  label: string;
+  items: MenuGroup["items"];
+  pathname: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  const anyActive = items.some((i) => isActive(i.href, pathname));
+
   return (
-    <Link
-      href={item.href}
-      className={
-        isActive(item.href, pathname)
-          ? "text-sm font-semibold text-brand-700"
-          : "text-sm font-medium text-slate-600 hover:text-brand-700"
-      }
-    >
-      {item.label}
-    </Link>
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        onMouseEnter={() => setOpen(true)}
+        className={`flex items-center gap-1 text-sm ${
+          anyActive ? "font-semibold text-brand-700" : "font-medium text-slate-600 hover:text-brand-700"
+        }`}
+        aria-expanded={open}
+      >
+        {label}
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute left-0 top-full z-50 w-80 pt-3"
+          onMouseLeave={() => setOpen(false)}
+        >
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+            {items.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={`block rounded-lg px-3 py-2 transition ${
+                  isActive(item.href, pathname) ? "bg-brand-50" : "hover:bg-slate-50"
+                }`}
+              >
+                <span className={`text-sm font-medium ${isActive(item.href, pathname) ? "text-brand-700" : "text-slate-800"}`}>
+                  {item.title}
+                </span>
+                <span className="block text-xs text-slate-500">{item.description}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -150,11 +213,41 @@ export function SiteHeader() {
             )}
           </Link>
 
-          <nav className="hidden items-center gap-6 md:flex">
-            {(user ? USER_NAV : GUEST_NAV).map((item) => (
-              <NavLink key={item.href} item={item} pathname={pathname} />
-            ))}
-          </nav>
+          {user ? (
+            <nav className="hidden items-center gap-6 md:flex">
+              <Link
+                href="/dashboard"
+                className={isActive("/dashboard", pathname) ? "text-sm font-semibold text-brand-700" : "text-sm font-medium text-slate-600 hover:text-brand-700"}
+              >
+                Dashboard
+              </Link>
+              {USER_MENU_GROUPS.map((group) => (
+                <DropdownMenu key={group.label} label={group.label} items={group.items} pathname={pathname} />
+              ))}
+              <Link
+                href="/messages"
+                className={isActive("/messages", pathname) ? "text-sm font-semibold text-brand-700" : "text-sm font-medium text-slate-600 hover:text-brand-700"}
+              >
+                Messages
+              </Link>
+            </nav>
+          ) : (
+            <nav className="hidden items-center gap-6 md:flex">
+              {GUEST_NAV.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={
+                    isActive(item.href, pathname)
+                      ? "text-sm font-semibold text-brand-700"
+                      : "text-sm font-medium text-slate-600 hover:text-brand-700"
+                  }
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
@@ -184,9 +277,41 @@ export function SiteHeader() {
 
       {/* Mobile nav */}
       <nav className="flex gap-4 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden">
-        {(user ? USER_NAV : GUEST_NAV).map((item) => (
-          <NavLink key={item.href} item={item} pathname={pathname} />
-        ))}
+        {user
+          ? [
+              { href: "/dashboard", label: "Dashboard" },
+              { href: "/courses", label: "Courses" },
+              { href: "/saved", label: "Saved" },
+              { href: "/resources", label: "Resources" },
+              { href: "/practice", label: "Practice" },
+              { href: "/teacher", label: "Mentor" },
+              { href: "/messages", label: "Messages" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={
+                  isActive(item.href, pathname)
+                    ? "whitespace-nowrap text-sm font-semibold text-brand-700"
+                    : "whitespace-nowrap text-sm font-medium text-slate-600"
+                }
+              >
+                {item.label}
+              </Link>
+            ))
+          : GUEST_NAV.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={
+                  isActive(item.href, pathname)
+                    ? "whitespace-nowrap text-sm font-semibold text-brand-700"
+                    : "whitespace-nowrap text-sm font-medium text-slate-600"
+                }
+              >
+                {item.label}
+              </Link>
+            ))}
       </nav>
     </header>
   );
