@@ -6,6 +6,7 @@ import Link from "next/link";
 import { api, getCachedUser, clearAuth, updateCachedUser, nextAuthPath, type User } from "@/lib/api";
 import { Loader } from "@/components/Loader";
 import PasswordInput from "@/components/ui/PasswordInput";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function ProfilePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const loading = useMinLoading(user !== null);
 
   useEffect(() => {
     const cached = getCachedUser();
@@ -78,6 +80,7 @@ export default function ProfilePage() {
   }
 
   if (!user) return <Loader />;
+  if (loading) return <Loader />;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">

@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { api, getAccessToken } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 interface Resource {
   id: string;
@@ -31,6 +32,7 @@ export default function ResourcesPage() {
   const [mine, setMine] = useState<{ items: Resource[]; quotaBytes: number; usedBytes: number } | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const showLoader = loading || useMinLoading(!loading);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState("");
@@ -215,7 +217,7 @@ export default function ResourcesPage() {
         className="mt-6 w-full max-w-md rounded-xl border border-slate-300 px-4 py-2.5 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
       />
 
-      {loading ? (
+      {showLoader ? (
         <Loader />
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

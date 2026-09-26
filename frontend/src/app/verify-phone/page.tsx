@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, getCachedUser, nextAuthPath, updateCachedUser, type User } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 export default function VerifyPhonePage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function VerifyPhonePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const loading = useMinLoading(user !== null);
 
   useEffect(() => {
     const cached = getCachedUser();
@@ -71,6 +73,7 @@ export default function VerifyPhonePage() {
     }
   }
 
+  if (loading) return <Loader />;
   if (!user) return <Loader />;
 
   return (

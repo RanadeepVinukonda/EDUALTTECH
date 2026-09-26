@@ -4,6 +4,7 @@ import { FormEvent, Suspense, useCallback, useEffect, useRef, useState } from "r
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 interface Conversation {
   id: string;
@@ -40,6 +41,7 @@ function Messages() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const showLoader = loading || useMinLoading(!loading);
 
   const loadList = useCallback(() => {
     api<{ conversations: Conversation[] }>("/cms/conversations")
@@ -114,7 +116,7 @@ function Messages() {
       <section className="w-72 shrink-0">
         <h1 className="font-display text-xl font-bold text-slate-900">Messages</h1>
         <p className="mt-1 text-xs text-slate-500">One chat per course, mentor ↔ student.</p>
-        {loading ? (
+        {showLoader ? (
           <Loader />
         ) : conversations.length === 0 ? (
           <p className="mt-6 rounded-xl border border-dashed border-slate-300 p-4 text-xs text-slate-500">

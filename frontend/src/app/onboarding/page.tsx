@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, getCachedUser, updateCachedUser, type User } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 const TOPICS = [
   "Programming",
@@ -29,6 +30,7 @@ export default function OnboardingPage() {
   const [bio, setBio] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const loading = useMinLoading(user !== null);
 
   useEffect(() => {
     const cached = getCachedUser();
@@ -68,6 +70,7 @@ export default function OnboardingPage() {
     }
   }
 
+  if (loading) return <Loader />;
   if (!user) return <Loader />;
 
   return (

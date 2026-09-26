@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { api, ApiError, getCachedUser, type User } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 interface PanelData {
   courses: Array<{
@@ -49,6 +50,7 @@ export default function ProviderWorkspacePage() {
   const [meetingForm, setMeetingForm] = useState({ ...EMPTY_MEETING });
   const [meetings, setMeetings] = useState<Record<string, Array<{ id: string; title: string; scheduledAt: string; durationMin: number }>>>({});
   const [meetingBusy, setMeetingBusy] = useState(false);
+  const loading = useMinLoading(panel !== null);
 
   useEffect(() => {
     setUser(getCachedUser());
@@ -138,6 +140,7 @@ export default function ProviderWorkspacePage() {
   }
 
   if (error && !panel) return <div className="mx-auto max-w-6xl px-4 py-16 text-red-600">{error}</div>;
+  if (loading) return <Loader />;
   if (!panel) return <Loader />;
 
   const isProvider = mentorship.length > 0 || getCachedUser()?.isProvider === true;

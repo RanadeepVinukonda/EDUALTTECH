@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 interface Problem {
   id: string;
@@ -24,6 +25,7 @@ export default function PracticePage() {
   const [topic, setTopic] = useState("");
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(true);
+  const showLoader = loading || useMinLoading(!loading);
 
   useEffect(() => {
     setLoading(true);
@@ -69,7 +71,7 @@ export default function PracticePage() {
         ))}
       </div>
 
-      {loading ? (
+      {showLoader ? (
         <Loader />
       ) : (
         <ul className="mt-8 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">

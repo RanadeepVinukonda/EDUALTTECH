@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 import { BookmarkX } from "lucide-react";
 
 interface SavedCourse {
@@ -21,6 +22,7 @@ interface SavedCourse {
 export default function SavedPage() {
   const [items, setItems] = useState<SavedCourse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const loading = useMinLoading(items !== null);
 
   useEffect(() => {
     api<{ items: SavedCourse[] }>("/wishlist")
@@ -34,7 +36,7 @@ export default function SavedPage() {
   }
 
   if (error) return <div className="mx-auto max-w-7xl px-4 py-16 text-red-600">{error}</div>;
-  if (!items) return <Loader />;
+  if (!items || loading) return <Loader />;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">

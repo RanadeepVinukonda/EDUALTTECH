@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 interface CourseItem {
   id: string;
@@ -22,6 +23,7 @@ export default function CoursesPage() {
   const [items, setItems] = useState<CourseItem[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const showLoader = loading || useMinLoading(!loading);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -45,7 +47,7 @@ export default function CoursesPage() {
         className="mt-6 w-full max-w-md rounded-xl border border-slate-300 px-4 py-2.5 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
       />
 
-      {loading ? (
+      {showLoader ? (
         <Loader />
       ) : items.length === 0 ? (
         <p className="mt-10 rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-500">

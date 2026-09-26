@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 interface Problem {
   id: string;
@@ -64,6 +65,7 @@ export default function PracticeProblemPage() {
   const [verdict, setVerdict] = useState<Attempt | null>(null);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const loading = useMinLoading(problem !== null);
 
   useEffect(() => {
     let cancelled = false;
@@ -108,6 +110,7 @@ export default function PracticeProblemPage() {
   }
 
   if (error && !problem) return <div className="mx-auto max-w-5xl px-4 py-16 text-red-600">{error}</div>;
+  if (loading) return <Loader />;
   if (!problem) return <Loader />;
 
   const verdictInfo = verdict ? VERDICTS[verdict.result] : null;

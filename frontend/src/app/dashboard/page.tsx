@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { Loader } from "@/components/Loader";
+import { useMinLoading } from "@/lib/useMinLoading";
 
 interface DashboardData {
   enrollments: Array<{
@@ -22,6 +23,7 @@ interface DashboardData {
 export default function StudentDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const loading = useMinLoading(data !== null);
 
   useEffect(() => {
     api<DashboardData>("/dashboard/me")
@@ -30,7 +32,7 @@ export default function StudentDashboardPage() {
   }, []);
 
   if (error) return <div className="mx-auto max-w-7xl px-4 py-16 text-red-600">{error}</div>;
-  if (!data) return <Loader />;
+  if (!data || loading) return <Loader />;
 
   const accepted = data.practiceStats.find((s) => s.result === "ACCEPTED")?._count ?? 0;
   const totalAttempts = data.practiceStats.reduce((sum, s) => sum + s._count, 0);
