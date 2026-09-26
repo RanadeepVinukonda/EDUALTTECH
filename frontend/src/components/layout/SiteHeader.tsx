@@ -49,29 +49,36 @@ function DropdownMenu({
   label,
   items,
   pathname,
+  open,
+  onOpenChange,
 }: {
   label: string;
   items: MenuGroup["items"];
   pathname: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) onOpenChange(false);
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, []);
+  }, [onOpenChange]);
 
   const anyActive = items.some((i) => isActive(i.href, pathname));
 
   return (
-    <div className="relative" ref={ref}>
+    <div
+      className="relative"
+      ref={ref}
+      onMouseEnter={() => onOpenChange(true)}
+      onMouseLeave={() => onOpenChange(false)}
+    >
       <button
-        onClick={() => setOpen((v) => !v)}
-        onMouseEnter={() => setOpen(true)}
+        onClick={() => onOpenChange(!open)}
         className={`flex items-center gap-1 text-sm ${
           anyActive ? "font-semibold text-brand-700" : "font-medium text-slate-600 hover:text-brand-700"
         }`}
@@ -82,16 +89,13 @@ function DropdownMenu({
       </button>
 
       {open && (
-        <div
-          className="absolute left-0 top-full z-50 w-80 pt-3"
-          onMouseLeave={() => setOpen(false)}
-        >
+        <div className="absolute left-0 top-full z-50 w-80 pt-3">
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
             {items.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setOpen(false)}
+                onClick={() => onOpenChange(false)}
                 className={`block rounded-lg px-3 py-2 transition ${
                   isActive(item.href, pathname) ? "bg-brand-50" : "hover:bg-slate-50"
                 }`}
@@ -174,6 +178,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [logoOk, setLogoOk] = useState(true);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const refresh = () => setUser(getCachedUser());
 
@@ -222,7 +227,14 @@ export function SiteHeader() {
                 Dashboard
               </Link>
               {USER_MENU_GROUPS.map((group) => (
-                <DropdownMenu key={group.label} label={group.label} items={group.items} pathname={pathname} />
+                <DropdownMenu
+                  key={group.label}
+                  label={group.label}
+                  items={group.items}
+                  pathname={pathname}
+                  open={openMenu === group.label}
+                  onOpenChange={(o) => setOpenMenu(o ? group.label : null)}
+                />
               ))}
               <Link
                 href="/messages"
