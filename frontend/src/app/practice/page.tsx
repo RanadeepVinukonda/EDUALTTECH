@@ -70,7 +70,7 @@ export default function PracticePage() {
       </div>
 
       {loading ? (
-        <Loader label="Loading problems…" />
+        <Loader />
       ) : (
         <ul className="mt-8 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
           {items.map((p) => (

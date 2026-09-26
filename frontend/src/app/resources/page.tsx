@@ -216,7 +216,7 @@ export default function ResourcesPage() {
       />
 
       {loading ? (
-        <Loader label="Loading resources…" />
+        <Loader />
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((r) => (

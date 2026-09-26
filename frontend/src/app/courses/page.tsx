@@ -46,7 +46,7 @@ export default function CoursesPage() {
       />
 
       {loading ? (
-        <Loader label="Loading courses…" />
+        <Loader />
       ) : items.length === 0 ? (
         <p className="mt-10 rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
           No courses found yet — check back soon.

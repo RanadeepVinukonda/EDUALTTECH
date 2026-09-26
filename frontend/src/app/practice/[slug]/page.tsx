@@ -108,7 +108,7 @@ export default function PracticeProblemPage() {
   }
 
   if (error && !problem) return <div className="mx-auto max-w-5xl px-4 py-16 text-red-600">{error}</div>;
-  if (!problem) return <Loader label="Loading problem…" />;
+  if (!problem) return <Loader />;
 
   const verdictInfo = verdict ? VERDICTS[verdict.result] : null;
   const jsOnly = problem.language !== "JAVASCRIPT";

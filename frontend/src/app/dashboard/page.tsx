@@ -30,7 +30,7 @@ export default function StudentDashboardPage() {
   }, []);
 
   if (error) return <div className="mx-auto max-w-7xl px-4 py-16 text-red-600">{error}</div>;
-  if (!data) return <Loader label="Loading your dashboard…" />;
+  if (!data) return <Loader />;
 
   const accepted = data.practiceStats.find((s) => s.result === "ACCEPTED")?._count ?? 0;
   const totalAttempts = data.practiceStats.reduce((sum, s) => sum + s._count, 0);

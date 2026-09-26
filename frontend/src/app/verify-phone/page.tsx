@@ -71,7 +71,7 @@ export default function VerifyPhonePage() {
     }
   }
 
-  if (!user) return <Loader label="Loading…" />;
+  if (!user) return <Loader />;
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:px-6">

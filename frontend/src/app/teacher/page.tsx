@@ -138,7 +138,7 @@ export default function ProviderWorkspacePage() {
   }
 
   if (error && !panel) return <div className="mx-auto max-w-6xl px-4 py-16 text-red-600">{error}</div>;
-  if (!panel) return <Loader label="Loading your workspace…" />;
+  if (!panel) return <Loader />;
 
   const isProvider = mentorship.length > 0 || getCachedUser()?.isProvider === true;
 

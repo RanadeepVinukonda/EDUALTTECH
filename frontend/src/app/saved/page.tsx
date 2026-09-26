@@ -34,7 +34,7 @@ export default function SavedPage() {
   }
 
   if (error) return <div className="mx-auto max-w-7xl px-4 py-16 text-red-600">{error}</div>;
-  if (!items) return <Loader label="Loading saved courses…" />;
+  if (!items) return <Loader />;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
