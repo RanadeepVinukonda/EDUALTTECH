@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Bell } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Bell, LogOut, ShoppingBag, User as UserIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/api";
 
@@ -17,35 +17,96 @@ const USER_NAV = [
   { href: "/courses", label: "Courses" },
   { href: "/practice", label: "Practice" },
   { href: "/messages", label: "Messages" },
+  { href: "/teacher", label: "Mentor" },
+];
+
+const ACCOUNT_MENU = [
+  { href: "/profile", label: "My profile", icon: UserIcon },
+  { href: "/orders", label: "My orders", icon: ShoppingBag },
+  { href: "/notifications", label: "Notifications", icon: Bell },
 ];
 
 function isActive(href: string, pathname: string): boolean {
   return pathname === href || pathname.startsWith(href.replace(/\/$/, "") + "/");
 }
 
-function NavLinks({ user, pathname }: { user: User | null; pathname: string }) {
-  const items = user ? USER_NAV : GUEST_NAV;
+function NavLink({ item, pathname }: { item: { href: string; label: string }; pathname: string }) {
   return (
-    <>
-      {items.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={
-            isActive(item.href, pathname)
-              ? "text-sm font-semibold text-brand-700"
-              : "text-sm font-medium text-slate-600 hover:text-brand-700"
-          }
-        >
-          {item.label}
-        </Link>
-      ))}
-    </>
+    <Link
+      href={item.href}
+      className={
+        isActive(item.href, pathname)
+          ? "text-sm font-semibold text-brand-700"
+          : "text-sm font-medium text-slate-600 hover:text-brand-700"
+      }
+    >
+      {item.label}
+    </Link>
+  );
+}
+
+function UserMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<void> }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-9 w-9 items-center justify-center rounded-full brand-grad font-display text-sm font-bold text-white"
+        aria-label="Account menu"
+      >
+        {user.name?.[0]?.toUpperCase() ?? "U"}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-11 z-50 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+          <div className="border-b border-slate-100 px-4 py-3">
+            <p className="truncate text-sm font-semibold text-slate-900">{user.name}</p>
+            <p className="truncate text-xs text-slate-500">{user.email}</p>
+          </div>
+          {ACCOUNT_MENU.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 px-4 py-2 text-sm ${
+                  isActive(item.href, pathname) ? "bg-brand-50 font-semibold text-brand-700" : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <Icon className="h-4 w-4" /> {item.label}
+              </Link>
+            );
+          })}
+          <button
+            onClick={async () => {
+              setOpen(false);
+              await onSignOut();
+              router.refresh();
+            }}
+            className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            <LogOut className="h-4 w-4" /> Sign out
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
 export function SiteHeader() {
-  const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [logoOk, setLogoOk] = useState(true);
@@ -55,7 +116,7 @@ export function SiteHeader() {
   useEffect(() => {
     refresh();
     return subscribeAuth(refresh);
-  }, [pathname, router]);
+  }, [pathname]);
 
   if (pathname.startsWith("/admin")) return null;
 
@@ -64,69 +125,40 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          {logoOk ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/brand/logo.png"
-                alt="Edu-Alt-Tech"
-                className="h-9 w-auto"
-                onError={() => setLogoOk(false)}
-                data-logo
-              />
-              <span className="font-display text-lg font-semibold text-slate-900">Edu-Alt-Tech</span>
-            </>
-          ) : (
-            <span className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg brand-grad font-display text-lg font-bold text-white">
-                E
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
+            {logoOk ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/brand/logo.png"
+                  alt="Edu-Alt-Tech"
+                  className="h-9 w-auto"
+                  onError={() => setLogoOk(false)}
+                  data-logo
+                />
+                <span className="font-display text-lg font-semibold text-slate-900">Edu-Alt-Tech</span>
+              </>
+            ) : (
+              <span className="flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg brand-grad font-display text-lg font-bold text-white">
+                  E
+                </span>
+                <span className="font-display text-lg font-semibold text-slate-900">Edu-Alt-Tech</span>
               </span>
-              <span className="font-display text-lg font-semibold text-slate-900">Edu-Alt-Tech</span>
-            </span>
-          )}
-        </Link>
+            )}
+          </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
-          <NavLinks user={user} pathname={pathname} />
-        </nav>
+          <nav className="hidden items-center gap-6 md:flex">
+            {(user ? USER_NAV : GUEST_NAV).map((item) => (
+              <NavLink key={item.href} item={item} pathname={pathname} />
+            ))}
+          </nav>
+        </div>
 
         <div className="flex items-center gap-3">
           {user ? (
-            <>
-              <span className="hidden flex-col items-end leading-tight md:flex">
-                <span className="max-w-[140px] truncate text-sm font-semibold text-slate-800">{user.name}</span>
-              </span>
-              <Link
-                href={home}
-                className={
-                  isActive(home, pathname)
-                    ? "hidden sm:inline-block rounded-lg brand-grad px-4 py-2 text-sm font-semibold text-white opacity-90"
-                    : "hidden sm:inline-block rounded-lg brand-grad px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-                }
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/notifications"
-                aria-label="Notifications"
-                title="Notifications"
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-              >
-                <Bell className="h-5 w-5" />
-              </Link>
-              <button
-                onClick={async () => {
-                  // Revoke the Supabase session server-side, then drop local state.
-                  await api("/auth/logout", { method: "POST" }).catch(() => undefined);
-                  clearAuth();
-                  window.location.href = "/";
-                }}
-                className="text-sm font-medium text-slate-500 hover:text-slate-800"
-              >
-                Sign out
-              </button>
-            </>
+            <UserMenu user={user} onSignOut={() => api("/auth/logout", { method: "POST" }).catch(() => undefined).then(clearAuth)} />
           ) : (
             <>
               <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-brand-700">
@@ -140,12 +172,20 @@ export function SiteHeader() {
               </Link>
             </>
           )}
+          <Link
+            href={home}
+            className="hidden rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-50 sm:inline-block"
+          >
+            {user?.role === "ADMIN" ? "Admin panel" : "Dashboard"}
+          </Link>
         </div>
       </div>
 
       {/* Mobile nav */}
       <nav className="flex gap-4 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden">
-        <NavLinks user={user} pathname={pathname} />
+        {(user ? USER_NAV : GUEST_NAV).map((item) => (
+          <NavLink key={item.href} item={item} pathname={pathname} />
+        ))}
       </nav>
     </header>
   );
