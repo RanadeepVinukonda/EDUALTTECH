@@ -33,6 +33,17 @@ export default function AdminCoursesPage() {
   const [creating, setCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState<string | null>(null);
 
+  const describeError = (err: unknown): string => {
+    if (err instanceof ApiError && err.details && typeof err.details === "object") {
+      const d = err.details as { fieldErrors?: Record<string, string[]> };
+      const issues = Object.entries(d.fieldErrors ?? {})
+        .map(([field, msgs]) => `${field}: ${(msgs ?? []).join(", ")}`)
+        .join(" · ");
+      if (issues) return `${err.message} — ${issues}`;
+    }
+    return err instanceof Error ? err.message : "Could not create the course";
+  };
+
   const createCourse = async (e: FormEvent) => {
     e.preventDefault();
     setCreating(true);
@@ -48,7 +59,7 @@ export default function AdminCoursesPage() {
       setCreateMsg("Course created. Mentors are added when you approve their application.");
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create the course");
+      setError(describeError(err));
     } finally {
       setCreating(false);
     }
