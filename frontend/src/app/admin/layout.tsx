@@ -79,14 +79,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const sidebar = (
-    <nav className="flex h-full flex-col overflow-y-auto border-r border-slate-200 bg-white px-3 py-4">
+    <nav className="flex h-full flex-col overflow-y-auto border-r border-ink-900/60 bg-ink-800 px-3 py-4">
       <div className="flex items-center justify-between px-2">
         <Link href="/admin" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/logo.png" alt="Edu Alt Tech" className="h-8 w-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-          <span className="font-display text-sm font-semibold text-ink-700">Admin</span>
+          <span className="font-display text-sm font-semibold text-white">Admin</span>
         </Link>
-        <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 lg:hidden">
+        <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-ink-200 hover:bg-white/10 lg:hidden">
           <ChevronLeft className="h-4 w-4" />
         </button>
       </div>
@@ -94,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="mt-5 flex-1 space-y-5">
         {NAV.map((group) => (
           <div key={group.section}>
-            <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">{group.section}</p>
+            <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-ink-300">{group.section}</p>
             <ul className="space-y-0.5">
               {group.items.map((item) => {
                 const active = isActive(item.href, pathname);
@@ -107,7 +107,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
                         active
                           ? "brand-grad font-semibold text-white shadow-sm"
-                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                          : "text-ink-100 hover:bg-white/10 hover:text-white"
                       }`}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
@@ -123,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <button
         onClick={signOut}
-        className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink-100 hover:bg-white/10 hover:text-white"
       >
         <LogOut className="h-4 w-4" />
         Sign out
@@ -141,14 +141,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile drawer */}
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 bg-ink-900/60" onClick={() => setOpen(false)} />
           <aside className="absolute inset-y-0 left-0 w-60">{sidebar}</aside>
         </div>
       )}
 
       <div className="lg:pl-60">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-brand-100 bg-white/90 px-4 backdrop-blur sm:px-6">
           <div className="flex items-center gap-2">
             <button onClick={() => setOpen(true)} className="rounded-lg p-2 text-brand-700 hover:bg-brand-50 lg:hidden">
               <Menu className="h-5 w-5" />
