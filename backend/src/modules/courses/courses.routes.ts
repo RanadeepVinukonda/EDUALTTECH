@@ -120,7 +120,7 @@ const courseSchema = z.object({
   isPublished: z.boolean().optional(),
 });
 
-router.post("/",   requireRole("ADMIN"), validate(courseSchema), async (req, res, next) => {
+router.post("/",   requireAuth, requireRole("ADMIN"), validate(courseSchema), async (req, res, next) => {
     try {
     const base = req.body.title
       .toLowerCase()
@@ -146,7 +146,7 @@ router.post("/",   requireRole("ADMIN"), validate(courseSchema), async (req, res
 // drop a real image instead of pasting a URL. Limits enforced before any
 // byte is read, and only admins may write.
 
-router.post("/thumbnail", requireRole("ADMIN"), async (req, res, next) => {
+router.post("/thumbnail", requireAuth, requireRole("ADMIN"), async (req, res, next) => {
   const mimeType = (req.headers["x-thumbnail-mime"] ?? "image/jpeg").toString();
   if (!mimeType.startsWith("image/")) throw ApiError.badRequest("Thumbnail must be an image");
   const maxBytes = config.limits.maxUploadBytes;
