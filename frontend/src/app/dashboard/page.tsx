@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 
 interface DashboardData {
   enrollments: Array<{
@@ -29,7 +30,7 @@ export default function StudentDashboardPage() {
   }, []);
 
   if (error) return <div className="mx-auto max-w-7xl px-4 py-16 text-red-600">{error}</div>;
-  if (!data) return <div className="mx-auto max-w-7xl px-4 py-16 text-slate-500">Loading your dashboard…</div>;
+  if (!data) return <Loader label="Loading your dashboard…" />;
 
   const accepted = data.practiceStats.find((s) => s.result === "ACCEPTED")?._count ?? 0;
   const totalAttempts = data.practiceStats.reduce((sum, s) => sum + s._count, 0);

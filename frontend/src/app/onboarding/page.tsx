@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, getCachedUser, updateCachedUser, type User } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 
 const TOPICS = [
   "Programming",
@@ -67,7 +68,7 @@ export default function OnboardingPage() {
     }
   }
 
-  if (!user) return <div className="mx-auto max-w-2xl px-4 py-16 text-slate-500">Loading…</div>;
+  if (!user) return <Loader label="Loading…" />;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">

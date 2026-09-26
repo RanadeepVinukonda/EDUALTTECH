@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { api, ApiError, getCachedUser, type User } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 
 interface PanelData {
   courses: Array<{
@@ -137,7 +138,7 @@ export default function ProviderWorkspacePage() {
   }
 
   if (error && !panel) return <div className="mx-auto max-w-6xl px-4 py-16 text-red-600">{error}</div>;
-  if (!panel) return <div className="mx-auto max-w-6xl px-4 py-16 text-slate-500">Loading your workspace…</div>;
+  if (!panel) return <Loader label="Loading your workspace…" />;
 
   const isProvider = mentorship.length > 0 || getCachedUser()?.isProvider === true;
 

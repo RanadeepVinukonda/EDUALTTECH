@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 
 interface CourseItem {
   id: string;
@@ -45,7 +46,7 @@ export default function CoursesPage() {
       />
 
       {loading ? (
-        <p className="mt-10 text-slate-500">Loading courses…</p>
+        <Loader label="Loading courses…" />
       ) : items.length === 0 ? (
         <p className="mt-10 rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
           No courses found yet — check back soon.

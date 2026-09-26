@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 
 interface Problem {
   id: string;
@@ -69,7 +70,7 @@ export default function PracticePage() {
       </div>
 
       {loading ? (
-        <p className="mt-10 text-slate-500">Loading problems…</p>
+        <Loader label="Loading problems…" />
       ) : (
         <ul className="mt-8 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
           {items.map((p) => (

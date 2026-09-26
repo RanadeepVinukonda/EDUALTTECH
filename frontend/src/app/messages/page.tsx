@@ -3,6 +3,7 @@
 import { FormEvent, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 
 interface Conversation {
   id: string;
@@ -23,7 +24,7 @@ interface Message {
 
 export default function MessagesPage() {
   return (
-    <Suspense fallback={<p className="py-20 text-center text-sm text-slate-500">Loading messages…</p>}>
+    <Suspense fallback={<Loader label="Loading messages…" />}>
       <Messages />
     </Suspense>
   );
@@ -114,7 +115,7 @@ function Messages() {
         <h1 className="font-display text-xl font-bold text-slate-900">Messages</h1>
         <p className="mt-1 text-xs text-slate-500">One chat per course, mentor ↔ student.</p>
         {loading ? (
-          <p className="mt-6 text-sm text-slate-400">Loading…</p>
+          <Loader label="Loading messages…" />
         ) : conversations.length === 0 ? (
           <p className="mt-6 rounded-xl border border-dashed border-slate-300 p-4 text-xs text-slate-500">
             No conversations yet. Students can open a chat from any course they are enrolled in.

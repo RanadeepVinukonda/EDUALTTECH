@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { api, getAccessToken } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 
 interface Resource {
   id: string;
@@ -215,7 +216,7 @@ export default function ResourcesPage() {
       />
 
       {loading ? (
-        <p className="mt-10 text-slate-500">Loading resources…</p>
+        <Loader label="Loading resources…" />
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((r) => (

@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, getCachedUser, nextAuthPath, updateCachedUser, type User } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 
 export default function VerifyPhonePage() {
   const router = useRouter();
@@ -70,7 +71,7 @@ export default function VerifyPhonePage() {
     }
   }
 
-  if (!user) return <div className="mx-auto max-w-md px-4 py-16 text-slate-500">Loading…</div>;
+  if (!user) return <Loader label="Loading…" />;
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:px-6">

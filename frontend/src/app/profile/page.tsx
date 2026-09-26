@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, getCachedUser, clearAuth, updateCachedUser, nextAuthPath, type User } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 import PasswordInput from "@/components/ui/PasswordInput";
 
 export default function ProfilePage() {
@@ -76,7 +77,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (!user) return <div className="mx-auto max-w-3xl px-4 py-16 text-slate-500">Loading…</div>;
+  if (!user) return <Loader label="Loading…" />;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">

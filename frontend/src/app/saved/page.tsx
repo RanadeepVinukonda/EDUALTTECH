@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
+import { Loader } from "@/components/Loader";
 import { BookmarkX } from "lucide-react";
 
 interface SavedCourse {
@@ -33,7 +34,7 @@ export default function SavedPage() {
   }
 
   if (error) return <div className="mx-auto max-w-7xl px-4 py-16 text-red-600">{error}</div>;
-  if (!items) return <div className="mx-auto max-w-7xl px-4 py-16 text-slate-500">Loading saved courses…</div>;
+  if (!items) return <Loader label="Loading saved courses…" />;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
