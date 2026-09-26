@@ -9,6 +9,7 @@ interface CourseRow {
   title: string;
   slug: string;
   subject: string;
+  thumbnailUrl: string | null;
   pricePaise: number | null;
   isPublished: boolean;
   teacher: { id: string; name: string; email: string };
@@ -186,35 +187,46 @@ export default function AdminCoursesPage() {
       {courses.length === 0 ? (
         <p className="mt-8 rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">No courses yet.</p>
       ) : (
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {courses.map((course) => (
-            <article key={course.id} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-slate-900">{course.title}</p>
-                  <p className="text-sm text-slate-500">
-                    {course.subject} · hosted by {course.teacher.name} · {course._count.enrollments} learners
-                    {course.pricePaise != null && <span className="ml-1 font-semibold text-ink-700">· ₹{(course.pricePaise / 100).toLocaleString("en-IN")}</span>}
-                  </p>
+            <article key={course.id} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-brand-300 hover:shadow-sm">
+              {course.thumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={course.thumbnailUrl} alt="" className="h-40 w-full object-cover" />
+              ) : (
+                <div className="flex h-40 items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100">
+                  <span className="rounded-xl brand-grad px-3 py-1.5 text-sm font-bold text-white">{course.subject[0]}</span>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? "bg-brand-50 text-brand-700" : "bg-amber-50 text-amber-700"}`}>
-                  {course.isPublished ? "Published" : "Draft"}
-                </span>
-              </div>
+              )}
+              <div className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{course.subject}</p>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? "bg-brand-50 text-brand-700" : "bg-amber-50 text-amber-700"}`}>
+                    {course.isPublished ? "Published" : "Draft"}
+                  </span>
+                </div>
+                <h2 className="font-display mt-2 text-lg font-semibold text-slate-900">{course.title}</h2>
+                <p className="text-sm text-slate-500">
+                  hosted by {course.teacher.name} · {course._count.enrollments} learners
+                  {course.pricePaise != null && (
+                    <span className="ml-1 font-semibold text-ink-700">· ₹{(course.pricePaise / 100).toLocaleString("en-IN")}</span>
+                  )}
+                </p>
 
-              <ul className="mt-4 space-y-2">
-                {course.mentors.length === 0 && <li className="text-sm text-slate-400">No mentors yet — they join by applying.</li>}
-                {course.mentors.map((m) => (
-                  <li key={m.id} className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-2 text-sm">
-                    <span className="text-slate-700">
-                      {m.mentor.name} <span className="text-slate-400">· {m.mentor.email}</span>
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {m._count.chapters} chapters · {m._count.enrollments} learners
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                <ul className="mt-4 space-y-2 border-t border-slate-100 pt-4">
+                  {course.mentors.length === 0 && <li className="text-sm text-slate-400">No mentors yet — they join by applying.</li>}
+                  {course.mentors.map((m) => (
+                    <li key={m.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm">
+                      <span className="truncate text-slate-700">
+                        {m.mentor.name} <span className="text-slate-400">· {m.mentor.email}</span>
+                      </span>
+                      <span className="ml-2 shrink-0 text-xs text-slate-500">
+                        {m._count.chapters} ch · {m._count.enrollments} students
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </article>
           ))}
         </div>
