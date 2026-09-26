@@ -15,6 +15,7 @@ const GUEST_NAV = [
 const USER_NAV = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/courses", label: "Courses" },
+  { href: "/saved", label: "Saved" },
   { href: "/practice", label: "Practice" },
   { href: "/messages", label: "Messages" },
   { href: "/teacher", label: "Mentor" },
