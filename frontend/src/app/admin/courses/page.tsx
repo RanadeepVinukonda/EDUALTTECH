@@ -9,6 +9,7 @@ interface CourseRow {
   title: string;
   slug: string;
   subject: string;
+  pricePaise: number | null;
   isPublished: boolean;
   teacher: { id: string; name: string; email: string };
   mentors: Array<{
@@ -27,10 +28,12 @@ export default function AdminCoursesPage() {
     description: "",
     subject: "",
     gradeLevel: "",
+    price: "",
     thumbnailUrl: "",
     isPublished: true,
   });
   const [creating, setCreating] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [createMsg, setCreateMsg] = useState<string | null>(null);
 
   const describeError = (err: unknown): string => {
@@ -44,18 +47,47 @@ export default function AdminCoursesPage() {
     return err instanceof Error ? err.message : "Could not create the course";
   };
 
+  const onThumbnail = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const { thumbnailUrl } = await api<{ thumbnailUrl: string }>("/courses/thumbnail", {
+        method: "POST",
+        headers: { "Content-Type": file.type, "x-thumbnail-mime": file.type },
+        body: file,
+      });
+      setNewCourse((s) => ({ ...s, thumbnailUrl }));
+      setCreateMsg("Thumbnail uploaded.");
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const createCourse = async (e: FormEvent) => {
     e.preventDefault();
     setCreating(true);
     setCreateMsg(null);
     setError(null);
     try {
+      const pricePaise = newCourse.price.trim() === "" ? null : Math.round(parseFloat(newCourse.price) * 100);
       const { course } = await api<{ course: { id: string } }>("/courses", {
         method: "POST",
-        body: JSON.stringify(newCourse),
+        body: JSON.stringify({
+          title: newCourse.title,
+          description: newCourse.description,
+          subject: newCourse.subject,
+          gradeLevel: newCourse.gradeLevel,
+          pricePaise,
+          thumbnailUrl: newCourse.thumbnailUrl,
+          isPublished: newCourse.isPublished,
+        }),
       });
       void course;
-      setNewCourse({ title: "", description: "", subject: "", gradeLevel: "", thumbnailUrl: "", isPublished: true });
+      setNewCourse({ title: "", description: "", subject: "", gradeLevel: "", price: "", thumbnailUrl: "", isPublished: true });
       setCreateMsg("Course created. Mentors are added when you approve their application.");
       load();
     } catch (err) {
@@ -113,6 +145,24 @@ export default function AdminCoursesPage() {
             rows={2}
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 sm:col-span-2"
           />
+          <input
+            value={newCourse.price}
+            onChange={(e) => setNewCourse((s) => ({ ...s, price: e.target.value }))}
+            placeholder="Price (₹, e.g. 499 — leave blank for free)"
+            inputMode="decimal"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+          />
+          <label className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600">
+            {newCourse.thumbnailUrl ? <span className="truncate text-brand-700">Thumbnail uploaded ✓</span> : "Thumbnail (optional)"}
+            <span
+              role="button"
+              onClick={() => { const el = document.getElementById("course-thumb-input") as HTMLInputElement | null; el?.click(); }}
+              className="ml-auto shrink-0 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+            >
+              {uploading ? "Uploading…" : "Choose file"}
+            </span>
+            <input id="course-thumb-input" type="file" accept="image/*" onChange={onThumbnail} className="hidden" />
+          </label>
           <label className="flex items-center gap-2 text-sm text-slate-700">
             <input
               type="checkbox"
@@ -144,6 +194,7 @@ export default function AdminCoursesPage() {
                   <p className="font-semibold text-slate-900">{course.title}</p>
                   <p className="text-sm text-slate-500">
                     {course.subject} · hosted by {course.teacher.name} · {course._count.enrollments} learners
+                    {course.pricePaise != null && <span className="ml-1 font-semibold text-ink-700">· ₹{(course.pricePaise / 100).toLocaleString("en-IN")}</span>}
                   </p>
                 </div>
                 <span className={`rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? "bg-brand-50 text-brand-700" : "bg-amber-50 text-amber-700"}`}>

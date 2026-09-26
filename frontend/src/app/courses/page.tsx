@@ -11,6 +11,7 @@ interface CourseItem {
   description: string;
   subject: string;
   gradeLevel: string | null;
+  pricePaise: number | null;
   thumbnailUrl: string | null;
   teacher: { name: string };
   _count: { enrollments: number; modules: number };
@@ -71,6 +72,9 @@ export default function CoursesPage() {
               <p className="mt-2 line-clamp-2 text-sm text-slate-600">{c.description}</p>
               <p className="mt-4 text-xs text-slate-500">
                 {c.teacher.name} · {c._count.modules} modules · {c._count.enrollments} enrolled
+                {c.pricePaise != null && (
+                  <span className="ml-1 font-semibold text-ink-700">· ₹{(c.pricePaise / 100).toLocaleString("en-IN")}</span>
+                )}
               </p>
               </div>
             </Link>

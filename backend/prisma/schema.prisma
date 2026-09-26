@@ -260,6 +260,8 @@ model Course {
   thumbnailUrl String?
   subject      String
   gradeLevel   String?
+  pricePaise   Int?
+  currency     String   @default("INR")
   isPublished  Boolean  @default(false)
   teacherId    String
   teacher      User     @relation("CourseTeacher", fields: [teacherId], references: [id])

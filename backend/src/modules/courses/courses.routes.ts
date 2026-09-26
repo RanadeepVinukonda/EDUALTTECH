@@ -43,6 +43,7 @@ router.get("/", async (req, res, next) => {
           thumbnailUrl: true,
           subject: true,
           gradeLevel: true,
+          pricePaise: true,
           teacher: { select: { name: true } },
           _count: { select: { enrollments: true, modules: true } },
         },
@@ -111,6 +112,7 @@ const courseSchema = z.object({
   description: z.string().min(10),
   subject: z.string().min(2).max(60),
   gradeLevel: z.string().max(40).optional(),
+  pricePaise: z.union([z.number().int().min(0), z.string().regex(/^\d*$/).transform((v) => (v === "" ? null : parseInt(v, 10)))]).nullable().optional(),
   // Form sends thumbnailUrl as "" when the admin leaves the picker empty —
   // coercion to undefined so an empty field never trips .url() validation.
   thumbnailUrl: z.preprocess(
