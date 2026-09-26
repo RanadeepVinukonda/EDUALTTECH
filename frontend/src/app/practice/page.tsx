@@ -25,7 +25,8 @@ export default function PracticePage() {
   const [topic, setTopic] = useState("");
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(true);
-  const showLoader = loading || useMinLoading(!loading);
+  const minLoading = useMinLoading(!loading);
+  const showLoader = loading || minLoading;
 
   useEffect(() => {
     setLoading(true);

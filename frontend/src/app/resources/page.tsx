@@ -32,7 +32,8 @@ export default function ResourcesPage() {
   const [mine, setMine] = useState<{ items: Resource[]; quotaBytes: number; usedBytes: number } | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const showLoader = loading || useMinLoading(!loading);
+  const minLoading = useMinLoading(!loading);
+  const showLoader = loading || minLoading;
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState("");

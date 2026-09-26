@@ -23,7 +23,8 @@ export default function CoursesPage() {
   const [items, setItems] = useState<CourseItem[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const showLoader = loading || useMinLoading(!loading);
+  const minLoading = useMinLoading(!loading);
+  const showLoader = loading || minLoading;
 
   useEffect(() => {
     const t = setTimeout(() => {

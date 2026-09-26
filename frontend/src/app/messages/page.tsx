@@ -41,7 +41,8 @@ function Messages() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  const showLoader = loading || useMinLoading(!loading);
+  const minLoading = useMinLoading(!loading);
+  const showLoader = loading || minLoading;
 
   const loadList = useCallback(() => {
     api<{ conversations: Conversation[] }>("/cms/conversations")
