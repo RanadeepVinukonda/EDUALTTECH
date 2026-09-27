@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Bell, ChevronDown, LogOut, ShoppingBag, User as UserIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/api";
 
 const GUEST_NAV = [
@@ -112,7 +112,7 @@ function DropdownMenu({
 }
 
 function UserMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<void> }) {
-  const router = useRouter();
+  
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -160,7 +160,7 @@ function UserMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<vo
             onClick={async () => {
               setOpen(false);
               await onSignOut();
-              router.refresh();
+              window.location.href = "/";
             }}
             className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
           >
