@@ -24,7 +24,7 @@ export function SiteFooter() {
     <footer className="bg-ink-800">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div>
-          <p className="font-display text-lg font-semibold text-white">Edu-Alt-Tech</p>
+          <p className="font-display text-lg font-semibold text-white">EduAltTech</p>
           <p className="mt-2 text-sm text-ink-200">
             The skill marketplace of the <span className="font-semibold text-white">Setsuzoku</span> group — digital solutions and marketing &amp; admissions alongside.
           </p>
@@ -76,7 +76,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-ink-900 py-4 text-center text-xs text-ink-300">
-        © {new Date().getFullYear()} Setsuzoku · Edu-Alt-Tech. All rights reserved.
+        © {new Date().getFullYear()} Setsuzoku · EduAltTech. All rights reserved.
       </div>
     </footer>
   );

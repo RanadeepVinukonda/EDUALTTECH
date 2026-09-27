@@ -30,7 +30,7 @@ function MemberCard({ name, file }: { name: string; file: string }) {
         </span>
       )}
       <p className="mt-3 font-display text-sm font-bold text-ink-700">{name}</p>
-      <p className="mt-0.5 text-[11px] uppercase tracking-wider text-slate-400">Edu-Alt-Tech</p>
+      <p className="mt-0.5 text-[11px] uppercase tracking-wider text-slate-400">EduAltTech</p>
     </div>
   );
 }

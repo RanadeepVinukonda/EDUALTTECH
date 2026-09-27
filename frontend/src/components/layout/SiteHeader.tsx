@@ -199,19 +199,19 @@ export function SiteHeader() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/brand/logo.png"
-                  alt="Edu-Alt-Tech"
+                  alt="EduAltTech"
                   className="h-9 w-auto"
                   onError={() => setLogoOk(false)}
                   data-logo
                 />
-                <span className="font-display text-lg font-semibold text-slate-900">Edu-Alt-Tech</span>
+                <span className="font-display text-lg font-semibold text-slate-900">EduAltTech</span>
               </>
             ) : (
               <span className="flex items-center gap-2">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg brand-grad font-display text-lg font-bold text-white">
                   E
                 </span>
-                <span className="font-display text-lg font-semibold text-slate-900">Edu-Alt-Tech</span>
+                <span className="font-display text-lg font-semibold text-slate-900">EduAltTech</span>
               </span>
             )}
           </Link>

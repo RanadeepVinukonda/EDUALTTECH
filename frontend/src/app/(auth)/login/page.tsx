@@ -72,7 +72,7 @@ function LoginForm() {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
       <h1 className="font-display text-2xl font-bold text-slate-900">Welcome back</h1>
-      <p className="mt-1 text-sm text-slate-600">Sign in to your Edu-Alt-Tech account.</p>
+      <p className="mt-1 text-sm text-slate-600">Sign in to your EduAltTech account.</p>
 
       {created && (
         <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">

@@ -6,7 +6,7 @@ import TeamGrid from "@/components/team/TeamGrid";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Edu-Alt-Tech matches skilled people with students who need them — hands-on skill assessment, mentor training, and paid teaching. Schools get digital solutions and classroom programs in Kakinada, Andhra Pradesh.",
+    "EduAltTech matches skilled people with students who need them — hands-on skill assessment, mentor training, and paid teaching. Schools get digital solutions and classroom programs in Kakinada, Andhra Pradesh.",
   alternates: { canonical: "https://www.edualttech.com/about" },
 };
 
@@ -48,7 +48,7 @@ export default function AboutPage() {
               <span className="text-brand-600">Anyone can be a mentor.</span>
             </h1>
             <p className="max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
-              Edu-Alt-Tech is a skill marketplace: people who know how to do something well get
+              EduAltTech is a skill marketplace: people who know how to do something well get
               trained to teach it, and students who want to learn get matched to them. We started
               in Kakinada because the skilled people and the students were both already there — they
               just had no bridge. We built the bridge.

@@ -113,7 +113,7 @@ export default function ServicesPage() {
 
         <div className="mb-16 rounded-xl border border-black/5 bg-slate-50 p-8 text-center shadow-elev1">
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-600">
-            Every service above is delivered by the <strong>Edu-Alt-Tech team</strong> — educators,
+            Every service above is delivered by the <strong>EduAltTech team</strong> — educators,
             engineers and trained classroom providers, not outsourced agency work.
           </p>
           <Link

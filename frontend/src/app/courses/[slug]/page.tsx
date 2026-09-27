@@ -216,7 +216,7 @@ export default function CourseDetailPage() {
           key: razorpayKeyId,
           amount: order.amountPaise,
           currency: "INR",
-          name: "Edu-Alt-Tech",
+          name: "EduAltTech",
           order_id: order.razorpayOrderId,
           handler: (r) => resolve(r),
           modal: { ondismiss: () => reject(new Error("Payment cancelled")) },

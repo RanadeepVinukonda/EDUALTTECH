@@ -11,8 +11,8 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", 
 
 export const metadata: Metadata = {
   title: {
-    default: "Edu-Alt-Tech — Technology for schools, built with schools",
-    template: "%s · Edu-Alt-Tech",
+    default: "EduAltTech — Technology for schools, built with schools",
+    template: "%s · EduAltTech",
   },
   description:
     "Ed-tech platform building digital classrooms, learning apps and school tools together with partner schools. Students learn on it, teachers teach on it, schools run on it.",

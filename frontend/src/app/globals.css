@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Edu-Alt-Tech design tokens — single source of truth for the brand.
+ * EduAltTech design tokens — single source of truth for the brand.
  * brand = green (primary #038C3E), ink = deep teal-navy (headings/accent #024059).
  * Radii and elevations match the design system.
  */
@@ -65,7 +65,7 @@ body {
   @apply bg-slate-50 text-slate-800 antialiased;
 }
 
-/* Logo gradient — matches the Edu-Alt-Tech brand mark (#038C3E → #026B2F). */
+/* Logo gradient — matches the EduAltTech brand mark (#038C3E → #026B2F). */
 .brand-grad {
   background-image: linear-gradient(135deg, #038c3e, #026b2f);
   transition: filter 0.2s ease;

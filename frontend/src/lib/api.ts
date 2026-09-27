@@ -1,5 +1,5 @@
 /**
- * Minimal API client for the Edu-Alt-Tech backend.
+ * Minimal API client for the EduAltTech backend.
  * - Attaches the access token
  * - On 401, tries one refresh-token rotation, then retries the request once
  */

@@ -5,7 +5,7 @@ import { ArrowRight, BookOpen, Building2, Megaphone } from "lucide-react";
 export const metadata: Metadata = {
   title: "Setsuzoku Group",
   description:
-    "Setsuzoku is the group behind Edu-Alt-Tech — an education skill marketplace, in-house digital solutions studio and the marketing that fills school seats.",
+    "Setsuzoku is the group behind EduAltTech — an education skill marketplace, in-house digital solutions studio and the marketing that fills school seats.",
   alternates: { canonical: "https://www.edualttech.com/setsuzoku" },
 };
 
@@ -41,7 +41,7 @@ export default function SetsuzokuPage() {
     <div className="relative overflow-hidden bg-white px-6 pb-32 pt-16">
       <div className="mx-auto max-w-[1200px]">
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-brand-600">The group behind Edu-Alt-Tech</p>
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-brand-600">The group behind EduAltTech</p>
           <h1 className="mb-6 font-display text-5xl font-black leading-[0.9] tracking-tighter text-ink-700 md:text-7xl">
             Setsuzoku.
             <br />

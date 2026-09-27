@@ -47,7 +47,7 @@ export default function ContactPage() {
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <h1 className="font-display text-3xl font-bold text-slate-900">Talk to us</h1>
       <p className="mt-2 text-slate-600">
-        Schools, teachers, parents — write to us about bringing Edu-Alt-Tech to your campus, or
+        Schools, teachers, parents — write to us about bringing EduAltTech to your campus, or
         just email <a className="font-semibold text-brand-700" href="mailto:info@edualttech.com">info@edualttech.com</a>.
       </p>
 

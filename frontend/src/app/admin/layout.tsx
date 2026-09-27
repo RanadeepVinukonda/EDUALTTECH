@@ -83,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex items-center justify-between px-2">
         <Link href="/admin" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/logo.png" alt="Edu Alt Tech" className="h-8 w-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+          <img src="/brand/logo.png" alt="EduAltTech" className="h-8 w-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
           <span className="font-display text-sm font-semibold text-white">Admin</span>
         </Link>
         <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-ink-200 hover:bg-white/10 lg:hidden">
@@ -154,7 +154,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="h-5 w-5" />
             </button>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/logo.png" alt="Edu Alt Tech" className="h-8 w-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            <img src="/brand/logo.png" alt="EduAltTech" className="h-8 w-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
             <h1 className="font-display text-base font-bold text-ink-700">{current?.label ?? "Admin"}</h1>
           </div>
           <div className="flex items-center gap-3">
