@@ -43,17 +43,11 @@ export default function StudentDashboardPage() {
       <p className="mt-1 text-slate-600">Progress, scores and streaks — all in one place.</p>
 
       <div className="mt-4 flex flex-wrap gap-3 text-sm">
-        <Link href="/profile" className="font-semibold text-brand-700 hover:text-brand-800">
-          Edit profile
+        <Link href="/courses/mine" className="font-semibold text-brand-700 hover:text-brand-800">
+          My courses
         </Link>
-        <Link href="/teacher" className="font-semibold text-brand-700 hover:text-brand-800">
-          Mentor workspace
-        </Link>
-        <Link href="/notifications" className="font-semibold text-brand-700 hover:text-brand-800">
-          Notifications
-        </Link>
-        <Link href="/orders" className="font-semibold text-brand-700 hover:text-brand-800">
-          My orders
+        <Link href="/courses" className="font-semibold text-brand-700 hover:text-brand-800">
+          Browse all →
         </Link>
       </div>
 

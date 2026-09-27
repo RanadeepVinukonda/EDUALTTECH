@@ -22,22 +22,22 @@ const USER_MENU_GROUPS: MenuGroup[] = [
     label: "Learn",
     items: [
       { title: "Courses", href: "/courses", description: "Browse all digital classrooms" },
-      { title: "Saved", href: "/saved", description: "Courses you bookmarked" },
+      { title: "My courses", href: "/courses/mine", description: "Everything you are learning or mentoring" },
+      { title: "Bookmarks", href: "/bookmarks", description: "Courses & resources you saved" },
       { title: "Resources", href: "/resources", description: "Learning guides & library" },
     ],
   },
   {
     label: "Mentor",
     items: [
-      { title: "Mentor workspace", href: "/teacher", description: "Teach & manage your classes" },
       { title: "Practice", href: "/practice", description: "Solve problems & track scores" },
+      { title: "Apply to mentor", href: "/teachers/apply", description: "Complete the mentoring application" },
     ],
   },
 ];
 
 const ACCOUNT_MENU = [
   { href: "/profile", label: "My profile", icon: UserIcon },
-  { href: "/orders", label: "My orders", icon: ShoppingBag },
   { href: "/notifications", label: "Notifications", icon: Bell },
 ];
 
@@ -233,12 +233,6 @@ export function SiteHeader() {
                   onOpenChange={(o) => setOpenMenu(o ? group.label : null)}
                 />
               ))}
-              <Link
-                href="/messages"
-                className={isActive("/messages", pathname) ? "text-sm font-semibold text-brand-700" : "text-sm font-medium text-slate-600 hover:text-brand-700"}
-              >
-                Messages
-              </Link>
             </nav>
           ) : (
             <nav className="hidden items-center gap-6 md:flex">
@@ -283,12 +277,12 @@ export function SiteHeader() {
         {user
           ? [
               { href: "/dashboard", label: "Dashboard" },
+              { href: "/courses/mine", label: "My courses" },
               { href: "/courses", label: "Courses" },
-              { href: "/saved", label: "Saved" },
+              { href: "/bookmarks", label: "Bookmarks" },
               { href: "/resources", label: "Resources" },
               { href: "/practice", label: "Practice" },
-              { href: "/teacher", label: "Mentor" },
-              { href: "/messages", label: "Messages" },
+              { href: "/teachers/apply", label: "Apply to mentor" },
             ].map((item) => (
               <Link
                 key={item.href}

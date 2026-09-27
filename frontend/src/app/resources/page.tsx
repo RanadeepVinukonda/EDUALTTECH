@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { Bookmark as BookmarkIcon } from "lucide-react";
 import { api, getAccessToken, API_BASE } from "@/lib/api";
 import { Loader } from "@/components/Loader";
 import { useMinLoading } from "@/lib/useMinLoading";
@@ -30,6 +31,7 @@ function formatBytes(bytes: number): string {
 export default function ResourcesPage() {
   const [items, setItems] = useState<Resource[]>([]);
   const [mine, setMine] = useState<{ items: Resource[]; quotaBytes: number; usedBytes: number } | null>(null);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const minLoading = useMinLoading(!loading);
@@ -50,6 +52,25 @@ export default function ResourcesPage() {
     }, 300);
     return () => clearTimeout(t);
   }, [search]);
+
+  const loadBookmarks = useCallback(() => {
+    api<{ items: Array<{ id: string }> }>("/resources/bookmarks")
+      .then((d) => setBookmarks(new Set(d.items.map((b) => b.id))))
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(loadBookmarks, [loadBookmarks]);
+
+  async function toggleBookmark(id: string) {
+    const saved = bookmarks.has(id);
+    await api(`/resources/${id}/bookmark`, { method: saved ? "DELETE" : "POST" }).catch(() => undefined);
+    setBookmarks((prev) => {
+      const next = new Set(prev);
+      if (saved) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const loadMine = useCallback(() => {
     api<{ items: Resource[]; quotaBytes: number; usedBytes: number }>("/resources/my")
@@ -239,6 +260,19 @@ export default function ResourcesPage() {
               >
                 Download ↓ <span className="font-normal text-slate-400">({r.downloads})</span>
               </button>
+              </div>
+              <div className="flex justify-end border-t border-slate-100 px-5 py-2.5">
+                <button
+                  onClick={() => toggleBookmark(r.id)}
+                  aria-pressed={bookmarks.has(r.id)}
+                  aria-label={bookmarks.has(r.id) ? "Remove from bookmarks" : "Bookmark this file"}
+                  className={`flex items-center gap-1 text-xs font-medium transition ${
+                    bookmarks.has(r.id) ? "text-brand-700" : "text-slate-400 hover:text-brand-700"
+                  }`}
+                >
+                  <BookmarkIcon className={`h-4 w-4 ${bookmarks.has(r.id) ? "fill-brand-600 text-brand-600" : ""}`} />
+                  {bookmarks.has(r.id) ? "Bookmarked" : "Bookmark"}
+                </button>
               </div>
             </div>
           ))}

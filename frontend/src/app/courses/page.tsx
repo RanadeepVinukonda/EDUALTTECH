@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { api } from "@/lib/api";
+import { useCallback, useEffect, useState } from "react";
+import { Bookmark as BookmarkIcon } from "lucide-react";
+import { api, getCachedUser } from "@/lib/api";
 import { Loader } from "@/components/Loader";
 import { useMinLoading } from "@/lib/useMinLoading";
+import { CourseCard, type CourseCardData } from "@/components/courses/CourseCard";
 
 interface CourseItem {
   id: string;
@@ -22,9 +23,21 @@ interface CourseItem {
 export default function CoursesPage() {
   const [items, setItems] = useState<CourseItem[]>([]);
   const [search, setSearch] = useState("");
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const minLoading = useMinLoading(!loading);
   const showLoader = loading || minLoading;
+
+  const loadBookmarks = useCallback(() => {
+    if (!getCachedUser()) return;
+    api<{ items: Array<{ id: string }> }>("/wishlist")
+      .then((d) => setBookmarks(new Set(d.items.map((i) => i.id))))
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    loadBookmarks();
+  }, [loadBookmarks]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -35,6 +48,21 @@ export default function CoursesPage() {
     }, 300);
     return () => clearTimeout(t);
   }, [search]);
+
+  async function toggleBookmark(course: CourseItem) {
+    if (!getCachedUser()) {
+      window.location.href = "/login";
+      return;
+    }
+    const saved = bookmarks.has(course.id);
+    await api(`/wishlist/${course.id}`, { method: saved ? "DELETE" : "POST" }).catch(() => undefined);
+    setBookmarks((prev) => {
+      const next = new Set(prev);
+      if (saved) next.delete(course.id);
+      else next.add(course.id);
+      return next;
+    });
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -56,33 +84,34 @@ export default function CoursesPage() {
         </p>
       ) : (
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((c) => (
-            <Link
-              key={c.id}
-              href={`/courses/${c.slug}`}
-              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-brand-300 hover:shadow-sm"
-            >
-              {c.thumbnailUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={c.thumbnailUrl} alt="" className="h-40 w-full object-cover" />
-              ) : (
-                <div className="flex h-40 items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100">
-                  <span className="rounded-xl brand-grad px-3 py-1.5 text-sm font-bold text-white">{c.subject[0]}</span>
-                </div>
-              )}
-              <div className="p-6">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{c.subject}</p>
-              <h2 className="font-display mt-2 text-lg font-semibold text-slate-900 group-hover:text-brand-800">{c.title}</h2>
-              <p className="mt-2 line-clamp-2 text-sm text-slate-600">{c.description}</p>
-              <p className="mt-4 text-xs text-slate-500">
-                {c.teacher.name} · {c._count.modules} modules · {c._count.enrollments} enrolled
-                {c.pricePaise != null && (
-                  <span className="ml-1 font-semibold text-ink-700">· ₹{(c.pricePaise / 100).toLocaleString("en-IN")}</span>
-                )}
-              </p>
-              </div>
-            </Link>
-          ))}
+          {items.map((c) => {
+            const saved = bookmarks.has(c.id);
+            return (
+              <CourseCard
+                key={c.id}
+                course={c as unknown as CourseCardData}
+                footer={
+                  <div className="flex items-center justify-end px-6 py-3">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleBookmark(c);
+                      }}
+                      aria-pressed={saved}
+                      aria-label={saved ? "Remove from bookmarks" : "Bookmark this course"}
+                      className={`flex items-center gap-1 text-xs font-medium transition ${
+                        saved ? "text-brand-700" : "text-slate-400 hover:text-brand-700"
+                      }`}
+                    >
+                      <BookmarkIcon className={`h-4 w-4 ${saved ? "fill-brand-600 text-brand-600" : ""}`} />
+                      {saved ? "Bookmarked" : "Bookmark"}
+                    </button>
+                  </div>
+                }
+              />
+            );
+          })}
         </div>
       )}
     </div>

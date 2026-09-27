@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { Bookmark as BookmarkIcon } from "lucide-react";
 import { api, ApiError, getCachedUser, updateCachedUser } from "@/lib/api";
 import { CourseChat } from "@/components/courses/CourseChat";
+import { MentorDM } from "@/components/courses/MentorDM";
+import { MentorCoursePanel } from "@/components/courses/MentorCoursePanel";
 
 const PLANS = [
   { plan: "TRIAL", label: "First-Class Trial", price: "₹1", note: "Try the platform for ₹1" },
@@ -21,8 +24,20 @@ interface Chapter {
   resources: Array<{ label: string; url: string }>;
 }
 
+interface CourseResource {
+  id: string;
+  title: string;
+  subject: string;
+  kind: string;
+  fileUrl: string;
+  fileSizeBytes: number | null;
+  createdAt: string;
+}
+
 interface Mentor {
   id: string;
+  capacity: number;
+  seatsLeft: number;
   mentor: { id: string; name: string; avatarUrl: string | null; bio: string | null; education: string | null };
   chapters: Chapter[];
   _count: { enrollments: number };
@@ -38,6 +53,7 @@ interface CourseDetail {
   thumbnailUrl: string | null;
   teacher: { name: string };
   mentors: Mentor[];
+  resources: CourseResource[];
   modules: Array<{
     id: string;
     title: string;
@@ -67,6 +83,7 @@ export default function CourseDetailPage() {
     durationMin: number;
     meetingUrl: string;
   }> | null>(null);
+  const [mentorView, setMentorView] = useState<{ courseMentorId: string } | null>(null);
 
   useEffect(() => {
     api<{ course: CourseDetail }>(`/courses/${params.slug}`)
@@ -84,12 +101,14 @@ export default function CourseDetailPage() {
     if (!getCachedUser()) return;
     (async () => {
       try {
-        const me = await api<{ enrollments: Array<{ id: string; course: { id: string } }> }>("/dashboard/me").catch(() => null);
-        const mine = me?.enrollments.find((e) => e.course.id === course.id);
-        if (mine) {
+        const mine = await api<{ seeking: Array<{ id: string; course: { id: string }; courseMentor: { id: string } | null }>; mentoring: Array<{ id: string; course: { id: string } }> }>("/courses/mine").catch(() => null);
+        const seeking = mine?.seeking.find((e) => e.course.id === course.id);
+        if (seeking) {
           setEnrolled(true);
-          setEnrollmentId(mine.id);
+          setEnrollmentId(seeking.id);
         }
+        const mentoring = mine?.mentoring.find((m) => m.course.id === course.id);
+        if (mentoring) setMentorView({ courseMentorId: mentoring.id });
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
         const meets = await api<{ meetings: Array<{
@@ -98,8 +117,8 @@ export default function CourseDetailPage() {
           scheduledAt: string;
           durationMin: number;
           meetingUrl: string;
-        }> }>(`/meetings/course/${course.id}`);
-        setMeetings(meets.meetings);
+        }> }>(`/meetings/course/${course.id}`).catch(() => null);
+        if (meets) setMeetings(meets.meetings);
       } catch {
         // 401/403 — treat as "no access", leave defaults.
       }
@@ -138,11 +157,12 @@ export default function CourseDetailPage() {
     setBusy(true);
     setError(null);
     try {
-      await api(`/courses/${course.id}/enroll`, {
+      const d = await api<{ enrollment: { id: string } }>(`/courses/${course.id}/enroll`, {
         method: "POST",
         body: JSON.stringify(selected ? { courseMentorId: selected } : {}),
       });
       setEnrolled(true);
+      if (d.enrollment) setEnrollmentId(d.enrollment.id);
     } catch (err) {
       const e = err instanceof ApiError ? err : null;
       if (e?.status === 402) {
@@ -215,7 +235,11 @@ export default function CourseDetailPage() {
       });
 
       try {
-        await api(`/courses/${course.id}/enroll`, { method: "POST", body: JSON.stringify(selected ? { courseMentorId: selected } : {}) });
+        const d = await api<{ enrollment?: { id: string } }>(`/courses/${course.id}/enroll`, {
+          method: "POST",
+          body: JSON.stringify(selected ? { courseMentorId: selected } : {}),
+        });
+        if (d.enrollment) setEnrollmentId(d.enrollment.id);
         const me = await api<{ user: import("@/lib/api").User }>("/auth/me").catch(() => null);
         if (me) updateCachedUser(me.user);
         setShowPay(false);
@@ -263,23 +287,17 @@ export default function CourseDetailPage() {
             >
               {enrolled ? "Enrolled" : busy ? "Enrolling…" : course.mentors.length > 0 && !selected ? "Pick a mentor first" : "Enroll in this course"}
             </button>
-            {enrolled && enrollmentId && (
-              <Link
-                href={`/messages?enrollment=${enrollmentId}`}
-                className="rounded-xl border border-brand-600 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-100"
-              >
-                Message your mentor
-              </Link>
-            )}
             <button
               onClick={toggleWishlist}
               disabled={saving}
               aria-pressed={saved}
-              className={`rounded-xl border px-4 py-3 text-sm font-semibold transition disabled:opacity-60 ${
+              aria-label={saved ? "Remove from bookmarks" : "Bookmark this course"}
+              className={`flex items-center gap-1.5 rounded-xl border px-4 py-3 text-sm font-semibold transition disabled:opacity-60 ${
                 saved ? "border-brand-600 bg-brand-50 text-brand-700" : "border-slate-300 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700"
               }`}
             >
-              {saved ? "Saved ✓" : "Save for later"}
+              <BookmarkIcon className={`h-4 w-4 ${saved ? "fill-brand-600" : ""}`} />
+              {saved ? "Bookmarked" : "Bookmark"}
             </button>
             <Link
               href={`/teachers/apply?course=${course.slug}`}
@@ -294,26 +312,35 @@ export default function CourseDetailPage() {
       {course.mentors.length > 0 && (
         <section className="mt-8">
           <h2 className="font-display text-xl font-semibold text-slate-900">Choose your mentor</h2>
-          <p className="mt-1 text-sm text-slate-500">Each mentor runs the course their own way, with their own chapters.</p>
+          <p className="mt-1 text-sm text-slate-500">Each mentor runs the course their own way. Full mentors are closed — pick one with open seats.</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {course.mentors.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => setSelected(m.id)}
-                aria-pressed={selected === m.id}
-                className={`rounded-2xl border p-5 text-left transition ${
-                  selected === m.id ? "border-brand-600 bg-brand-50" : "border-slate-200 bg-white hover:border-brand-300"
-                }`}
-              >
-                <p className="font-semibold text-slate-900">{m.mentor.name}</p>
-                {m.mentor.education && <p className="mt-0.5 text-xs text-slate-500">{m.mentor.education}</p>}
-                {m.mentor.bio && <p className="mt-2 text-sm text-slate-600">{m.mentor.bio}</p>}
-                <p className="mt-3 text-xs font-medium text-brand-700">
-                  {m._count.enrollments} learners · {m.chapters.length} chapters
-                </p>
-              </button>
-            ))}
+            {course.mentors.map((m) => {
+              const full = m.seatsLeft <= 0;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setSelected(m.id)}
+                  disabled={full}
+                  aria-pressed={selected === m.id}
+                  className={`rounded-2xl border p-5 text-left transition ${
+                    selected === m.id ? "border-brand-600 bg-brand-50" : "border-slate-200 bg-white hover:border-brand-300"
+                  } ${full ? "opacity-60" : ""}`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-slate-900">{m.mentor.name}</p>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${full ? "bg-red-50 text-red-600" : "bg-brand-50 text-brand-700"}`}>
+                      {full ? "Full" : `${m.seatsLeft} seats left`}
+                    </span>
+                  </div>
+                  {m.mentor.education && <p className="mt-0.5 text-xs text-slate-500">{m.mentor.education}</p>}
+                  {m.mentor.bio && <p className="mt-2 text-sm text-slate-600">{m.mentor.bio}</p>}
+                  <p className="mt-3 text-xs font-medium text-brand-700">
+                    {m._count.enrollments} learners · {m.chapters.length} chapters
+                  </p>
+                </button>
+              );
+            })}
           </div>
         </section>
       )}
@@ -378,6 +405,17 @@ export default function CourseDetailPage() {
         </section>
       )}
 
+      {mentorView && (
+        <div className="mt-12 border-t border-slate-200 pt-10">
+          <MentorCoursePanel
+            courseId={course.id}
+            courseSlug={course.slug}
+            courseMentorId={mentorView.courseMentorId}
+            courseTitle={course.title}
+          />
+        </div>
+      )}
+
       {activeMentor && activeMentor.chapters.length > 0 && (
         <section className="mt-10">
           <h2 className="font-display text-xl font-semibold text-slate-900">
@@ -404,7 +442,34 @@ export default function CourseDetailPage() {
         </section>
       )}
 
-      <CourseChat courseId={course.id} />
+      {/* Course library — PPTs, PDFs, links the mentor uploaded for this course */}
+      {course.resources.length > 0 && (
+        <section className="mt-10">
+          <h2 className="font-display text-xl font-semibold text-slate-900">Course resources</h2>
+          <ul className="mt-4 space-y-3">
+            {course.resources.map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5">
+                <div>
+                  <p className="font-semibold text-slate-900">{r.title}</p>
+                  <p className="mt-0.5 text-sm text-slate-500">
+                    {r.subject} · {r.kind}
+                    {r.fileSizeBytes != null && ` · ${(r.fileSizeBytes / 1024).toFixed(0)} KB`} · {new Date(r.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
+                  Open
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {enrolled && enrollmentId ? (
+        <MentorDM enrollmentId={enrollmentId} courseTitle={course.title} />
+      ) : (
+        <CourseChat courseId={course.id} />
+      )}
 
       <div className="mt-10 space-y-6">
         {course.modules.map((mod) => (
