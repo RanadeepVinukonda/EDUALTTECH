@@ -1,5 +1,10 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import { randomUUID } from "node:crypto";
+import { prisma } from "../../lib/prisma.js";
+import { uploadFile, publicFileUrl } from "../../lib/storage.js";
+import { config } from "../../config/env.js";
+import { ApiError } from "../../utils/ApiError.js";
 import {
   register,
   login,
@@ -63,6 +68,35 @@ router.post("/dev/confirm-email", validate(resendVerificationSchema), devConfirm
 router.get("/me", requireAuth, me);
 router.patch("/me", requireAuth, validate(updateProfileSchema), updateProfile);
 router.post("/change-password", requireAuth, validate(changePasswordSchema), changePassword);
+
+// Avatar upload — raw image body → Supabase Storage → returns the new URL.
+router.post("/avatar", requireAuth, async (req, res, next) => {
+  try {
+    const raw = (req.headers["x-avatar-mime"] ?? req.headers["content-type"] ?? "").toString();
+    const mimeType = raw.split(/[;,]/)[0] || "image/jpeg";
+    if (!mimeType.startsWith("image/")) throw ApiError.badRequest("Avatar must be an image");
+    const maxBytes = config.limits.maxUploadBytes;
+    const length = Number(req.headers["content-length"] ?? 0);
+    if (!Number.isFinite(length) || length <= 0) throw ApiError.badRequest("Missing Content-Length");
+    if (length > maxBytes) {
+      throw ApiError.badRequest(`Avatar too large — max ${Math.round(maxBytes / 1024 / 1024)} MB`);
+    }
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) chunks.push(chunk as Buffer);
+    const body = Buffer.concat(chunks);
+    if (body.byteLength !== length) throw ApiError.badRequest("Body size does not match Content-Length");
+
+    const ext = mimeType.split("/")[1] ?? "jpeg";
+    const path = `avatars/${req.user!.id}/${randomUUID()}.${ext}`;
+    await uploadFile(config.supabase.storageBucket, path, body, mimeType);
+    const avatarUrl = publicFileUrl(config.supabase.storageBucket, path);
+    await prisma.user.update({ where: { id: req.user!.id }, data: { avatarUrl } });
+    res.status(201).json({ success: true, data: { avatarUrl } });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.post("/phone/send-otp", authLimiter, requireAuth, validate(sendPhoneOtpSchema), sendPhoneOtp);
 router.post("/phone/verify-otp", requireAuth, validate(verifyPhoneOtpSchema), verifyPhoneOtp);

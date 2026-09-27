@@ -1,0 +1,152 @@
+import { Router } from "express";
+import { z } from "zod";
+import { prisma } from "../../lib/prisma.js";
+import { requireAuth } from "../../middlewares/auth.js";
+import { validate } from "../../middlewares/validate.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { param } from "../../utils/params.js";
+import type { Role } from "@prisma/client";
+
+const router = Router();
+
+type AuthUser = { id: string; role: Role };
+
+/** Admins, course owners and mentors of the course may edit its content. */
+async function assertContentAccess(courseId: string, user: AuthUser): Promise<void> {
+  if (user.role === "ADMIN") return;
+  const [owns, mentors] = await Promise.all([
+    prisma.course.findFirst({ where: { id: courseId, teacherId: user.id }, select: { id: true } }),
+    prisma.courseMentor.findFirst({ where: { courseId, mentorId: user.id }, select: { id: true } }),
+  ]);
+  if (!owns && !mentors) throw ApiError.forbidden("Only the course owner, mentors or admins can edit course content");
+}
+
+const moduleSchema = z.object({
+  title: z.string().trim().min(2).max(160),
+  position: z.number().int().min(1).max(500).optional(),
+});
+
+router.get("/:courseId/modules", requireAuth, async (req, res, next) => {
+  try {
+    await assertContentAccess(param(req, "courseId"), req.user!);
+    const modules = await prisma.module.findMany({
+      where: { courseId: param(req, "courseId") },
+      orderBy: { position: "asc" },
+      include: { lessons: { orderBy: { position: "asc" } } },
+    });
+    res.json({ success: true, data: { modules } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/:courseId/modules", requireAuth, validate(moduleSchema), async (req, res, next) => {
+  try {
+    const courseId = param(req, "courseId");
+    await assertContentAccess(courseId, req.user!);
+    const last = await prisma.module.findFirst({ where: { courseId }, orderBy: { position: "desc" }, select: { position: true } });
+    const module = await prisma.module.create({
+      data: { courseId, title: req.body.title, position: req.body.position ?? (last?.position ?? 0) + 1 },
+    });
+    res.status(201).json({ success: true, data: { module } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+const moduleUpdate = moduleSchema.partial();
+
+router.patch("/modules/:id", requireAuth, validate(moduleUpdate), async (req, res, next) => {
+  try {
+    const module = await prisma.module.findUnique({ where: { id: param(req, "id") }, select: { id: true, courseId: true } });
+    if (!module) throw ApiError.notFound("Module not found");
+    await assertContentAccess(module.courseId, req.user!);
+    const updated = await prisma.module.update({ where: { id: module.id }, data: req.body });
+    res.json({ success: true, data: { module: updated } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/modules/:id", requireAuth, async (req, res, next) => {
+  try {
+    const module = await prisma.module.findUnique({ where: { id: param(req, "id") }, select: { id: true, courseId: true } });
+    if (!module) throw ApiError.notFound("Module not found");
+    await assertContentAccess(module.courseId, req.user!);
+    await prisma.module.delete({ where: { id: module.id } });
+    res.json({ success: true, data: { message: "Module deleted" } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+const lessonSchema = z.object({
+  title: z.string().trim().min(2).max(200),
+  type: z.enum(["VIDEO", "READING", "QUIZ", "ASSIGNMENT"]).default("READING"),
+  contentUrl: z.union([z.string().url(), z.literal("")]).optional(),
+  textContent: z.string().max(20_000).optional(),
+  position: z.number().int().min(1).max(500).optional(),
+  isPublished: z.boolean().optional(),
+});
+
+async function assertLessonAccess(lessonId: string, user: AuthUser): Promise<{ id: string; courseId: string }> {
+  const lesson = await prisma.lesson.findUnique({ where: { id: lessonId }, select: { id: true, courseId: true } });
+  if (!lesson) throw ApiError.notFound("Lesson not found");
+  await assertContentAccess(lesson.courseId, user);
+  return lesson;
+}
+
+router.post("/:courseId/lessons", requireAuth, validate(lessonSchema.omit({ position: true }).required({ title: true })), async (req, res, next) => {
+  try {
+    const courseId = param(req, "courseId");
+    const moduleId = (req.headers["x-module-id"] ?? "").toString();
+    if (!moduleId) throw ApiError.badRequest("x-module-id header is required");
+    const module = await prisma.module.findUnique({ where: { id: moduleId }, select: { id: true, courseId: true } });
+    if (!module || module.courseId !== courseId) throw ApiError.badRequest("Module does not belong to this course");
+    await assertContentAccess(courseId, req.user!);
+    const last = await prisma.lesson.findFirst({ where: { moduleId }, orderBy: { position: "desc" }, select: { position: true } });
+    const lesson = await prisma.lesson.create({
+      data: {
+        moduleId,
+        courseId,
+        title: req.body.title,
+        type: req.body.type,
+        contentUrl: req.body.contentUrl || null,
+        textContent: req.body.textContent,
+        position: req.body.position ?? (last?.position ?? 0) + 1,
+        isPublished: req.body.isPublished ?? true,
+      },
+    });
+    res.status(201).json({ success: true, data: { lesson } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch("/lessons/:id", requireAuth, validate(lessonSchema.partial()), async (req, res, next) => {
+  try {
+    await assertLessonAccess(param(req, "id"), req.user!);
+    const lesson = await prisma.lesson.update({
+      where: { id: param(req, "id") },
+      data: {
+        ...req.body,
+        contentUrl: req.body.contentUrl === undefined ? undefined : req.body.contentUrl || null,
+      },
+    });
+    res.json({ success: true, data: { lesson } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/lessons/:id", requireAuth, async (req, res, next) => {
+  try {
+    await assertLessonAccess(param(req, "id"), req.user!);
+    await prisma.lesson.delete({ where: { id: param(req, "id") } });
+    res.json({ success: true, data: { message: "Lesson deleted" } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+export default router;

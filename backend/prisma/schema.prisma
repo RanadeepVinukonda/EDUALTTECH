@@ -132,6 +132,7 @@ model User {
   orders             Order[]
   subscriptions      Subscription[]
   wishlist           WishlistItem[]
+  resourceBookmarks  ResourceBookmark[]
   liveMeetings       LiveMeeting[]
   auditLogs          AuditLog[]
   organizationMemberships OrganizationMembership[]
@@ -276,6 +277,7 @@ model Course {
   teacherApplications TeacherApplication[]
   wishlist      WishlistItem[]
   meetings      LiveMeeting[]
+  resources     Resource[]
 
   @@index([teacherId])
   @@index([subject])
@@ -290,6 +292,7 @@ model CourseMentor {
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   mentorId  String
   mentor    User     @relation("CourseMentorUser", fields: [mentorId], references: [id], onDelete: Cascade)
+  capacity  Int      @default(20) // max students this mentor accepts
   createdAt DateTime @default(now())
 
   chapters  CourseChapter[]
@@ -494,14 +497,31 @@ model Resource {
   fileSizeBytes Int?     // uploaded bytes — used for per-user quota
   mimeType      String?
   storagePath   String?  // Supabase Storage object key (uploads only)
+  courseId      String?
+  course        Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull) // course-library resource (mentors)
   ownerId       String?
   owner         User?    @relation(fields: [ownerId], references: [id], onDelete: SetNull)
   downloads     Int      @default(0)
   isPublished   Boolean  @default(true)
   createdAt     DateTime @default(now())
 
+  bookmarks ResourceBookmark[]
+
   @@index([subject])
   @@index([ownerId])
+  @@index([courseId])
+}
+
+model ResourceBookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, resourceId])
+  @@index([userId])
 }
 
 // ────────────────────────────────────────────────────────────────────

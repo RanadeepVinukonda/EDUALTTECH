@@ -10,6 +10,7 @@ import { requestId } from "./middlewares/request-id.js";
 
 import authRoutes from "./modules/auth/auth.routes.js";
 import courseRoutes from "./modules/courses/courses.routes.js";
+import courseContentRoutes from "./modules/courses/content.routes.js";
 import practiceRoutes from "./modules/practice/practice.routes.js";
 import resourceRoutes from "./modules/resources/resources.routes.js";
 import chatRoutes from "./modules/chat/chat.routes.js";
@@ -59,6 +60,7 @@ export function createApp(): express.Express {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/courses", courseRoutes);
+  app.use("/api/courses", courseContentRoutes);
   app.use("/api/practice", practiceRoutes);
   app.use("/api/resources", resourceRoutes);
   app.use("/api/chat", chatRoutes);

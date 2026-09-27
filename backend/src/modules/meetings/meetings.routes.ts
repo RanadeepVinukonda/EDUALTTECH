@@ -5,6 +5,8 @@ import { requireAuth } from "../../middlewares/auth.js";
 import { validate } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
+import { sendEmail } from "../../lib/email.js";
+import { logger } from "../../utils/logger.js";
 import type { Role } from "@prisma/client";
 
 const router = Router();
@@ -121,6 +123,36 @@ router.post("/", validate(createSchema), async (req, res, next) => {
         senderId: req.user!.id,
       },
     });
+
+    // Email the join link to every ACTIVE student so nobody misses the class.
+    void (async () => {
+      try {
+        const students = await prisma.enrollment.findMany({
+          where: { courseId: data.courseId, status: "ACTIVE" },
+          select: { student: { select: { email: true, name: true } } },
+        });
+        for (const { student } of students) {
+          await sendEmail({
+            to: student.email,
+            subject: `Live class: ${data.title}`,
+            text: [
+              `Hi ${student.name},`,
+              "",
+              `A live class has been scheduled for your course.`,
+              `Topic: ${data.title}`,
+              `When: ${new Date(data.scheduledAt).toLocaleString("en-IN", { dateStyle: "full", timeStyle: "short" })}`,
+              `Duration: ${data.durationMin} min`,
+              "",
+              `Join here: ${data.meetingUrl}`,
+              "",
+              "— The Edu-Alt-Tech team",
+            ].join("\n"),
+          });
+        }
+      } catch (err) {
+        logger.warn("Live class email failed", { error: err });
+      }
+    })();
 
     res.status(201).json({ success: true, data: { meeting } });
   } catch (err) {

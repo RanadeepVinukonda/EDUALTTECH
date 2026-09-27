@@ -60,6 +60,43 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// ── My courses — both sides of a user's life on the platform, in one call.
+// seeking: courses I enrolled to learn. mentoring: courses I own or mentor.
+router.get("/mine", requireAuth, async (req, res, next) => {
+  try {
+    const [seeking, mentoring] = await Promise.all([
+      prisma.enrollment.findMany({
+        where: { studentId: req.user!.id },
+        orderBy: { enrolledAt: "desc" },
+        include: {
+          course: {
+            select: {
+              id: true,
+              slug: true,
+              title: true,
+              thumbnailUrl: true,
+              subject: true,
+              pricePaise: true,
+            },
+          },
+          courseMentor: { select: { id: true, capacity: true, mentor: { select: { id: true, name: true, avatarUrl: true } } } },
+        },
+      }),
+      req.user!.role === "ADMIN"
+        ? prisma.courseMentor.findMany({ orderBy: { createdAt: "desc" }, include: { course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, subject: true } } } })
+        : prisma.courseMentor.findMany({
+            where: { OR: [{ mentorId: req.user!.id }, { course: { teacherId: req.user!.id } }] },
+            orderBy: { createdAt: "desc" },
+            include: { course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, subject: true } } },
+          }),
+    ]);
+
+    res.json({ success: true, data: { seeking, mentoring } });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/:slug", async (req, res, next) => {
   try {
     const course = await prisma.course.findUnique({
@@ -85,6 +122,7 @@ router.get("/:slug", async (req, res, next) => {
           },
           orderBy: { createdAt: "asc" },
         },
+        resources: { where: { isPublished: true }, orderBy: { createdAt: "desc" } },
         modules: {
           orderBy: { position: "asc" },
           include: {
@@ -99,6 +137,22 @@ router.get("/:slug", async (req, res, next) => {
       },
     });
     if (!course) throw ApiError.notFound("Course not found");
+
+    const raw = course as typeof course & {
+      mentors: (typeof course.mentors)[number] & { seatsLeft?: number };
+    };
+    // Derive live seat counts — capacity vs ACTIVE enrollments, not total.
+    const mentorCounts = await prisma.enrollment.groupBy({
+      by: ["courseMentorId"],
+      where: { courseId: course.id, status: "ACTIVE", courseMentorId: { not: null } },
+      _count: { _all: true },
+    });
+    const padded = new Map(mentorCounts.map((m) => [m.courseMentorId, m._count._all]));
+    for (const m of raw.mentors) {
+      const used = padded.get(m.id) ?? 0;
+      (m as { seatsLeft?: number }).seatsLeft = Math.max(m.capacity - used, 0);
+    }
+
     res.json({ success: true, data: { course } });
   } catch (err) {
     next(err);
@@ -193,15 +247,34 @@ router.post("/:id/enroll", requireAuth, validate(enrollSchema), async (req, res,
     const courseId = param(req, "id");
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-      include: { mentors: { select: { id: true } } },
+      include: { mentors: { select: { id: true, capacity: true } } },
     });
     if (!course || !course.isPublished) throw ApiError.notFound("Course not found");
 
     const { courseMentorId } = req.body as z.infer<typeof enrollSchema>;
     if (course.mentors.length > 0) {
-      if (!courseMentorId) throw ApiError.badRequest("Choose a mentor before enrolling");
-      if (!course.mentors.some((m) => m.id === courseMentorId)) {
-        throw ApiError.badRequest("That mentor does not teach this course");
+      if (!courseMentorId) throw ApiError.badRequest("Choose a mentor with seats before enrolling");
+      const chosen = course.mentors.find((m) => m.id === courseMentorId);
+      if (!chosen) throw ApiError.badRequest("That mentor does not teach this course");
+
+      // Mentor seats are per-ACTIVE-enrollment. If every mentor is full, the
+      // student gets a readable reason instead of a dead-end 400.
+      const counts = await prisma.enrollment.groupBy({
+        by: ["courseMentorId"],
+        where: { courseId, status: "ACTIVE", courseMentorId: { not: null } },
+        _count: { _all: true },
+      });
+      const used = new Map(counts.map((c) => [c.courseMentorId, c._count._all]));
+      const open = course.mentors
+        .map((m) => ({ id: m.id, seatsLeft: Math.max(m.capacity - (used.get(m.id) ?? 0), 0) }))
+        .filter((m) => m.seatsLeft > 0);
+
+      if ((used.get(chosen.id) ?? 0) >= chosen.capacity) {
+        throw ApiError.conflict(
+          open.length > 0
+            ? `That mentor is full. Choose from mentors with open seats (${open.length} available).`
+            : "All mentors for this course are full right now.",
+        );
       }
     }
 

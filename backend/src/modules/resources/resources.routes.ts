@@ -5,10 +5,54 @@ import { requireAuth } from "../../middlewares/auth.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { config } from "../../config/env.js";
 import { uploadFile, deleteFile, publicFileUrl, storageKey } from "../../lib/storage.js";
+import { param as paramId } from "../../utils/params.js";
 
 const router = Router();
 
 const KINDS = ["pdf", "doc", "slides", "video", "link", "audio"];
+
+// ── Bookmark endpoints (registered before the catch-all routes) ──────────
+router.use("/bookmarks", requireAuth);
+router.get("/bookmarks", async (req, res, next) => {
+  try {
+    const items = await prisma.resourceBookmark.findMany({
+      where: { userId: req.user!.id },
+      include: { resource: true },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json({
+      success: true,
+      data: { count: items.length, items: items.filter((b) => b.resource?.isPublished).map((b) => ({ ...b.resource!, savedAt: b.createdAt })) },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/:id/bookmark", requireAuth, async (req, res, next) => {
+  try {
+    const id = paramId(req, "id");
+    const resource = await prisma.resource.findUnique({ where: { id } });
+    if (!resource || !resource.isPublished) throw ApiError.notFound("Resource not found");
+    await prisma.resourceBookmark.upsert({
+      where: { userId_resourceId: { userId: req.user!.id, resourceId: id } },
+      update: {},
+      create: { userId: req.user!.id, resourceId: id },
+    });
+    res.status(201).json({ success: true, data: { saved: true } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/:id/bookmark", requireAuth, async (req, res, next) => {
+  try {
+    await prisma.resourceBookmark.deleteMany({ where: { userId: req.user!.id, resourceId: paramId(req, "id") } });
+    res.json({ success: true, data: { saved: false } });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get("/", async (req, res, next) => {
   try {
@@ -57,6 +101,7 @@ const UPLOAD_SELECT = {
   mimeType: true,
   createdAt: true,
   ownerId: true,
+  courseId: true,
 } as const;
 
 router.get("/my", requireAuth, async (req, res, next) => {
@@ -108,9 +153,22 @@ router.post(
       const fileName = (req.headers["x-resource-file"] ?? "file").toString().trim() || "file";
       const mimeType = (req.headers["x-resource-mime"] ?? "application/octet-stream").toString();
       const thumbnailUrl = req.headers["x-resource-thumb"]?.toString().trim().slice(0, 500) || null;
+      const courseIdRaw = req.headers["x-resource-course"]?.toString().trim();
 
       if (!title) throw ApiError.badRequest("x-resource-title header is required");
       if (!KINDS.includes(kindRaw)) throw ApiError.badRequest(`Kind must be one of: ${KINDS.join(", ")}`);
+
+      let courseId = null;
+      if (courseIdRaw) {
+        if (req.user!.role !== "ADMIN") {
+          const [owns, mentors] = await Promise.all([
+            prisma.course.findFirst({ where: { id: courseIdRaw, teacherId: req.user!.id }, select: { id: true } }),
+            prisma.courseMentor.findFirst({ where: { courseId: courseIdRaw, mentorId: req.user!.id }, select: { id: true } }),
+          ]);
+          if (!owns && !mentors) throw ApiError.forbidden("Only the course owner, mentors or admins can add course resources");
+        }
+        courseId = courseIdRaw;
+      }
 
       const length = Number(req.headers["content-length"] ?? 0);
       if (!Number.isFinite(length) || length <= 0) throw ApiError.badRequest("Missing Content-Length");
@@ -145,6 +203,7 @@ router.post(
           mimeType,
           storagePath: path,
           ownerId: userId,
+          courseId,
         },
         select: UPLOAD_SELECT,
       });
