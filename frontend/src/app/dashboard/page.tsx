@@ -42,12 +42,9 @@ export default function StudentDashboardPage() {
       <h1 className="font-display text-3xl font-bold text-slate-900">Your learning dashboard</h1>
       <p className="mt-1 text-slate-600">Progress, scores and streaks — all in one place.</p>
 
-      <div className="mt-4 flex flex-wrap gap-3 text-sm">
+      <div className="mt-4 max-w-sm text-sm">
         <Link href="/courses/mine" className="font-semibold text-brand-700 hover:text-brand-800">
           My courses
-        </Link>
-        <Link href="/courses" className="font-semibold text-brand-700 hover:text-brand-800">
-          Browse all →
         </Link>
       </div>
 
@@ -61,12 +58,7 @@ export default function StudentDashboardPage() {
 
       {/* Enrolled courses */}
       <section className="mt-10">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-semibold text-slate-900">My courses</h2>
-          <Link href="/courses" className="text-sm font-semibold text-brand-700 hover:text-brand-800">
-            Browse all →
-          </Link>
-        </div>
+        <h2 className="font-display text-xl font-semibold text-slate-900">My courses</h2>
         {data.enrollments.length === 0 ? (
           <p className="mt-4 rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
             No enrollments yet — your digital classroom is waiting.

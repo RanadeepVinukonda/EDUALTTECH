@@ -38,6 +38,7 @@ const USER_MENU_GROUPS: MenuGroup[] = [
 
 const ACCOUNT_MENU = [
   { href: "/profile", label: "My profile", icon: UserIcon },
+  { href: "/orders", label: "My orders", icon: ShoppingBag },
   { href: "/notifications", label: "Notifications", icon: Bell },
 ];
 
