@@ -219,9 +219,11 @@ async function seedPractice(userId: string) {
   const count = await prisma.practiceAttempt.count({ where: { studentId: userId } });
   if (count > 0) return;
   const probs = await prisma.practiceProblem.findMany({ take: 3 });
+  if (probs.length === 0) return;
   const ups: string[] = ["ACCEPTED", "WRONG_ANSWER", "ACCEPTED", "TIME_LIMIT", "ACCEPTED"];
   for (let i = 0; i < ups.length; i++) {
     const p = probs[i % probs.length];
+    if (!p) continue;
     await prisma.practiceAttempt.create({
       data: { problemId: p.id, studentId: userId, result: ups[i] as never, code: "// seeded", runtimeMs: 45 + i },
     });
