@@ -25,77 +25,49 @@ export function CourseCard({
   onToggleBookmark?: (course: CourseCardData) => void;
 }) {
   return (
-    <Link
-      href={`/courses/${course.slug}`}
-      className="group block [perspective:1000px]"
-    >
-      <div
-        style={{
-          border: "3px solid #0f172a",
-          backgroundColor: "#0f172a",
-          backgroundImage:
-            "linear-gradient(135deg, transparent 18.75%, #e2e8f0 0 31.25%, transparent 0), repeating-linear-gradient(45deg, #e2e8f0 -6.25% 6.25%, #0f172a 0 18.75%)",
-          backgroundSize: "60px 60px",
-          backgroundPosition: "0 0, 0 0",
-        }}
-        className="relative w-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[background-position:-100px_100px,-100px_100px] group-hover:[transform:rotate3d(0.5,1,0,12deg)]"
-      >
-        {onToggleBookmark && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleBookmark(course);
-            }}
-            aria-pressed={saved}
-            aria-label={saved ? "Remove from bookmarks" : "Bookmark this course"}
-            style={{ transform: "translate3d(0, 0, 80px)" }}
-            className="absolute right-3 top-3 flex h-12 w-12 items-center justify-center border border-brand-500 bg-slate-900 shadow-[rgba(100,100,111,0.2)_0_17px_10px_-10px] transition-transform duration-500 hover:[transform:translate3d(0,0,100px)]"
-          >
-            <BookmarkIcon className={`h-5 w-5 ${saved ? "fill-brand-500 text-brand-500" : "text-brand-500"}`} />
-          </button>
+    <Link href={`/courses/${course.slug}`} className="group block [perspective:1000px]">
+      <div className="relative w-full overflow-hidden rounded-2xl border border-slate-200 bg-white transition-transform duration-500 hover:shadow-sm [transform-style:preserve-3d] group-hover:[transform:rotate3d(0.5,1,0,10deg)]">
+        {course.thumbnailUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={course.thumbnailUrl} alt="" className="h-40 w-full object-cover" />
+        ) : (
+          <div className="flex h-40 items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100">
+            <span className="rounded-xl brand-grad px-3 py-1.5 text-sm font-bold text-white">{course.subject[0]}</span>
+          </div>
         )}
-
-        <div className="content-box bg-brand-600 pt-16 [transform-style:preserve-3d]">
-          <div className="flex items-start justify-between">
-            <span
-              className="text-xs font-semibold uppercase tracking-wide text-slate-900 [transform:translate3d(0,0,40px)] transition-transform duration-500 group-hover:[transform:translate3d(0,0,60px)]"
-            >
-              {course.subject}
-            </span>
-            {course.pricePaise != null && (
-              <span
-                className="rounded border-2 border-slate-900 bg-slate-900 px-2 py-0.5 text-xs font-bold text-brand-400 [transform:translate3d(0,0,40px)] transition-transform duration-500 group-hover:[transform:translate3d(0,0,60px)]"
+        <div className="p-6">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{course.subject}</p>
+            {onToggleBookmark && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onToggleBookmark(course);
+                }}
+                aria-pressed={saved}
+                aria-label={saved ? "Remove from bookmarks" : "Bookmark this course"}
+                className={`shrink-0 transition ${saved ? "text-brand-700" : "text-slate-400 hover:text-brand-700"}`}
               >
-                ₹{(course.pricePaise / 100).toLocaleString("en-IN")}
-              </span>
+                <BookmarkIcon className={`h-4 w-4 ${saved ? "fill-brand-600" : ""}`} />
+              </button>
             )}
           </div>
-
-          <h2
-            className="mt-2 font-display text-lg font-bold text-slate-900 [transform:translate3d(0,0,40px)] transition-transform duration-500 group-hover:[transform:translate3d(0,0,60px)]"
-          >
-            {course.title}
-          </h2>
-
-          <p
-            className="mt-2 line-clamp-2 text-xs font-semibold text-slate-900/80 [transform:translate3d(0,0,30px)] transition-transform duration-500 group-hover:[transform:translate3d(0,0,60px)]"
-          >
-            {course.description}
-          </p>
-
-          <p
-            className="mt-3 text-xs font-semibold text-slate-900/70 [transform:translate3d(0,0,30px)] transition-transform duration-500 group-hover:[transform:translate3d(0,0,60px)]"
-          >
+          <h2 className="font-display mt-2 text-lg font-semibold text-slate-900 group-hover:text-brand-800">{course.title}</h2>
+          <p className="mt-2 line-clamp-2 text-sm text-slate-600">{course.description}</p>
+          <p className="mt-4 text-xs text-slate-500">
             {course.teacher.name} · {course._count.modules} modules · {course._count.enrollments} enrolled
+            {course.pricePaise != null && (
+              <span className="ml-1 font-semibold text-ink-700">· ₹{(course.pricePaise / 100).toLocaleString("en-IN")}</span>
+            )}
           </p>
-
-          <span
-            className="mt-4 inline-block cursor-pointer bg-slate-900 px-3 py-1.5 text-[9px] font-black uppercase tracking-wide text-brand-400 [transform:translate3d(0,0,20px)] transition-transform duration-500 group-hover:[transform:translate3d(0,0,60px)]"
-          >
-            Visit Course
-          </span>
         </div>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full bg-brand-600 py-3 text-center text-sm font-bold uppercase tracking-wider text-white transition-transform duration-150 group-hover:translate-y-0"
+        >
+          Visit Course
+        </span>
       </div>
     </Link>
   );
