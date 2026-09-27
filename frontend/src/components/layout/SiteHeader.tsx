@@ -61,12 +61,13 @@ function DropdownMenu({
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onOpenChange(false);
     };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, [onOpenChange]);
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open, onOpenChange]);
 
   const anyActive = items.some((i) => isActive(i.href, pathname));
 
