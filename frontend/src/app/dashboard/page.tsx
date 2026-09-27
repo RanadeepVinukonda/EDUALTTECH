@@ -58,7 +58,12 @@ export default function StudentDashboardPage() {
 
       {/* Enrolled courses */}
       <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold text-slate-900">My courses</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-xl font-semibold text-slate-900">My courses</h2>
+          <Link href="/courses" className="text-sm font-semibold text-brand-700 hover:text-brand-800">
+            Browse all →
+          </Link>
+        </div>
         {data.enrollments.length === 0 ? (
           <p className="mt-4 rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
             No enrollments yet — your digital classroom is waiting.
