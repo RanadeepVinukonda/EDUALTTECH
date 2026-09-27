@@ -62,12 +62,6 @@ export function CourseCard({
             )}
           </p>
         </div>
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full bg-brand-600 py-3 text-center text-sm font-bold uppercase tracking-wider text-white transition-transform duration-150 group-hover:translate-y-0"
-        >
-          Visit Course
-        </span>
       </div>
     </Link>
   );
