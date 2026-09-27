@@ -193,25 +193,35 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-4">
-          <Link href={user ? home : "/"} className="flex items-center gap-2">
+          <Link href={user ? home : "/"} className="group flex items-center gap-2">
             {logoOk ? (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/brand/logo.png"
-                  alt="EduAltTech"
-                  className="h-9 w-auto"
+                  alt="EduAltTech Logo"
+                  className="h-12 w-12 overflow-hidden rounded-xl object-cover transition-transform group-hover:scale-105"
                   onError={() => setLogoOk(false)}
                   data-logo
                 />
-                <span className="font-display text-lg font-semibold text-slate-900">EduAltTech</span>
+                <span className="block leading-tight">
+                  <span className="block text-lg font-bold tracking-tight text-slate-900">EduAltTech</span>
+                  <span className="hidden text-[10px] font-semibold uppercase leading-tight tracking-widest text-brand-600 sm:block">
+                    Education Technology Partner
+                  </span>
+                </span>
               </>
             ) : (
               <span className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg brand-grad font-display text-lg font-bold text-white">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl brand-grad font-display text-lg font-bold text-white">
                   E
                 </span>
-                <span className="font-display text-lg font-semibold text-slate-900">EduAltTech</span>
+                <span className="block leading-tight">
+                  <span className="block text-lg font-bold tracking-tight text-slate-900">EduAltTech</span>
+                  <span className="hidden text-[10px] font-semibold uppercase leading-tight tracking-widest text-brand-600 sm:block">
+                    Education Technology Partner
+                  </span>
+                </span>
               </span>
             )}
           </Link>

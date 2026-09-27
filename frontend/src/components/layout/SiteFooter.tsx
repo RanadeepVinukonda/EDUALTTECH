@@ -24,7 +24,20 @@ export function SiteFooter() {
     <footer className="bg-ink-800">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div>
-          <p className="font-display text-lg font-semibold text-white">EduAltTech</p>
+          <Link href="/" className="group flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/logo.png"
+              alt="EduAltTech Logo"
+              className="h-12 w-12 overflow-hidden rounded-xl object-cover transition-transform group-hover:scale-105"
+            />
+            <span className="block leading-tight">
+              <span className="block text-lg font-bold tracking-tight text-white">EduAltTech</span>
+              <span className="hidden text-[10px] font-semibold uppercase leading-tight tracking-widest text-brand-400 sm:block">
+                Education Technology Partner
+              </span>
+            </span>
+          </Link>
           <p className="mt-2 text-sm text-ink-200">
             The skill marketplace of the <span className="font-semibold text-white">Setsuzoku</span> group — digital solutions and marketing &amp; admissions alongside.
           </p>
