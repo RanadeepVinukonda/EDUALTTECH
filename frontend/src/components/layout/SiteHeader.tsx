@@ -195,7 +195,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href={user ? home : "/"} className="flex items-center gap-2">
             {logoOk ? (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}

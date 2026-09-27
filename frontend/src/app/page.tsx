@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HomeLanding from "@/components/home/HomeLanding";
+import { RedirectAuthed } from "@/components/RedirectAuthed";
 
 export const metadata: Metadata = {
   title: "Edu Alt Tech | Skills Meet Students — Mentors, Tuition & School Tech",
@@ -41,6 +42,7 @@ const organizationJsonLd = {
 export default function HomePage() {
   return (
     <>
+      <RedirectAuthed />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
