@@ -71,13 +71,9 @@ function DropdownMenu({
   const anyActive = items.some((i) => isActive(i.href, pathname));
 
   return (
-    <div
-      className="relative"
-      ref={ref}
-      onMouseEnter={() => onOpenChange(true)}
-      onMouseLeave={() => onOpenChange(false)}
-    >
+    <div className="relative" ref={ref}>
       <button
+        type="button"
         onClick={() => onOpenChange(!open)}
         className={`flex items-center gap-1 text-sm ${
           anyActive ? "font-semibold text-brand-700" : "font-medium text-slate-600 hover:text-brand-700"
