@@ -278,12 +278,6 @@ export function SiteHeader() {
               </Link>
             </>
           )}
-          <Link
-            href={home}
-            className="hidden rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-50 sm:inline-block"
-          >
-            {user?.role === "ADMIN" ? "Admin panel" : "Dashboard"}
-          </Link>
         </div>
       </div>
 
