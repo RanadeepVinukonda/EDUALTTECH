@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { api, getAccessToken } from "@/lib/api";
+import { api, getAccessToken, API_BASE } from "@/lib/api";
 import { Loader } from "@/components/Loader";
 import { useMinLoading } from "@/lib/useMinLoading";
 
@@ -80,7 +80,7 @@ export default function ResourcesPage() {
     try {
       // ponytail: raw put; the API helper forces JSON, so this goes direct,
       // accepting a re-login if the token happens to rotate mid-upload.
-      const res = await fetch(`/backend/resources/upload`, {
+      const res = await fetch(`${API_BASE}/resources/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
