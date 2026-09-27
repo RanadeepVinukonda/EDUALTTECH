@@ -181,3 +181,72 @@ body {
     transform: rotate(0deg);
   }
 }
+
+/* ── 404 face ─────────────────────────────────────────────── */
+.face-404-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 3rem 1.5rem;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+.face-404 {
+  width: 200px;
+}
+
+.face-404__eyes,
+.face-404__eye-lid,
+.face-404__mouth-left,
+.face-404__mouth-right,
+.face-404__nose,
+.face-404__pupil {
+  animation: face404-eyes 1s 0.3s forwards;
+}
+
+.face-404__eye-lid,
+.face-404__pupil {
+  animation-duration: 4s;
+  animation-delay: 1.3s;
+  animation-iteration-count: infinite;
+}
+
+.face-404__eye-lid { animation-name: face404-lid; }
+.face-404__mouth-left { animation-name: face404-mouth-left; }
+.face-404__mouth-right { animation-name: face404-mouth-right; }
+.face-404__nose { animation-name: face404-nose; }
+.face-404__pupil { animation-name: face404-pupil; }
+
+@keyframes face404-eyes {
+  from { transform: translateY(112.5px); }
+  to { transform: translateY(15px); }
+}
+
+@keyframes face404-lid {
+  0%, 40%, 45%, 100% { transform: translateY(0); }
+  42.5% { transform: translateY(17.5px); }
+}
+
+@keyframes face404-pupil {
+  0%, 37.5%, 40%, 45%, 87.5%, 100% { stroke-dashoffset: 0; transform: translate(0, 0); }
+  12.5%, 25%, 62.5%, 75% { transform: translate(-35px, 0); }
+  42.5% { stroke-dashoffset: 35; transform: translate(0, 17.5px); }
+}
+
+@keyframes face404-mouth-left {
+  from, 50% { stroke-dashoffset: -102; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes face404-mouth-right {
+  from, 50% { stroke-dashoffset: 102; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes face404-nose {
+  from { transform: translate(0, 0); }
+  to { transform: translate(0, 22.5px); }
+}
