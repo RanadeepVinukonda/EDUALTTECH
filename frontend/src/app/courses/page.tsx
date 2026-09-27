@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Bookmark as BookmarkIcon } from "lucide-react";
 import { api, getCachedUser } from "@/lib/api";
 import { Loader } from "@/components/Loader";
 import { useMinLoading } from "@/lib/useMinLoading";
@@ -49,7 +48,7 @@ export default function CoursesPage() {
     return () => clearTimeout(t);
   }, [search]);
 
-  async function toggleBookmark(course: CourseItem) {
+  async function toggleBookmark(course: CourseCardData | CourseItem) {
     if (!getCachedUser()) {
       window.location.href = "/login";
       return;
@@ -83,34 +82,15 @@ export default function CoursesPage() {
           No courses found yet — check back soon.
         </p>
       ) : (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((c) => {
-            const saved = bookmarks.has(c.id);
-            return (
-              <CourseCard
-                key={c.id}
-                course={c as unknown as CourseCardData}
-                footer={
-                  <div className="flex items-center justify-end px-6 py-3">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleBookmark(c);
-                      }}
-                      aria-pressed={saved}
-                      aria-label={saved ? "Remove from bookmarks" : "Bookmark this course"}
-                      className={`flex items-center justify-end px-6 py-3 text-xs font-medium transition ${
-                        saved ? "text-brand-700" : "text-slate-400 hover:text-brand-700"
-                      }`}
-                    >
-                      <BookmarkIcon className={`h-4 w-4 ${saved ? "fill-brand-600 text-brand-600" : ""}`} />
-                    </button>
-                  </div>
-                }
-              />
-            );
-          })}
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((c) => (
+            <CourseCard
+              key={c.id}
+              course={c as unknown as CourseCardData}
+              saved={bookmarks.has(c.id)}
+              onToggleBookmark={toggleBookmark}
+            />
+          ))}
         </div>
       )}
     </div>
