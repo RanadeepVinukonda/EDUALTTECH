@@ -18,7 +18,7 @@ export function CourseCard({ course, footer }: { course: CourseCardData; footer?
   return (
     <Link
       href={`/courses/${course.slug}`}
-      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-brand-300 hover:shadow-sm"
+      className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-brand-300 hover:shadow-sm"
     >
       {course.thumbnailUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -40,6 +40,12 @@ export function CourseCard({ course, footer }: { course: CourseCardData; footer?
         </p>
       </div>
       {footer && <div className="border-t border-slate-100">{footer}</div>}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full bg-brand-600 py-3 text-center text-sm font-bold uppercase tracking-wider text-white transition-transform duration-150 group-hover:translate-y-0"
+      >
+        Visit Course
+      </span>
     </Link>
   );
 }

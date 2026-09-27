@@ -100,12 +100,11 @@ export default function CoursesPage() {
                       }}
                       aria-pressed={saved}
                       aria-label={saved ? "Remove from bookmarks" : "Bookmark this course"}
-                      className={`flex items-center gap-1 text-xs font-medium transition ${
+                      className={`flex items-center justify-end px-6 py-3 text-xs font-medium transition ${
                         saved ? "text-brand-700" : "text-slate-400 hover:text-brand-700"
                       }`}
                     >
                       <BookmarkIcon className={`h-4 w-4 ${saved ? "fill-brand-600 text-brand-600" : ""}`} />
-                      {saved ? "Bookmarked" : "Bookmark"}
                     </button>
                   </div>
                 }
