@@ -247,7 +247,7 @@ export default function AdminCoursesPage() {
 
                 <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
                   <Link
-                    href={`/courses/${course.slug}`}
+                    href={`/admin/courses/view/${course.slug}`}
                     className="text-sm font-semibold text-brand-700 hover:text-brand-800"
                   >
                     View course
