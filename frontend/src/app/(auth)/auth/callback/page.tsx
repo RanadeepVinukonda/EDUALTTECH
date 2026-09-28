@@ -12,6 +12,8 @@ function CallbackInner() {
   const [state, setState] = useState<"working" | "verified" | "failed">("working");
   const [message, setMessage] = useState<string | null>(null);
 
+  const isOauth = params.get("oa") === "1";
+
   useEffect(() => {
     (async () => {
       const oauth = params.get("oa") === "1";
@@ -89,8 +91,23 @@ function CallbackInner() {
   if (state === "working") {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-elev2">
-        <h1 className="font-display text-xl font-bold text-slate-900">Confirming your email…</h1>
-        <p className="mt-2 text-sm text-slate-600">This should only take a moment.</p>
+        {isOauth ? (
+          <>
+            <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-brand-100">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 animate-spin text-brand-700" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="12" cy="12" r="9" opacity="0.25" />
+                <path d="M12 3a9 9 0 0 1 9 9" strokeLinecap="round" />
+              </svg>
+            </span>
+            <h1 className="mt-4 font-display text-xl font-bold text-slate-900">Signing you in…</h1>
+            <p className="mt-2 text-sm text-slate-600">A moment while we finish your sign-in.</p>
+          </>
+        ) : (
+          <>
+            <h1 className="font-display text-xl font-bold text-slate-900">Confirming your email…</h1>
+            <p className="mt-2 text-sm text-slate-600">This should only take a moment.</p>
+          </>
+        )}
       </div>
     );
   }
