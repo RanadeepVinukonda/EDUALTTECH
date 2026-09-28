@@ -21,6 +21,14 @@ interface Application {
 
 const STATUSES = ["UNDER_REVIEW", "INTERVIEW", "APPROVED", "REJECTED"] as const;
 
+const BADGE: Record<Application["status"], string> = {
+  PENDING: "bg-slate-100 text-slate-600",
+  UNDER_REVIEW: "bg-amber-50 text-amber-700",
+  INTERVIEW: "bg-ink-100 text-ink-700",
+  APPROVED: "bg-brand-50 text-brand-700",
+  REJECTED: "bg-red-50 text-red-600",
+};
+
 export default function AdminApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +66,7 @@ export default function AdminApplicationsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <h1 className="font-display text-2xl font-bold text-ink-700">Mentor applications</h1>
       <p className="mt-1 text-sm text-slate-600">
         Review each application, schedule an interview, then approve to attach the mentor to their course.
@@ -66,75 +74,136 @@ export default function AdminApplicationsPage() {
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
       {applications.length === 0 ? (
-        <p className="mt-8 rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
+        <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
           No applications yet.
-        </p>
+        </div>
       ) : (
-        <div className="mt-6 space-y-4">
-          {applications.map((app) => (
-            <article key={app.id} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-slate-900">{app.user.name}</p>
-                  <p className="text-sm text-slate-500">
-                    {app.user.email}
-                    {app.user.schoolName ? ` · ${app.user.schoolName}` : ""}
-                  </p>
+        <div className="mt-6 space-y-6">
+          {applications.map((app) => {
+            const initials = app.user.name
+              .split(" ")
+              .map((p) => p[0])
+              .filter(Boolean)
+              .slice(0, 2)
+              .join("")
+              .toUpperCase();
+            return (
+              <article key={app.id} className="rounded-[20px] bg-white p-6 shadow-elev2 sm:p-8">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-700">
+                      {initials}
+                    </span>
+                    <div>
+                      <p className="font-display text-lg font-bold text-slate-900">{app.user.name}</p>
+                      <p className="text-sm text-slate-500">
+                        {app.user.email}
+                        {app.user.schoolName ? ` · ${app.user.schoolName}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${BADGE[app.status]}`}>
+                    {app.status.replace("_", " ")}
+                  </span>
                 </div>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                  {app.status.replace("_", " ")}
-                </span>
-              </div>
 
-              <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
-                <Row label="Course" value={app.course?.title ?? "Not specified"} />
-                <Row label="Subject" value={app.subject} />
-                <Row label="Experience" value={`${app.experience} year(s)`} />
-                <Row label="Education" value={app.education ?? "—"} />
-                <Row label="Qualifications" value={app.qualifications ?? "—"} />
-                <Row
-                  label="Resume"
-                  value={app.resumeUrl ? <a className="font-medium text-brand-700 hover:text-brand-800" href={app.resumeUrl}>Open link</a> : "—"}
-                />
-              </dl>
-              {app.message && <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">{app.message}</p>}
+                <dl className="mt-5 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+                  <Row label="Course" value={app.course?.title ?? "Not specified"} />
+                  <Row label="Subject" value={app.subject} />
+                  <Row label="Experience" value={`${app.experience} year(s)`} />
+                  <Row label="Education" value={app.education ?? "—"} />
+                  <Row label="Qualifications" value={app.qualifications ?? "—"} />
+                  <Row
+                    label="Resume"
+                    value={app.resumeUrl ? <a className="font-medium text-brand-700 hover:text-brand-800" href={app.resumeUrl}>Open link</a> : "—"}
+                  />
+                </dl>
+                {app.message && (
+                  <div className="mt-4 rounded-[10px] border-[1.5px] border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    {app.message}
+                  </div>
+                )}
 
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <input
-                  placeholder="Note (sent to the applicant)"
-                  value={notes[app.id] ?? ""}
-                  onChange={(e) => setNotes((n) => ({ ...n, [app.id]: e.target.value }))}
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                />
-                <input
-                  type="url"
-                  placeholder="Interview meeting link"
-                  value={links[app.id] ?? app.meetingLink ?? ""}
-                  onChange={(e) => setLinks((l) => ({ ...l, [app.id]: e.target.value }))}
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                />
-              </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="flex h-[50px] items-center rounded-[10px] border-[1.5px] border-slate-200 px-3 transition focus-within:border-brand-500">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <path d="M14 3v4a1 1 0 0 0 1 1h4" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M9 13h6M9 17h4" strokeLinecap="round" />
+                    </svg>
+                    <input
+                      placeholder="Note (sent to the applicant)"
+                      value={notes[app.id] ?? ""}
+                      onChange={(e) => setNotes((n) => ({ ...n, [app.id]: e.target.value }))}
+                      className="ml-2 h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                    />
+                  </div>
+                  <div className="flex h-[50px] items-center rounded-[10px] border-[1.5px] border-slate-200 px-3 transition focus-within:border-brand-500">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <input
+                      type="url"
+                      placeholder="Interview meeting link"
+                      value={links[app.id] ?? app.meetingLink ?? ""}
+                      onChange={(e) => setLinks((l) => ({ ...l, [app.id]: e.target.value }))}
+                      className="ml-2 h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                    />
+                  </div>
+                </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                {STATUSES.map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => review(app, status)}
-                    disabled={busyId === app.id || app.status === status}
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-40 ${
-                      status === "APPROVED"
-                        ? "brand-grad text-white hover:bg-brand-700"
-                        : status === "REJECTED"
-                          ? "border border-red-300 text-red-600 hover:bg-red-50"
-                          : "border border-slate-300 text-slate-700 hover:border-brand-400 hover:text-brand-700"
-                    }`}
-                  >
-                    {status.replace("_", " ")}
-                  </button>
-                ))}
-              </div>
-            </article>
-          ))}
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  {STATUSES.map((status) => {
+                    const busy = busyId === app.id;
+                    const current = app.status === status;
+                    if (status === "INTERVIEW") {
+                      return (
+                        <button
+                          key={status}
+                          type="button"
+                          onClick={() => review(app, status)}
+                          disabled={busy || current}
+                          className={`btn-apply disabled:cursor-not-allowed disabled:opacity-40 ${current ? "ring-2 ring-ink-300" : ""}`}
+                          title="Move to interview with the meeting link above"
+                        >
+                          <div aria-hidden="true">
+                            <div className="pencil" />
+                            <div className="folder">
+                              <div className="top">
+                                <svg viewBox="0 0 24 27">
+                                  <path d="M1,0 L23,0 C23.5522847,-1.01453063e-16 24,0.44771525 24,1 L24,8.17157288 C24,8.70200585 23.7892863,9.21071368 23.4142136,9.58578644 L20.5857864,12.4142136 C20.2107137,12.7892863 20,13.2979941 20,13.8284271 L20,26 C20,26.5522847 19.5522847,27 19,27 L1,27 C0.44771525,27 6.76353751e-17,26.5522847 0,26 L0,1 C-6.76353751e-17,0.44771525 0.44771525,1.01453063e-16 1,0 Z" />
+                                </svg>
+                              </div>
+                              <div className="paper" />
+                            </div>
+                          </div>
+                          {busy ? "Working…" : current ? "Interview" : "Schedule interview"}
+                        </button>
+                      );
+                    }
+                    return (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => review(app, status)}
+                        disabled={busy || current}
+                        className={`h-[50px] rounded-[10px] px-5 text-[15px] font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                          status === "APPROVED"
+                            ? "bg-slate-900 text-white hover:bg-slate-800"
+                            : status === "REJECTED"
+                              ? "border-[1.5px] border-red-300 bg-white text-red-600 hover:bg-red-50"
+                              : "border-[1.5px] border-slate-200 bg-white text-slate-700 hover:border-brand-400 hover:text-brand-700"
+                        }`}
+                      >
+                        {status.replace("_", " ")}
+                      </button>
+                    );
+                  })}
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </div>
