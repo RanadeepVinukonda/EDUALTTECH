@@ -240,6 +240,32 @@ router.get("/mentors", async (_req, res, next) => {
   }
 });
 
+router.delete("/courses/:id", async (req, res, next) => {
+  try {
+    const courseId = param(req, "id");
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: { _count: { select: { enrollments: true, modules: true, mentors: true } } },
+    });
+    if (!course) throw ApiError.notFound("Course not found");
+
+    // Deleting a course destroys enrollments, lesson progress, DMs and
+    // mentor roadmaps. That's a loss for every paying learner — so it's only
+    // allowed while the course has no active students. Completed/dropped rows
+    // cascade away cleanly; a claim on an active seat must be resolved first.
+    const active = await prisma.enrollment.count({ where: { courseId, status: "ACTIVE" } });
+    if (active > 0) {
+      throw ApiError.conflict("This course has active learners — they'd lose their seat and progress. Reassign or finish them before deleting");
+    }
+
+    await prisma.course.delete({ where: { id: courseId } });
+    res.json({ success: true, data: { message: "Course deleted" } });
+    audit(req.user!.id, "COURSE_DELETED", "Course", courseId, { title: course.title });
+  } catch (err) {
+    next(err);
+  }
+});
+
 const assignMentorSchema = z.object({ mentorId: z.string().min(1).max(40) });
 
 router.post("/courses/:id/mentors", validate(assignMentorSchema), async (req, res, next) => {

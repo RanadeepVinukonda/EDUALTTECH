@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { FormEvent } from "react";
+import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 
 interface CourseRow {
@@ -36,6 +37,8 @@ export default function AdminCoursesPage() {
   const [creating, setCreating] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [createMsg, setCreateMsg] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const describeError = (err: unknown): string => {
     if (err instanceof ApiError && err.details && typeof err.details === "object") {
@@ -105,6 +108,21 @@ export default function AdminCoursesPage() {
   }, []);
 
   useEffect(load, [load]);
+
+  const deleteCourse = async (id: string) => {
+    setDeleting(id);
+    setError(null);
+    try {
+      await api(`/admin/courses/${id}`, { method: "DELETE" });
+      setConfirmDelete(null);
+      setCreateMsg("Course deleted.");
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not delete the course");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -226,6 +244,45 @@ export default function AdminCoursesPage() {
                     </li>
                   ))}
                 </ul>
+
+                <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                  <Link
+                    href={`/courses/${course.slug}`}
+                    className="text-sm font-semibold text-brand-700 hover:text-brand-800"
+                  >
+                    View course
+                  </Link>
+                  {confirmDelete !== course.id ? (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(course.id)}
+                      disabled={deleting === course.id}
+                      className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  ) : (
+                    <span className="flex items-center gap-2 text-sm">
+                      <span className="text-slate-600">Sure?</span>
+                      <button
+                        type="button"
+                        onClick={() => deleteCourse(course.id)}
+                        disabled={deleting === course.id}
+                        className="rounded bg-red-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {deleting === course.id ? "Deleting…" : "Yes, delete"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(null)}
+                        disabled={deleting === course.id}
+                        className="text-xs font-medium text-slate-500 hover:text-slate-800 disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                    </span>
+                  )}
+                </div>
               </div>
             </article>
           ))}
