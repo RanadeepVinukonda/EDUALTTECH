@@ -28,6 +28,7 @@ interface Chapter {
     position: number;
     lessons: Array<{ id: string; title: string; type: string; position: number }>;
   }>;
+  _count?: { modules: number };
 }
 
 interface CourseMeeting {
@@ -37,6 +38,18 @@ interface CourseMeeting {
   durationMin: number;
   meetingUrl: string;
   chapter: { id: string; title: string } | null;
+}
+
+interface Insights {
+  topResources: Array<{ id: string; title: string; kind: string; fileUrl: string; downloads: number }>;
+  topLessons: Array<{
+    id: string;
+    title: string;
+    type: string;
+    position: number;
+    module: { id: string; title: string } | null;
+    _count: { progressItems: number };
+  }>;
 }
 
 interface CourseResource {
@@ -66,7 +79,7 @@ interface CourseDetail {
   subject: string;
   gradeLevel: string | null;
   thumbnailUrl: string | null;
-  teacher: { name: string };
+  teacher: { id: string; name: string };
   mentors: Mentor[];
   resources: CourseResource[];
   modules: Array<{
@@ -92,7 +105,9 @@ export default function CourseDetailPage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [meetings, setMeetings] = useState<CourseMeeting[] | null>(null);
+  const [insights, setInsights] = useState<Insights | null>(null);
   const [mentorView, setMentorView] = useState<{ courseMentorId: string } | null>(null);
+  const [openChapter, setOpenChapter] = useState<string | null>(null);
 
   useEffect(() => {
     api<{ course: CourseDetail }>(`/courses/${params.slug}`)
@@ -122,6 +137,8 @@ export default function CourseDetailPage() {
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
         const meets = await api<{ meetings: CourseMeeting[] }>(`/meetings/course/${course.id}`).catch(() => null);
         if (meets) setMeetings(meets.meetings);
+        const useTopped = await api<{ topResources: Insights["topResources"]; topLessons: Insights["topLessons"] }>(`/courses/${course.id}/insights`).catch(() => null);
+        if (useTopped) setInsights(useTopped);
       } catch {
         // 401/403 — treat as "no access", leave defaults.
       }
@@ -262,6 +279,12 @@ export default function CourseDetailPage() {
   if (!course) return <div className="mx-auto max-w-5xl px-4 py-16 text-slate-500">Loading course…</div>;
 
   const activeMentor = course.mentors.find((m) => m.id === selected) ?? course.mentors[0] ?? null;
+  // Owner/mentor/admin and ACTIVE enrollees see the real course; everyone else
+  // gets the locked roadmap shell until they pay.
+  const unlocked = !!mentorView || enrolled
+    || course.mentors.some((m) => m.mentor.id === getCachedUser()?.id)
+    || course.teacher.id === getCachedUser()?.id
+    || getCachedUser()?.role === "ADMIN";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
@@ -419,113 +442,189 @@ export default function CourseDetailPage() {
         </div>
       )}
 
-      {activeMentor && activeMentor.chapters.length > 0 && (
-        <section className="mt-10">
-          <h2 className="font-display text-xl font-semibold text-slate-900">
-            {activeMentor.mentor.name}&apos;s roadmap
-          </h2>
-          <ol className="mt-4 space-y-4">
-            {activeMentor.chapters.map((c) => {
-              const chapterMeeting = meetings?.find((m) => m.chapter?.id === c.id && new Date(m.scheduledAt).getTime() > Date.now());
-              return (
-                <li key={c.id} className="rounded-2xl border border-slate-200 bg-white p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
-                      <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
-                    </div>
-                    {chapterMeeting && <MeetingCountdown scheduledAt={chapterMeeting.scheduledAt} />}
-                  </div>
-                  {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
-                  <div className="mt-3 flex flex-wrap gap-4 text-sm">
-                    {chapterMeeting && (
-                      <Link href={chapterMeeting.meetingUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-brand-700 hover:text-brand-800">
-                        Join live session
-                      </Link>
+      {/* Knowledge unlocked only after enrolling/mentoring. Anonymous and
+          unenrolled visitors see the roadmap shell — chapter titles, no
+          videos, no concepts, no resources. */}
+      <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="min-w-0">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-display text-xl font-semibold text-slate-900">
+              {activeMentor ? `${activeMentor.mentor.name}&apos;s roadmap` : "Course roadmap"}
+            </h2>
+            {!unlocked && activeMentor && (
+              <p className="text-xs font-medium text-slate-400">
+                {activeMentor.chapters.reduce((n, c) => n + (c._count?.modules ?? 0), 0)} concepts inside — enroll to unlock
+              </p>
+            )}
+          </div>
+
+          {activeMentor && activeMentor.chapters.length === 0 ? (
+            <p className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-400">
+              The roadmap is being prepared. Check back soon.
+            </p>
+          ) : activeMentor ? (
+            <ol className="mt-4 space-y-3">
+              {activeMentor.chapters.map((c) => {
+                const chapterMeeting = meetings?.find((m) => m.chapter?.id === c.id && new Date(m.scheduledAt).getTime() > Date.now());
+                const conceptCount = c._count?.modules ?? c.modules.length;
+                return (
+                  <li key={c.id}>
+                    {unlocked ? (
+                      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                        <button
+                          type="button"
+                          onClick={() => setOpenChapter((oc) => (oc === c.id ? null : c.id))}
+                          aria-expanded={openChapter === c.id}
+                          className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
+                            <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
+                            {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
+                          </div>
+                          <span className="flex shrink-0 items-center gap-2">
+                            {chapterMeeting && <MeetingCountdown scheduledAt={chapterMeeting.scheduledAt} />}
+                            <span className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${openChapter === c.id ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}>
+                              {openChapter === c.id ? "Close" : `${conceptCount} concepts`}
+                            </span>
+                          </span>
+                        </button>
+
+                        {openChapter === c.id && (
+                          <div className="space-y-4 border-t border-slate-100 p-5">
+                            <div className="flex flex-wrap gap-3 text-sm">
+                              {chapterMeeting && (
+                                <Link href={chapterMeeting.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-700">
+                                  Join live session
+                                </Link>
+                              )}
+                              {c.recordingUrl && (
+                                <Link href={c.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
+                                  Watch video
+                                </Link>
+                              )}
+                              {c.meetingUrl && (
+                                <Link href={c.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
+                                  Join live session
+                                </Link>
+                              )}
+                            </div>
+                            {c.recordingUrl && (
+                              <video controls className="aspect-video w-full max-w-2xl rounded-xl bg-slate-900" src={c.recordingUrl} />
+                            )}
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Concepts in this chapter</p>
+                              <ul className="mt-2 space-y-2">
+                                {c.modules.length === 0 && <li className="text-sm text-slate-400">No concepts here yet.</li>}
+                                {c.modules.map((mod) => (
+                                  <li key={mod.id} className="rounded-xl border border-slate-200 p-4">
+                                    <p className="font-semibold text-slate-800">{mod.position}. {mod.title}</p>
+                                    {mod.lessons.length > 0 && (
+                                      <ul className="mt-2 flex flex-wrap gap-2">
+                                        {mod.lessons.map((l) => (
+                                          <li key={l.id} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
+                                            {l.title} <span className="text-slate-400">{l.type.toLowerCase()}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            {c.resources.length > 0 && (
+                              <div>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Resources</p>
+                                <ul className="mt-2 flex flex-wrap gap-2">
+                                  {c.resources.map((r) => (
+                                    <li key={r.url}>
+                                      <Link href={r.url} target="_blank" rel="noopener noreferrer" className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">
+                                        {r.label}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4">
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
+                          <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
+                          {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
+                        </div>
+                        <span className="flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
+                          <span aria-hidden>🔒</span> {conceptCount} concepts
+                        </span>
+                      </div>
                     )}
-                    {c.meetingUrl && <Link href={c.meetingUrl} className="font-medium text-brand-700 hover:text-brand-800">Join live session</Link>}
-                    {c.recordingUrl && <Link href={c.recordingUrl} className="font-medium text-brand-700 hover:text-brand-800">Watch recording</Link>}
-                    {c.resources.map((r) => (
-                      <Link key={r.url} href={r.url} className="font-medium text-brand-700 hover:text-brand-800">
-                        {r.label}
-                      </Link>
-                    ))}
-                  </div>
-                  {c.modules.length > 0 && (
-                    <ul className="mt-4 space-y-2 border-t border-slate-100 pt-4">
-                      {c.modules.map((mod) => (
-                        <li key={mod.id} className="text-sm">
-                          <p className="font-semibold text-slate-800">{mod.position}. {mod.title}</p>
-                          {mod.lessons.length > 0 && (
-                            <ul className="mt-1 flex flex-wrap gap-2">
-                              {mod.lessons.map((l) => (
-                                <li key={l.id} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
-                                  {l.title} <span className="text-slate-400">{l.type.toLowerCase()}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <p className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-400">No roadmap yet for this course.</p>
+          )}
         </section>
-      )}
 
-      {/* Course library — PPTs, PDFs, links the mentor uploaded for this course */}
-      {course.resources.length > 0 && (
-        <section className="mt-10">
-          <h2 className="font-display text-xl font-semibold text-slate-900">Course resources</h2>
-          <ul className="mt-4 space-y-3">
-            {course.resources.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5">
-                <div>
-                  <p className="font-semibold text-slate-900">{r.title}</p>
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    {r.subject} · {r.kind}
-                    {r.fileSizeBytes != null && ` · ${(r.fileSizeBytes / 1024).toFixed(0)} KB`} · {new Date(r.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
-                  Open
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+        {/* Enrolled right rail — live chat + what the class is actually using */}
+        {unlocked && (
+          <aside className="space-y-6">
+            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="font-display text-lg font-semibold text-slate-900">Class chat</h3>
+              {enrolled && enrollmentId ? (
+                <MentorDM enrollmentId={enrollmentId} courseTitle={course.title} />
+              ) : (
+                <CourseChat courseId={course.id} />
+              )}
+            </section>
 
-      {enrolled && enrollmentId ? (
-        <MentorDM enrollmentId={enrollmentId} courseTitle={course.title} />
-      ) : (
-        <CourseChat courseId={course.id} />
-      )}
+            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="font-display text-lg font-semibold text-slate-900">Most viewed resources</h3>
+              {insights && insights.topResources.length > 0 ? (
+                <ul className="mt-3 space-y-2">
+                  {insights.topResources.map((r) => (
+                    <li key={r.id}>
+                      <a
+                        href={r.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm hover:bg-brand-50"
+                      >
+                        <span className="min-w-0 truncate text-slate-700">{r.title}</span>
+                        <span className="shrink-0 text-xs text-slate-400">{r.downloads} opens</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-slate-400">Nothing opened yet.</p>
+              )}
+            </section>
 
-      <div className="mt-10 space-y-6">
-        {course.modules.map((mod) => (
-          <section key={mod.id} className="rounded-2xl border border-slate-200 bg-white">
-            <header className="border-b border-slate-100 px-6 py-4">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Module {mod.position}</p>
-              <h2 className="font-display text-lg font-semibold text-slate-900">{mod.title}</h2>
-            </header>
-            <ul className="divide-y divide-slate-50">
-              {mod.lessons.map((l) => (
-                <li key={l.id} className="flex items-center gap-3 px-6 py-3 text-sm">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
-                    {l.position}
-                  </span>
-                  <span className="text-slate-700">{l.title}</span>
-                  <span className="ml-auto rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-500">{l.type}</span>
-                </li>
-              ))}
-              {mod.lessons.length === 0 && <li className="px-6 py-3 text-sm text-slate-400">Lessons coming soon</li>}
-            </ul>
-          </section>
-        ))}
+            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="font-display text-lg font-semibold text-slate-900">Most watched</h3>
+              {insights && insights.topLessons.length > 0 ? (
+                <ul className="mt-3 space-y-2">
+                  {insights.topLessons.map((l) => (
+                    <li key={l.id} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+                      <span className="min-w-0">
+                        <span className="block truncate text-slate-700">{l.title}</span>
+                        {l.module && <span className="block text-xs text-slate-400">{l.module.title}</span>}
+                      </span>
+                      <span className="shrink-0 text-xs text-slate-400">{l._count.progressItems} completions</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-slate-400">Students haven&apos;t finished lessons yet.</p>
+              )}
+            </section>
+          </aside>
+        )}
       </div>
     </div>
   );

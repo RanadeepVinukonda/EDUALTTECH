@@ -42,3 +42,20 @@ export function requireRole(...roles: Role[]) {
     next();
   };
 }
+
+/** Attach req.user when a valid token is present; never rejects anonymous visitors. */
+export async function optionalAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
+  const header = req.headers.authorization;
+  let token: string | undefined;
+  if (header?.startsWith("Bearer ")) {
+    token = header.slice("Bearer ".length);
+  } else if (config.authCookie) {
+    token = getCookie(req, ACCESS_COOKIE) ?? undefined;
+  }
+  if (!token) return next();
+  const auth = await getUserByToken(token).catch(() => null);
+  if (!auth) return next();
+  const user = await prisma.user.findUnique({ where: { id: auth.id }, select: { id: true, email: true, role: true } });
+  req.user = user ?? { id: auth.id, email: auth.email, role: "USER" };
+  next();
+}

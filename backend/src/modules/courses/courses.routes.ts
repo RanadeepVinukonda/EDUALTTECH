@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { prisma } from "../../lib/prisma.js";
-import { requireAuth, requireRole } from "../../middlewares/auth.js";
+import { requireAuth, requireRole, optionalAuth } from "../../middlewares/auth.js";
 import { validate } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
@@ -97,10 +97,120 @@ router.get("/mine", requireAuth, async (req, res, next) => {
   }
 });
 
-router.get("/:slug", async (req, res, next) => {
+router.get("/:courseId/insights", requireAuth, async (req, res, next) => {
   try {
+    const courseId = param(req, "courseId");
+    const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true, teacherId: true } });
+    if (!course) throw ApiError.notFound("Course not found");
+
+    let canView = req.user!.role === "ADMIN";
+    if (!canView) {
+      const [owns, mentors, enrolled] = await Promise.all([
+        course.teacherId === req.user!.id,
+        prisma.courseMentor.findFirst({ where: { courseId, mentorId: req.user!.id }, select: { id: true } }),
+        prisma.enrollment.findFirst({ where: { courseId, studentId: req.user!.id, status: "ACTIVE" }, select: { id: true } }),
+      ]);
+      canView = owns || !!mentors || !!enrolled;
+    }
+    if (!canView) throw ApiError.forbidden("Enroll in this course to see its insights");
+
+    const [topResources, topLessons] = await Promise.all([
+      prisma.resource.findMany({
+        where: { courseId, isPublished: true },
+        orderBy: [{ downloads: "desc" }, { createdAt: "desc" }],
+        take: 5,
+        select: { id: true, title: true, kind: true, fileUrl: true, downloads: true },
+      }),
+      prisma.lesson.findMany({
+        where: { courseId, isPublished: true },
+        orderBy: [{ progressItems: { _count: "desc" } }, { position: "asc" }],
+        take: 5,
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          position: true,
+          module: { select: { id: true, title: true } },
+          _count: { select: { progressItems: true } },
+        },
+      }),
+    ]);
+
+    res.json({ success: true, data: { topResources, topLessons } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/:slug", optionalAuth, async (req, res, next) => {
+  try {
+    const slug = param(req, "slug");
+    const courseBase = await prisma.course.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        subject: true,
+        gradeLevel: true,
+        thumbnailUrl: true,
+        pricePaise: true,
+        teacher: { select: { id: true, name: true } },
+        _count: { select: { enrollments: true } },
+      },
+    });
+    if (!courseBase) throw ApiError.notFound("Course not found");
+
+    // Content visibility: owners, mentors, admins and ACTIVE enrollees get the
+    // real roadmap (videos, concepts, resources). Everyone else sees a shell.
+    let canView = req.user?.role === "ADMIN";
+    if (!canView && req.user) {
+      const [owns, mentors, enrolled] = await Promise.all([
+        prisma.course.findFirst({ where: { id: courseBase.id, teacherId: req.user.id }, select: { id: true } }),
+        prisma.courseMentor.findFirst({ where: { courseId: courseBase.id, mentorId: req.user.id }, select: { id: true } }),
+        prisma.enrollment.findFirst({
+          where: { courseId: courseBase.id, studentId: req.user.id, status: "ACTIVE" },
+          select: { id: true },
+        }),
+      ]);
+      canView = !!owns || !!mentors || !!enrolled;
+    }
+
+    const chapterShell = {
+      id: true,
+      title: true,
+      summary: true,
+      order: true,
+      _count: { select: { modules: true } },
+    } as const;
+    const chapterFull = {
+      id: true,
+      title: true,
+      summary: true,
+      order: true,
+      meetingUrl: true,
+      recordingUrl: true,
+      resources: true,
+      modules: {
+        where: { chapterId: { not: null } },
+        orderBy: { position: "asc" },
+        select: {
+          id: true,
+          title: true,
+          position: true,
+          lessons: {
+            where: { isPublished: true },
+            orderBy: { position: "asc" },
+            select: { id: true, title: true, type: true, position: true },
+          },
+        },
+      },
+      _count: { select: { modules: true } },
+    } as const;
+
     const course = await prisma.course.findUnique({
-      where: { slug: param(req, "slug") },
+      where: { slug },
       include: {
         teacher: { select: { id: true, name: true } },
         mentors: {
@@ -108,63 +218,40 @@ router.get("/:slug", async (req, res, next) => {
             mentor: { select: { id: true, name: true, avatarUrl: true, bio: true, education: true } },
             chapters: {
               orderBy: { order: "asc" },
-              select: {
-                id: true,
-                title: true,
-                summary: true,
-                order: true,
-                meetingUrl: true,
-                recordingUrl: true,
-                resources: true,
-                modules: {
-                  where: { chapterId: { not: null } },
-                  orderBy: { position: "asc" },
-                  select: {
-                    id: true,
-                    title: true,
-                    position: true,
-                    lessons: {
-                      where: { isPublished: true },
-                      orderBy: { position: "asc" },
-                      select: { id: true, title: true, type: true, position: true },
-                    },
-                  },
-                },
-              },
+              select: canView ? chapterFull : chapterShell,
             },
             _count: { select: { enrollments: true } },
           },
           orderBy: { createdAt: "asc" },
         },
-        resources: { where: { isPublished: true }, orderBy: { createdAt: "desc" } },
-        modules: {
-          orderBy: { position: "asc" },
-          include: {
-            lessons: {
-              where: { isPublished: true },
+        resources: canView ? { where: { isPublished: true }, orderBy: { createdAt: "desc" } } : undefined,
+        modules: canView
+          ? {
               orderBy: { position: "asc" },
-              select: { id: true, title: true, type: true, position: true },
-            },
-          },
-        },
+              include: {
+                lessons: {
+                  where: { isPublished: true },
+                  orderBy: { position: "asc" },
+                  select: { id: true, title: true, type: true, position: true },
+                },
+              },
+            }
+          : undefined,
         _count: { select: { enrollments: true } },
       },
     });
     if (!course) throw ApiError.notFound("Course not found");
 
-    const raw = course as typeof course & {
-      mentors: (typeof course.mentors)[number] & { seatsLeft?: number };
-    };
-    // Derive live seat counts — capacity vs ACTIVE enrollments, not total.
+    // Recompute live seat counts against ACTIVE enrollments.
     const mentorCounts = await prisma.enrollment.groupBy({
       by: ["courseMentorId"],
       where: { courseId: course.id, status: "ACTIVE", courseMentorId: { not: null } },
       _count: { _all: true },
     });
     const padded = new Map(mentorCounts.map((m) => [m.courseMentorId, m._count._all]));
-    for (const m of raw.mentors) {
+    for (const m of course.mentors as Array<{ id: string; capacity: number; seatsLeft?: number }>) {
       const used = padded.get(m.id) ?? 0;
-      (m as { seatsLeft?: number }).seatsLeft = Math.max(m.capacity - used, 0);
+      m.seatsLeft = Math.max(m.capacity - used, 0);
     }
 
     res.json({ success: true, data: { course } });
