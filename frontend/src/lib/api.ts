@@ -14,6 +14,29 @@ export const COOKIE_MODE = process.env.NEXT_PUBLIC_AUTH_COOKIE === "1";
 const ACCESS_KEY = "eat.access";
 const REFRESH_KEY = "eat.refresh";
 const USER_KEY = "eat.user";
+const REMEMBER_KEY = "eat.remember";
+
+// "Remember me" = persist the session across browser restarts (localStorage).
+// Unchecked = session lives only until the tab closes (sessionStorage).
+function sessionStore(): Storage {
+  return localStorage.getItem(REMEMBER_KEY) === "1" ? localStorage : sessionStorage;
+}
+
+function storageGet(key: string): string | null {
+  return sessionStorage.getItem(key) ?? localStorage.getItem(key);
+}
+
+function storageSet(key: string, value: string | null): void {
+  sessionStorage.removeItem(key);
+  localStorage.removeItem(key);
+  if (value !== null) {
+    if (key === REMEMBER_KEY) {
+      localStorage.setItem(key, value);
+    } else {
+      sessionStore().setItem(key, value);
+    }
+  }
+}
 
 export type Role = "USER" | "ADMIN";
 
@@ -60,7 +83,7 @@ export function nextAuthPath(user: User): string {
 
 export function updateCachedUser(user: User): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  storageSet(USER_KEY, JSON.stringify(user));
   window.dispatchEvent(new Event(AUTH_EVENT));
 }
 
@@ -75,47 +98,51 @@ export function subscribeAuth(fn: () => void): () => void {
 
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(ACCESS_KEY);
+  return storageGet(ACCESS_KEY);
 }
 
 export function getCachedUser(): User | null {
   if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(USER_KEY);
+  const raw = storageGet(USER_KEY);
   if (!raw) return null;
   try {
     return JSON.parse(raw) as User;
   } catch {
-    localStorage.removeItem(USER_KEY);
+    [sessionStorage, localStorage].forEach((s) => s.removeItem(USER_KEY));
     return null;
   }
 }
 
-function persistAuth(auth: AuthResponse | null): void {
+function persistAuth(auth: AuthResponse | null, remember = true): void {
   if (typeof window === "undefined") return;
   if (auth) {
+    storageSet(REMEMBER_KEY, remember ? "1" : "0");
     if (!COOKIE_MODE) {
-      localStorage.setItem(ACCESS_KEY, auth.accessToken);
-      localStorage.setItem(REFRESH_KEY, auth.refreshToken);
+      storageSet(ACCESS_KEY, auth.accessToken);
+      storageSet(REFRESH_KEY, auth.refreshToken);
     }
-    localStorage.setItem(USER_KEY, JSON.stringify(auth.user));
+    storageSet(USER_KEY, JSON.stringify(auth.user));
   } else {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-    localStorage.removeItem(USER_KEY);
+    [sessionStorage, localStorage].forEach((s) => {
+      s.removeItem(ACCESS_KEY);
+      s.removeItem(REFRESH_KEY);
+      s.removeItem(USER_KEY);
+      s.removeItem(REMEMBER_KEY);
+    });
   }
   window.dispatchEvent(new Event(AUTH_EVENT));
 }
 
-export function persistAuthTokens(auth: AuthResponse): void {
-  persistAuth(auth);
+export function persistAuthTokens(auth: AuthResponse, remember = true): void {
+  persistAuth(auth, remember);
 }
 
 /** Store access/refresh tokens without a cached profile yet (auth callback). */
 export function persistSessionTokens(accessToken: string, refreshToken: string): void {
   if (typeof window === "undefined") return;
   if (!COOKIE_MODE) {
-    localStorage.setItem(ACCESS_KEY, accessToken);
-    localStorage.setItem(REFRESH_KEY, refreshToken);
+    storageSet(ACCESS_KEY, accessToken);
+    storageSet(REFRESH_KEY, refreshToken);
   }
   window.dispatchEvent(new Event(AUTH_EVENT));
 }
@@ -148,7 +175,7 @@ let refreshInFlight: Promise<boolean> | null = null;
 async function tryRefresh(): Promise<boolean> {
   refreshInFlight ??= (async () => {
     try {
-      const refreshToken = typeof window !== "undefined" ? localStorage.getItem(REFRESH_KEY) : null;
+      const refreshToken = typeof window !== "undefined" ? storageGet(REFRESH_KEY) : null;
       if (!refreshToken) return false;
 
       const res = await fetch(`${API_BASE}/auth/refresh`, {
@@ -161,7 +188,7 @@ async function tryRefresh(): Promise<boolean> {
 
       const json = (await res.json()) as ApiEnvelope<AuthResponse>;
       if (!json.success || !json.data) return false;
-      persistAuthTokens(json.data);
+      persistAuthTokens(json.data, localStorage.getItem(REMEMBER_KEY) === "1");
       return true;
     } finally {
       refreshInFlight = null;

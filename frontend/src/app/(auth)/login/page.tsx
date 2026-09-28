@@ -28,7 +28,7 @@ function LoginForm() {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
-      persistAuthTokens(data);
+      persistAuthTokens(data, remember);
       router.push(nextAuthPath(data.user));
       router.refresh();
     } catch (err) {
