@@ -7,10 +7,14 @@ type Props = InputHTMLAttributes<HTMLInputElement> & { id?: string };
 export default function PasswordInput({ className = "", ...rest }: Props) {
   const [visible, setVisible] = useState(false);
   return (
-    <div className="relative">
+    <div className={`flex h-[50px] items-center rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 transition focus-within:border-brand-500 ${className}`}>
+      <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <rect x="5" y="11" width="14" height="10" rx="2" />
+        <path d="M8 11V7a4 4 0 0 1 8 0v4" strokeLinecap="round" />
+      </svg>
       <input
         type={visible ? "text" : "password"}
-        className={`w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 ${className}`}
+        className="ml-2 h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
         {...rest}
       />
       <button
@@ -18,7 +22,7 @@ export default function PasswordInput({ className = "", ...rest }: Props) {
         aria-label={visible ? "Hide password" : "Show password"}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => setVisible((v) => !v)}
-        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 hover:text-slate-600"
+        className="shrink-0 pl-2 text-slate-400 hover:text-slate-600"
       >
         {visible ? (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

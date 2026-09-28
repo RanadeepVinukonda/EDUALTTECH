@@ -146,29 +146,34 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+          <label htmlFor="email" className="mb-1 block text-sm font-semibold text-slate-800">Email</label>
           <div className="flex gap-2">
-            <input
-              id="email"
-              type="email"
-              required
-              placeholder="you@school.in"
-              value={form.email}
-              disabled={emailVerified}
-              onChange={(e) => {
-                setForm((f) => ({ ...f, email: e.target.value }));
-                setEmailVerified(false);
-              }}
-              className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-200 disabled:bg-slate-50 ${
-                emailVerified ? "border-emerald-400 bg-emerald-50 text-emerald-900" : "border-slate-300 focus:border-brand-500"
-              }`}
-            />
+            <div className="flex h-[50px] flex-1 items-center rounded-[10px] border-[1.5px] border-slate-200 px-3 transition focus-within:border-brand-500">
+              <svg viewBox="0 0 32 32" className="h-5 w-5 shrink-0 text-slate-400" aria-hidden="true">
+                <path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z" />
+              </svg>
+              <input
+                id="email"
+                type="email"
+                required
+                placeholder="you@school.in"
+                value={form.email}
+                disabled={emailVerified}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, email: e.target.value }));
+                  setEmailVerified(false);
+                }}
+                className={`ml-2 h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-60 ${
+                  emailVerified ? "text-emerald-800" : ""
+                }`}
+              />
+            </div>
             <button
               type="button"
               disabled={!emailValid || emailVerified}
               onClick={() => setShowVerify(true)}
-              className={`shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${
-                emailVerified ? "bg-emerald-100 text-emerald-800" : "brand-grad text-white hover:bg-brand-700"
+              className={`shrink-0 rounded-[10px] px-4 text-sm font-medium transition disabled:opacity-50 ${
+                emailVerified ? "bg-emerald-100 text-emerald-800" : "bg-slate-900 text-white hover:bg-slate-800"
               }`}
             >
               {emailVerified ? "Verified ✓" : "Verify"}
@@ -180,17 +185,23 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="phone" className="mb-1 block text-sm font-medium text-slate-700">Phone (optional)</label>
+          <label htmlFor="phone" className="mb-1 block text-sm font-semibold text-slate-800">Phone (optional)</label>
           <div className="flex gap-2">
-            <input
-              id="phone"
-              type="tel"
-              placeholder="+91 98765 43210"
-              value={form.phone}
-              onChange={set("phone")}
-              className={inputCls}
-            />
-            <span className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-400">
+            <div className="flex h-[50px] flex-1 items-center rounded-[10px] border-[1.5px] border-slate-200 px-3 transition focus-within:border-brand-500">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <rect x="7" y="2" width="10" height="20" rx="2" />
+                <path d="M11 18h2" strokeLinecap="round" />
+              </svg>
+              <input
+                id="phone"
+                type="tel"
+                placeholder="+91 98765 43210"
+                value={form.phone}
+                onChange={set("phone")}
+                className="ml-2 h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+              />
+            </div>
+            <span className="flex shrink-0 items-center rounded-[10px] border border-slate-200 px-3 text-xs font-medium text-slate-400">
               OTP coming soon
             </span>
           </div>

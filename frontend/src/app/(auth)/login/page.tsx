@@ -120,7 +120,7 @@ function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-[50px] rounded-[10px] border-[1.5px] border-slate-200 bg-transparent px-0 pt-0 pb-0 text-sm text-slate-800 shadow-none"
+            className="w-full"
             placeholder="Enter your Password"
           />
         </div>
