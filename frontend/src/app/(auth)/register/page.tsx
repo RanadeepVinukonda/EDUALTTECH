@@ -23,7 +23,10 @@ const QUALIFICATIONS = [
 ];
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200";
+  "w-full rounded-[10px] border-[1.5px] border-slate-200 bg-transparent px-3 py-2 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 placeholder:text-slate-400";
+
+const selectCls =
+  "w-full rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -104,7 +107,7 @@ export default function RegisterPage() {
   const higherEd = form.educationClass === "Higher education";
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-elev2">
+    <div className="rounded-[20px] bg-white p-8 shadow-elev2">
       <h1 className="font-display text-2xl font-bold text-ink-700">Create your account</h1>
       <p className="mt-1 text-sm text-slate-600">
         Join free — start learning in minutes. Want to mentor? Pick a course and apply right from its page.
@@ -280,7 +283,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading || !canSubmit}
-          className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="w-full rounded-[10px] bg-slate-900 py-3 text-[15px] font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
         >
           {loading ? "Creating account…" : "Create account"}
         </button>

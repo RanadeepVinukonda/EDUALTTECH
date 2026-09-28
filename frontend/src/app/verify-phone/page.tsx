@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { api, getCachedUser, nextAuthPath, updateCachedUser, type User } from "@/lib/api";
 import { Loader } from "@/components/Loader";
 import { useMinLoading } from "@/lib/useMinLoading";
+import OtpVerifyCard from "@/components/ui/OtpVerifyCard";
 
 export default function VerifyPhonePage() {
   const router = useRouter();
@@ -68,78 +69,90 @@ export default function VerifyPhonePage() {
       router.push(nextAuthPath(data.user));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");
+      setOtp("");
     } finally {
       setBusy(false);
     }
   }
+
+  function skip() {
+    if (!user) return;
+    router.push(nextAuthPath(user));
+  }
+
+  const skipBtn = (
+    <button
+      type="button"
+      onClick={skip}
+      className="mt-6 w-full rounded-[10px] bg-white py-3 font-medium text-slate-600 shadow-[1px_1px_3px_#b5b5b5,-1px_-1px_3px_#ffffff] transition hover:text-slate-900 active:shadow-[inset_2px_2px_4px_#b5b5b5,inset_-2px_-2px_4px_#ffffff]"
+    >
+      Skip for now — go to dashboard
+    </button>
+  );
 
   if (loading) return <Loader />;
   if (!user) return <Loader />;
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:px-6">
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="font-display text-2xl font-bold text-slate-900">Verify your phone</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          {step === "phone" ? "We'll send a 6-digit code to confirm your number." : `Enter the code sent for ${phone}.`}
-        </p>
+      {step === "phone" ? (
+        <div className="rounded-[20px] bg-white p-8 shadow-elev2">
+          <p className="text-2xl font-bold tracking-tight text-slate-900">Verify your phone</p>
+          <p className="mt-1 text-sm text-slate-600">We&apos;ll send a 6-digit code to confirm your number.</p>
 
-        {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-        {message && !error && <p className="mt-4 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{message}</p>}
-        {devOtp && (
-          <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">Local dev only — code: {devOtp}</p>
-        )}
+          {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+          {message && !error && <p className="mt-4 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{message}</p>}
 
-        {step === "phone" ? (
           <form onSubmit={sendOtp} className="mt-6 space-y-4">
             <div>
-              <label htmlFor="phone" className="mb-1 block text-sm font-medium text-slate-700">Mobile number</label>
-              <input
-                id="phone"
-                type="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                placeholder="+91 98765 43210"
-              />
+              <label htmlFor="phone" className="mb-1 block text-sm font-semibold text-slate-800">Mobile number</label>
+              <div className="flex h-[50px] items-center rounded-[10px] border-[1.5px] border-slate-200 px-3 transition focus-within:border-brand-500">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <rect x="7" y="2" width="10" height="20" rx="2" />
+                  <path d="M11 18h2" strokeLinecap="round" />
+                </svg>
+                <input
+                  id="phone"
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="ml-2 h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                  placeholder="Enter your mobile number"
+                />
+              </div>
             </div>
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+              className="w-full rounded-[10px] bg-slate-900 py-3 text-[15px] font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
             >
               {busy ? "Sending…" : "Send code"}
             </button>
           </form>
-        ) : (
-          <form onSubmit={verifyOtp} className="mt-6 space-y-4">
-            <div>
-              <label htmlFor="otp" className="mb-1 block text-sm font-medium text-slate-700">6-digit code</label>
-              <input
-                id="otp"
-                inputMode="numeric"
-                maxLength={6}
-                required
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center text-lg tracking-[0.4em] focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                placeholder="000000"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={busy || otp.length !== 6}
-              className="w-full rounded-lg brand-grad py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
-            >
-              {busy ? "Verifying…" : "Verify phone"}
-            </button>
-            <button type="button" onClick={() => setStep("phone")} className="w-full text-sm text-slate-500 hover:text-slate-700">
-              Use a different number
-            </button>
-          </form>
-        )}
-      </div>
+        </div>
+      ) : (
+        <>
+          <OtpVerifyCard
+            title="Verify your phone"
+            subtitle={`Enter the code sent for ${phone}.`}
+            value={otp}
+            onChange={setOtp}
+            onSubmit={verifyOtp}
+            onBack={() => setStep("phone")}
+            submitLabel={busy ? "Verifying…" : "Verify phone"}
+            busy={busy}
+          />
+
+          {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+          {message && !error && <p className="mt-4 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{message}</p>}
+          {devOtp && (
+            <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">Local dev only — code: {devOtp}</p>
+          )}
+        </>
+      )}
+
+      {skipBtn}
     </div>
   );
 }
