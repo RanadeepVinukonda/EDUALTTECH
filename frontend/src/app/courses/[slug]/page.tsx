@@ -279,12 +279,13 @@ export default function CourseDetailPage() {
   if (!course) return <div className="mx-auto max-w-5xl px-4 py-16 text-slate-500">Loading course…</div>;
 
   const activeMentor = course.mentors.find((m) => m.id === selected) ?? course.mentors[0] ?? null;
+  const user = getCachedUser();
   // Owner/mentor/admin and ACTIVE enrollees see the real course; everyone else
   // gets the locked roadmap shell until they pay.
-  const unlocked = !!mentorView || enrolled
-    || course.mentors.some((m) => m.mentor.id === getCachedUser()?.id)
-    || course.teacher.id === getCachedUser()?.id
-    || getCachedUser()?.role === "ADMIN";
+  const isStaff = !!user && (course.teacher.id === user.id
+    || course.mentors.some((m) => m.mentor.id === user.id)
+    || user.role === "ADMIN");
+  const unlocked = !!mentorView || enrolled || isStaff;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
@@ -304,7 +305,11 @@ export default function CourseDetailPage() {
       <p className="mt-4 max-w-3xl text-lg text-slate-600">{course.description}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
-        {showPay ? null : (
+        {isStaff ? (
+          <span className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-600">
+            You teach this course — learners can enroll and pick you as their mentor.
+          </span>
+        ) : showPay ? null : (
           <>
             <button
               onClick={enroll}
@@ -406,7 +411,11 @@ export default function CourseDetailPage() {
         </div>
       ) : (
         <p className="mt-6 text-sm text-slate-500">
-          {enrolled ? "You are enrolled in this course." : "Pick a plan above to confirm your seat."}
+          {isStaff
+            ? "Manage this course below — chapters, live sessions and student conversations."
+            : enrolled
+              ? "You are enrolled in this course."
+              : "Pick a plan above to confirm your seat."}
         </p>
       )}
 

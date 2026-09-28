@@ -39,6 +39,15 @@ router.post("/apply", requireAuth, validate(applySchema), async (req, res, next)
         where: { courseId_mentorId: { courseId: body.courseId, mentorId: req.user!.id } },
       });
       if (alreadyMentor) throw ApiError.conflict("You are already a mentor for this course");
+
+      // Same rule on the other side: an active learner can't apply to mentor
+      // the course they're currently enrolled in — drop or finish it first.
+      const alreadySeeking = await prisma.enrollment.findUnique({
+        where: { studentId_courseId: { studentId: req.user!.id, courseId: body.courseId } },
+      });
+      if (alreadySeeking?.status === "ACTIVE") {
+        throw ApiError.conflict("You're enrolled as a learner in this course — finish or drop it before applying to mentor it");
+      }
     }
 
     const application = await prisma.teacherApplication.upsert({
@@ -191,6 +200,19 @@ router.post("/applications/:id/review", requireAuth, requireRole("ADMIN"), valid
     const { status, reviewNote, meetingLink } = req.body as z.infer<typeof reviewSchema>;
     if (status === "INTERVIEW" && !meetingLink && !app.meetingLink) {
       throw ApiError.badRequest("Add an interview meeting link before moving to interview");
+    }
+
+    // Approving a mentor for a course they're actively learning would create a
+    // seek+mentor split. If they enrolled while the application was pending, the
+    // admin route fixes it before the approval can go through.
+    if (status === "APPROVED" && app.courseId) {
+      const seeking = await prisma.enrollment.findFirst({
+        where: { studentId: app.userId, courseId: app.courseId, status: "ACTIVE" },
+        select: { id: true },
+      });
+      if (seeking) {
+        throw ApiError.conflict("This applicant is actively learning the same course — drop that enrollment before approving the mentor role");
+      }
     }
 
     const [updated] = await prisma.$transaction([

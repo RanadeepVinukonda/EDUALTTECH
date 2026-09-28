@@ -352,6 +352,19 @@ router.post("/:id/enroll", requireAuth, validate(enrollSchema), async (req, res,
     });
     if (!course || !course.isPublished) throw ApiError.notFound("Course not found");
 
+    // A course can't be both seeked and mentored at the same time: the
+    // owner / mentors are the teaching team, not students in the same course.
+    const isProvider = await prisma.course.findFirst({
+      where: {
+        id: courseId,
+        OR: [{ teacherId: req.user!.id }, { mentors: { some: { mentorId: req.user!.id } } }],
+      },
+      select: { id: true },
+    });
+    if (isProvider) {
+      throw ApiError.conflict("You teach or mentor this course — you can't enroll in it as a student");
+    }
+
     const { courseMentorId } = req.body as z.infer<typeof enrollSchema>;
     if (course.mentors.length > 0) {
       if (!courseMentorId) throw ApiError.badRequest("Choose a mentor with seats before enrolling");
@@ -366,6 +379,15 @@ router.post("/:id/enroll", requireAuth, validate(enrollSchema), async (req, res,
         _count: { _all: true },
       });
       const used = new Map(counts.map((c) => [c.courseMentorId, c._count._all]));
+      // The seeker's own active seat (re-enrolling, switching mentor back)
+      // doesn't consume a new slot, so it must not count against capacity.
+      const existingSeat = await prisma.enrollment.findUnique({
+        where: { studentId_courseId: { studentId: req.user!.id, courseId } },
+        select: { courseMentorId: true },
+      });
+      if (existingSeat?.courseMentorId === chosen.id) {
+        used.set(chosen.id, Math.max((used.get(chosen.id) ?? 0) - 1, 0));
+      }
       const open = course.mentors
         .map((m) => ({ id: m.id, seatsLeft: Math.max(m.capacity - (used.get(m.id) ?? 0), 0) }))
         .filter((m) => m.seatsLeft > 0);
@@ -429,6 +451,7 @@ router.post("/lessons/:lessonId/complete", requireAuth, async (req, res, next) =
       where: { studentId_courseId: { studentId: req.user!.id, courseId: lesson.courseId } },
     });
     if (!enrollment) throw ApiError.forbidden("You are not enrolled in this course");
+    if (enrollment.status !== "ACTIVE") throw ApiError.forbidden("Your enrollment is no longer active");
 
     await prisma.lessonProgress.upsert({
       where: { enrollmentId_lessonId: { enrollmentId: enrollment.id, lessonId } },

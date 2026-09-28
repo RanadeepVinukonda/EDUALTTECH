@@ -254,6 +254,15 @@ router.post("/courses/:id/mentors", validate(assignMentorSchema), async (req, re
     if (!course) throw ApiError.notFound("Course not found");
     if (!mentor || !mentor.isActive) throw ApiError.badRequest("That account cannot be assigned as a mentor");
 
+    // A user can mentor or seek this course, not both. The course owner is the
+    // teaching team's head — assigning them as their own mentor is a duplicate.
+    const [owns, seeks] = await Promise.all([
+      prisma.course.findFirst({ where: { id: courseId, teacherId: mentorId }, select: { id: true } }),
+      prisma.enrollment.findFirst({ where: { courseId, studentId: mentorId, status: "ACTIVE" }, select: { id: true } }),
+    ]);
+    if (owns) throw ApiError.conflict("That user owns this course — no mentor assignment needed");
+    if (seeks) throw ApiError.conflict("That user is actively learning this course — drop the enrollment before assigning them as mentor");
+
     const assignment = await prisma.courseMentor.upsert({
       where: { courseId_mentorId: { courseId, mentorId } },
       update: {},

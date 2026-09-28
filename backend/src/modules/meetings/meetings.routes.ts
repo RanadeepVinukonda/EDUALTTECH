@@ -93,10 +93,13 @@ router.post("/", validate(createSchema), async (req, res, next) => {
     if (data.chapterId) {
       const chapter = await prisma.courseChapter.findUnique({
         where: { id: data.chapterId },
-        include: { courseMentor: { select: { courseId: true } } },
+        include: { courseMentor: { select: { courseId: true, mentorId: true } } },
       });
       if (!chapter || chapter.courseMentor.courseId !== data.courseId) {
         throw ApiError.badRequest("That chapter does not belong to this course");
+      }
+      if (req.user!.role !== "ADMIN" && chapter.courseMentor.mentorId !== req.user!.id) {
+        throw ApiError.forbidden("You can only schedule meetings on your own chapters");
       }
     }
 

@@ -49,10 +49,14 @@ router.post("/:courseId/modules", requireAuth, validate(moduleSchema), async (re
     if (chapterId) {
       const chapter = await prisma.courseChapter.findUnique({
         where: { id: chapterId },
-        select: { courseMentor: { select: { courseId: true } } },
+        select: { courseMentor: { select: { courseId: true, mentorId: true } } },
       });
       if (!chapter || chapter.courseMentor.courseId !== courseId) {
         throw ApiError.badRequest("That chapter does not belong to this course");
+      }
+      // A mentor only manages their own roadmap — not their colleagues' chapters.
+      if (req.user!.role !== "ADMIN" && chapter.courseMentor.mentorId !== req.user!.id) {
+        throw ApiError.forbidden("You can only add concepts to your own chapters");
       }
     }
     const last = await prisma.module.findFirst({
@@ -73,9 +77,17 @@ const moduleUpdate = moduleSchema.partial();
 
 router.patch("/modules/:id", requireAuth, validate(moduleUpdate), async (req, res, next) => {
   try {
-    const module = await prisma.module.findUnique({ where: { id: param(req, "id") }, select: { id: true, courseId: true } });
+    const module = await prisma.module.findUnique({ where: { id: param(req, "id") }, select: { id: true, courseId: true, chapterId: true } });
     if (!module) throw ApiError.notFound("Module not found");
     await assertContentAccess(module.courseId, req.user!);
+    const positions = moduleUpdate.pick({ position: true }).safeParse(req.body);
+    if (positions.success && positions.data.position !== undefined) {
+      const clash = await prisma.module.findFirst({
+        where: { courseId: module.courseId, chapterId: module.chapterId, position: positions.data.position, id: { not: module.id } },
+        select: { id: true },
+      });
+      if (clash) throw ApiError.conflict("Another concept already uses that position");
+    }
     const updated = await prisma.module.update({ where: { id: module.id }, data: req.body });
     res.json({ success: true, data: { module: updated } });
   } catch (err) {
@@ -104,8 +116,8 @@ const lessonSchema = z.object({
   isPublished: z.boolean().optional(),
 });
 
-async function assertLessonAccess(lessonId: string, user: AuthUser): Promise<{ id: string; courseId: string }> {
-  const lesson = await prisma.lesson.findUnique({ where: { id: lessonId }, select: { id: true, courseId: true } });
+async function assertLessonAccess(lessonId: string, user: AuthUser): Promise<{ id: string; courseId: string; moduleId: string }> {
+  const lesson = await prisma.lesson.findUnique({ where: { id: lessonId }, select: { id: true, courseId: true, moduleId: true } });
   if (!lesson) throw ApiError.notFound("Lesson not found");
   await assertContentAccess(lesson.courseId, user);
   return lesson;
@@ -140,8 +152,16 @@ router.post("/:courseId/lessons", requireAuth, validate(lessonSchema.omit({ posi
 
 router.patch("/lessons/:id", requireAuth, validate(lessonSchema.partial()), async (req, res, next) => {
   try {
-    await assertLessonAccess(param(req, "id"), req.user!);
-    const lesson = await prisma.lesson.update({
+    const lesson = await assertLessonAccess(param(req, "id"), req.user!);
+    const positions = lessonSchema.pick({ position: true }).safeParse(req.body);
+    if (positions.success && positions.data.position !== undefined) {
+      const clash = await prisma.lesson.findFirst({
+        where: { moduleId: lesson.id, position: positions.data.position, id: { not: lesson.id } },
+        select: { id: true },
+      });
+      if (clash) throw ApiError.conflict("Another lesson already uses that position");
+    }
+    const updated = await prisma.lesson.update({
       where: { id: param(req, "id") },
       data: {
         ...req.body,
