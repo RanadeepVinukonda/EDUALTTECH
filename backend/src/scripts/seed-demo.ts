@@ -163,7 +163,7 @@ async function seedMentoring(userId: string) {
   const modules = ["Basics", "Data Structures", "Projects"];
   let pos = 0;
   for (const title of modules) {
-    const mod = await prisma.module.findUnique({ where: { courseId_position: { courseId: course.id, position: pos } } });
+    const mod = await prisma.module.findFirst({ where: { courseId: course.id, chapterId: null, position: pos } });
     if (!mod) {
       await prisma.module.create({
         data: {
@@ -182,10 +182,38 @@ async function seedMentoring(userId: string) {
     pos++;
   }
   const meetings = await prisma.liveMeeting.count({ where: { courseId: course.id } });
+  const week1 = await prisma.courseChapter.findFirst({
+    where: { courseMentorId: cm.id, order: 0 },
+    select: { id: true },
+  });
+  const chapterMods = ["Getting started", "Your first script"];
+  let cpos = 0;
+  for (const title of chapterMods) {
+    const mod = await prisma.module.findFirst({
+      where: { courseId: course.id, chapterId: week1?.id, position: cpos },
+    });
+    if (!mod && week1) {
+      await prisma.module.create({
+        data: {
+          courseId: course.id,
+          chapterId: week1.id,
+          title,
+          position: cpos,
+          lessons: {
+            create: [
+              { title: `Lesson ${cpos + 1} — ${title}`, type: "READING", courseId: course.id, position: 0, isPublished: true },
+            ],
+          },
+        },
+      });
+    }
+    cpos++;
+  }
   if (meetings === 0) {
     await prisma.liveMeeting.create({
       data: {
         courseId: course.id,
+        chapterId: week1?.id,
         title: "Live Q&A — Python kickoff",
         description: "First live session for enrolled students.",
         scheduledAt: new Date(Date.now() + 3 * 864e5),

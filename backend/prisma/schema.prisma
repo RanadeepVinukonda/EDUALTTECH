@@ -318,6 +318,7 @@ model CourseChapter {
   updatedAt      DateTime @updatedAt
 
   meetings LiveMeeting[]
+  modules  Module[]
 
   @@unique([courseMentorId, order])
   @@index([courseMentorId])
@@ -327,11 +328,14 @@ model Module {
   id        String  @id @default(cuid())
   courseId  String
   course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chapterId String?
+  chapter   CourseChapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
   title     String
   position  Int
   lessons   Lesson[]
 
-  @@unique([courseId, position])
+  @@unique([courseId, chapterId, position])
+  @@index([chapterId])
 }
 
 model Lesson {

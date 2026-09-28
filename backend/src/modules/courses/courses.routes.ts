@@ -116,6 +116,20 @@ router.get("/:slug", async (req, res, next) => {
                 meetingUrl: true,
                 recordingUrl: true,
                 resources: true,
+                modules: {
+                  where: { chapterId: { not: null } },
+                  orderBy: { position: "asc" },
+                  select: {
+                    id: true,
+                    title: true,
+                    position: true,
+                    lessons: {
+                      where: { isPublished: true },
+                      orderBy: { position: "asc" },
+                      select: { id: true, title: true, type: true, position: true },
+                    },
+                  },
+                },
               },
             },
             _count: { select: { enrollments: true } },

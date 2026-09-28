@@ -29,8 +29,9 @@ const moduleSchema = z.object({
 router.get("/:courseId/modules", requireAuth, async (req, res, next) => {
   try {
     await assertContentAccess(param(req, "courseId"), req.user!);
+    const chapterId = (req.query.chapterId as string | undefined) ?? null;
     const modules = await prisma.module.findMany({
-      where: { courseId: param(req, "courseId") },
+      where: { courseId: param(req, "courseId"), chapterId },
       orderBy: { position: "asc" },
       include: { lessons: { orderBy: { position: "asc" } } },
     });
@@ -44,9 +45,23 @@ router.post("/:courseId/modules", requireAuth, validate(moduleSchema), async (re
   try {
     const courseId = param(req, "courseId");
     await assertContentAccess(courseId, req.user!);
-    const last = await prisma.module.findFirst({ where: { courseId }, orderBy: { position: "desc" }, select: { position: true } });
+    const chapterId = (req.headers["x-chapter-id"] as string | undefined) ?? null;
+    if (chapterId) {
+      const chapter = await prisma.courseChapter.findUnique({
+        where: { id: chapterId },
+        select: { courseMentor: { select: { courseId: true } } },
+      });
+      if (!chapter || chapter.courseMentor.courseId !== courseId) {
+        throw ApiError.badRequest("That chapter does not belong to this course");
+      }
+    }
+    const last = await prisma.module.findFirst({
+      where: { courseId, chapterId },
+      orderBy: { position: "desc" },
+      select: { position: true },
+    });
     const module = await prisma.module.create({
-      data: { courseId, title: req.body.title, position: req.body.position ?? (last?.position ?? 0) + 1 },
+      data: { courseId, chapterId, title: req.body.title, position: req.body.position ?? (last?.position ?? 0) + 1 },
     });
     res.status(201).json({ success: true, data: { module } });
   } catch (err) {

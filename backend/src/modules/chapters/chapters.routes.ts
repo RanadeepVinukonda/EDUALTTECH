@@ -56,7 +56,16 @@ router.get("/mine", requireAuth, async (req, res, next) => {
       where: req.user!.role === "ADMIN" ? {} : { mentorId: req.user!.id },
       include: {
         course: { select: { id: true, title: true, slug: true } },
-        chapters: { orderBy: { order: "asc" } },
+        chapters: {
+          orderBy: { order: "asc" },
+          include: {
+            modules: {
+              where: { chapterId: { not: null } },
+              orderBy: { position: "asc" },
+              include: { lessons: { orderBy: { position: "asc" } } },
+            },
+          },
+        },
         _count: { select: { enrollments: true } },
       },
       orderBy: { createdAt: "desc" },

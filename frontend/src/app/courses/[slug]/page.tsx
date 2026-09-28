@@ -22,6 +22,21 @@ interface Chapter {
   meetingUrl: string | null;
   recordingUrl: string | null;
   resources: Array<{ label: string; url: string }>;
+  modules: Array<{
+    id: string;
+    title: string;
+    position: number;
+    lessons: Array<{ id: string; title: string; type: string; position: number }>;
+  }>;
+}
+
+interface CourseMeeting {
+  id: string;
+  title: string;
+  scheduledAt: string;
+  durationMin: number;
+  meetingUrl: string;
+  chapter: { id: string; title: string } | null;
 }
 
 interface CourseResource {
@@ -76,13 +91,7 @@ export default function CourseDetailPage() {
   const [paying, setPaying] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [meetings, setMeetings] = useState<Array<{
-    id: string;
-    title: string;
-    scheduledAt: string;
-    durationMin: number;
-    meetingUrl: string;
-  }> | null>(null);
+  const [meetings, setMeetings] = useState<CourseMeeting[] | null>(null);
   const [mentorView, setMentorView] = useState<{ courseMentorId: string } | null>(null);
 
   useEffect(() => {
@@ -111,13 +120,7 @@ export default function CourseDetailPage() {
         if (mentoring) setMentorView({ courseMentorId: mentoring.id });
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
-        const meets = await api<{ meetings: Array<{
-          id: string;
-          title: string;
-          scheduledAt: string;
-          durationMin: number;
-          meetingUrl: string;
-        }> }>(`/meetings/course/${course.id}`).catch(() => null);
+        const meets = await api<{ meetings: CourseMeeting[] }>(`/meetings/course/${course.id}`).catch(() => null);
         if (meets) setMeetings(meets.meetings);
       } catch {
         // 401/403 — treat as "no access", leave defaults.
@@ -422,22 +425,53 @@ export default function CourseDetailPage() {
             {activeMentor.mentor.name}&apos;s roadmap
           </h2>
           <ol className="mt-4 space-y-4">
-            {activeMentor.chapters.map((c) => (
-              <li key={c.id} className="rounded-2xl border border-slate-200 bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
-                <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
-                {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
-                <div className="mt-3 flex flex-wrap gap-4 text-sm">
-                  {c.meetingUrl && <Link href={c.meetingUrl} className="font-medium text-brand-700 hover:text-brand-800">Join live session</Link>}
-                  {c.recordingUrl && <Link href={c.recordingUrl} className="font-medium text-brand-700 hover:text-brand-800">Watch recording</Link>}
-                  {c.resources.map((r) => (
-                    <Link key={r.url} href={r.url} className="font-medium text-brand-700 hover:text-brand-800">
-                      {r.label}
-                    </Link>
-                  ))}
-                </div>
-              </li>
-            ))}
+            {activeMentor.chapters.map((c) => {
+              const chapterMeeting = meetings?.find((m) => m.chapter?.id === c.id && new Date(m.scheduledAt).getTime() > Date.now());
+              return (
+                <li key={c.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
+                      <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
+                    </div>
+                    {chapterMeeting && <MeetingCountdown scheduledAt={chapterMeeting.scheduledAt} />}
+                  </div>
+                  {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
+                  <div className="mt-3 flex flex-wrap gap-4 text-sm">
+                    {chapterMeeting && (
+                      <Link href={chapterMeeting.meetingUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-brand-700 hover:text-brand-800">
+                        Join live session
+                      </Link>
+                    )}
+                    {c.meetingUrl && <Link href={c.meetingUrl} className="font-medium text-brand-700 hover:text-brand-800">Join live session</Link>}
+                    {c.recordingUrl && <Link href={c.recordingUrl} className="font-medium text-brand-700 hover:text-brand-800">Watch recording</Link>}
+                    {c.resources.map((r) => (
+                      <Link key={r.url} href={r.url} className="font-medium text-brand-700 hover:text-brand-800">
+                        {r.label}
+                      </Link>
+                    ))}
+                  </div>
+                  {c.modules.length > 0 && (
+                    <ul className="mt-4 space-y-2 border-t border-slate-100 pt-4">
+                      {c.modules.map((mod) => (
+                        <li key={mod.id} className="text-sm">
+                          <p className="font-semibold text-slate-800">{mod.position}. {mod.title}</p>
+                          {mod.lessons.length > 0 && (
+                            <ul className="mt-1 flex flex-wrap gap-2">
+                              {mod.lessons.map((l) => (
+                                <li key={l.id} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
+                                  {l.title} <span className="text-slate-400">{l.type.toLowerCase()}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
           </ol>
         </section>
       )}
@@ -495,4 +529,24 @@ export default function CourseDetailPage() {
       </div>
     </div>
   );
+}
+
+function MeetingCountdown({ scheduledAt }: { scheduledAt: string }) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const diff = new Date(scheduledAt).getTime() - now;
+  if (diff <= 0) {
+    return <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">Live now</span>;
+  }
+  const days = Math.floor(diff / 86_400_000);
+  const hours = Math.floor((diff % 86_400_000) / 3_600_000);
+  const mins = Math.floor((diff % 3_600_000) / 60_000);
+  const secs = Math.floor((diff % 60_000) / 1000);
+  const label = days > 0 ? `${days}d ${hours}h ${mins}m` : `${hours}h ${mins}m ${secs}s`;
+  return <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">Starts in {label}</span>;
 }
