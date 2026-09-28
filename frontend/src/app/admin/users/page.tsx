@@ -18,6 +18,7 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "USER" as "USER" | "ADMIN" });
   const [busy, setBusy] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     api<{ items: UserRow[] }>("/admin/users?limit=100")
@@ -28,8 +29,16 @@ export default function AdminUsersPage() {
   useEffect(load, [load]);
 
   async function toggleActive(u: UserRow) {
-    await api(`/admin/users/${u.id}`, { method: "PATCH", body: JSON.stringify({ isActive: !u.isActive }) });
-    load();
+    setBusyId(u.id);
+    setError(null);
+    try {
+      await api(`/admin/users/${u.id}`, { method: "PATCH", body: JSON.stringify({ isActive: !u.isActive }) });
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not update the account");
+    } finally {
+      setBusyId(null);
+    }
   }
 
   async function createUser(e: FormEvent) {
@@ -126,13 +135,52 @@ export default function AdminUsersPage() {
                     {u.isActive ? "Active" : "Disabled"}
                   </span>
                 </td>
-                <td className="px-5 py-3 text-right">
-                  <button onClick={() => toggleActive(u)} className="text-sm font-semibold text-brand-700 hover:text-brand-800">
-                    {u.isActive ? "Disable" : "Enable"}
-                  </button>
-                  <button onClick={() => removeUser(u)} className="ml-4 text-sm font-semibold text-red-600 hover:text-red-700">
-                    Delete
-                  </button>
+                <td className="px-5 py-3 text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleActive(u)}
+                      disabled={busyId === u.id}
+                      title={u.isActive ? "Disable account" : "Enable account"}
+                      aria-label={u.isActive ? "Disable account" : "Enable account"}
+                      className={`flex h-9 w-9 items-center justify-center rounded-full border transition disabled:opacity-50 ${
+                        u.isActive
+                          ? "border-slate-200 bg-white text-slate-400 hover:border-amber-300 hover:text-amber-600"
+                          : "border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100"
+                      }`}
+                    >
+                      {busyId === u.id ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
+                      ) : u.isActive ? (
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M4.9 4.9l14.2 14.2" />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                          <path d="M22 4L12 14.01l-3-3" />
+                        </svg>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => removeUser(u)}
+                      title="Delete account"
+                      aria-label="Delete account"
+                      className="group relative h-9 w-9 overflow-hidden rounded-full bg-slate-900 text-white transition-all duration-300 hover:w-28 hover:rounded-full hover:bg-red-600"
+                    >
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <svg viewBox="0 0 448 512" className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-6 group-hover:opacity-0" aria-hidden="true">
+                          <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                        </svg>
+                      </span>
+                      <span className="absolute inset-0 -top-4 flex items-end justify-center pb-2.5 text-xs font-semibold text-white opacity-0 transition-all duration-300 group-hover:top-0 group-hover:translate-y-0 group-hover:opacity-100">
+                        Delete
+                      </span>
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
