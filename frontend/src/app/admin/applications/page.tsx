@@ -98,14 +98,14 @@ export default function AdminApplicationsPage() {
           No applications yet.
         </div>
       ) : (
-        <div className="mt-10 space-y-12">
+        <div className="mt-10 flex flex-wrap content-start items-start gap-x-10 gap-y-14">
           {folders().map((folder) => {
             const key = folder.title;
             const isOpen = open[key] ?? false;
             const thumb = folder.apps[0]?.course?.thumbnailUrl ?? null;
             const files = folder.apps.slice(0, 5);
             return (
-              <div key={key} className="flex w-full flex-col items-center">
+              <div key={key} className={`flex flex-col items-start ${isOpen ? "w-full" : "w-[260px]"}`}>
                 <label className="eat-folder-card">
                   <input
                     type="checkbox"
