@@ -90,12 +90,12 @@ export default function AdminApplicationsPage() {
           No applications yet.
         </div>
       ) : (
-        <div className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 space-y-12">
           {folders().map((folder) => {
             const key = folder.title;
             const isOpen = open[key] ?? false;
             return (
-              <div key={key} className="flex min-w-0 flex-col items-center">
+              <div key={key} className="flex w-full flex-col items-center">
                 <label className="eat-folder-card">
                   <input
                     type="checkbox"
@@ -115,11 +115,6 @@ export default function AdminApplicationsPage() {
                       </svg>
                       <div className="eat-folder-label" />
                       <span className="eat-folder-title">{folder.title}</span>
-                      <div className="eat-counter" title={`${folder.apps.length} application${folder.apps.length === 1 ? "" : "s"}`}>
-                        <div className="eat-status-dot" />
-                        <span className="eat-counter-label">Apps</span>
-                        <span className="eat-counter-number">{String(folder.apps.length).padStart(2, "0")}</span>
-                      </div>
                     </div>
                   </div>
                 </label>
