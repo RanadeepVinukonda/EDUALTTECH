@@ -41,7 +41,6 @@ export default function AdminContentPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [draft, setDraft] = useState({ alt: "", category: LOGO_CATEGORIES[0] as string, position: "", url: "" });
   const [uploading, setUploading] = useState(false);
-  const [previewKey, setPreviewKey] = useState(0);
 
   const kind = tab === "logos" ? "logo" : "image";
 
@@ -99,7 +98,6 @@ export default function AdminContentPage() {
       setMessage("Saved.");
       setDraft({ alt: "", category: tab === "logos" ? LOGO_CATEGORIES[0] : PHOTO_CATEGORIES[0], position: "", url: "" });
       load();
-      setPreviewKey((k) => k + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save");
     } finally {
@@ -112,7 +110,6 @@ export default function AdminContentPage() {
       await api(`/cms/admin/media/${row.id}`, { method: "DELETE" });
       setMessage("Deleted.");
       load();
-      setPreviewKey((k) => k + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not delete");
     }
@@ -299,34 +296,6 @@ export default function AdminContentPage() {
           ))}
         </div>
       )}
-
-      <div className="mt-10 rounded-[20px] bg-white p-6 shadow-elev2 sm:p-8">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="font-display text-lg font-bold text-ink-700">Live website preview</h2>
-            <p className="mt-1 text-xs text-slate-500">The actual homepage (edualttech.com) with the saved assets applied.</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setPreviewKey((k) => k + 1)}
-            className="inline-flex shrink-0 items-center gap-2 rounded-[10px] border-[1.5px] border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand-400 hover:text-brand-700"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M23 4v6h-6M1 20v-6h6" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Refresh
-          </button>
-        </div>
-        <div key={previewKey} className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
-          <iframe
-            src="/"
-            title="EduAltTech website live preview"
-            className="h-[70vh] w-full bg-white"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-          />
-        </div>
-      </div>
 
       <div className="mt-10 rounded-[20px] bg-white p-6 shadow-elev2 sm:p-8">
         <h2 className="font-display text-lg font-bold text-ink-700">Site preview</h2>
