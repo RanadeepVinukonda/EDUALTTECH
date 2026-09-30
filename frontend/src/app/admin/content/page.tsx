@@ -242,6 +242,28 @@ export default function AdminContentPage() {
         <p className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-500">
           Nothing here yet — upload and save your first {tab === "logos" ? "logo" : "photo"}.
         </p>
+      ) : tab === "logos" ? (
+        <div className="mt-8 space-y-3">
+          {rows.map((r) => (
+            <article key={r.id} className="flex items-center gap-4 rounded-[16px] bg-white p-4 shadow-elev2">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] bg-slate-50">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={r.url} alt={r.alt ?? ""} className="max-h-9 max-w-9 object-contain" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-slate-900">{r.alt ?? "Untitled"}</p>
+                <p className="mt-1 flex flex-wrap gap-1.5 text-[11px]">
+                  <span className="rounded-full bg-brand-50 px-2 py-0.5 font-semibold text-brand-700">{r.category ?? "—"}</span>
+                </p>
+              </div>
+              <button type="button" onClick={() => remove(r)} title="Delete" aria-label="Delete" className="btn-trash shrink-0">
+                <svg viewBox="0 0 448 512" className="svgIcon" aria-hidden="true">
+                  <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                </svg>
+              </button>
+            </article>
+          ))}
+        </div>
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((r) => (
