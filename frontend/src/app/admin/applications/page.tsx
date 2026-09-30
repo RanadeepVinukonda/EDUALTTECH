@@ -29,14 +29,6 @@ const BADGE: Record<Application["status"], string> = {
   REJECTED: "bg-red-50 text-red-600",
 };
 
-const FILE_COLOR: Record<Application["status"], string> = {
-  PENDING: "#f59e0b",
-  UNDER_REVIEW: "#8b5cf6",
-  INTERVIEW: "#3b82f6",
-  APPROVED: "#10b981",
-  REJECTED: "#f43f5e",
-};
-
 export default function AdminApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -116,11 +108,11 @@ export default function AdminApplicationsPage() {
 
                   <div className="eat-folder-container">
                     <svg className="eat-folder-back" viewBox="0 0 50 40" fill="none" aria-hidden="true">
-                      <path d="M0 4C0 1.79086 1.79086 0 4 0H16.524C17.721 0 18.8415 0.54051 19.574 1.4673L22.426 5.0654C23.1585 5.99219 24.279 6.5327 25.476 6.5327H46C48.2091 6.5327 50 8.32356 50 10.5327V36C50 38.2091 48.2091 40 46 40H4C1.79086 40 0 38.2091 0 36V4Z" fill="#024059" />
+                      <path d="M0 4C0 1.79086 1.79086 0 4 0H16.524C17.721 0 18.8415 0.54051 19.574 1.4673L22.426 5.0654C23.1585 5.99219 24.279 6.5327 25.476 6.5327H46C48.2091 6.5327 50 8.32356 50 10.5327V36C50 38.2091 48.2091 40 46 40H4C1.79086 40 0 38.2091 0 36V4Z" fill="#0056b3" />
                     </svg>
 
                     {files.map((app, i) => (
-                      <div key={app.id} className={`eat-file eat-file-${i + 1}`} style={{ background: FILE_COLOR[app.status] }}>
+                      <div key={app.id} className={`eat-file eat-file-${i + 1}`}>
                         <div className="eat-file-shine" />
                         <div className="eat-file-text">{app.user.name}</div>
                         <div className="eat-file-tag">{app.status.replace("_", " ")}</div>
@@ -135,7 +127,7 @@ export default function AdminApplicationsPage() {
                         </div>
                       ) : (
                         <svg className="eat-folder-front" viewBox="0 0 50 34" fill="none" aria-hidden="true">
-                          <path d="M0 4C0 1.79086 1.79086 0 4 0H46C48.2091 0 50 1.79086 50 4V30C50 32.2091 48.2091 34 46 34H4C1.79086 34 0 32.2091 0 30V4Z" fill="rgba(3, 140, 62, 0.65)" />
+                          <path d="M0 4C0 1.79086 1.79086 0 4 0H46C48.2091 0 50 1.79086 50 4V30C50 32.2091 48.2091 34 46 34H4C1.79086 34 0 32.2091 0 30V4Z" fill="rgba(0, 123, 255, 0.65)" />
                         </svg>
                       )}
                       <div className="eat-folder-label" />
