@@ -239,6 +239,61 @@ body {
   transition-duration: 0.3s;
 }
 
+/* View course button — twin of btn-trash, brand-green expand-on-hover. */
+.btn-view {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #038c3e;
+  border: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition-duration: 0.3s;
+  overflow: hidden;
+  position: relative;
+  text-decoration: none;
+  color: #fff;
+}
+
+.btn-view .svgIcon {
+  width: 12px;
+  transition-duration: 0.3s;
+  color: #fff;
+}
+
+.btn-view:hover {
+  width: 140px;
+  border-radius: 50px;
+  background-color: #026b2f;
+  align-items: center;
+}
+
+.btn-view:hover .svgIcon {
+  width: 50px;
+  transition-duration: 0.3s;
+  transform: translateY(60%);
+}
+
+.btn-view::before {
+  position: absolute;
+  top: -20px;
+  content: "View";
+  color: white;
+  transition-duration: 0.3s;
+  font-size: 2px;
+}
+
+.btn-view:hover::before {
+  font-size: 13px;
+  opacity: 1;
+  transform: translateY(30px);
+  transition-duration: 0.3s;
+}
+
 /* ── "Continue Application" folder+pen button ──────────────
    Ported from the reference card, themed for EduAltTech (ink/green). */
 .btn-apply {

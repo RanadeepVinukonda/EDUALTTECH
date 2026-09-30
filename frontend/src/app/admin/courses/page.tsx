@@ -349,13 +349,14 @@ export default function AdminCoursesPage() {
                 <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
                   <Link
                     href={`/admin/courses/view/${course.slug}`}
-                    className="flex h-[42px] items-center gap-2 rounded-[10px] border-[1.5px] border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-400 hover:text-brand-700"
+                    title="View course"
+                    aria-label="View course"
+                    className="btn-view"
                   >
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" className="svgIcon" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                       <circle cx="12" cy="12" r="3" />
                     </svg>
-                    View course
                   </Link>
                   <button
                     type="button"
