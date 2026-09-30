@@ -35,6 +35,18 @@ export default function AdminApplicationsPage() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [links, setLinks] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+
+  const folders = useCallback(() => {
+    const map = new Map<string, { title: string; apps: Application[] }>();
+    for (const app of applications) {
+      const key = app.course?.title ?? "Unassigned course";
+      const f = map.get(key) ?? { title: key, apps: [] };
+      f.apps.push(app);
+      map.set(key, f);
+    }
+    return [...map.values()];
+  }, [applications]);
 
   const load = useCallback(() => {
     api<{ applications: Application[] }>("/teachers/applications")
@@ -79,7 +91,47 @@ export default function AdminApplicationsPage() {
         </div>
       ) : (
         <div className="mt-6 space-y-6">
-          {applications.map((app) => {
+          {folders().map((folder) => {
+            const key = folder.title;
+            const isOpen = open[key] ?? true;
+            const counts = folder.apps.length;
+            const dots = ["bg-slate-300", "bg-brand-300", "bg-amber-300"].slice(0, Math.min(counts, 3));
+            return (
+              <section key={key} className="rounded-[20px] bg-white shadow-elev2">
+                <button
+                  type="button"
+                  onClick={() => setOpen((o) => ({ ...o, [key]: !isOpen }))}
+                  className="flex w-full items-center gap-4 rounded-[20px] p-5 text-left transition hover:bg-slate-50 sm:p-6"
+                  aria-expanded={isOpen}
+                >
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ink text-white shadow-[0_4px_10px_rgba(2,64,89,0.25)]">
+                    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-display text-lg font-bold text-slate-900">{folder.title}</span>
+                    <span className="block text-sm text-slate-500">{counts} application{counts === 1 ? "" : "s"}</span>
+                  </span>
+                  <span className="hidden shrink-0 gap-1 sm:flex">
+                    {dots.map((c, i) => (
+                      <span key={i} className={`flex h-2 w-2 rounded-full ${c}`} />
+                    ))}
+                  </span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    className={`h-5 w-5 shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? "" : "-rotate-90"}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                {isOpen && (
+                  <div className="space-y-6 px-5 pb-6 sm:px-6">
+                    {folder.apps.map((app) => {
             const initials = app.user.name
               .split(" ")
               .map((p) => p[0])
@@ -195,6 +247,11 @@ export default function AdminApplicationsPage() {
                   ))}
                 </div>
               </article>
+            );
+              })}
+                  </div>
+                )}
+              </section>
             );
           })}
         </div>
