@@ -29,14 +29,6 @@ const BADGE: Record<Application["status"], string> = {
   REJECTED: "bg-red-50 text-red-600",
 };
 
-const FILE_COLOR: Record<Application["status"], string> = {
-  PENDING: "#f59e0b",
-  UNDER_REVIEW: "#8b5cf6",
-  INTERVIEW: "#3b82f6",
-  APPROVED: "#10b981",
-  REJECTED: "#f43f5e",
-};
-
 export default function AdminApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +36,6 @@ export default function AdminApplicationsPage() {
   const [links, setLinks] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
-  const [query, setQuery] = useState<Record<string, string>>({});
 
   const folders = useCallback(() => {
     const map = new Map<string, { title: string; apps: Application[] }>();
@@ -103,14 +94,6 @@ export default function AdminApplicationsPage() {
           {folders().map((folder) => {
             const key = folder.title;
             const isOpen = open[key] ?? false;
-            const q = (query[key] ?? "").toLowerCase();
-            const matched = folder.apps.filter(
-              (a) =>
-                a.user.name.toLowerCase().includes(q) ||
-                a.user.email.toLowerCase().includes(q) ||
-                a.subject.toLowerCase().includes(q)
-            );
-            const files = folder.apps.slice(0, 5);
             return (
               <div key={key} className="flex min-w-0 flex-col items-center">
                 <label className="eat-folder-card">
@@ -120,62 +103,18 @@ export default function AdminApplicationsPage() {
                     checked={isOpen}
                     onChange={() => setOpen((o) => ({ ...o, [key]: !isOpen }))}
                   />
-                  <span className="eat-hint-wrapper" aria-hidden="true">
-                    <span className="eat-hint-text">Click to open</span>
-                    <svg className="eat-hint-arrow" viewBox="0 0 40 40" fill="none">
-                      <path d="M 35 5 C 35 5, 15 5, 10 25 M 10 25 L 3 18 M 10 25 L 18 22" stroke="#60a5fa" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
 
                   <div className="eat-folder-container">
                     <svg className="eat-folder-back" viewBox="0 0 50 40" fill="none" aria-hidden="true">
                       <path d="M0 4C0 1.79086 1.79086 0 4 0H16.524C17.721 0 18.8415 0.54051 19.574 1.4673L22.426 5.0654C23.1585 5.99219 24.279 6.5327 25.476 6.5327H46C48.2091 6.5327 50 8.32356 50 10.5327V36C50 38.2091 48.2091 40 46 40H4C1.79086 40 0 38.2091 0 36V4Z" fill="#024059" />
                     </svg>
 
-                    <div className="eat-folder-search">
-                      <svg className="eat-search-icon" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} aria-hidden="true">
-                        <circle cx={11} cy={11} r={8} />
-                        <line x1={21} y1={21} x2="16.65" y2="16.65" />
-                      </svg>
-                      <input
-                        type="text"
-                        placeholder="Search applicants…"
-                        className="eat-search-input"
-                        value={query[key] ?? ""}
-                        onChange={(e) => setQuery((x) => ({ ...x, [key]: e.target.value }))}
-                      />
-                    </div>
-
-                    {files.map((app, i) => {
-                      const isMore = i === 4 && folder.apps.length > 5;
-                      const cls = `eat-file eat-file-${i + 1}`;
-                      if (isMore) {
-                        return (
-                          <div key={app.id} className={cls} style={{ background: "#024059" }}>
-                            <div className="eat-file-shine" />
-                            <div className="eat-file-text">+{folder.apps.length - 4} more</div>
-                            <div className="eat-file-tag">applications</div>
-                          </div>
-                        );
-                      }
-                      return (
-                        <div key={app.id} className={cls} style={{ background: FILE_COLOR[app.status] }}>
-                          <div className="eat-file-shine" />
-                          <svg className="eat-file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                            <circle cx={12} cy={8} r={4} />
-                            <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
-                          </svg>
-                          <div className="eat-file-text">{app.user.name}</div>
-                          <div className="eat-file-tag">{app.status.replace("_", " ")}</div>
-                        </div>
-                      );
-                    })}
-
                     <div className="eat-folder-front-wrapper">
                       <svg className="eat-folder-front" viewBox="0 0 50 34" fill="none" aria-hidden="true">
                         <path d="M0 4C0 1.79086 1.79086 0 4 0H46C48.2091 0 50 1.79086 50 4V30C50 32.2091 48.2091 34 46 34H4C1.79086 34 0 32.2091 0 30V4Z" fill="rgba(3, 140, 62, 0.65)" />
                       </svg>
                       <div className="eat-folder-label" />
+                      <span className="eat-folder-title">{folder.title}</span>
                       <div className="eat-counter" title={`${folder.apps.length} application${folder.apps.length === 1 ? "" : "s"}`}>
                         <div className="eat-status-dot" />
                         <span className="eat-counter-label">Apps</span>
@@ -187,25 +126,18 @@ export default function AdminApplicationsPage() {
 
                 {isOpen && (
                   <div className="mt-6 w-full space-y-4">
-                    <p className="text-center font-display text-base font-bold text-ink-700">{folder.title}</p>
-                    {matched.length === 0 ? (
-                      <p className="rounded-[10px] bg-white px-4 py-3 text-center text-sm text-slate-500 shadow-elev2">
-                        No matching applications.
-                      </p>
-                    ) : (
-                      matched.map((app) => (
-                        <ApplicationCard
-                          key={app.id}
-                          app={app}
-                          note={notes[app.id] ?? ""}
-                          link={links[app.id] ?? app.meetingLink ?? ""}
-                          busy={busyId === app.id}
-                          onNote={(v) => setNotes((n) => ({ ...n, [app.id]: v }))}
-                          onLink={(v) => setLinks((l) => ({ ...l, [app.id]: v }))}
-                          onReview={(s) => review(app, s)}
-                        />
-                      ))
-                    )}
+                    {folder.apps.map((app) => (
+                      <ApplicationCard
+                        key={app.id}
+                        app={app}
+                        note={notes[app.id] ?? ""}
+                        link={links[app.id] ?? app.meetingLink ?? ""}
+                        busy={busyId === app.id}
+                        onNote={(v) => setNotes((n) => ({ ...n, [app.id]: v }))}
+                        onLink={(v) => setLinks((l) => ({ ...l, [app.id]: v }))}
+                        onReview={(s) => review(app, s)}
+                      />
+                    ))}
                   </div>
                 )}
               </div>

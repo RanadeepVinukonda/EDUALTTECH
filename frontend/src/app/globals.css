@@ -420,10 +420,9 @@ body {
   --pex: -24px;
 }
 
-/* ── Animated course folder card ────────────────────────────
-   Ported from the reference "files in a folder" card, themed for
-   EduAltTech. Opens on click (checkbox), files fan out, counter
-   badge pops in. Applications live inside each folder. */
+/* ── Animated course folder card ──────────────────────────────────
+   Course folder card. Click to open — front flap lifts and the
+   application cards for that course render underneath one by one. */
 .eat-folder-card {
   position: relative;
   display: flex;
@@ -438,54 +437,6 @@ body {
 
 .eat-folder-toggle {
   display: none;
-}
-
-.eat-hint-wrapper {
-  position: absolute;
-  top: -40px;
-  right: -50px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  pointer-events: none;
-  z-index: 100;
-  animation: eatFloatHint 2.5s ease-in-out infinite;
-}
-
-.eat-hint-text {
-  font-family: "Inter", -apple-system, sans-serif;
-  color: #60a5fa;
-  font-size: 10px;
-  font-weight: 900;
-  text-decoration: underline;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  position: relative;
-  right: -25px;
-  top: 10px;
-  transform: rotate(45deg);
-}
-
-.eat-hint-arrow {
-  height: 35px;
-  width: 35px;
-}
-
-@keyframes eatFloatHint {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(6px);
-  }
-}
-
-.eat-folder-toggle:checked ~ .eat-hint-wrapper {
-  opacity: 0;
-  transform: translateY(-10px);
 }
 
 .eat-folder-container {
@@ -519,6 +470,10 @@ body {
   border-radius: 12px;
 }
 
+.eat-folder-toggle:checked ~ .eat-folder-container .eat-folder-front-wrapper {
+  transform: rotateX(-50deg);
+}
+
 .eat-folder-label {
   position: absolute;
   top: 10px;
@@ -527,6 +482,24 @@ body {
   height: 4px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 10px;
+}
+
+.eat-folder-title {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 84%;
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: #ffffff;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .eat-counter {
@@ -610,210 +583,6 @@ body {
 .eat-counter:hover .eat-counter-number {
   color: #ffffff;
   transition: color 0.3s ease;
-}
-
-.eat-file {
-  position: absolute;
-  bottom: 5px;
-  left: 10%;
-  width: 80%;
-  height: 85px;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  z-index: 0;
-}
-
-.eat-file-1 {
-  z-index: 25;
-  transition-delay: 0.15s;
-}
-.eat-file-2 {
-  z-index: 24;
-  transition-delay: 0.1s;
-}
-.eat-file-3 {
-  z-index: 23;
-  transition-delay: 0.05s;
-}
-.eat-file-4 {
-  z-index: 22;
-  transition-delay: 0.02s;
-}
-.eat-file-5 {
-  z-index: 21;
-  transition-delay: 0s;
-}
-
-.eat-file-shine {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transform: skewX(-20deg);
-  transition: none;
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-shine {
-  left: 150%;
-  transition: left 0.8s ease-in-out;
-  transition-delay: 0.3s;
-}
-
-.eat-file-text {
-  font-family: "Inter", sans-serif;
-  font-size: 9px;
-  color: white;
-  padding: 12px;
-  font-weight: 800;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  transform: translateY(5px);
-  transition: all 0.3s ease 0.4s;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.35;
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-text {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-folder-front-wrapper {
-  transform: rotateX(-50deg);
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-1 {
-  transform: translateY(-70px) rotate(-10deg) translateX(-15px) translateZ(20px);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-2 {
-  transform: translateY(-55px) rotate(8deg) translateX(18px) translateZ(10px);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-3 {
-  transform: translateY(-40px) rotate(-15deg) translateX(-8px);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-4 {
-  transform: translateY(-25px) rotate(12deg) translateX(12px);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-5 {
-  transform: translateY(-10px) rotate(-5deg);
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file:hover {
-  cursor: pointer;
-  filter: brightness(1.1);
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-1:hover {
-  transform: translateY(-80px) rotate(-10deg) translateX(-15px) translateZ(20px);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-2:hover {
-  transform: translateY(-65px) rotate(8deg) translateX(18px) translateZ(10px);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-3:hover {
-  transform: translateY(-50px) rotate(-15deg) translateX(-8px);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-4:hover {
-  transform: translateY(-35px) rotate(12deg) translateX(12px);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-5:hover {
-  transform: translateY(-20px) rotate(-5deg);
-}
-
-.eat-file-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 14px;
-  height: 14px;
-  color: rgba(255, 255, 255, 0.4);
-  transition: color 0.3s ease;
-}
-
-.eat-file-tag {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  color: rgba(255, 255, 255, 0.9);
-  font-family: "Inter", -apple-system, sans-serif;
-  font-size: 7px;
-  font-weight: 700;
-  padding: 3px 6px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  transform: translateX(10px);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  pointer-events: none;
-  text-transform: uppercase;
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file:hover .eat-file-icon {
-  color: rgba(255, 255, 255, 0.9);
-}
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-file-tag {
-  opacity: 1;
-}
-
-.eat-folder-search {
-  position: absolute;
-  top: -40px;
-  left: 10%;
-  width: 30px;
-  height: 25px;
-  background-color: #038c3e;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  opacity: 0;
-  z-index: 100;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.eat-search-icon {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-}
-
-.eat-search-input {
-  background: transparent;
-  border: none;
-  color: #ffffff;
-  font-family: "Inter", sans-serif;
-  font-size: 9px;
-  margin-left: 8px;
-  outline: none;
-  transition: width 0.4s ease;
-}
-.eat-search-input::placeholder {
-  color: #ffffff;
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-folder-search {
-  opacity: 1;
-  top: -80px;
-  width: 80%;
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-folder-search:focus-within {
-  width: 90%;
-  background-color: #024059;
-}
-
-.eat-folder-toggle:checked ~ .eat-folder-container .eat-folder-search:focus-within .eat-search-input {
-  width: 100%;
 }
 
 /* ── 404 face ─────────────────────────────────────────────── */
