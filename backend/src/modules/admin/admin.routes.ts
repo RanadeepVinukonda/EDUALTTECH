@@ -197,7 +197,19 @@ router.delete("/users/:id", async (req, res, next) => {
       if (adminCount <= 1) throw ApiError.conflict("Refusing to delete the last admin");
     }
 
-    await prisma.user.delete({ where: { id: userId } });
+    const teachingCourses = await prisma.course.count({ where: { teacherId: userId } });
+    if (teachingCourses > 0) throw ApiError.conflict("This user teaches a course — delete or reassign the course first.");
+
+    // Relations that don't cascade off User must be cleared before the hard delete.
+    await prisma.$transaction([
+      prisma.classroomMessage.deleteMany({ where: { senderId: userId } }),
+      prisma.conversationMessage.deleteMany({ where: { senderId: userId } }),
+      prisma.conversation.deleteMany({ where: { mentorId: userId } }),
+      prisma.notification.deleteMany({ where: { senderId: userId } }),
+      prisma.subscription.deleteMany({ where: { userId } }),
+      prisma.order.deleteMany({ where: { userId } }),
+      prisma.user.delete({ where: { id: userId } }),
+    ]);
     // Remove the Supabase auth identity too, so the address can be reused.
     await admin.auth.admin.deleteUser(userId).catch(() => undefined);
     res.json({ success: true, data: { message: "Account deleted" } });
