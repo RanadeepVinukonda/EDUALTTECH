@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Wrench, Menu, Users, LayoutDashboard, GraduationCap, ShoppingBag, LayoutGrid, CreditCard, MessageSquare, Settings, LogOut, ChevronLeft } from "lucide-react";
+import { Wrench, Menu, Users, LayoutDashboard, GraduationCap, ShoppingBag, LayoutGrid, CreditCard, Settings, LogOut, ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { api, clearAuth, getCachedUser, subscribeAuth, type User } from "@/lib/api";
@@ -33,7 +33,6 @@ const NAV: { section: string; items: NavItem[] }[] = [
     section: "Operations",
     items: [
       { href: "/admin/webhooks", label: "Payments log", icon: CreditCard },
-      { href: "/admin/messages", label: "Messages", icon: MessageSquare },
       { href: "/admin/settings", label: "Settings", icon: Settings },
     ],
   },

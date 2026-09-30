@@ -10,10 +10,9 @@ interface AdminStats {
   providers: number;
   courses: number;
   enrollments: number;
-  unreadMessages: number;
   paidOrders: number;
-  trialOrders: number;
   resources: number;
+  trialOrders: number;
 }
 
 export default function AdminPage() {
@@ -37,7 +36,7 @@ export default function AdminPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <h1 className="font-display text-3xl font-bold text-ink-700">Admin dashboard</h1>
-      <p className="mt-1 text-slate-600">Courses, users, enrollments, payments and messages — the whole platform.</p>
+      <p className="mt-1 text-slate-600">Courses, users, enrollments and payments — the whole platform.</p>
 
       {error && <div className="mt-8 rounded-xl bg-red-50 p-4 text-red-700">{error}</div>}
       {!stats && !error && <p className="mt-8 text-slate-500">Loading platform stats…</p>}
@@ -52,14 +51,12 @@ export default function AdminPage() {
             <Stat label="Enrollments" value={stats.enrollments} />
             <Stat label="Paid (full plan)" value={stats.paidOrders} />
             <Stat label="Resources" value={stats.resources} />
-            <Stat label="Unread messages" value={stats.unreadMessages} highlight={stats.unreadMessages > 0} />
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <AdminLinkCard href="/admin/users" title="Users" body="Manage accounts, admins and access." />
             <AdminLinkCard href="/admin/applications" title="Mentor applications" body="Review, interview and approve mentors." />
             <AdminLinkCard href="/admin/courses" title="Courses & mentors" body="Assign or remove mentors on any course." />
-            <AdminLinkCard href="/admin/messages" title="Contact messages" body="Schools reaching out via the site form." />
             <AdminLinkCard href="/admin/orders" title="Orders" body="Razorpay ledger — payments, plans and refunds." />
             <AdminLinkCard href="/admin/webhooks" title="Webhook events" body="Append-only Razorpay event trail." />
             <AdminLinkCard href="/admin/settings" title="Platform settings" body="Keys, defaults and impact numbers." />
