@@ -16,7 +16,7 @@ interface Application {
   reviewNote: string | null;
   createdAt: string;
   user: { id: string; name: string; email: string; schoolName: string | null };
-  course: { id: string; title: string; slug: string } | null;
+  course: { id: string; title: string; slug: string; thumbnailUrl: string | null } | null;
 }
 
 const STATUSES = ["UNDER_REVIEW", "INTERVIEW", "APPROVED", "REJECTED"] as const;
@@ -27,6 +27,14 @@ const BADGE: Record<Application["status"], string> = {
   INTERVIEW: "bg-brand-50 text-brand-700",
   APPROVED: "bg-emerald-50 text-emerald-700",
   REJECTED: "bg-red-50 text-red-600",
+};
+
+const FILE_COLOR: Record<Application["status"], string> = {
+  PENDING: "#f59e0b",
+  UNDER_REVIEW: "#8b5cf6",
+  INTERVIEW: "#3b82f6",
+  APPROVED: "#10b981",
+  REJECTED: "#f43f5e",
 };
 
 export default function AdminApplicationsPage() {
@@ -94,6 +102,8 @@ export default function AdminApplicationsPage() {
           {folders().map((folder) => {
             const key = folder.title;
             const isOpen = open[key] ?? false;
+            const thumb = folder.apps[0]?.course?.thumbnailUrl ?? null;
+            const files = folder.apps.slice(0, 5);
             return (
               <div key={key} className="flex w-full flex-col items-center">
                 <label className="eat-folder-card">
@@ -109,10 +119,25 @@ export default function AdminApplicationsPage() {
                       <path d="M0 4C0 1.79086 1.79086 0 4 0H16.524C17.721 0 18.8415 0.54051 19.574 1.4673L22.426 5.0654C23.1585 5.99219 24.279 6.5327 25.476 6.5327H46C48.2091 6.5327 50 8.32356 50 10.5327V36C50 38.2091 48.2091 40 46 40H4C1.79086 40 0 38.2091 0 36V4Z" fill="#024059" />
                     </svg>
 
+                    {files.map((app, i) => (
+                      <div key={app.id} className={`eat-file eat-file-${i + 1}`} style={{ background: FILE_COLOR[app.status] }}>
+                        <div className="eat-file-shine" />
+                        <div className="eat-file-text">{app.user.name}</div>
+                        <div className="eat-file-tag">{app.status.replace("_", " ")}</div>
+                      </div>
+                    ))}
+
                     <div className="eat-folder-front-wrapper">
-                      <svg className="eat-folder-front" viewBox="0 0 50 34" fill="none" aria-hidden="true">
-                        <path d="M0 4C0 1.79086 1.79086 0 4 0H46C48.2091 0 50 1.79086 50 4V30C50 32.2091 48.2091 34 46 34H4C1.79086 34 0 32.2091 0 30V4Z" fill="rgba(3, 140, 62, 0.65)" />
-                      </svg>
+                      {thumb ? (
+                        <div className="eat-folder-front-img">
+                          <img src={thumb} alt={folder.title} />
+                          <span className="eat-folder-shade" />
+                        </div>
+                      ) : (
+                        <svg className="eat-folder-front" viewBox="0 0 50 34" fill="none" aria-hidden="true">
+                          <path d="M0 4C0 1.79086 1.79086 0 4 0H46C48.2091 0 50 1.79086 50 4V30C50 32.2091 48.2091 34 46 34H4C1.79086 34 0 32.2091 0 30V4Z" fill="rgba(3, 140, 62, 0.65)" />
+                        </svg>
+                      )}
                       <div className="eat-folder-label" />
                       <span className="eat-folder-title">{folder.title}</span>
                     </div>

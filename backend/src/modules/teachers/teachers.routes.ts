@@ -166,7 +166,7 @@ router.get("/applications", requireAuth, requireRole("ADMIN"), async (_req, res,
     const applications = await prisma.teacherApplication.findMany({
       include: {
         user: { select: { id: true, name: true, email: true, schoolName: true } },
-        course: { select: { id: true, title: true, slug: true } },
+        course: { select: { id: true, title: true, slug: true, thumbnailUrl: true } },
       },
       orderBy: { createdAt: "desc" },
     });
