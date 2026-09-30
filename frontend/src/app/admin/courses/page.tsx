@@ -285,7 +285,7 @@ export default function AdminCoursesPage() {
       ) : (
         <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {courses.map((course) => (
-            <article key={course.id} className="group overflow-hidden rounded-[20px] bg-white shadow-elev2 transition hover:-translate-y-1 hover:shadow-elev3">
+            <article key={course.id} className="group flex flex-col overflow-hidden rounded-[20px] bg-white shadow-elev2 transition hover:-translate-y-1 hover:shadow-elev3">
               {course.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={course.thumbnailUrl} alt="" className="h-40 w-full object-cover" />
@@ -346,7 +346,7 @@ export default function AdminCoursesPage() {
                   ))}
                 </ul>
 
-                <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
                   <Link
                     href={`/admin/courses/view/${course.slug}`}
                     className="flex h-[42px] items-center gap-2 rounded-[10px] border-[1.5px] border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-400 hover:text-brand-700"
