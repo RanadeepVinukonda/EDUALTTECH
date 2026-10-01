@@ -40,11 +40,11 @@ export default function EmailVerifyModal({
     setSending(true);
     setError(null);
     try {
-      const data = await api<{ message: string; devOtp?: string }>("/auth/send-email-code", {
+      // The code is never pre-filled, not even in dev — the user types what they received.
+      await api<{ message: string }>("/auth/send-email-code", {
         method: "POST",
         body: JSON.stringify({ email }),
       });
-      if (data.devOtp) setCode(data.devOtp); // dev: pre-fill so the flow is testable headless
       setSent(true);
       setCountdown(60);
     } catch (err) {
