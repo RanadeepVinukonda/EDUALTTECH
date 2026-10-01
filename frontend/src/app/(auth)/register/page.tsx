@@ -122,9 +122,6 @@ export default function RegisterPage() {
               {emailVerified ? "Verified ✓" : "Verify"}
             </button>
           </div>
-          {emailVerified && (
-            <p className="mt-1 text-xs text-emerald-700">Email confirmed. You&apos;re all set to create the account.</p>
-          )}
         </div>
 
         <div>

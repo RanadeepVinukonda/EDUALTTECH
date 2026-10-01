@@ -121,6 +121,7 @@ function LoginForm() {
           <PasswordInput
             id="password"
             required
+            strength={false}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full"

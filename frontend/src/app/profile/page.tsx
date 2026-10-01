@@ -8,10 +8,24 @@ import { Loader } from "@/components/Loader";
 import PasswordInput from "@/components/ui/PasswordInput";
 import { useMinLoading } from "@/lib/useMinLoading";
 
+const BOARDS = ["CBSE", "ICSE / CISCE", "State Board", "International (IB / IGCSE)", "Other"];
+const CLASSES = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Higher education"];
+const QUALIFICATIONS = [
+  "Diploma / Vocational",
+  "B.E. / B.Tech.",
+  "B.Sc.",
+  "B.A. / B.Com.",
+  "M.E. / M.Tech.",
+  "M.Sc.",
+  "M.B.A.",
+  "Ph.D. / Post-graduate",
+  "Other",
+];
+
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [form, setForm] = useState({ name: "", schoolName: "", className: "", education: "", bio: "" });
+  const [form, setForm] = useState({ name: "", schoolName: "", className: "", educationBoard: "", qualification: "", bio: "" });
   const [topics, setTopics] = useState("");
   const [pwd, setPwd] = useState({ currentPassword: "", newPassword: "" });
   const [message, setMessage] = useState<string | null>(null);
@@ -30,7 +44,8 @@ export default function ProfilePage() {
       name: cached.name,
       schoolName: cached.schoolName ?? "",
       className: cached.className ?? "",
-      education: cached.education ?? "",
+      educationBoard: cached.educationBoard ?? "",
+      qualification: cached.qualification ?? "",
       bio: cached.bio ?? "",
     });
     setTopics((cached.interestedTopics ?? []).join(", "));
@@ -50,9 +65,16 @@ export default function ProfilePage() {
           .filter(Boolean)
           .slice(0, 20),
       };
-      for (const key of ["schoolName", "className", "education", "bio"] as const) {
+      for (const key of ["schoolName", "className", "educationBoard", "qualification"] as const) {
+        payload[key] = form[key];
+      }
+      if (form.className) payload.educationClass = form.className;
+      // "Class 10 · CBSE" — one line, matches how the old signup summarised it.
+      payload.education = [form.className, form.educationBoard, form.qualification].filter(Boolean).join(" · ");
+      for (const key of ["bio"] as const) {
         if (form[key].trim()) payload[key] = form[key].trim();
       }
+
       const data = await api<{ user: User }>("/auth/me", { method: "PATCH", body: JSON.stringify(payload) });
       updateCachedUser(data.user);
       setUser(data.user);
@@ -104,8 +126,29 @@ export default function ProfilePage() {
         <h2 className="font-display text-lg font-semibold text-slate-900">Details</h2>
         <Field label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} required />
         <Field label="School / college" value={form.schoolName} onChange={(v) => setForm((f) => ({ ...f, schoolName: v }))} />
-        <Field label="Class / year" value={form.className} onChange={(v) => setForm((f) => ({ ...f, className: v }))} />
-        <Field label="Current level" value={form.education} onChange={(v) => setForm((f) => ({ ...f, education: v }))} />
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Select
+            label="Level"
+            value={form.className}
+            placeholder="Select level"
+            options={CLASSES}
+            onChange={(v) => setForm((f) => ({ ...f, className: v }))}
+          />
+          <Select
+            label="Board"
+            value={form.educationBoard}
+            placeholder="Select board"
+            options={BOARDS}
+            onChange={(v) => setForm((f) => ({ ...f, educationBoard: v }))}
+          />
+          <Select
+            label="Qualification"
+            value={form.qualification}
+            placeholder="If higher education"
+            options={QUALIFICATIONS}
+            onChange={(v) => setForm((f) => ({ ...f, qualification: v }))}
+          />
+        </div>
         <Field label="Subjects (comma separated)" value={topics} onChange={setTopics} />
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">About you</label>
@@ -138,6 +181,38 @@ export default function ProfilePage() {
           Update password
         </button>
       </form>
+    </div>
+  );
+}
+
+function Select({
+  label,
+  value,
+  options,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  placeholder: string;
+  onChange: (v: string) => void;
+}) {
+  const id = label.toLowerCase().replace(/[^a-z]+/g, "-");
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
+      <select
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>{o}</option>
+        ))}
+      </select>
     </div>
   );
 }

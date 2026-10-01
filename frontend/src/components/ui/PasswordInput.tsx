@@ -2,7 +2,7 @@
 
 import { useState, type InputHTMLAttributes } from "react";
 
-type Props = InputHTMLAttributes<HTMLInputElement> & { id?: string };
+type Props = InputHTMLAttributes<HTMLInputElement> & { id?: string; strength?: boolean };
 
 const LEVELS = ["Weak", "Fair", "Good", "Strong"];
 
@@ -18,12 +18,12 @@ function score(value: string): number {
   return Math.min(Math.round((s / 5) * 4), 3);
 }
 
-export default function PasswordInput({ className = "", onChange, ...rest }: Props) {
+export default function PasswordInput({ className = "", onChange, strength = true, ...rest }: Props) {
   const [visible, setVisible] = useState(false);
   const [value, setValue] = useState(String(rest.value ?? rest.defaultValue ?? ""));
 
   const level = score(value);
-  const showMeter = level >= 0;
+  const showMeter = strength && level >= 0;
   const bars = level + 1;
 
   return (

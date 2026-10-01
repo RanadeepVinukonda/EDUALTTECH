@@ -54,6 +54,9 @@ export interface User {
   phoneVerifiedAt: string | null;
   interestedTopics: string[];
   education: string | null;
+  educationBoard: string | null;
+  educationClass: string | null;
+  qualification: string | null;
   bio: string | null;
   onboardingDone: boolean;
   createdAt: string;
