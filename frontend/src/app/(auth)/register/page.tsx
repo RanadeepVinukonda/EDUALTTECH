@@ -129,7 +129,7 @@ export default function RegisterPage() {
 
         <div>
           <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-            Password (min 8 characters, one letter + one number)
+            Password
           </label>
           <PasswordInput
             id="password"
@@ -141,10 +141,6 @@ export default function RegisterPage() {
             className="w-full"
           />
         </div>
-
-        <p className="rounded-[10px] bg-slate-50 px-4 py-3 text-xs text-slate-500">
-          Phone number, school and subjects come later — we&apos;ll ask for them step by step after you sign in.
-        </p>
 
         <button
           type="submit"
