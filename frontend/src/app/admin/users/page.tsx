@@ -17,6 +17,7 @@ export default function AdminUsersPage() {
   const [items, setItems] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "USER" as "USER" | "ADMIN" });
   const [busy, setBusy] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -34,8 +35,10 @@ export default function AdminUsersPage() {
   async function toggleActive(u: UserRow) {
     setBusyId(u.id);
     setError(null);
+    setMessage(null);
     try {
       await api(`/admin/users/${u.id}`, { method: "PATCH", body: JSON.stringify({ isActive: !u.isActive }) });
+      setMessage(`${u.name} ${u.isActive ? "disabled" : "enabled"}.`);
       load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not update the account");
@@ -48,8 +51,10 @@ export default function AdminUsersPage() {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setMessage(null);
     try {
       await api("/admin/users", { method: "POST", body: JSON.stringify(form) });
+      setMessage(`${form.name} created.`);
       setForm({ name: "", email: "", password: "", role: "USER" });
       load();
     } catch (err) {
@@ -63,11 +68,13 @@ export default function AdminUsersPage() {
     if (!window.confirm(`Delete ${u.name}? This cannot be undone.`)) return;
     setDeletingId(u.id);
     setError(null);
+    setMessage(null);
     try {
       await api(`/admin/users/${u.id}`, { method: "DELETE" });
+      setMessage(`${u.name} deleted.`);
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not delete the account");
+      setError(err instanceof ApiError ? err.message : "Could not delete the account");
     } finally {
       setDeletingId(null);
     }
@@ -78,6 +85,7 @@ export default function AdminUsersPage() {
       <h1 className="font-display text-2xl font-bold text-ink-700">Users</h1>
       <p className="mt-1 text-sm text-slate-600">Everyone is a user. A user learns in courses they join and mentors the courses they guide.</p>
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {message && <p className="mt-4 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">{message}</p>}
 
       <form onSubmit={createUser} className="mt-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-5">
         <input
@@ -189,7 +197,7 @@ export default function AdminUsersPage() {
                       disabled={deletingId === u.id}
                       title="Delete account"
                       aria-label="Delete account"
-                      className="btn-trash disabled:opacity-40">
+                      className={`btn-trash ${deletingId === u.id ? "is-busy" : ""}`}>
                       <svg viewBox="0 0 448 512" className="svgIcon" aria-hidden="true">
                         <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
                       </svg>
