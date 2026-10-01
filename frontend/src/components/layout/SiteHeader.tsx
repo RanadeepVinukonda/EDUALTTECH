@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, ChevronDown, LogOut, ShoppingBag, User as UserIcon } from "lucide-react";
+import { Bell, ChevronDown, LogOut, ShoppingBag, User as UserIcon, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/api";
@@ -44,6 +44,88 @@ const ACCOUNT_MENU = [
 
 function isActive(href: string, pathname: string): boolean {
   return pathname === href || pathname.startsWith(href.replace(/\/$/, "") + "/");
+}
+
+const NAG_KEY = "eat.profileNagDismissedAt";
+
+/** Percentage of the profile signals that are filled in. */
+function profileProgress(user: User): number {
+  const done = [
+    !!user.name,
+    !!user.emailVerifiedAt,
+    !!user.phoneVerifiedAt,
+    !!user.schoolName,
+    !!user.className,
+    !!user.education,
+    (user.interestedTopics?.length ?? 0) > 0,
+    !!user.bio,
+  ].filter(Boolean).length;
+  return Math.round((done / 8) * 100);
+}
+
+/**
+ * "Complete your profile" strip. Dismissible with the X, remembered per browser
+ * session at the progress it was dismissed, so it returns once you fill more in.
+ */
+function ProfileNudge({ user }: { user: User }) {
+  const progress = profileProgress(user);
+  const [dismissedAt, setDismissedAt] = useState<number | null>(null);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem(NAG_KEY);
+    setDismissedAt(raw === null ? null : Number(raw));
+  }, []);
+
+  if (user.role === "ADMIN" || progress >= 100) return null;
+  if (dismissedAt !== null && progress <= dismissedAt) return null;
+
+  const target = user.onboardingDone ? "/profile" : "/onboarding";
+
+  return (
+    <div className="border-t border-brand-100 bg-brand-50/80">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="truncate text-sm font-medium text-ink-700">
+              Complete your profile to use all features
+            </p>
+            <span className="shrink-0 text-xs font-semibold tabular-nums text-brand-700">{progress}%</span>
+          </div>
+          <div
+            className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-brand-100"
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Profile completion"
+          >
+            <div
+              className="h-full rounded-full bg-brand-600 transition-[width] duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        <Link
+          href={target}
+          className="shrink-0 rounded-lg brand-grad px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
+        >
+          Complete profile
+        </Link>
+        <button
+          type="button"
+          aria-label="Dismiss"
+          onClick={() => {
+            sessionStorage.setItem(NAG_KEY, String(progress));
+            setDismissedAt(progress);
+          }}
+          className="shrink-0 rounded-lg p-1 text-ink-700/60 hover:bg-white hover:text-ink-700"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function DropdownMenu({
@@ -282,6 +364,8 @@ export function SiteHeader() {
           )}
         </div>
       </div>
+
+      {user && <ProfileNudge user={user} />}
 
       {/* Mobile nav */}
       <nav className="flex gap-4 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden">
