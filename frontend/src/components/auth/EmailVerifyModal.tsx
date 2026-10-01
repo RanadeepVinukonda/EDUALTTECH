@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import OtpVerifyCard from "@/components/ui/OtpVerifyCard";
 
@@ -19,12 +19,21 @@ export default function EmailVerifyModal({
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(0);
+  const autoSent = useRef(false);
 
   useEffect(() => {
     if (countdown <= 0) return;
     const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [countdown]);
+
+  useEffect(() => {
+    if (autoSent.current) return;
+    autoSent.current = true;
+    sendCode();
+    // Opening the dialog is consent to send the code — no second click needed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function sendCode(e?: FormEvent) {
     e?.preventDefault();
@@ -35,9 +44,9 @@ export default function EmailVerifyModal({
         method: "POST",
         body: JSON.stringify({ email }),
       });
+      if (data.devOtp) setCode(data.devOtp); // dev: pre-fill so the flow is testable headless
       setSent(true);
       setCountdown(60);
-      if (data.devOtp) setCode(data.devOtp); // dev: pre-fill so the flow is testable headless
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not send the code");
     } finally {
@@ -68,7 +77,7 @@ export default function EmailVerifyModal({
       <div className="w-full max-w-sm">
         <OtpVerifyCard
           title="Verify your email"
-          subtitle={`We emailed a 6-digit code to ${email}`}
+          subtitle={sending ? `Sending a 6-digit code to ${email}…` : sent ? `Check ${email} for the 6-digit code` : `We'll send a 6-digit code to ${email}`}
           value={code}
           onChange={setCode}
           onSubmit={verify}

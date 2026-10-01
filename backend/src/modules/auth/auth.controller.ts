@@ -282,6 +282,9 @@ export async function sendEmailCode(req: Request, res: Response, next: NextFunct
       emailSent = true;
     } catch (err) {
       logger.warn("Email verification code not sent", { email: () => "***", err });
+      // Never report success for a mail that was rejected — in production the
+      // caller would sit in front of an inbox that stays silent.
+      if (isProd) throw err;
     }
 
     res.json({
