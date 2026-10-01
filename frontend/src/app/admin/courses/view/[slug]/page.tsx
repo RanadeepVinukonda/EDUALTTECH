@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 interface AdminChapter {
   id: string;
@@ -55,7 +56,7 @@ export default function AdminCourseViewPage() {
   }, [params.slug]);
 
   if (error) return <div className="mx-auto max-w-6xl px-4 py-16 text-red-600">{error}</div>;
-  if (!course) return <div className="mx-auto max-w-6xl px-4 py-16 text-slate-500">Loading course…</div>;
+  if (!course) return <LoadingScreen inline label="Loading course…" />;
 
   const chapters = course.mentors.flatMap((m) => m.chapters.map((c) => ({ mentor: m.mentor, chapter: c })));
 

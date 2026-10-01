@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FormEvent } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 interface CourseRow {
   id: string;
@@ -24,6 +25,7 @@ interface CourseRow {
 
 export default function AdminCoursesPage() {
   const [courses, setCourses] = useState<CourseRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newCourse, setNewCourse] = useState({
     title: "",
@@ -103,7 +105,8 @@ export default function AdminCoursesPage() {
   const load = useCallback(() => {
     api<{ courses: CourseRow[] }>("/admin/courses")
       .then((d) => setCourses(d.courses))
-      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load courses"));
+      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load courses"))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(load, [load]);
@@ -279,7 +282,9 @@ export default function AdminCoursesPage() {
         </form>
       </section>
 
-      {courses.length === 0 ? (
+      {loading ? (
+        <LoadingScreen inline label="Loading courses…" />
+      ) : courses.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
           No courses yet.
         </div>

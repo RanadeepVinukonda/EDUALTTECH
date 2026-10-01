@@ -5,6 +5,7 @@ import { Wrench, Menu, Users, LayoutDashboard, GraduationCap, ShoppingBag, Layou
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { api, clearAuth, getCachedUser, subscribeAuth, type User } from "@/lib/api";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 interface NavItem {
   href: string;
@@ -50,6 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [user, setUser] = useState<User | null>(null);
   const [checked, setChecked] = useState(false);
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     const refresh = () => setUser(getCachedUser());
@@ -68,13 +70,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => setOpen(false), [pathname]);
 
   const signOut = useCallback(async () => {
+    setSigningOut(true);
     await api("/auth/logout", { method: "POST" }).catch(() => undefined);
     clearAuth();
     window.location.href = "/";
   }, []);
 
+  if (signingOut) return <LoadingScreen label="Signing you out…" />;
+
   if (!checked || !user || user.role !== "ADMIN") {
-    return <p className="flex min-h-screen items-center justify-center text-sm text-slate-500">Checking access…</p>;
+    return <LoadingScreen label="Checking admin access…" />;
   }
 
   const sidebar = (
@@ -122,10 +127,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <button
         onClick={signOut}
-        className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink-100 hover:bg-white/10 hover:text-white"
+        disabled={signingOut}
+        className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink-100 hover:bg-white/10 hover:text-white disabled:opacity-50"
       >
-        <LogOut className="h-4 w-4" />
-        Sign out
+        {signingOut ? (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        ) : (
+          <LogOut className="h-4 w-4" />
+        )}
+        {signingOut ? "Signing out…" : "Sign out"}
       </button>
     </nav>
   );

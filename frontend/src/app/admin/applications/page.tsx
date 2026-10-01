@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 interface Application {
   id: string;
@@ -36,6 +37,7 @@ export default function AdminApplicationsPage() {
   const [links, setLinks] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
 
   const folders = useCallback(() => {
     const map = new Map<string, { title: string; apps: Application[] }>();
@@ -51,7 +53,8 @@ export default function AdminApplicationsPage() {
   const load = useCallback(() => {
     api<{ applications: Application[] }>("/teachers/applications")
       .then((d) => setApplications(d.applications))
-      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load"));
+      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load"))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(load, [load]);
@@ -85,7 +88,9 @@ export default function AdminApplicationsPage() {
       </p>
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
-      {applications.length === 0 ? (
+      {loading ? (
+        <LoadingScreen inline label="Loading applications…" />
+      ) : applications.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
           No applications yet.
         </div>

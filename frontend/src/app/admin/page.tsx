@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 interface AdminStats {
   users: number;
@@ -39,7 +40,7 @@ export default function AdminPage() {
       <p className="mt-1 text-slate-600">Courses, users, enrollments and payments — the whole platform.</p>
 
       {error && <div className="mt-8 rounded-xl bg-red-50 p-4 text-red-700">{error}</div>}
-      {!stats && !error && <p className="mt-8 text-slate-500">Loading platform stats…</p>}
+      {!stats && !error && <LoadingScreen inline label="Loading platform stats…" />}
 
       {stats && (
         <>

@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import PasswordInput from "@/components/ui/PasswordInput";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 interface UserRow {
   id: string;
@@ -127,6 +128,9 @@ export default function AdminUsersPage() {
         </button>
       </form>
 
+      {loading ? (
+        <LoadingScreen inline label="Loading accounts…" />
+      ) : (
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -139,13 +143,7 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {loading ? (
-              <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-sm text-slate-500">
-                  Loading accounts…
-                </td>
-              </tr>
-            ) : items.length === 0 ? (
+            {items.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-5 py-8 text-center text-sm text-slate-500">
                   No users yet — create one above.
@@ -210,6 +208,7 @@ export default function AdminUsersPage() {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

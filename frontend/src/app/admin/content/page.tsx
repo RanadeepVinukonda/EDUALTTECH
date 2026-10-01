@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 type Tab = "logos" | "photos";
 
@@ -38,6 +39,7 @@ export default function AdminContentPage() {
   const [rows, setRows] = useState<MediaRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [draft, setDraft] = useState({ alt: "", category: LOGO_CATEGORIES[0] as string, position: "", url: "" });
   const [uploading, setUploading] = useState(false);
@@ -50,7 +52,8 @@ export default function AdminContentPage() {
   const load = useCallback(() => {
     api<{ items: MediaRow[] }>("/cms/admin/media")
       .then((d) => setRows(d.items.filter((m) => m.kind === kind)))
-      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load"));
+      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load"))
+      .finally(() => setLoading(false));
   }, [kind]);
 
   useEffect(load, [load]);
@@ -245,7 +248,9 @@ export default function AdminContentPage() {
         </form>
       </section>
 
-      {rows.length === 0 ? (
+      {loading ? (
+        <LoadingScreen inline label={tab === "logos" ? "Loading logos…" : "Loading photos…"} />
+      ) : rows.length === 0 ? (
         <p className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-500">
           Nothing here yet — upload and save your first {tab === "logos" ? "logo" : "photo"}.
         </p>
