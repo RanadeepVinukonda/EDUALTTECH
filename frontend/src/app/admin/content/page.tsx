@@ -106,6 +106,8 @@ export default function AdminContentPage() {
   };
 
   const remove = async (row: MediaRow) => {
+    const label = row.alt ?? (tab === "logos" ? "this logo" : "this photo");
+    if (!window.confirm(`Delete ${label}? The site will fall back to its default image.`)) return;
     try {
       await api(`/cms/admin/media/${row.id}`, { method: "DELETE" });
       setMessage("Deleted.");

@@ -108,7 +108,8 @@ export default function AdminCoursesPage() {
 
   useEffect(load, [load]);
 
-  const deleteCourse = async (id: string) => {
+  const deleteCourse = async (id: string, title: string) => {
+    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setDeletingId(id);
     setError(null);
     try {
@@ -360,7 +361,7 @@ export default function AdminCoursesPage() {
                   </Link>
                   <button
                     type="button"
-                    onClick={() => deleteCourse(course.id)}
+                    onClick={() => deleteCourse(course.id, course.title)}
                     disabled={deletingId === course.id}
                     title="Delete course"
                     aria-label="Delete course"

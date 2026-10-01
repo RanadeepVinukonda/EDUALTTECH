@@ -15,15 +15,18 @@ interface UserRow {
 
 export default function AdminUsersPage() {
   const [items, setItems] = useState<UserRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "USER" as "USER" | "ADMIN" });
   const [busy, setBusy] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     api<{ items: UserRow[] }>("/admin/users?limit=100")
       .then((d) => setItems(d.items))
-      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load"));
+      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load"))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(load, [load]);
@@ -58,12 +61,15 @@ export default function AdminUsersPage() {
 
   async function removeUser(u: UserRow) {
     if (!window.confirm(`Delete ${u.name}? This cannot be undone.`)) return;
+    setDeletingId(u.id);
     setError(null);
     try {
       await api(`/admin/users/${u.id}`, { method: "DELETE" });
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not delete the account");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -125,7 +131,20 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {items.map((u) => (
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-8 text-center text-sm text-slate-500">
+                  Loading accounts…
+                </td>
+              </tr>
+            ) : items.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-8 text-center text-sm text-slate-500">
+                  No users yet — create one above.
+                </td>
+              </tr>
+            ) : (
+              items.map((u) => (
               <tr key={u.id}>
                 <td className="px-5 py-3 font-medium text-slate-900">{u.name}</td>
                 <td className="px-5 py-3 text-slate-600">{u.email}</td>
@@ -167,9 +186,10 @@ export default function AdminUsersPage() {
                     <button
                       type="button"
                       onClick={() => removeUser(u)}
+                      disabled={deletingId === u.id}
                       title="Delete account"
                       aria-label="Delete account"
-                      className="btn-trash">
+                      className="btn-trash disabled:opacity-40">
                       <svg viewBox="0 0 448 512" className="svgIcon" aria-hidden="true">
                         <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
                       </svg>
@@ -177,7 +197,8 @@ export default function AdminUsersPage() {
                   </div>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>
