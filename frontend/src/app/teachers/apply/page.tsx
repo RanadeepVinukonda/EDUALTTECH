@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Award, BookOpen, Briefcase, FileText, MessageSquare, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { BookOpen, Briefcase, FileText, Upload } from "lucide-react";
 import { api, API_BASE, ApiError, getAccessToken, getCachedUser } from "@/lib/api";
 
 interface CourseOption {
@@ -36,14 +37,25 @@ const RESUME_TYPES = ".pdf,.doc,.docx";
 
 export default function MentorApplyPage() {
   const user = getCachedUser();
+  const router = useRouter();
   const [courses, setCourses] = useState<CourseOption[]>([]);
   const [application, setApplication] = useState<Application | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [submitted, setSubmitted] = useState<{ course: string; slug: string } | null>(null);
   const [form, setForm] = useState({ courseId: "", subject: "", experience: "", qualifications: "", message: "" });
   const [resume, setResume] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!submitted?.slug) return;
+    const t = setTimeout(() => {
+      router.push(`/courses/${submitted.slug}`);
+      router.refresh();
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [submitted, router]);
 
   useEffect(() => {
     api<{ items: CourseOption[] }>("/courses?limit=50")
@@ -119,6 +131,9 @@ export default function MentorApplyPage() {
       const data = await api<{ application: Application }>("/teachers/apply", { method: "POST", body: JSON.stringify(payload) });
       setApplication(data.application);
       setResume(null);
+      // Show the confirmation, then hand the user to the course they applied for.
+      const course = courses.find((c) => c.id === form.courseId);
+      setSubmitted({ course: course?.title ?? "the course", slug: course?.slug ?? "" });
     } catch (err) {
       setError(err instanceof ApiError || err instanceof Error ? err.message : "Failed to submit application");
     } finally {
@@ -145,6 +160,31 @@ export default function MentorApplyPage() {
             className="mt-6 inline-block rounded-[10px] bg-slate-900 px-6 py-3 text-[15px] font-medium text-white transition hover:bg-slate-800"
           >
             Create account
+          </a>
+        </div>
+      </Stage>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <Stage>
+        <div className="text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
+            <svg viewBox="0 0 24 24" className="h-6 w-6 text-brand-600" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+              <path d="m5 13 4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Application submitted</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Your mentor application for <span className="font-semibold text-slate-800">{submitted.course}</span> is pending review.
+            You are now on the course page — mentoring and enrollment are locked until an admin reviews it.
+          </p>
+          <a
+            href={`/courses/${submitted.slug}`}
+            className="mt-6 inline-block rounded-[10px] bg-slate-900 px-6 py-3 text-[15px] font-medium text-white transition hover:bg-slate-800"
+          >
+            Go to course
           </a>
         </div>
       </Stage>

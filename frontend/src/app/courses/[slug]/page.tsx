@@ -107,6 +107,7 @@ export default function CourseDetailPage() {
   const [meetings, setMeetings] = useState<CourseMeeting[] | null>(null);
   const [insights, setInsights] = useState<Insights | null>(null);
   const [mentorView, setMentorView] = useState<{ courseMentorId: string } | null>(null);
+  const [mentorPending, setMentorPending] = useState(false);
   const [openChapter, setOpenChapter] = useState<string | null>(null);
 
   useEffect(() => {
@@ -133,6 +134,13 @@ export default function CourseDetailPage() {
         }
         const mentoring = mine?.mentoring.find((m) => m.course.id === course.id);
         if (mentoring) setMentorView({ courseMentorId: mentoring.id });
+        // A pending mentor application locks both actions: no second application,
+        // and no enrolling in a course you may end up teaching.
+        const app = await api<{ application: { status: string; course: { id: string } | null } | null }>("/teachers/me").catch(() => null);
+        if (app?.application && app.application.course?.id === course.id
+          && ["PENDING", "UNDER_REVIEW", "INTERVIEW", "APPROVED"].includes(app.application.status)) {
+          setMentorPending(true);
+        }
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
         const meets = await api<{ meetings: CourseMeeting[] }>(`/meetings/course/${course.id}`).catch(() => null);
@@ -313,10 +321,18 @@ export default function CourseDetailPage() {
           <>
             <button
               onClick={enroll}
-              disabled={busy || enrolled || (course.mentors.length > 0 && !selected)}
+              disabled={busy || enrolled || mentorPending || (course.mentors.length > 0 && !selected)}
               className="rounded-xl brand-grad px-6 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
             >
-              {enrolled ? "Enrolled" : busy ? "Enrolling…" : course.mentors.length > 0 && !selected ? "Pick a mentor first" : "Enroll in this course"}
+              {enrolled
+                ? "Enrolled"
+                : mentorPending
+                  ? "Enrollment closed — mentor request pending"
+                  : busy
+                    ? "Enrolling…"
+                    : course.mentors.length > 0 && !selected
+                      ? "Pick a mentor first"
+                      : "Enroll in this course"}
             </button>
             <button
               onClick={toggleWishlist}
@@ -330,12 +346,18 @@ export default function CourseDetailPage() {
               <BookmarkIcon className={`h-4 w-4 ${saved ? "fill-brand-600" : ""}`} />
               {saved ? "Bookmarked" : "Bookmark"}
             </button>
-            <Link
-              href={`/teachers/apply?course=${course.slug}`}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 hover:border-brand-400 hover:text-brand-700"
-            >
-              Mentor this course
-            </Link>
+            {mentorPending ? (
+              <span className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                Mentor request pending
+              </span>
+            ) : (
+              <Link
+                href={`/teachers/apply?course=${course.slug}`}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-600 hover:border-brand-400 hover:text-brand-700"
+              >
+                Mentor this course
+              </Link>
+            )}
           </>
         )}
       </div>
