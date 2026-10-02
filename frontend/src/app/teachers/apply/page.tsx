@@ -53,7 +53,7 @@ export default function MentorApplyPage() {
     const t = setTimeout(() => {
       router.push(`/courses/${submitted.slug}`);
       router.refresh();
-    }, 2500);
+    }, 1500);
     return () => clearTimeout(t);
   }, [submitted, router]);
 

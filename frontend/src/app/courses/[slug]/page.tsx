@@ -71,6 +71,14 @@ interface Mentor {
   _count: { enrollments: number };
 }
 
+interface MentorApplication {
+  id: string;
+  status: "PENDING" | "UNDER_REVIEW" | "INTERVIEW" | "APPROVED" | "REJECTED";
+  courseId: string;
+  reviewNote: string | null;
+  meetingLink: string | null;
+}
+
 interface CourseDetail {
   id: string;
   slug: string;
@@ -107,7 +115,7 @@ export default function CourseDetailPage() {
   const [meetings, setMeetings] = useState<CourseMeeting[] | null>(null);
   const [insights, setInsights] = useState<Insights | null>(null);
   const [mentorView, setMentorView] = useState<{ courseMentorId: string } | null>(null);
-  const [mentorPending, setMentorPending] = useState(false);
+  const [mentorApp, setMentorApp] = useState<MentorApplication | null>(null);
   const [openChapter, setOpenChapter] = useState<string | null>(null);
 
   useEffect(() => {
@@ -134,12 +142,12 @@ export default function CourseDetailPage() {
         }
         const mentoring = mine?.mentoring.find((m) => m.course.id === course.id);
         if (mentoring) setMentorView({ courseMentorId: mentoring.id });
-        // A pending mentor application locks both actions: no second application,
+        // An open mentor application locks both actions: no second application,
         // and no enrolling in a course you may end up teaching.
-        const app = await api<{ application: { status: string; course: { id: string } | null } | null }>("/teachers/me").catch(() => null);
-        if (app?.application && app.application.course?.id === course.id
+        const app = await api<{ application: MentorApplication | null }>("/teachers/me").catch(() => null);
+        if (app?.application && app.application.courseId === course.id
           && ["PENDING", "UNDER_REVIEW", "INTERVIEW", "APPROVED"].includes(app.application.status)) {
-          setMentorPending(true);
+          setMentorApp(app.application);
         }
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
@@ -312,6 +320,8 @@ export default function CourseDetailPage() {
       <p className="mt-1 text-sm text-slate-500">Hosted by {course.teacher.name} · {course._count.enrollments} enrolled</p>
       <p className="mt-4 max-w-3xl text-lg text-slate-600">{course.description}</p>
 
+      {mentorApp && <MentorStatusBanner app={mentorApp} />}
+
       <div className="mt-5 flex flex-wrap items-center gap-3">
         {isStaff ? (
           <span className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-600">
@@ -321,13 +331,13 @@ export default function CourseDetailPage() {
           <>
             <button
               onClick={enroll}
-              disabled={busy || enrolled || mentorPending || (course.mentors.length > 0 && !selected)}
+              disabled={busy || enrolled || !!mentorApp || (course.mentors.length > 0 && !selected)}
               className="rounded-xl brand-grad px-6 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
             >
               {enrolled
                 ? "Enrolled"
-                : mentorPending
-                  ? "Enrollment closed — mentor request pending"
+                : mentorApp
+                  ? "Enrollment closed while your mentor request is open"
                   : busy
                     ? "Enrolling…"
                     : course.mentors.length > 0 && !selected
@@ -346,9 +356,9 @@ export default function CourseDetailPage() {
               <BookmarkIcon className={`h-4 w-4 ${saved ? "fill-brand-600" : ""}`} />
               {saved ? "Bookmarked" : "Bookmark"}
             </button>
-            {mentorPending ? (
+            {mentorApp ? (
               <span className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
-                Mentor request pending
+                Mentor request {mentorApp.status === "APPROVED" ? "approved" : "pending"}
               </span>
             ) : (
               <Link
@@ -657,6 +667,41 @@ export default function CourseDetailPage() {
           </aside>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Where the user's own mentor application for this course stands. */
+const MENTOR_APP_UI: Record<MentorApplication["status"], { tone: string; dot: string; label: string; body: string }> = {
+  PENDING: { tone: "border-amber-300 bg-amber-50", dot: "bg-amber-500", label: "Pending — admin reviewing", body: "Your mentor application is in the queue. An admin reviews every application by hand; you will get an email with the outcome." },
+  UNDER_REVIEW: { tone: "border-amber-300 bg-amber-50", dot: "bg-amber-500", label: "Under review", body: "An admin is reviewing your mentor application right now." },
+  INTERVIEW: { tone: "border-sky-300 bg-sky-50", dot: "bg-sky-500", label: "Interview scheduled", body: "You are through review and have an interview booked. Join using the link below." },
+  APPROVED: { tone: "border-emerald-300 bg-emerald-50", dot: "bg-emerald-600", label: "Approved mentor", body: "You are mentoring this course. Add chapters, lessons and resources from the mentor panel below." },
+  REJECTED: { tone: "border-slate-200 bg-slate-50", dot: "bg-slate-400", label: "Not approved", body: "This application was not approved." },
+};
+
+function MentorStatusBanner({ app }: { app: MentorApplication }) {
+  const ui = MENTOR_APP_UI[app.status];
+  return (
+    <div className={`mt-5 rounded-2xl border px-5 py-4 ${ui.tone}`} role="status">
+      <p className="flex items-center gap-2 text-sm font-bold text-slate-900">
+        <span className={`h-2 w-2 shrink-0 rounded-full ${ui.dot} ${app.status === "PENDING" || app.status === "UNDER_REVIEW" ? "animate-pulse" : ""}`} />
+        Mentor application · {ui.label}
+      </p>
+      <p className="mt-1 text-sm text-slate-600">{ui.body}</p>
+      {app.status === "INTERVIEW" && app.meetingLink && (
+        <a
+          href={app.meetingLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-block rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+        >
+          Join interview
+        </a>
+      )}
+      {app.reviewNote && (
+        <p className="mt-3 rounded-lg bg-white/70 px-3 py-2 text-xs text-slate-600">Admin note: {app.reviewNote}</p>
+      )}
     </div>
   );
 }

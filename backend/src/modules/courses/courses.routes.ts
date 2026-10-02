@@ -62,9 +62,10 @@ router.get("/", async (req, res, next) => {
 
 // ── My courses — both sides of a user's life on the platform, in one call.
 // seeking: courses I enrolled to learn. mentoring: courses I own or mentor.
+// applying: mentor applications awaiting review (not mentoring yet).
 router.get("/mine", requireAuth, async (req, res, next) => {
   try {
-    const [seeking, mentoring] = await Promise.all([
+    const [seeking, mentoring, applying] = await Promise.all([
       prisma.enrollment.findMany({
         where: { studentId: req.user!.id },
         orderBy: { enrolledAt: "desc" },
@@ -89,9 +90,14 @@ router.get("/mine", requireAuth, async (req, res, next) => {
             orderBy: { createdAt: "desc" },
             include: { course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, subject: true } } },
           }),
+      prisma.teacherApplication.findMany({
+        where: { userId: req.user!.id },
+        orderBy: { createdAt: "desc" },
+        include: { course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, subject: true } } },
+      }),
     ]);
 
-    res.json({ success: true, data: { seeking, mentoring } });
+    res.json({ success: true, data: { seeking, mentoring, applying } });
   } catch (err) {
     next(err);
   }
