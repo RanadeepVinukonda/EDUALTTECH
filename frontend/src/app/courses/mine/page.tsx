@@ -105,72 +105,72 @@ export default function MyCoursesPage() {
         {pending.length > 0 && (
           <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {pending.map((a) => (
-              <Link
+              <CourseCard
                 key={a.id}
-                href={`/courses/${a.course.slug}`}
-                className="group flex items-center gap-4 rounded-2xl border border-amber-300 bg-amber-50 p-5 transition hover:border-amber-400"
-              >
-                {a.course.thumbnailUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={a.course.thumbnailUrl} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />
-                ) : (
-                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl brand-grad text-lg font-bold text-white">
-                    {a.course.subject[0]}
-                  </span>
-                )}
-                <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-amber-800">
+                course={a.course}
+                badge={
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">
                     <Clock className="h-3.5 w-3.5" />
-                    {a.status === "INTERVIEW" ? "Interview scheduled" : a.status === "UNDER_REVIEW" ? "Under review" : "Pending"}
-                  </p>
-                  <h3 className="font-display mt-1 truncate text-base font-semibold text-slate-900">{a.course.title}</h3>
-                  <p className="mt-0.5 text-xs text-slate-600">Mentor application awaiting admin review.</p>
-                </div>
-              </Link>
+                    {a.status === "INTERVIEW" ? "Interview" : a.status === "UNDER_REVIEW" ? "Under review" : "Pending"}
+                  </span>
+                }
+              />
             ))}
           </div>
         )}
-        {mentoring.length === 0 ? (
-          <div className={`rounded-xl border border-dashed border-slate-300 p-8 text-center ${pending.length > 0 ? "mt-4" : "mt-4"}`}>
-            <p className="text-slate-500">
-              {pending.length > 0
-                ? "Your pending application above unlocks mentoring once an admin approves it."
-                : "You are not mentoring any course yet."}
-            </p>
-            {pending.length === 0 && (
-              <Link href="/teachers/apply" className="mt-3 inline-block font-semibold text-brand-700 hover:text-brand-800">
-                Apply to mentor →
-              </Link>
-            )}
+        {mentoring.length === 0 && pending.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-dashed border-slate-300 p-8 text-center">
+            <p className="text-slate-500">You are not mentoring any course yet.</p>
+            <Link href="/teachers/apply" className="mt-3 inline-block font-semibold text-brand-700 hover:text-brand-800">
+              Apply to mentor →
+            </Link>
           </div>
-        ) : (
+        ) : mentoring.length > 0 ? (
           <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {mentoring.map((m) => (
-              <Link
+              <CourseCard
                 key={m.id}
-                href={`/courses/${m.course.slug}`}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-brand-300 hover:shadow-sm"
-              >
-                {m.course.thumbnailUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.course.thumbnailUrl} alt="" className="h-36 w-full object-cover" />
-                ) : (
-                  <div className="flex h-36 items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100">
-                    <span className="rounded-xl brand-grad px-3 py-1.5 text-sm font-bold text-white">{m.course.subject[0]}</span>
-                  </div>
-                )}
-                <div className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{m.course.subject}</p>
-                  <h3 className="font-display mt-1 text-lg font-semibold text-slate-900 group-hover:text-brand-800">{m.course.title}</h3>
-                  <p className="mt-1 text-xs text-slate-500">
+                course={m.course}
+                badge={
+                  <span className="text-xs text-slate-500">
                     {m.capacity} seats · {m._count?.enrollments ?? 0} learners
-                  </p>
-                </div>
-              </Link>
+                  </span>
+                }
+              />
             ))}
           </div>
-        )}
+        ) : null}
       </section>
     </div>
+  );
+}
+
+/** One course card, shared by live mentorships and pending applications. */
+function CourseCard({
+  course,
+  badge,
+}: {
+  course: { slug: string; title: string; thumbnailUrl: string | null; subject: string };
+  badge: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={`/courses/${course.slug}`}
+      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-brand-300 hover:shadow-sm"
+    >
+      {course.thumbnailUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={course.thumbnailUrl} alt="" className="h-36 w-full object-cover" />
+      ) : (
+        <div className="flex h-36 items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100">
+          <span className="rounded-xl brand-grad px-3 py-1.5 text-sm font-bold text-white">{course.subject[0]}</span>
+        </div>
+      )}
+      <div className="p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{course.subject}</p>
+        <h3 className="font-display mt-1 text-lg font-semibold text-slate-900 group-hover:text-brand-800">{course.title}</h3>
+        <div className="mt-2">{badge}</div>
+      </div>
+    </Link>
   );
 }
