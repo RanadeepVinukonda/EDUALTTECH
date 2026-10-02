@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { requireAuth, requireRole } from "../../middlewares/auth.js";
@@ -8,8 +9,45 @@ import { param } from "../../utils/params.js";
 import { applicationStatusEmail } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
 import { logger } from "../../utils/logger.js";
+import { config } from "../../config/env.js";
+import { publicFileUrl, uploadFile } from "../../lib/storage.js";
 
 const router = Router();
+
+// ── Resume upload ───────────────────────────────────────────────────
+
+const RESUME_MIME: Record<string, string> = {
+  "application/pdf": "pdf",
+  "application/msword": "doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+};
+const RESUME_MAX_BYTES = 5 * 1024 * 1024;
+
+// Raw body → Supabase Storage → returns the URL. Mirrors the avatar upload so
+// no multipart dependency creeps in for a single small file.
+router.post("/resume", requireAuth, async (req, res, next) => {
+  try {
+    const raw = (req.headers["x-resume-mime"] ?? req.headers["content-type"] ?? "").toString();
+    const mime = raw.split(/[;,]/)[0]?.trim() ?? "";
+    const ext = RESUME_MIME[mime];
+    if (!ext) throw ApiError.badRequest("Resume must be a PDF, DOC or DOCX file");
+
+    const length = Number(req.headers["content-length"] ?? 0);
+    if (!Number.isFinite(length) || length <= 0) throw ApiError.badRequest("Missing Content-Length");
+    if (length > RESUME_MAX_BYTES) throw ApiError.badRequest("Resume too large — max 5 MB");
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) chunks.push(chunk as Buffer);
+    const body = Buffer.concat(chunks);
+    if (body.byteLength !== length) throw ApiError.badRequest("Body size does not match Content-Length");
+
+    const path = `resumes/${req.user!.id}/${randomUUID()}.${ext}`;
+    await uploadFile(config.supabase.storageBucket, path, body, mime);
+    res.status(201).json({ success: true, data: { resumeUrl: publicFileUrl(config.supabase.storageBucket, path) } });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // ── Apply to join as teacher ────────────────────────────────────────
 

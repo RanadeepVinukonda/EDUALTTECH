@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 
@@ -218,7 +219,21 @@ function ApplicationCard({
         <Row label="Qualifications" value={app.qualifications ?? "—"} />
         <Row
           label="Resume"
-          value={app.resumeUrl ? <a className="font-medium text-brand-700 hover:text-brand-800" href={app.resumeUrl}>Open link</a> : "—"}
+          value={
+            app.resumeUrl ? (
+              <a
+                href={app.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border-[1.5px] border-slate-200 px-3 py-1.5 font-medium text-slate-700 transition hover:border-brand-400 hover:text-brand-700"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                View resume
+              </a>
+            ) : (
+              "—"
+            )
+          }
         />
       </dl>
       {app.message && (

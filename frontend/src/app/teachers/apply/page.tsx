@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { api, ApiError, getCachedUser } from "@/lib/api";
+import { api, API_BASE, ApiError, getAccessToken, getCachedUser } from "@/lib/api";
 
 interface CourseOption {
   id: string;
@@ -30,7 +30,9 @@ export default function MentorApplyPage() {
   const [courses, setCourses] = useState<CourseOption[]>([]);
   const [application, setApplication] = useState<Application | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [form, setForm] = useState({ courseId: "", subject: "", experience: "", qualifications: "", resumeUrl: "", message: "" });
+  const [form, setForm] = useState({ courseId: "", subject: "", experience: "", qualifications: "", message: "" });
+  const [resume, setResume] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -61,23 +63,57 @@ export default function MentorApplyPage() {
     setForm((f) => ({ ...f, courseId: id, subject: course?.subject ?? f.subject }));
   }
 
+  const RESUME_TYPES = ".pdf,.doc,.docx";
+
+  function pickResume(file: File | null) {
+    setError(null);
+    if (!file) return setResume(null);
+    if (file.size > 5 * 1024 * 1024) return setError("Resume too large — max 5 MB");
+    setResume(file);
+  }
+
+  // ponytail: raw put; the API helper forces JSON, so this goes direct.
+  async function uploadResume(): Promise<string | null> {
+    if (!resume) return null;
+    setUploading(true);
+    try {
+      const res = await fetch(`${API_BASE}/teachers/resume`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+          "Content-Type": "application/octet-stream",
+          "x-resume-mime": resume.type || "application/pdf",
+        },
+        body: resume,
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error?.message ?? "Resume upload failed");
+      }
+      return json.data.resumeUrl as string;
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const payload: Record<string, unknown> = {
-        subject: form.subject,
-      };
+      const payload: Record<string, unknown> = { subject: form.subject };
       if (form.experience.trim()) payload.experience = Number(form.experience);
-      for (const key of ["courseId", "qualifications", "resumeUrl", "message"] as const) {
+      for (const key of ["courseId", "qualifications", "message"] as const) {
         if (form[key].trim()) payload[key] = form[key].trim();
       }
+      const resumeUrl = await uploadResume();
+      if (resumeUrl) payload.resumeUrl = resumeUrl;
 
       const data = await api<{ application: Application }>("/teachers/apply", { method: "POST", body: JSON.stringify(payload) });
       setApplication(data.application);
+      setResume(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to submit application");
+      setError(err instanceof ApiError || err instanceof Error ? err.message : "Failed to submit application");
     } finally {
       setLoading(false);
     }
@@ -199,15 +235,26 @@ export default function MentorApplyPage() {
         </div>
 
         <div>
-          <label htmlFor="resume" className="mb-1 block text-sm font-medium text-slate-700">Resume link (optional)</label>
+          <label htmlFor="resume" className="mb-1 block text-sm font-medium text-slate-700">Resume (optional)</label>
           <input
             id="resume"
-            type="url"
-            value={form.resumeUrl}
-            onChange={(e) => setForm((f) => ({ ...f, resumeUrl: e.target.value }))}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-            placeholder="https://drive.google.com/…"
+            type="file"
+            accept={RESUME_TYPES}
+            onChange={(e) => pickResume(e.target.files?.[0] ?? null)}
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
           />
+          <p className="mt-1 text-xs text-slate-500">
+            {resume ? (
+              <span className="flex items-center justify-between gap-3">
+                <span className="truncate text-slate-700">{resume.name}</span>
+                <button type="button" onClick={() => setResume(null)} className="shrink-0 font-medium text-slate-500 hover:text-slate-800">
+                  Remove
+                </button>
+              </span>
+            ) : (
+              "PDF, DOC or DOCX up to 5 MB."
+            )}
+          </p>
         </div>
 
         <div>
@@ -223,10 +270,10 @@ export default function MentorApplyPage() {
 
         <button
           type="submit"
-          disabled={loading || !form.courseId}
+          disabled={loading || uploading || !form.courseId}
           className="w-full rounded-xl brand-grad py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
-          {loading ? "Submitting…" : "Submit application"}
+          {uploading ? "Uploading resume…" : loading ? "Submitting…" : "Submit application"}
         </button>
       </form>
     </div>
