@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { Award, BookOpen, Briefcase, FileText, MessageSquare, Upload } from "lucide-react";
 import { api, API_BASE, ApiError, getAccessToken, getCachedUser } from "@/lib/api";
 
 interface CourseOption {
@@ -24,6 +25,14 @@ const STATUS_COPY: Record<string, { heading: string; body: string }> = {
   APPROVED: { heading: "You're approved", body: "You can now build chapters and run your classroom." },
   REJECTED: { heading: "Not this time", body: "Your application was not approved. You can apply again for another course." },
 };
+
+const inputShell =
+  "flex h-[50px] items-center rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 transition focus-within:border-brand-500";
+const inputCls = "ml-2 h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400";
+const labelCls = "mb-1 block text-sm font-semibold text-slate-800";
+const areaCls =
+  "w-full rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 placeholder:text-slate-400";
+const RESUME_TYPES = ".pdf,.doc,.docx";
 
 export default function MentorApplyPage() {
   const user = getCachedUser();
@@ -62,8 +71,6 @@ export default function MentorApplyPage() {
     const course = courses.find((c) => c.id === id);
     setForm((f) => ({ ...f, courseId: id, subject: course?.subject ?? f.subject }));
   }
-
-  const RESUME_TYPES = ".pdf,.doc,.docx";
 
   function pickResume(file: File | null) {
     setError(null);
@@ -119,37 +126,48 @@ export default function MentorApplyPage() {
     }
   }
 
-  if (!loaded) return <div className="mx-auto max-w-2xl px-4 py-20 text-slate-500">Loading…</div>;
+  if (!loaded) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-gradient-to-b from-brand-50 to-white">
+        <div className="rounded-[20px] bg-white p-8 text-sm text-slate-500 shadow-elev2">Loading…</div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-        <h1 className="font-display text-2xl font-bold text-slate-900">Mentor a course</h1>
-        <p className="mt-3 text-slate-600">Create an account first, then apply to mentor any course.</p>
-        <a href="/register" className="mt-6 inline-block rounded-xl brand-grad px-6 py-3 font-semibold text-white hover:bg-brand-700">
-          Create account
-        </a>
-      </div>
+      <Stage>
+        <div className="rounded-[20px] bg-white p-8 text-center shadow-elev2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Mentor a course</h1>
+          <p className="mt-1 text-sm text-slate-600">Create an account first, then apply to mentor any course.</p>
+          <a
+            href="/register"
+            className="mt-6 inline-block rounded-[10px] bg-slate-900 px-6 py-3 text-[15px] font-medium text-white transition hover:bg-slate-800"
+          >
+            Create account
+          </a>
+        </div>
+      </Stage>
     );
   }
 
   if (application && application.status !== "REJECTED") {
     const copy = STATUS_COPY[application.status] ?? STATUS_COPY.PENDING;
     return (
-      <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center">
+      <Stage>
+        <div className="rounded-[20px] bg-white p-8 text-center shadow-elev2">
           <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{application.status.replace("_", " ")}</p>
           <h1 className="font-display mt-2 text-2xl font-bold text-slate-900">{copy.heading}</h1>
-          <p className="mt-3 text-slate-600">{copy.body}</p>
+          <p className="mt-1 text-sm text-slate-600">{copy.body}</p>
           {application.course && (
             <p className="mt-4 text-sm text-slate-500">
-              Course: <span className="font-medium text-slate-700">{application.course.title}</span>
+              Course: <span className="font-medium text-slate-800">{application.course.title}</span>
             </p>
           )}
           {application.status === "INTERVIEW" && application.meetingLink && (
             <a
               href={application.meetingLink}
-              className="mt-6 inline-block rounded-xl brand-grad px-6 py-3 font-semibold text-white hover:bg-brand-700"
+              className="mt-6 inline-block rounded-[10px] bg-slate-900 px-6 py-3 text-[15px] font-medium text-white transition hover:bg-slate-800"
             >
               Join interview
             </a>
@@ -158,15 +176,15 @@ export default function MentorApplyPage() {
             <p className="mt-6 rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">{application.reviewNote}</p>
           )}
         </div>
-      </div>
+      </Stage>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-      <h1 className="font-display text-3xl font-bold text-slate-900">Mentor a course</h1>
-      <p className="mt-2 text-slate-600">
-        Anyone here can learn and teach. Pick a course you want to guide, tell us your background, and an admin will review it.
+    <Stage>
+      <h1 className="text-2xl font-bold tracking-tight text-slate-900">Mentor a course</h1>
+      <p className="mt-1 text-sm text-slate-600">
+        Pick a course you want to guide and tell us your background. An admin reviews every application.
       </p>
 
       {application?.status === "REJECTED" && (
@@ -176,78 +194,99 @@ export default function MentorApplyPage() {
         </div>
       )}
 
-      {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {error && (
+        <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+          {error}
+        </p>
+      )}
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-3xl border border-slate-200 bg-white p-8">
+      <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="course" className="mb-1 block text-sm font-medium text-slate-700">Course you want to mentor</label>
-          <select
-            id="course"
-            required
-            value={form.courseId}
-            onChange={(e) => pickCourse(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-          >
-            <option value="" disabled>Select a course</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title} · {c.subject}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="course" className={labelCls}>Course you want to mentor</label>
+          <div className={inputShell}>
+            <BookOpen className="h-5 w-5 shrink-0 text-slate-400" aria-hidden="true" />
+            <select
+              id="course"
+              required
+              value={form.courseId}
+              onChange={(e) => pickCourse(e.target.value)}
+              className={`${inputCls} appearance-none`}
+            >
+              <option value="" disabled>Select a course</option>
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title} · {c.subject}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>
-          <label htmlFor="subject" className="mb-1 block text-sm font-medium text-slate-700">Subject</label>
-          <input
-            id="subject"
-            required
-            value={form.subject}
-            onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-            placeholder="e.g. Mathematics"
-          />
+          <label htmlFor="subject" className={labelCls}>Subject</label>
+          <div className={inputShell}>
+            <FileText className="h-5 w-5 shrink-0 text-slate-400" aria-hidden="true" />
+            <input
+              id="subject"
+              required
+              value={form.subject}
+              onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+              className={inputCls}
+              placeholder="e.g. Mathematics"
+            />
+          </div>
         </div>
 
         <div>
-          <label htmlFor="experience" className="mb-1 block text-sm font-medium text-slate-700">Years of experience (optional)</label>
-          <input
-            id="experience"
-            type="number"
-            min={0}
-            max={60}
-            value={form.experience}
-            onChange={(e) => setForm((f) => ({ ...f, experience: e.target.value }))}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-          />
+          <label htmlFor="experience" className={labelCls}>Years of experience (optional)</label>
+          <div className={inputShell}>
+            <Briefcase className="h-5 w-5 shrink-0 text-slate-400" aria-hidden="true" />
+            <input
+              id="experience"
+              type="number"
+              min={0}
+              max={60}
+              value={form.experience}
+              onChange={(e) => setForm((f) => ({ ...f, experience: e.target.value }))}
+              className={inputCls}
+              placeholder="e.g. 3"
+            />
+          </div>
         </div>
 
         <div>
-          <label htmlFor="qualifications" className="mb-1 block text-sm font-medium text-slate-700">Qualifications</label>
+          <label htmlFor="qualifications" className={labelCls}>Qualifications</label>
           <textarea
             id="qualifications"
             rows={3}
             value={form.qualifications}
             onChange={(e) => setForm((f) => ({ ...f, qualifications: e.target.value }))}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className={areaCls}
             placeholder="Degrees, certifications, teaching experience"
           />
         </div>
 
         <div>
-          <label htmlFor="resume" className="mb-1 block text-sm font-medium text-slate-700">Resume (optional)</label>
-          <input
-            id="resume"
-            type="file"
-            accept={RESUME_TYPES}
-            onChange={(e) => pickResume(e.target.files?.[0] ?? null)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
-          />
-          <p className="mt-1 text-xs text-slate-500">
+          <label htmlFor="resume" className={labelCls}>Resume (optional)</label>
+          <div className={`${inputShell} h-auto py-1.5`}>
+            <Upload className="h-5 w-5 shrink-0 text-slate-400" aria-hidden="true" />
+            <input
+              id="resume"
+              type="file"
+              accept={RESUME_TYPES}
+              onChange={(e) => pickResume(e.target.files?.[0] ?? null)}
+              className="ml-2 h-full w-full min-w-0 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-slate-500">
             {resume ? (
               <span className="flex items-center justify-between gap-3">
                 <span className="truncate text-slate-700">{resume.name}</span>
-                <button type="button" onClick={() => setResume(null)} className="shrink-0 font-medium text-slate-500 hover:text-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setResume(null)}
+                  className="shrink-0 font-medium text-slate-500 hover:text-slate-800"
+                >
                   Remove
                 </button>
               </span>
@@ -258,24 +297,34 @@ export default function MentorApplyPage() {
         </div>
 
         <div>
-          <label htmlFor="message" className="mb-1 block text-sm font-medium text-slate-700">Anything else? (optional)</label>
+          <label htmlFor="message" className={labelCls}>Anything else? (optional)</label>
           <textarea
             id="message"
             rows={3}
             value={form.message}
             onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className={areaCls}
+            placeholder="How you plan to teach, availability, anything useful"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading || uploading || !form.courseId}
-          className="w-full rounded-xl brand-grad py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="w-full rounded-[10px] bg-slate-900 py-3 text-[15px] font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
         >
           {uploading ? "Uploading resume…" : loading ? "Submitting…" : "Submit application"}
         </button>
       </form>
+    </Stage>
+  );
+}
+
+/** Same centred gradient stage the login / register cards sit on. */
+function Stage({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-[calc(100vh-4rem)] justify-center bg-gradient-to-b from-brand-50 to-white px-4 py-12">
+      <div className="w-full max-w-md rounded-[20px] bg-white p-8 shadow-elev2">{children}</div>
     </div>
   );
 }
