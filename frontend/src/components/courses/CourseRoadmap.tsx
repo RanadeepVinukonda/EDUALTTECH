@@ -8,6 +8,7 @@ export interface RoadmapLesson {
   id: string;
   title: string;
   type: "VIDEO" | "READING" | "QUIZ" | "ASSIGNMENT";
+  resources?: Array<{ label: string; url: string }>;
   // Absent in the pre-enrollment teaser payload — titles only.
   contentUrl?: string | null;
   meetingUrl?: string | null;
@@ -20,6 +21,7 @@ export interface RoadmapModule {
   id: string;
   title: string;
   position: number;
+  resources?: Array<{ label: string; url: string }>;
   lessons: RoadmapLesson[];
 }
 
@@ -65,6 +67,34 @@ const TYPE_DOT: Record<RoadmapLesson["type"], string> = {
   ASSIGNMENT: "bg-brand-600",
 };
 
+/** "label|url, label|url" ⇄ [{ label, url }] — one shape for chapter, lesson and concept. */
+export function parseResources(raw: string): Array<{ label: string; url: string }> {
+  return raw
+    .split(",")
+    .map((pair) => pair.split("|").map((s) => s.trim()))
+    .filter(([label, url]) => label && url && /^https?:\/\//.test(url))
+    .map(([label, url]) => ({ label: label!, url: url! }));
+}
+
+export function formatResources(list?: Array<{ label: string; url: string }>): string {
+  return (list ?? []).map((r) => `${r.label}|${r.url}`).join(", ");
+}
+
+function ResourceStrip({ resources }: { resources?: Array<{ label: string; url: string }> }) {
+  if (!resources || resources.length === 0) return null;
+  return (
+    <ul className="mt-2 flex flex-wrap gap-2">
+      {resources.map((r) => (
+        <li key={r.url}>
+          <Link href={r.url} target="_blank" rel="noopener noreferrer" className="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">
+            {r.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function typeLabel(type: RoadmapLesson["type"]): string {
   return LESSON_TYPES.find((t) => t.value === type)?.label ?? type;
 }
@@ -101,7 +131,7 @@ export default function CourseRoadmap({
   if (!mentor) {
     return (
       <ol className="mt-4 space-y-3">
-        {chapters.length === 0 && <EmptyRoadmap mentor={false} />}
+        {chapters.length === 0 && mentor && <EmptyRoadmap mentor />}
         {chapters.map((c) => (
           <ChapterNode
             key={c.id}
@@ -147,14 +177,14 @@ export default function CourseRoadmap({
                   <ChapterLinks chapter={c} meetings={meetings.filter((m) => m.chapter?.id === c.id)} />
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Concepts</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Lessons in this chapter</p>
                     <ul className="mt-2 space-y-2">
-                      {c.modules.length === 0 && <li className="text-sm text-slate-400">No concepts yet — add the first one below.</li>}
+                      {c.modules.length === 0 && <li className="text-sm text-slate-400">No lessons yet — add the first one below.</li>}
                       {c.modules.map((mod) => (
                         <li key={mod.id} className="rounded-xl border border-slate-200 p-4">
                           <div className="flex items-center justify-between gap-3">
                             <p className="font-semibold text-slate-800">
-                              <span className="text-slate-400">{mod.position}.</span> {mod.title}
+                              <span className="text-slate-400">Lesson {mod.position}.</span> {mod.title}
                             </p>
                             <span className="flex shrink-0 items-center gap-2">
                               <button
@@ -162,10 +192,10 @@ export default function CourseRoadmap({
                                 onClick={() => setOpenModule((o) => (o === mod.id ? null : mod.id))}
                                 className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
                               >
-                                {openModule === mod.id ? "Hide lessons" : `${mod.lessons.length} lesson${mod.lessons.length === 1 ? "" : "s"}`}
+                                {openModule === mod.id ? "Hide concepts" : `${mod.lessons.length} concept${mod.lessons.length === 1 ? "" : "s"}`}
                               </button>
                               <RemoveButton
-                                label={`Delete concept ${mod.title}`}
+                                label={`Delete lesson ${mod.title}`}
                                 onClick={async () => {
                                   await api(`/courses/modules/${mod.id}`, { method: "DELETE" }).catch(() => undefined);
                                   onChanged?.();
@@ -174,9 +204,11 @@ export default function CourseRoadmap({
                             </span>
                           </div>
 
+
+
                           {openModule === mod.id && (
                             <ul className="mt-3 space-y-2 border-l-2 border-slate-100 pl-4">
-                              {mod.lessons.length === 0 && <li className="text-sm text-slate-400">No lessons yet.</li>}
+                              {mod.lessons.length === 0 && <li className="text-sm text-slate-400">No concepts yet — add one below.</li>}
                               {mod.lessons.map((l) => (
                                 <li key={l.id} className="rounded-lg bg-slate-50 px-3 py-2">
                                   <div className="flex items-center justify-between gap-3">
@@ -194,7 +226,7 @@ export default function CourseRoadmap({
                                         {editLesson === l.id ? "Close" : "Edit"}
                                       </button>
                                       <RemoveButton
-                                        label={`Delete lesson ${l.title}`}
+                                        label={`Delete concept ${l.title}`}
                                         onClick={async () => {
                                           await api(`/courses/lessons/${l.id}`, { method: "DELETE" }).catch(() => undefined);
                                           onChanged?.();
@@ -202,18 +234,21 @@ export default function CourseRoadmap({
                                       />
                                     </span>
                                   </div>
-                                  {editLesson === l.id && <LessonForm courseId={courseId} moduleId={mod.id} lesson={l} onDone={() => { setEditLesson(null); onChanged?.(); }} />}
+                                  <ResourceStrip resources={l.resources} />
+                                  {editLesson === l.id && (
+                                    <ConceptForm courseId={courseId} moduleId={mod.id} concept={l} onDone={() => { setEditLesson(null); onChanged?.(); }} />
+                                  )}
                                 </li>
                               ))}
                               <li>
-                                <LessonForm courseId={courseId} moduleId={mod.id} lesson={null} onDone={() => onChanged?.()} />
+                                <ConceptForm courseId={courseId} moduleId={mod.id} concept={null} onDone={() => onChanged?.()} />
                               </li>
                             </ul>
                           )}
                         </li>
                       ))}
                     </ul>
-                    <AddConceptForm courseId={courseId} chapterId={c.id} onDone={() => onChanged?.()} />
+                    <AddLessonForm courseId={courseId} chapterId={c.id} onDone={() => onChanged?.()} />
                   </div>
                 </div>
               )}
@@ -232,7 +267,7 @@ export default function CourseRoadmap({
 function EmptyRoadmap({ mentor }: { mentor: boolean }) {
   return (
     <li className="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-400">
-      {mentor ? "No chapters yet — add the first step of your roadmap below." : "The roadmap is being prepared. Check back soon."}
+      No chapters yet — add the first step of your roadmap below.
     </li>
   );
 }
@@ -290,26 +325,29 @@ function ChapterNode({
             <div className="space-y-4 border-t border-slate-100 p-5">
               <ChapterLinks chapter={chapter} meetings={meetings} />
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Concepts</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Lessons in this chapter</p>
                 <ul className="mt-2 space-y-2">
-                  {chapter.modules.length === 0 && <li className="text-sm text-slate-400">Nothing here yet.</li>}
+                  {chapter.modules.length === 0 && <li className="text-sm text-slate-400">No lessons here yet.</li>}
                   {chapter.modules.map((mod) => (
                     <li key={mod.id} className="rounded-xl border border-slate-200 p-4">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="font-semibold text-slate-800">
-                          <span className="text-slate-400">{mod.position}.</span> {mod.title}
-                        </p>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-800">
+                            <span className="text-slate-400">Lesson {mod.position}.</span> {mod.title}
+                          </p>
+                          <ResourceStrip resources={mod.resources} />
+                        </div>
                         <button
                           type="button"
                           onClick={() => onToggleModule(mod.id)}
                           className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
                         >
-                          {openModule === mod.id ? "Hide" : `${mod.lessons.length} lesson${mod.lessons.length === 1 ? "" : "s"}`}
+                          {openModule === mod.id ? "Hide concepts" : `${mod.lessons.length} concept${mod.lessons.length === 1 ? "" : "s"}`}
                         </button>
                       </div>
                       {openModule === mod.id && (
                         <ul className="mt-3 space-y-2 border-l-2 border-slate-100 pl-4">
-                          {mod.lessons.length === 0 && <li className="text-sm text-slate-400">No lessons yet.</li>}
+                          {mod.lessons.length === 0 && <li className="text-sm text-slate-400">No concepts yet.</li>}
                           {mod.lessons.map((l) => (
                             <LessonRow key={l.id} lesson={l} />
                           ))}
@@ -375,6 +413,7 @@ function LessonRow({ lesson }: { lesson: RoadmapLesson }) {
         {lesson.title}
         <span className="shrink-0 text-xs text-slate-400">{typeLabel(lesson.type)}</span>
       </p>
+      <ResourceStrip resources={lesson.resources} />
       <div className="mt-2 flex flex-wrap gap-2">
         {lesson.meetingUrl && (
           <Link href={lesson.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-md bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-700">
@@ -524,19 +563,19 @@ function AddChapterForm({ mentorId, onDone }: { mentorId: string; onDone: () => 
   );
 }
 
-function AddConceptForm({ courseId, chapterId, onDone }: { courseId: string; chapterId: string; onDone: () => void }) {
+function AddLessonForm({ courseId, chapterId, onDone }: { courseId: string; chapterId: string; onDone: () => void }) {
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
       <button type="button" onClick={() => setOpen(true)} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800">
-        <PlusIcon /> Add concept
+        <PlusIcon /> Add lesson
       </button>
     );
   }
   return (
     <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
       <FormShell
-        submitLabel="Add concept"
+        submitLabel="Add lesson"
         onSubmit={async (e) => {
           const fd = new FormData(e.currentTarget as HTMLFormElement);
           await api(`/courses/${courseId}/modules`, {
@@ -550,9 +589,9 @@ function AddConceptForm({ courseId, chapterId, onDone }: { courseId: string; cha
         }}
       >
         <div>
-          <label className={labelCls} htmlFor="mc-title">Concept title</label>
+          <label className={labelCls} htmlFor="mc-title">Lesson title</label>
           <div className={inputShell}>
-            <input id="mc-title" name="title" required placeholder="e.g. Quadratic equations" className={inputCls} />
+            <input id="mc-title" name="title" required placeholder="e.g. Solving quadratic equations" className={inputCls} />
           </div>
         </div>
       </FormShell>
@@ -563,24 +602,24 @@ function AddConceptForm({ courseId, chapterId, onDone }: { courseId: string; cha
   );
 }
 
-function LessonForm({
+function ConceptForm({
   courseId,
   moduleId,
-  lesson,
+  concept: lesson,
   onDone,
 }: {
   courseId: string;
   moduleId: string;
-  lesson: RoadmapLesson | null;
+  concept: RoadmapLesson | null;
   onDone: () => void;
 }) {
   const [open, setOpen] = useState(lesson === null);
   if (!open) return null;
   return (
     <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
-      <p className="text-sm font-semibold text-slate-800">{lesson ? "Edit lesson" : "New lesson"}</p>
+      <p className="text-sm font-semibold text-slate-800">{lesson ? "Edit concept" : "New concept"}</p>
       <FormShell
-        submitLabel={lesson ? "Save lesson" : "Add lesson"}
+        submitLabel={lesson ? "Save concept" : "Add concept"}
         onSubmit={async (e) => {
           const fd = new FormData(e.currentTarget as HTMLFormElement);
           const payload = {
@@ -589,6 +628,7 @@ function LessonForm({
             contentUrl: fd.get("contentUrl") || "",
             meetingUrl: fd.get("meetingUrl") || "",
             textContent: fd.get("textContent") || undefined,
+            resources: parseResources(fd.get("resources") as string),
           };
           if (lesson) {
             await api(`/courses/lessons/${lesson.id}`, { method: "PATCH", body: JSON.stringify(payload) });
@@ -620,20 +660,24 @@ function LessonForm({
           </div>
         </div>
         <div>
-          <label className={labelCls} htmlFor={`ls-video-${lesson?.id ?? "new"}`}>Online class / recording link</label>
+          <label className={labelCls} htmlFor={`ls-video-${lesson?.id ?? "new"}`}>Video recording link</label>
           <div className={inputShell}>
             <input id={`ls-video-${lesson?.id ?? "new"}`} name="contentUrl" type="url" defaultValue={lesson?.contentUrl ?? ""} placeholder="https://…" className={inputCls} />
           </div>
         </div>
         <div>
-          <label className={labelCls} htmlFor={`ls-meet-${lesson?.id ?? "new"}`}>Live meeting link</label>
+          <label className={labelCls} htmlFor={`ls-meet-${lesson?.id ?? "new"}`}>Live class link</label>
           <div className={inputShell}>
             <input id={`ls-meet-${lesson?.id ?? "new"}`} name="meetingUrl" type="url" defaultValue={lesson?.meetingUrl ?? ""} placeholder="https://meet…/…" className={inputCls} />
           </div>
         </div>
         <div>
           <label className={labelCls} htmlFor={`ls-notes-${lesson?.id ?? "new"}`}>Notes & resource links</label>
-          <textarea id={`ls-notes-${lesson?.id ?? "new"}`} name="textContent" rows={3} defaultValue={lesson?.textContent ?? ""} placeholder="Paste links or notes for students" className={areaCls} />
+          <textarea id={`ls-notes-${lesson?.id ?? "new"}`} name="textContent" rows={3} defaultValue={lesson?.textContent ?? ""} placeholder="Notes for students" className={areaCls} />
+        </div>
+        <div>
+          <label className={labelCls} htmlFor={`ls-res-${lesson?.id ?? "new"}`}>Resources — label|url pairs, comma separated</label>
+          <textarea id={`ls-res-${lesson?.id ?? "new"}`} name="resources" rows={2} defaultValue={formatResources(lesson?.resources)} placeholder="Worksheet|https://…, Slides|https://…" className={areaCls} />
         </div>
       </FormShell>
       <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">

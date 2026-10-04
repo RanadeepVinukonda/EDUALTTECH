@@ -475,9 +475,7 @@ export default function CourseDetailPage() {
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="min-w-0">
           <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-display text-xl font-semibold text-slate-900">
-              {activeMentor ? `${activeMentor.mentor.name}&apos;s roadmap` : "Course roadmap"}
-            </h2>
+            <h2 className="font-display text-xl font-semibold text-slate-900">Course roadmap</h2>
             {!unlocked && activeMentor && (
               <p className="text-xs font-medium text-slate-400">
                 {activeMentor.chapters.reduce((n, c) => n + (c._count?.modules ?? 0), 0)} concepts inside — enroll to unlock

@@ -335,6 +335,7 @@ model Module {
   chapter   CourseChapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
   title     String
   position  Int
+  resources Json     @default("[]") // [{ label, url }] — concept-level attachments
   lessons   Lesson[]
 
   @@unique([courseId, chapterId, position])

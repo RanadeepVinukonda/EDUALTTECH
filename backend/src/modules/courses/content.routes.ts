@@ -24,6 +24,10 @@ async function assertContentAccess(courseId: string, user: AuthUser): Promise<vo
 const moduleSchema = z.object({
   title: z.string().trim().min(2).max(160),
   position: z.number().int().min(1).max(500).optional(),
+  resources: z
+    .array(z.object({ label: z.string().trim().min(1).max(120), url: z.string().url() }))
+    .max(20)
+    .optional(),
 });
 
 // Learners only see lesson links (recording / meeting / notes) once they are
@@ -117,7 +121,13 @@ router.post("/:courseId/modules", requireAuth, validate(moduleSchema), async (re
       select: { position: true },
     });
     const module = await prisma.module.create({
-      data: { courseId, chapterId, title: req.body.title, position: req.body.position ?? (last?.position ?? 0) + 1 },
+      data: {
+        courseId,
+        chapterId,
+        title: req.body.title,
+        position: req.body.position ?? (last?.position ?? 0) + 1,
+        ...(req.body.resources ? { resources: req.body.resources } : {}),
+      },
     });
     res.status(201).json({ success: true, data: { module } });
   } catch (err) {
