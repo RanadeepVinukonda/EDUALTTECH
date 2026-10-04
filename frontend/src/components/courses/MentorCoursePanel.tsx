@@ -3,7 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { api, getAccessToken, API_BASE, getCachedUser } from "@/lib/api";
-import CourseRoadmap, { type RoadmapChapter } from "./CourseRoadmap";
+import CourseRoadmap, { type RoadmapChapter, type RoadmapShell } from "./CourseRoadmap";
 
 interface Meeting {
   id: string;
@@ -35,6 +35,7 @@ export function MentorCoursePanel({
   courseTitle: string;
 }) {
   const [chapters, setChapters] = useState<RoadmapChapter[]>([]);
+  const [roadmap, setRoadmap] = useState<RoadmapShell | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [resources, setResources] = useState<CourseResource[]>([]);
   const [busy, setBusy] = useState(false);
@@ -155,13 +156,14 @@ async function removeResource(id: string) {
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <h3 className="font-display text-lg font-semibold text-slate-900">Roadmap</h3>
         <p className="mt-1 text-sm text-slate-500">
-          Each chapter is a step of your path. Open one to add concepts, then lessons with a recorded class, a live
-          meeting link, notes and resources.
+          Create the roadmap first — name it, add your live class link, recordings and resources. Then break it into
+          chapters, lessons and concepts.
         </p>
         <CourseRoadmap
           courseId={courseId}
           mentorId={courseMentorId}
           chapters={chapters}
+          roadmap={roadmap}
           meetings={meetings}
           mode="mentor"
           onChanged={load}

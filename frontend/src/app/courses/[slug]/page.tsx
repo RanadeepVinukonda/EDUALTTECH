@@ -6,8 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Bookmark as BookmarkIcon } from "lucide-react";
 import { api, ApiError, getCachedUser, updateCachedUser } from "@/lib/api";
 import { CourseChat } from "@/components/courses/CourseChat";
-import { MentorDM } from "@/components/courses/MentorDM";
-import CourseRoadmap, { type RoadmapChapter, type RoadmapMeeting } from "@/components/courses/CourseRoadmap";
+import CourseRoadmap, { type RoadmapChapter, type RoadmapMeeting, type RoadmapShell } from "@/components/courses/CourseRoadmap";
 import { MentorCoursePanel } from "@/components/courses/MentorCoursePanel";
 
 const PLANS = [
@@ -106,7 +105,7 @@ export default function CourseDetailPage() {
   const [mentorApp, setMentorApp] = useState<MentorApplication | null>(null);
   // Unlocked roadmap (with recording/meeting links) — teaser data from the
   // course payload stays title-only until the viewer is in the course.
-  const [roadmap, setRoadmap] = useState<{ mentors: Array<{ id: string; chapters: RoadmapChapter[] }>; meetings: RoadmapMeeting[] } | null>(null);
+  const [roadmap, setRoadmap] = useState<{ mentors: Array<{ id: string } & RoadmapShell & { chapters: RoadmapChapter[] }>; meetings: RoadmapMeeting[] } | null>(null);
 
   useEffect(() => {
     api<{ course: CourseDetail }>(`/courses/${params.slug}`)
@@ -139,7 +138,7 @@ export default function CourseDetailPage() {
           && ["PENDING", "UNDER_REVIEW", "INTERVIEW", "APPROVED"].includes(app.application.status)) {
           setMentorApp(app.application);
         }
-        const rm = await api<{ mentors: Array<{ id: string; chapters: RoadmapChapter[] }>; meetings: RoadmapMeeting[] }>(`/courses/${course.id}/roadmap`).catch(() => null);
+        const rm = await api<{ mentors: Array<{ id: string } & RoadmapShell & { chapters: RoadmapChapter[] }>; meetings: RoadmapMeeting[] }>(`/courses/${course.id}/roadmap`).catch(() => null);
         if (rm) setRoadmap(rm);
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
@@ -488,6 +487,7 @@ export default function CourseDetailPage() {
               courseId={course.id}
               mentorId={activeMentor.id}
               chapters={roadmap?.mentors.find((m) => m.id === activeMentor.id)?.chapters ?? activeMentor.chapters}
+              roadmap={roadmap?.mentors.find((m) => m.id === activeMentor.id) ?? null}
               meetings={roadmap?.meetings ?? meetings ?? []}
               mode="learn"
               locked={!unlocked}
@@ -502,11 +502,10 @@ export default function CourseDetailPage() {
           <aside className="space-y-6">
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="font-display text-lg font-semibold text-slate-900">Class chat</h3>
-              {enrolled && enrollmentId ? (
-                <MentorDM enrollmentId={enrollmentId} courseTitle={course.title} />
-              ) : (
-                <CourseChat courseId={course.id} />
-              )}
+              <p className="mt-1 mb-3 text-xs text-slate-500">
+                One thread for everyone in this course — mentor messages reach every enrolled student.
+              </p>
+              <CourseChat courseId={course.id} />
             </section>
 
             <section className="rounded-2xl border border-slate-200 bg-white p-5">

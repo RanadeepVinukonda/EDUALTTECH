@@ -36,6 +36,15 @@ export interface RoadmapChapter {
   resources: Array<{ url: string; label: string }>;
 }
 
+/** The roadmap itself: created first, then chapters hang off it. */
+export interface RoadmapShell {
+  title: string | null;
+  summary: string | null;
+  meetingUrl: string | null;
+  recordingUrl: string | null;
+  resources: Array<{ label: string; url: string }> | null;
+}
+
 export interface RoadmapMeeting {
   id: string;
   title: string;
@@ -109,6 +118,7 @@ export default function CourseRoadmap({
   courseId,
   mentorId,
   chapters,
+  roadmap,
   meetings = [],
   mode,
   locked = false,
@@ -118,6 +128,7 @@ export default function CourseRoadmap({
   /** CourseMentor id — chapters hang off the mentorship, not the course. */
   mentorId: string;
   chapters: RoadmapChapter[];
+  roadmap?: RoadmapShell | null;
   meetings?: RoadmapMeeting[];
   mode: "mentor" | "learn";
   locked?: boolean;
@@ -130,6 +141,18 @@ export default function CourseRoadmap({
 
   if (!mentor) {
     return (
+      <>
+        {roadmap?.title && (
+          <header className="mt-4 rounded-2xl border border-brand-100 bg-brand-50/60 p-5">
+            <h3 className="font-display text-lg font-semibold text-slate-900">{roadmap.title}</h3>
+            {roadmap.summary && <p className="mt-1 text-sm text-slate-600">{roadmap.summary}</p>}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {roadmap.meetingUrl && <Link href={roadmap.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800">Join live class</Link>}
+              {roadmap.recordingUrl && <Link href={roadmap.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] border border-[1.5px] border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50">Watch recording</Link>}
+            </div>
+            <ResourceStrip resources={roadmap.resources ?? []} />
+          </header>
+        )}
       <ol className="mt-4 space-y-3">
         {chapters.length === 0 && mentor && <EmptyRoadmap mentor />}
         {chapters.map((c) => (
@@ -145,11 +168,15 @@ export default function CourseRoadmap({
           />
         ))}
       </ol>
+      </>
     );
   }
 
   return (
-    <ol className="mt-4 space-y-3">
+    <>
+      <RoadmapShellForm courseId={courseId} mentorId={mentorId} roadmap={roadmap ?? null} onDone={() => onChanged?.()} />
+      <p className="mt-6 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Chapters</p>
+      <ol className="mt-2 space-y-3">
       {chapters.length === 0 && <EmptyRoadmap mentor />}
       {chapters.map((c) => (
         <li key={c.id} className="relative">
@@ -260,7 +287,113 @@ export default function CourseRoadmap({
         <Node tone="ghost" />
         <AddChapterForm mentorId={mentorId} onDone={() => onChanged?.()} />
       </li>
-    </ol>
+      </ol>
+    </>
+  );
+}
+
+/** Step 1 — the roadmap itself: title, intro, live class link, recording, resources. */
+function RoadmapShellForm({
+  courseId,
+  mentorId,
+  roadmap,
+  onDone,
+}: {
+  courseId: string;
+  mentorId: string;
+  roadmap: RoadmapShell | null;
+  onDone: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(!roadmap?.title);
+
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    setBusy(true);
+    setError(null);
+    try {
+      await api("/chapters/roadmap", {
+        method: "PUT",
+        body: JSON.stringify({
+          courseMentorId: mentorId,
+          title: fd.get("title"),
+          summary: fd.get("summary") || undefined,
+          meetingUrl: fd.get("meetingUrl") || "",
+          recordingUrl: fd.get("recordingUrl") || "",
+          resources: parseResources(fd.get("resources") as string),
+        }),
+      });
+      setEditing(false);
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save the roadmap");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (roadmap?.title && !editing) {
+    return (
+      <div className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Your roadmap</p>
+            <h3 className="font-display text-lg font-semibold text-slate-900">{roadmap.title}</h3>
+            {roadmap.summary && <p className="mt-1 text-sm text-slate-600">{roadmap.summary}</p>}
+          </div>
+          <button type="button" onClick={() => setEditing(true)} className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">
+            Edit
+          </button>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {roadmap.meetingUrl && <Link href={roadmap.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800">Live class link</Link>}
+          {roadmap.recordingUrl && <Link href={roadmap.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] border border-[1.5px] border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50">Recording link</Link>}
+        </div>
+        <ResourceStrip resources={roadmap.resources ?? []} />
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+      <div>
+        <h3 className="font-display text-lg font-semibold text-slate-900">
+          {roadmap?.title ? "Edit roadmap" : "Create your roadmap"}
+        </h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Start here. Name the roadmap, add your live class link, recordings and resources — then break it into
+          chapters, lessons and concepts.
+        </p>
+      </div>
+      <div>
+        <label className={labelCls} htmlFor="rm-title">Roadmap title</label>
+        <input id="rm-title" name="title" required defaultValue={roadmap?.title ?? ""} placeholder="e.g. Become a confident React engineer" className={inputShell + " " + inputCls} />
+      </div>
+      <div>
+        <label className={labelCls} htmlFor="rm-summary">What will learners achieve?</label>
+        <textarea id="rm-summary" name="summary" rows={2} defaultValue={roadmap?.summary ?? ""} placeholder="Short intro shown above every chapter" className={areaCls} />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className={labelCls} htmlFor="rm-meet">Live class link</label>
+          <input id="rm-meet" name="meetingUrl" type="url" defaultValue={roadmap?.meetingUrl ?? ""} placeholder="https://meet.google.com/…" className={inputShell + " " + inputCls} />
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="rm-rec">Recording link</label>
+          <input id="rm-rec" name="recordingUrl" type="url" defaultValue={roadmap?.recordingUrl ?? ""} placeholder="https://youtube.com/…" className={inputShell + " " + inputCls} />
+        </div>
+      </div>
+      <div>
+        <label className={labelCls} htmlFor="rm-res">Resources for the whole roadmap — label|url pairs, comma separated</label>
+        <textarea id="rm-res" name="resources" rows={2} defaultValue={formatResources(roadmap?.resources ?? [])} placeholder="Starter pack|https://…, Syllabus|https://…" className={areaCls} />
+      </div>
+      {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+      <button type="submit" disabled={busy} className={submitCls}>
+        {busy ? "Saving…" : roadmap?.title ? "Save roadmap" : "Create roadmap"}
+      </button>
+    </form>
   );
 }
 

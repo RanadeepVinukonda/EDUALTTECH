@@ -103,6 +103,47 @@ router.get("/mentor/:mentorId", requireAuth, async (req, res, next) => {
 
 // ── Mentor: create / update / delete chapters ───────────────────────
 
+const roadmapSchema = z.object({
+  courseMentorId: z.string().cuid2(),
+  title: z.string().trim().min(3).max(160),
+  summary: z.string().trim().max(1_000).optional(),
+  meetingUrl: z.union([z.string().url(), z.literal("")]).optional(),
+  recordingUrl: z.union([z.string().url(), z.literal("")]).optional(),
+  resources: z.array(z.object({ label: z.string().trim().min(1).max(120), url: z.string().url() })).max(20).optional(),
+});
+
+// The roadmap is created before any chapter: title, intro, and the course-wide
+// live link / recording / resources that sit above every chapter.
+router.put("/roadmap", requireAuth, validate(roadmapSchema), async (req, res, next) => {
+  try {
+    const data = req.body as z.infer<typeof roadmapSchema>;
+    await assertMentorOwnsCourseMentor(data.courseMentorId, req.user!);
+
+    const roadmap = await prisma.courseMentor.update({
+      where: { id: data.courseMentorId },
+      data: {
+        roadmapTitle: data.title,
+        ...(data.summary !== undefined ? { roadmapSummary: data.summary || null } : {}),
+        ...(data.meetingUrl !== undefined ? { roadmapMeetingUrl: data.meetingUrl || null } : {}),
+        ...(data.recordingUrl !== undefined ? { roadmapRecordingUrl: data.recordingUrl || null } : {}),
+        ...(data.resources !== undefined ? { roadmapResources: data.resources } : {}),
+      },
+      select: {
+        id: true,
+        roadmapTitle: true,
+        roadmapSummary: true,
+        roadmapMeetingUrl: true,
+        roadmapRecordingUrl: true,
+        roadmapResources: true,
+      },
+    });
+
+    res.json({ success: true, data: { roadmap } });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post("/", requireAuth, validate(createChapterSchema), async (req, res, next) => {
   try {
     const data = req.body as z.infer<typeof createChapterSchema>;

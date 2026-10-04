@@ -298,6 +298,13 @@ model CourseMentor {
   capacity  Int      @default(20) // max students this mentor accepts
   createdAt DateTime @default(now())
 
+  // The roadmap itself — created first, then chapters hang off it.
+  roadmapTitle     String?
+  roadmapSummary   String?
+  roadmapMeetingUrl String?
+  roadmapRecordingUrl String?
+  roadmapResources Json     @default("[]") // [{ label, url }] — whole-roadmap attachments
+
   chapters  CourseChapter[]
   enrollments Enrollment[]
 

@@ -52,6 +52,11 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res, next) => {
       where: { courseId },
       select: {
         id: true,
+        roadmapTitle: true,
+        roadmapSummary: true,
+        roadmapMeetingUrl: true,
+        roadmapRecordingUrl: true,
+        roadmapResources: true,
         chapters: {
           orderBy: { order: "asc" },
           include: {
@@ -73,7 +78,15 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        mentors: mentors.map((m) => ({ id: m.id, chapters: m.chapters })),
+        mentors: mentors.map((m) => ({
+          id: m.id,
+          title: m.roadmapTitle,
+          summary: m.roadmapSummary,
+          meetingUrl: m.roadmapMeetingUrl,
+          recordingUrl: m.roadmapRecordingUrl,
+          resources: m.roadmapResources,
+          chapters: m.chapters,
+        })),
         meetings: meetings.map((m) => ({ ...m, chapter: m.chapterId ? { id: m.chapterId } : null })),
       },
     });
