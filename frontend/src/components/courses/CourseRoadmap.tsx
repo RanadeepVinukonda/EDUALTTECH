@@ -1,0 +1,652 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { api } from "@/lib/api";
+
+export interface RoadmapLesson {
+  id: string;
+  title: string;
+  type: "VIDEO" | "READING" | "QUIZ" | "ASSIGNMENT";
+  // Absent in the pre-enrollment teaser payload — titles only.
+  contentUrl?: string | null;
+  meetingUrl?: string | null;
+  textContent?: string | null;
+  position: number;
+  isPublished?: boolean;
+}
+
+export interface RoadmapModule {
+  id: string;
+  title: string;
+  position: number;
+  lessons: RoadmapLesson[];
+}
+
+export interface RoadmapChapter {
+  id: string;
+  title: string;
+  summary: string | null;
+  order: number;
+  recordingUrl: string | null;
+  meetingUrl: string | null;
+  modules: RoadmapModule[];
+  resources: Array<{ url: string; label: string }>;
+}
+
+export interface RoadmapMeeting {
+  id: string;
+  title: string;
+  meetingUrl: string;
+  scheduledAt: string;
+  chapter: { id: string } | null;
+}
+
+const inputShell =
+  "flex h-[50px] w-full items-center rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 transition focus-within:border-brand-500";
+const inputCls = "ml-2 h-full w-full min-w-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400";
+const areaCls =
+  "w-full rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 placeholder:text-slate-400";
+const labelCls = "mb-1 block text-sm font-semibold text-slate-800";
+const submitCls =
+  "rounded-[10px] bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50";
+
+const LESSON_TYPES = [
+  { value: "VIDEO", label: "Recorded class" },
+  { value: "READING", label: "Reading / notes" },
+  { value: "QUIZ", label: "Quiz" },
+  { value: "ASSIGNMENT", label: "Assignment" },
+];
+
+const TYPE_DOT: Record<RoadmapLesson["type"], string> = {
+  VIDEO: "bg-sky-500",
+  READING: "bg-slate-400",
+  QUIZ: "bg-violet-500",
+  ASSIGNMENT: "bg-brand-600",
+};
+
+export function typeLabel(type: RoadmapLesson["type"]): string {
+  return LESSON_TYPES.find((t) => t.value === type)?.label ?? type;
+}
+
+/**
+ * The course path. One component, two modes:
+ *  - "mentor": full authoring — + chapter, + concept, + lesson, inline editors.
+ *  - "learn":   read-only path — watch recordings, join meetings, open resources.
+ * `locked` is the pre-enrollment teaser: titles only, no links.
+ */
+export default function CourseRoadmap({
+  courseId,
+  mentorId,
+  chapters,
+  meetings = [],
+  mode,
+  locked = false,
+  onChanged,
+}: {
+  courseId: string;
+  /** CourseMentor id — chapters hang off the mentorship, not the course. */
+  mentorId: string;
+  chapters: RoadmapChapter[];
+  meetings?: RoadmapMeeting[];
+  mode: "mentor" | "learn";
+  locked?: boolean;
+  onChanged?: () => void;
+}) {
+  const mentor = mode === "mentor" && !locked;
+  const [openChapter, setOpenChapter] = useState<string | null>(null);
+  const [openModule, setOpenModule] = useState<string | null>(null);
+  const [editLesson, setEditLesson] = useState<string | null>(null);
+
+  if (!mentor) {
+    return (
+      <ol className="mt-4 space-y-3">
+        {chapters.length === 0 && <EmptyRoadmap mentor={false} />}
+        {chapters.map((c) => (
+          <ChapterNode
+            key={c.id}
+            chapter={c}
+            meetings={meetings.filter((m) => m.chapter?.id === c.id)}
+            open={openChapter === c.id}
+            locked={locked}
+            onToggle={() => setOpenChapter((o) => (o === c.id ? null : c.id))}
+            openModule={openModule}
+            onToggleModule={(id) => setOpenModule((o) => (o === id ? null : id))}
+          />
+        ))}
+      </ol>
+    );
+  }
+
+  return (
+    <ol className="mt-4 space-y-3">
+      {chapters.length === 0 && <EmptyRoadmap mentor />}
+      {chapters.map((c) => (
+        <li key={c.id} className="relative">
+          <div className="flex items-start gap-3">
+            <Node tone="brand" />
+            <div className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white">
+              <button
+                type="button"
+                onClick={() => setOpenChapter((o) => (o === c.id ? null : c.id))}
+                aria-expanded={openChapter === c.id}
+                className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50"
+              >
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
+                  <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
+                  {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
+                </div>
+                <span className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold ${openChapter === c.id ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}>
+                  {openChapter === c.id ? "Close" : `${c.modules.length} concept${c.modules.length === 1 ? "" : "s"}`}
+                </span>
+              </button>
+
+              {openChapter === c.id && (
+                <div className="space-y-4 border-t border-slate-100 p-5">
+                  <ChapterLinks chapter={c} meetings={meetings.filter((m) => m.chapter?.id === c.id)} />
+
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Concepts</p>
+                    <ul className="mt-2 space-y-2">
+                      {c.modules.length === 0 && <li className="text-sm text-slate-400">No concepts yet — add the first one below.</li>}
+                      {c.modules.map((mod) => (
+                        <li key={mod.id} className="rounded-xl border border-slate-200 p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="font-semibold text-slate-800">
+                              <span className="text-slate-400">{mod.position}.</span> {mod.title}
+                            </p>
+                            <span className="flex shrink-0 items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setOpenModule((o) => (o === mod.id ? null : mod.id))}
+                                className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                              >
+                                {openModule === mod.id ? "Hide lessons" : `${mod.lessons.length} lesson${mod.lessons.length === 1 ? "" : "s"}`}
+                              </button>
+                              <RemoveButton
+                                label={`Delete concept ${mod.title}`}
+                                onClick={async () => {
+                                  await api(`/courses/modules/${mod.id}`, { method: "DELETE" }).catch(() => undefined);
+                                  onChanged?.();
+                                }}
+                              />
+                            </span>
+                          </div>
+
+                          {openModule === mod.id && (
+                            <ul className="mt-3 space-y-2 border-l-2 border-slate-100 pl-4">
+                              {mod.lessons.length === 0 && <li className="text-sm text-slate-400">No lessons yet.</li>}
+                              {mod.lessons.map((l) => (
+                                <li key={l.id} className="rounded-lg bg-slate-50 px-3 py-2">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="flex min-w-0 items-center gap-2">
+                                      <span className={`h-2 w-2 shrink-0 rounded-full ${TYPE_DOT[l.type]}`} />
+                                      <span className="truncate text-sm font-medium text-slate-800">{l.title}</span>
+                                      <span className="shrink-0 text-xs text-slate-400">{typeLabel(l.type)}</span>
+                                    </span>
+                                    <span className="flex shrink-0 gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditLesson((e) => (e === l.id ? null : l.id))}
+                                        className="rounded-md px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+                                      >
+                                        {editLesson === l.id ? "Close" : "Edit"}
+                                      </button>
+                                      <RemoveButton
+                                        label={`Delete lesson ${l.title}`}
+                                        onClick={async () => {
+                                          await api(`/courses/lessons/${l.id}`, { method: "DELETE" }).catch(() => undefined);
+                                          onChanged?.();
+                                        }}
+                                      />
+                                    </span>
+                                  </div>
+                                  {editLesson === l.id && <LessonForm courseId={courseId} moduleId={mod.id} lesson={l} onDone={() => { setEditLesson(null); onChanged?.(); }} />}
+                                </li>
+                              ))}
+                              <li>
+                                <LessonForm courseId={courseId} moduleId={mod.id} lesson={null} onDone={() => onChanged?.()} />
+                              </li>
+                            </ul>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    <AddConceptForm courseId={courseId} chapterId={c.id} onDone={() => onChanged?.()} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </li>
+      ))}
+      <li className="flex items-start gap-3">
+        <Node tone="ghost" />
+        <AddChapterForm mentorId={mentorId} onDone={() => onChanged?.()} />
+      </li>
+    </ol>
+  );
+}
+
+function EmptyRoadmap({ mentor }: { mentor: boolean }) {
+  return (
+    <li className="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-400">
+      {mentor ? "No chapters yet — add the first step of your roadmap below." : "The roadmap is being prepared. Check back soon."}
+    </li>
+  );
+}
+
+function Node({ tone }: { tone: "brand" | "ghost" }) {
+  return (
+    <span className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white shadow-sm">
+      <span className={`h-full w-full rounded-full ${tone === "brand" ? "bg-brand-500" : "border-2 border-dashed border-slate-300 bg-white"}`} />
+    </span>
+  );
+}
+
+/** Learner-side chapter: click to reveal links and lessons. */
+function ChapterNode({
+  chapter,
+  meetings,
+  open,
+  locked,
+  onToggle,
+  openModule,
+  onToggleModule,
+}: {
+  chapter: RoadmapChapter;
+  meetings: RoadmapMeeting[];
+  open: boolean;
+  locked: boolean;
+  onToggle: () => void;
+  openModule: string | null;
+  onToggleModule: (id: string) => void;
+}) {
+  return (
+    <li className="relative">
+      <div className="flex items-start gap-3">
+        <Node tone="brand" />
+        <div className="min-w-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <button
+            type="button"
+            onClick={onToggle}
+            disabled={locked}
+            aria-expanded={open}
+            className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left enabled:hover:bg-slate-50"
+          >
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {chapter.order}</p>
+              <h3 className="font-display text-lg font-semibold text-slate-900">{chapter.title}</h3>
+              {chapter.summary && <p className="mt-1 text-sm text-slate-600">{chapter.summary}</p>}
+            </div>
+            <span className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${open ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500"}`}>
+              {locked && <span aria-hidden>🔒</span>}
+              {chapter.modules.length} concept{chapter.modules.length === 1 ? "" : "s"}
+            </span>
+          </button>
+
+          {open && !locked && (
+            <div className="space-y-4 border-t border-slate-100 p-5">
+              <ChapterLinks chapter={chapter} meetings={meetings} />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Concepts</p>
+                <ul className="mt-2 space-y-2">
+                  {chapter.modules.length === 0 && <li className="text-sm text-slate-400">Nothing here yet.</li>}
+                  {chapter.modules.map((mod) => (
+                    <li key={mod.id} className="rounded-xl border border-slate-200 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-semibold text-slate-800">
+                          <span className="text-slate-400">{mod.position}.</span> {mod.title}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => onToggleModule(mod.id)}
+                          className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                        >
+                          {openModule === mod.id ? "Hide" : `${mod.lessons.length} lesson${mod.lessons.length === 1 ? "" : "s"}`}
+                        </button>
+                      </div>
+                      {openModule === mod.id && (
+                        <ul className="mt-3 space-y-2 border-l-2 border-slate-100 pl-4">
+                          {mod.lessons.length === 0 && <li className="text-sm text-slate-400">No lessons yet.</li>}
+                          {mod.lessons.map((l) => (
+                            <LessonRow key={l.id} lesson={l} />
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {chapter.resources.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Resources</p>
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {chapter.resources.map((r) => (
+                      <li key={r.url}>
+                        <Link href={r.url} target="_blank" rel="noopener noreferrer" className="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">
+                          {r.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </li>
+  );
+}
+
+/** Recording / live links — shared by both modes. */
+function ChapterLinks({ chapter, meetings }: { chapter: RoadmapChapter; meetings: RoadmapMeeting[] }) {
+  const live = meetings.find((m) => new Date(m.scheduledAt).getTime() > Date.now()) ?? meetings[0];
+  const joinUrl = live?.meetingUrl ?? chapter.meetingUrl;
+  return (
+    <div className="flex flex-wrap gap-3 text-sm">
+      {joinUrl && (
+        <Link href={joinUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-700">
+          Join live session
+        </Link>
+      )}
+      {chapter.recordingUrl && (
+        <Link href={chapter.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
+          Watch recording
+        </Link>
+      )}
+      {chapter.resources.map((r) => (
+        <Link key={r.url} href={r.url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
+          {r.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/** One lesson for learners: watch, join, read. */
+function LessonRow({ lesson }: { lesson: RoadmapLesson }) {
+  return (
+    <li className="rounded-lg bg-slate-50 px-3 py-2">
+      <p className="flex items-center gap-2 text-sm font-medium text-slate-800">
+        <span className={`h-2 w-2 shrink-0 rounded-full ${TYPE_DOT[lesson.type]}`} />
+        {lesson.title}
+        <span className="shrink-0 text-xs text-slate-400">{typeLabel(lesson.type)}</span>
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {lesson.meetingUrl && (
+          <Link href={lesson.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-md bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-700">
+            Join meeting
+          </Link>
+        )}
+        {lesson.contentUrl && (
+          <Link href={lesson.contentUrl} target="_blank" rel="noopener noreferrer" className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
+            {lesson.type === "VIDEO" ? "Watch class" : "Open"}
+          </Link>
+        )}
+        {lesson.textContent && (
+          <details className="w-full">
+            <summary className="cursor-pointer text-xs font-semibold text-brand-700">Notes & resources</summary>
+            <p className="mt-1 whitespace-pre-wrap text-xs text-slate-600">{lesson.textContent}</p>
+          </details>
+        )}
+      </div>
+    </li>
+  );
+}
+
+function RemoveButton({ label, onClick }: { label: string; onClick: () => void | Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        try {
+          await onClick();
+        } finally {
+          setBusy(false);
+        }
+      }}
+      className="rounded-md px-2 py-1 text-xs font-semibold text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+    >
+      {busy ? "…" : "Delete"}
+    </button>
+  );
+}
+
+// ── Authoring forms. Same shells as login/profile: 50px inputs, semibold labels.
+
+function FormShell({ children, onSubmit, submitLabel }: { children: React.ReactNode; onSubmit: (e: FormEvent) => void; submitLabel: string }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        setError(null);
+        try {
+          await onSubmit(e);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Something went wrong");
+        } finally {
+          setBusy(false);
+        }
+      }}
+      className="mt-3 space-y-3"
+    >
+      {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>}
+      {children}
+      <button type="submit" disabled={busy} className={submitCls}>
+        {busy ? "Saving…" : submitLabel}
+      </button>
+    </form>
+  );
+}
+
+function AddChapterForm({ mentorId, onDone }: { mentorId: string; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center gap-2 rounded-2xl border border-dashed border-slate-300 px-5 py-4 text-sm font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700"
+      >
+        <PlusIcon /> Add chapter
+      </button>
+    );
+  }
+  return (
+    <div className="w-full rounded-2xl border border-slate-200 bg-white p-5">
+      <p className="text-sm font-semibold text-slate-800">New chapter</p>
+      <FormShell
+        submitLabel="Add chapter"
+        onSubmit={async (e) => {
+          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          const resources = (fd.get("resources") as string)
+            .split(",")
+            .map((pair) => pair.split("|").map((s) => s.trim()))
+            .filter(([label, url]) => label && url)
+            .map(([label, url]) => ({ label: label!, url: url! }));
+          await api("/chapters", {
+            method: "POST",
+            body: JSON.stringify({
+              courseMentorId: mentorId,
+              title: fd.get("title"),
+              ...(fd.get("summary") ? { summary: fd.get("summary") } : {}),
+              ...(fd.get("meetingUrl") ? { meetingUrl: fd.get("meetingUrl") } : {}),
+              ...(fd.get("recordingUrl") ? { recordingUrl: fd.get("recordingUrl") } : {}),
+              ...(resources.length ? { resources } : {}),
+            }),
+          });
+          (e.currentTarget as HTMLFormElement).reset();
+          setOpen(false);
+          onDone();
+        }}
+      >
+        <div>
+          <label className={labelCls} htmlFor="ch-title">Chapter title</label>
+          <div className={inputShell}>
+            <input id="ch-title" name="title" required placeholder="e.g. Algebra foundations" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="ch-summary">Summary (optional)</label>
+          <textarea id="ch-summary" name="summary" rows={2} placeholder="What this chapter covers" className={areaCls} />
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="ch-meet">Online meeting link (optional)</label>
+          <div className={inputShell}>
+            <input id="ch-meet" name="meetingUrl" type="url" placeholder="https://meet…/…" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="ch-rec">Recorded class link (optional)</label>
+          <div className={inputShell}>
+            <input id="ch-rec" name="recordingUrl" type="url" placeholder="https://…" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="ch-res">Resources — label|url pairs, comma separated</label>
+          <textarea id="ch-res" name="resources" rows={2} placeholder="Worksheet|https://…, Notes|https://…" className={areaCls} />
+        </div>
+      </FormShell>
+      <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
+        Cancel
+      </button>
+    </div>
+  );
+}
+
+function AddConceptForm({ courseId, chapterId, onDone }: { courseId: string; chapterId: string; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800">
+        <PlusIcon /> Add concept
+      </button>
+    );
+  }
+  return (
+    <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <FormShell
+        submitLabel="Add concept"
+        onSubmit={async (e) => {
+          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          await api(`/courses/${courseId}/modules`, {
+            method: "POST",
+            headers: { "x-chapter-id": chapterId },
+            body: JSON.stringify({ title: fd.get("title") }),
+          });
+          (e.currentTarget as HTMLFormElement).reset();
+          setOpen(false);
+          onDone();
+        }}
+      >
+        <div>
+          <label className={labelCls} htmlFor="mc-title">Concept title</label>
+          <div className={inputShell}>
+            <input id="mc-title" name="title" required placeholder="e.g. Quadratic equations" className={inputCls} />
+          </div>
+        </div>
+      </FormShell>
+      <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
+        Cancel
+      </button>
+    </div>
+  );
+}
+
+function LessonForm({
+  courseId,
+  moduleId,
+  lesson,
+  onDone,
+}: {
+  courseId: string;
+  moduleId: string;
+  lesson: RoadmapLesson | null;
+  onDone: () => void;
+}) {
+  const [open, setOpen] = useState(lesson === null);
+  if (!open) return null;
+  return (
+    <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+      <p className="text-sm font-semibold text-slate-800">{lesson ? "Edit lesson" : "New lesson"}</p>
+      <FormShell
+        submitLabel={lesson ? "Save lesson" : "Add lesson"}
+        onSubmit={async (e) => {
+          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          const payload = {
+            title: fd.get("title"),
+            type: fd.get("type"),
+            contentUrl: fd.get("contentUrl") || "",
+            meetingUrl: fd.get("meetingUrl") || "",
+            textContent: fd.get("textContent") || undefined,
+          };
+          if (lesson) {
+            await api(`/courses/lessons/${lesson.id}`, { method: "PATCH", body: JSON.stringify(payload) });
+          } else {
+            await api(`/courses/${courseId}/lessons`, {
+              method: "POST",
+              headers: { "x-module-id": moduleId },
+              body: JSON.stringify(payload),
+            });
+          }
+          (e.currentTarget as HTMLFormElement).reset();
+          onDone();
+        }}
+      >
+        <div>
+          <label className={labelCls} htmlFor={`ls-title-${lesson?.id ?? "new"}`}>Lesson title</label>
+          <div className={inputShell}>
+            <input id={`ls-title-${lesson?.id ?? "new"}`} name="title" required defaultValue={lesson?.title ?? ""} placeholder="e.g. Solving by factoring" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor={`ls-type-${lesson?.id ?? "new"}`}>Type</label>
+          <div className={inputShell}>
+            <select id={`ls-type-${lesson?.id ?? "new"}`} name="type" defaultValue={lesson?.type ?? "VIDEO"} className={`${inputCls} appearance-none`}>
+              {LESSON_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor={`ls-video-${lesson?.id ?? "new"}`}>Online class / recording link</label>
+          <div className={inputShell}>
+            <input id={`ls-video-${lesson?.id ?? "new"}`} name="contentUrl" type="url" defaultValue={lesson?.contentUrl ?? ""} placeholder="https://…" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor={`ls-meet-${lesson?.id ?? "new"}`}>Live meeting link</label>
+          <div className={inputShell}>
+            <input id={`ls-meet-${lesson?.id ?? "new"}`} name="meetingUrl" type="url" defaultValue={lesson?.meetingUrl ?? ""} placeholder="https://meet…/…" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor={`ls-notes-${lesson?.id ?? "new"}`}>Notes & resource links</label>
+          <textarea id={`ls-notes-${lesson?.id ?? "new"}`} name="textContent" rows={3} defaultValue={lesson?.textContent ?? ""} placeholder="Paste links or notes for students" className={areaCls} />
+        </div>
+      </FormShell>
+      <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
+        Cancel
+      </button>
+    </div>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+    </svg>
+  );
+}

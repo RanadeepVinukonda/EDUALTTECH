@@ -7,6 +7,7 @@ import { Bookmark as BookmarkIcon } from "lucide-react";
 import { api, ApiError, getCachedUser, updateCachedUser } from "@/lib/api";
 import { CourseChat } from "@/components/courses/CourseChat";
 import { MentorDM } from "@/components/courses/MentorDM";
+import CourseRoadmap, { type RoadmapChapter, type RoadmapMeeting } from "@/components/courses/CourseRoadmap";
 import { MentorCoursePanel } from "@/components/courses/MentorCoursePanel";
 
 const PLANS = [
@@ -14,22 +15,9 @@ const PLANS = [
   { plan: "FULL", label: "Full Plan", price: "₹499", note: "Unlimited access, forever yours" },
 ] as const;
 
-interface Chapter {
-  id: string;
-  title: string;
-  summary: string | null;
-  order: number;
-  meetingUrl: string | null;
-  recordingUrl: string | null;
-  resources: Array<{ label: string; url: string }>;
-  modules: Array<{
-    id: string;
-    title: string;
-    position: number;
-    lessons: Array<{ id: string; title: string; type: string; position: number }>;
-  }>;
-  _count?: { modules: number };
-}
+/** Title-only chapter from the public course payload; the unlocked roadmap
+ *  endpoint returns the same shape plus lesson content. */
+type Chapter = RoadmapChapter & { _count?: { modules: number } };
 
 interface CourseMeeting {
   id: string;
@@ -116,7 +104,9 @@ export default function CourseDetailPage() {
   const [insights, setInsights] = useState<Insights | null>(null);
   const [mentorView, setMentorView] = useState<{ courseMentorId: string } | null>(null);
   const [mentorApp, setMentorApp] = useState<MentorApplication | null>(null);
-  const [openChapter, setOpenChapter] = useState<string | null>(null);
+  // Unlocked roadmap (with recording/meeting links) — teaser data from the
+  // course payload stays title-only until the viewer is in the course.
+  const [roadmap, setRoadmap] = useState<{ mentors: Array<{ id: string; chapters: RoadmapChapter[] }>; meetings: RoadmapMeeting[] } | null>(null);
 
   useEffect(() => {
     api<{ course: CourseDetail }>(`/courses/${params.slug}`)
@@ -149,6 +139,8 @@ export default function CourseDetailPage() {
           && ["PENDING", "UNDER_REVIEW", "INTERVIEW", "APPROVED"].includes(app.application.status)) {
           setMentorApp(app.application);
         }
+        const rm = await api<{ mentors: Array<{ id: string; chapters: RoadmapChapter[] }>; meetings: RoadmapMeeting[] }>(`/courses/${course.id}/roadmap`).catch(() => null);
+        if (rm) setRoadmap(rm);
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
         const meets = await api<{ meetings: CourseMeeting[] }>(`/meetings/course/${course.id}`).catch(() => null);
@@ -320,7 +312,7 @@ export default function CourseDetailPage() {
       <p className="mt-1 text-sm text-slate-500">Hosted by {course.teacher.name} · {course._count.enrollments} enrolled</p>
       <p className="mt-4 max-w-3xl text-lg text-slate-600">{course.description}</p>
 
-      {mentorApp && <MentorStatusBanner app={mentorApp} />}
+      {mentorApp && mentorApp.status !== "APPROVED" && <MentorStatusBanner app={mentorApp} />}
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         {isStaff ? (
@@ -372,7 +364,7 @@ export default function CourseDetailPage() {
         )}
       </div>
 
-      {course.mentors.length > 0 && (
+      {course.mentors.length > 0 && !mentorView && !isStaff && (
         <section className="mt-8">
           <h2 className="font-display text-xl font-semibold text-slate-900">Choose your mentor</h2>
           <p className="mt-1 text-sm text-slate-500">Each mentor runs the course their own way. Full mentors are closed — pick one with open seats.</p>
@@ -441,15 +433,9 @@ export default function CourseDetailPage() {
             Cancel
           </button>
         </div>
-      ) : (
-        <p className="mt-6 text-sm text-slate-500">
-          {isStaff
-            ? "Manage this course below — chapters, live sessions and student conversations."
-            : enrolled
-              ? "You are enrolled in this course."
-              : "Pick a plan above to confirm your seat."}
-        </p>
-      )}
+      ) : enrolled ? (
+        <p className="mt-6 text-sm text-slate-500">You are enrolled in this course.</p>
+      ) : null}
 
       {meetings && meetings.length > 0 && (
         <section className="mt-10">
@@ -499,113 +485,15 @@ export default function CourseDetailPage() {
             )}
           </div>
 
-          {activeMentor && activeMentor.chapters.length === 0 ? (
-            <p className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-400">
-              The roadmap is being prepared. Check back soon.
-            </p>
-          ) : activeMentor ? (
-            <ol className="mt-4 space-y-3">
-              {activeMentor.chapters.map((c) => {
-                const chapterMeeting = meetings?.find((m) => m.chapter?.id === c.id && new Date(m.scheduledAt).getTime() > Date.now());
-                const conceptCount = c._count?.modules ?? c.modules.length;
-                return (
-                  <li key={c.id}>
-                    {unlocked ? (
-                      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                        <button
-                          type="button"
-                          onClick={() => setOpenChapter((oc) => (oc === c.id ? null : c.id))}
-                          aria-expanded={openChapter === c.id}
-                          className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50"
-                        >
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
-                            <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
-                            {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
-                          </div>
-                          <span className="flex shrink-0 items-center gap-2">
-                            {chapterMeeting && <MeetingCountdown scheduledAt={chapterMeeting.scheduledAt} />}
-                            <span className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${openChapter === c.id ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}>
-                              {openChapter === c.id ? "Close" : `${conceptCount} concepts`}
-                            </span>
-                          </span>
-                        </button>
-
-                        {openChapter === c.id && (
-                          <div className="space-y-4 border-t border-slate-100 p-5">
-                            <div className="flex flex-wrap gap-3 text-sm">
-                              {chapterMeeting && (
-                                <Link href={chapterMeeting.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-700">
-                                  Join live session
-                                </Link>
-                              )}
-                              {c.recordingUrl && (
-                                <Link href={c.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
-                                  Watch video
-                                </Link>
-                              )}
-                              {c.meetingUrl && (
-                                <Link href={c.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">
-                                  Join live session
-                                </Link>
-                              )}
-                            </div>
-                            {c.recordingUrl && (
-                              <video controls className="aspect-video w-full max-w-2xl rounded-xl bg-slate-900" src={c.recordingUrl} />
-                            )}
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Concepts in this chapter</p>
-                              <ul className="mt-2 space-y-2">
-                                {c.modules.length === 0 && <li className="text-sm text-slate-400">No concepts here yet.</li>}
-                                {c.modules.map((mod) => (
-                                  <li key={mod.id} className="rounded-xl border border-slate-200 p-4">
-                                    <p className="font-semibold text-slate-800">{mod.position}. {mod.title}</p>
-                                    {mod.lessons.length > 0 && (
-                                      <ul className="mt-2 flex flex-wrap gap-2">
-                                        {mod.lessons.map((l) => (
-                                          <li key={l.id} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
-                                            {l.title} <span className="text-slate-400">{l.type.toLowerCase()}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    )}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            {c.resources.length > 0 && (
-                              <div>
-                                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Resources</p>
-                                <ul className="mt-2 flex flex-wrap gap-2">
-                                  {c.resources.map((r) => (
-                                    <li key={r.url}>
-                                      <Link href={r.url} target="_blank" rel="noopener noreferrer" className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">
-                                        {r.label}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4">
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
-                          <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
-                          {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
-                        </div>
-                        <span className="flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
-                          <span aria-hidden>🔒</span> {conceptCount} concepts
-                        </span>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
+          {activeMentor ? (
+            <CourseRoadmap
+              courseId={course.id}
+              mentorId={activeMentor.id}
+              chapters={roadmap?.mentors.find((m) => m.id === activeMentor.id)?.chapters ?? activeMentor.chapters}
+              meetings={roadmap?.meetings ?? meetings ?? []}
+              mode="learn"
+              locked={!unlocked}
+            />
           ) : (
             <p className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-400">No roadmap yet for this course.</p>
           )}

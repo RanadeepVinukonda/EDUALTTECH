@@ -26,6 +26,58 @@ const moduleSchema = z.object({
   position: z.number().int().min(1).max(500).optional(),
 });
 
+// Learners only see lesson links (recording / meeting / notes) once they are
+// actually in the course. The public course page deliberately returns titles only.
+router.get("/:courseId/roadmap", requireAuth, async (req, res, next) => {
+  try {
+    const courseId = param(req, "courseId");
+    const user = req.user!;
+
+    const allowed = await (async () => {
+      if (user.role === "ADMIN") return true;
+      const [owns, mentors, enrolled] = await Promise.all([
+        prisma.course.findFirst({ where: { id: courseId, teacherId: user.id }, select: { id: true } }),
+        prisma.courseMentor.findFirst({ where: { courseId, mentorId: user.id }, select: { id: true } }),
+        prisma.enrollment.findFirst({ where: { courseId, studentId: user.id, status: "ACTIVE" }, select: { id: true } }),
+      ]);
+      return !!owns || !!mentors || !!enrolled;
+    })();
+    if (!allowed) throw ApiError.forbidden("Enroll to open the roadmap");
+
+    const mentors = await prisma.courseMentor.findMany({
+      where: { courseId },
+      select: {
+        id: true,
+        chapters: {
+          orderBy: { order: "asc" },
+          include: {
+            modules: {
+              orderBy: { position: "asc" },
+              include: { lessons: { where: { isPublished: true }, orderBy: { position: "asc" } } },
+            },
+          },
+        },
+      },
+    });
+
+    const meetings = await prisma.liveMeeting.findMany({
+      where: { courseId },
+      orderBy: { scheduledAt: "asc" },
+      select: { id: true, title: true, meetingUrl: true, scheduledAt: true, chapterId: true },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        mentors: mentors.map((m) => ({ id: m.id, chapters: m.chapters })),
+        meetings: meetings.map((m) => ({ ...m, chapter: m.chapterId ? { id: m.chapterId } : null })),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/:courseId/modules", requireAuth, async (req, res, next) => {
   try {
     await assertContentAccess(param(req, "courseId"), req.user!);
