@@ -127,6 +127,20 @@ router.post("/rooms/:id/messages", validate(messageSchema), async (req, res, nex
       include: { sender: { select: { id: true, name: true, role: true, avatarUrl: true } } },
     });
 
+    // Mirror into notifications so the header bell pings for classroom chat.
+    // Fire-and-forget: a failed notification must not fail the message.
+    void prisma.notification
+      .create({
+        data: {
+          title: `New message from ${message.sender.name}`,
+          body: message.body.slice(0, 140),
+          scope: "COURSE",
+          courseId: room.courseId,
+          senderId: req.user!.id,
+        },
+      })
+      .catch(() => undefined);
+
     res.status(201).json({ success: true, data: { message } });
   } catch (err) {
     next(err);

@@ -111,6 +111,7 @@ const lessonSchema = z.object({
   title: z.string().trim().min(2).max(200),
   type: z.enum(["VIDEO", "READING", "QUIZ", "ASSIGNMENT"]).default("READING"),
   contentUrl: z.union([z.string().url(), z.literal("")]).optional(),
+  meetingUrl: z.union([z.string().url(), z.literal("")]).optional(),
   textContent: z.string().max(20_000).optional(),
   position: z.number().int().min(1).max(500).optional(),
   isPublished: z.boolean().optional(),
@@ -139,6 +140,7 @@ router.post("/:courseId/lessons", requireAuth, validate(lessonSchema.omit({ posi
         title: req.body.title,
         type: req.body.type,
         contentUrl: req.body.contentUrl || null,
+        meetingUrl: req.body.meetingUrl || null,
         textContent: req.body.textContent,
         position: req.body.position ?? (last?.position ?? 0) + 1,
         isPublished: req.body.isPublished ?? true,
@@ -166,6 +168,7 @@ router.patch("/lessons/:id", requireAuth, validate(lessonSchema.partial()), asyn
       data: {
         ...req.body,
         contentUrl: req.body.contentUrl === undefined ? undefined : req.body.contentUrl || null,
+        meetingUrl: req.body.meetingUrl === undefined ? undefined : req.body.meetingUrl || null,
       },
     });
     res.json({ success: true, data: { lesson } });

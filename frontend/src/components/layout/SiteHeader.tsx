@@ -5,6 +5,7 @@ import { Bell, ChevronDown, LogOut, ShoppingBag, User as UserIcon, X } from "luc
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getCachedUser, clearAuth, subscribeAuth, api, type User } from "@/lib/api";
+import NotificationBell from "./NotificationBell";
 
 const GUEST_NAV = [
   { href: "/courses", label: "Learn" },
@@ -348,7 +349,10 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-3">
           {user ? (
-            <UserMenu user={user} onSignOut={() => api("/auth/logout", { method: "POST" }).catch(() => undefined).then(clearAuth)} />
+            <>
+              <NotificationBell />
+              <UserMenu user={user} onSignOut={() => api("/auth/logout", { method: "POST" }).catch(() => undefined).then(clearAuth)} />
+            </>
           ) : (
             <>
               <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-brand-700">

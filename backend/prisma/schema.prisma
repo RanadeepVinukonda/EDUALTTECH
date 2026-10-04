@@ -115,6 +115,8 @@ model User {
   bio             String?
   onboardingDone  Boolean   @default(false)
 
+  notifReadAt DateTime?
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -270,6 +272,7 @@ model Course {
   updatedAt    DateTime @updatedAt
 
   modules       Module[]
+  notifications Notification[]
   enrollments   Enrollment[]
   lessons       Lesson[]
   chats         ChatRoom[]
@@ -347,6 +350,7 @@ model Lesson {
   title       String
   type        LessonType @default(READING)
   contentUrl  String?
+  meetingUrl  String?
   textContent String?
   position    Int
   isPublished Boolean    @default(false)
@@ -562,6 +566,7 @@ model Notification {
   body      String
   scope     String   @default("ALL") // ALL | COURSE | USER
   courseId  String?
+  course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 

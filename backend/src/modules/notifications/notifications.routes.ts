@@ -44,6 +44,7 @@ router.post("/", requireAuth, validate(sendSchema), async (req, res, next) => {
 
 router.get("/", requireAuth, async (req, res, next) => {
   try {
+    // Mentors and owners must see their course's notices too, not just enrollees.
     const where =
       req.user!.role === "ADMIN"
         ? {}
@@ -51,6 +52,8 @@ router.get("/", requireAuth, async (req, res, next) => {
             OR: [
               { scope: "ALL" },
               { scope: "COURSE", course: { enrollments: { some: { studentId: req.user!.id } } } },
+              { scope: "COURSE", course: { mentors: { some: { mentorId: req.user!.id } } } },
+              { scope: "COURSE", course: { teacherId: req.user!.id } },
               { scope: "COURSE", senderId: req.user!.id },
               { senderId: req.user!.id },
             ],
@@ -60,10 +63,28 @@ router.get("/", requireAuth, async (req, res, next) => {
       where,
       orderBy: { createdAt: "desc" },
       take: 50,
-      include: { sender: { select: { name: true } } },
+      include: { sender: { select: { name: true } }, course: { select: { slug: true, title: true } } },
     });
 
-    res.json({ success: true, data: { notifications } });
+    // Unread = anything newer than the user's last bell visit. Read from the DB
+    // rather than the JWT so existing sessions keep working without a re-login.
+    const { notifReadAt: readAt } = await prisma.user.findUniqueOrThrow({
+      where: { id: req.user!.id },
+      select: { notifReadAt: true },
+    });
+    const unread = readAt ? notifications.filter((n) => n.createdAt > readAt).length : notifications.length;
+
+    res.json({ success: true, data: { notifications, unread } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Bell opened — everything currently listed is now seen.
+router.post("/read", requireAuth, async (req, res, next) => {
+  try {
+    await prisma.user.update({ where: { id: req.user!.id }, data: { notifReadAt: new Date() } });
+    res.json({ success: true, data: { unread: 0 } });
   } catch (err) {
     next(err);
   }
