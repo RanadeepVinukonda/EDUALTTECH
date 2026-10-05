@@ -80,6 +80,7 @@ interface CourseDetail {
   subject: string;
   gradeLevel: string | null;
   thumbnailUrl: string | null;
+  pricePaise: number | null;
   teacher: { id: string; name: string };
   mentors: Mentor[];
   chapters: Chapter[];
@@ -512,9 +513,53 @@ export default function CourseDetailPage() {
           )}
         </section>
 
-        {/* Enrolled right rail — live chat + what the class is actually using */}
-        {unlocked && (
-          <aside className="space-y-6">
+        {/* Right rail — sticky progress / what's inside, then live chat + class pulse */}
+        <aside className="space-y-6">
+          <div className="lg:sticky lg:top-24">
+            {unlocked ? (
+              <section className="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 className="font-display text-lg font-semibold text-slate-900">Your progress</h3>
+                {roadmap && roadmap.progress.totalLessons > 0 ? (
+                  <>
+                    <p className="mt-1 font-display text-2xl font-bold text-slate-900">{roadmap.progress.pct}%</p>
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full bg-emerald-500 transition-all"
+                        style={{ width: `${roadmap.progress.pct}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500">
+                      {roadmap.progress.completedLessonIds.length} of {roadmap.progress.totalLessons} concepts done — tick
+                      them off in the roadmap.
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-1 text-sm text-slate-500">Your mentor has not published concepts yet.</p>
+                )}
+              </section>
+            ) : (
+              <section className="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 className="font-display text-lg font-semibold text-slate-900">What is inside</h3>
+                <ul className="mt-3 space-y-1.5 text-sm text-slate-600">
+                  <li>{course.chapters.length} chapter{course.chapters.length === 1 ? "" : "s"}</li>
+                  <li>Live classes with your mentor</li>
+                  <li>Recordings, notes and downloadable resources</li>
+                  <li>Class chat with everyone in the course</li>
+                </ul>
+                <p className="mt-4 font-display text-2xl font-bold text-slate-900">
+                  {course.pricePaise
+                    ? (course.pricePaise / 100).toLocaleString("en-IN", { style: "currency", currency: "INR" })
+                    : "Free"}
+                </p>
+                {course.mentors.length > 0 && !selected && (
+                  <p className="mt-2 text-xs text-slate-500">Pick a mentor above to enrol.</p>
+                )}
+              </section>
+            )}
+          </div>
+
+          {unlocked && (
+            <>
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="font-display text-lg font-semibold text-slate-900">Class chat</h3>
               <p className="mt-1 mb-3 text-xs text-slate-500">
@@ -564,8 +609,9 @@ export default function CourseDetailPage() {
                 <p className="mt-3 text-sm text-slate-400">Students haven&apos;t finished lessons yet.</p>
               )}
             </section>
-          </aside>
-        )}
+            </>
+          )}
+        </aside>
       </div>
     </div>
   );
