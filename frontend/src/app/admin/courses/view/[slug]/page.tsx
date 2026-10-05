@@ -2,27 +2,18 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import LoadingScreen from "@/components/ui/LoadingScreen";
+import CourseRoadmap, { type RoadmapChapter } from "@/components/courses/CourseRoadmap";
 
-interface AdminChapter {
-  id: string;
-  title: string;
-  summary: string | null;
-  order: number;
-  meetingUrl: string | null;
-  recordingUrl: string | null;
-  resources: Array<{ label: string; url: string }>;
-  modules: Array<{ id: string; title: string; position: number; lessons: Array<{ id: string; title: string; type: string }> }>;
-}
+type AdminChapter = RoadmapChapter;
 
 interface AdminMentor {
   id: string;
   capacity: number;
   seatsLeft: number;
   mentor: { id: string; name: string; email?: string; avatarUrl: string | null };
-  chapters: AdminChapter[];
   _count: { enrollments: number };
 }
 
@@ -38,7 +29,13 @@ interface AdminCourse {
   isPublished: boolean;
   teacher: { id: string; name: string; email?: string };
   mentors: AdminMentor[];
-  _count: { enrollments: number };
+  chapters: AdminChapter[];
+  roadmapTitle: string | null;
+  roadmapSummary: string | null;
+  roadmapMeetingUrl: string | null;
+  roadmapRecordingUrl: string | null;
+  roadmapResources: Array<{ label: string; url: string }>;
+  _count: { enrollments: number; chapters: number; modules: number; lessons: number };
 }
 
 const initials = (name: string) =>
@@ -49,16 +46,20 @@ export default function AdminCourseViewPage() {
   const [course, setCourse] = useState<AdminCourse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    api<{ course: AdminCourse & { resources?: unknown[] } }>(`/courses/${params.slug}`)
+  const load = useCallback(() => {
+    return api<{ course: AdminCourse }>(`/courses/${params.slug}`)
       .then((d) => setCourse(d.course))
       .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load course"));
   }, [params.slug]);
 
+  useEffect(() => {
+    void load();
+  }, [load]);
+
   if (error) return <div className="mx-auto max-w-6xl px-4 py-16 text-red-600">{error}</div>;
   if (!course) return <LoadingScreen inline label="Loading course…" />;
 
-  const chapters = course.mentors.flatMap((m) => m.chapters.map((c) => ({ mentor: m.mentor, chapter: c })));
+  const chapters = course.chapters ?? [];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -133,7 +134,7 @@ export default function AdminCourseViewPage() {
                   <Stat value={m.seatsLeft} label="seats left" />
                 </div>
                 <p className="mt-4 rounded-[10px] bg-slate-50 px-3 py-2 text-xs font-medium text-brand-700">
-                  {m.chapters.length} chapter{m.chapters.length === 1 ? "" : "s"} in this roadmap
+                  {m._count.enrollments} student{m._count.enrollments === 1 ? "" : "s"} enrolled
                 </p>
               </div>
             ))}
@@ -142,74 +143,26 @@ export default function AdminCourseViewPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold text-ink-700">Roadmap ({chapters.length} chapters)</h2>
-        {chapters.length === 0 ? (
-          <Empty>No chapters published yet.</Empty>
-        ) : (
-          <ol className="mt-4 space-y-1 border-l-2 border-slate-200 pl-6">
-            {chapters.map(({ mentor, chapter: c }) => (
-              <li key={c.id} className="relative pb-6">
-                <span className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-brand-500 ring-2 ring-slate-200" />
-                <article className="rounded-[16px] bg-white p-5 shadow-elev1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    {mentor.name} · Chapter {c.order}
-                  </p>
-                  <h3 className="font-display mt-1 text-lg font-semibold text-slate-900">{c.title}</h3>
-                  {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
-
-                  {(c.meetingUrl || c.recordingUrl) && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {c.meetingUrl && <SessionLink href={c.meetingUrl} kind="live" label="Live session" />}
-                      {c.recordingUrl && <SessionLink href={c.recordingUrl} kind="recording" label="Recording" />}
-                    </div>
-                  )}
-
-                  {c.modules.length > 0 && (
-                    <ul className="mt-4 space-y-2">
-                      {c.modules.map((mod) => (
-                        <li key={mod.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-                          <p className="flex items-center gap-2 font-semibold text-slate-800">
-                            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-ink-700 text-[10px] font-bold text-white">{mod.position}</span>
-                            {mod.title}
-                          </p>
-                          {mod.lessons.length > 0 && (
-                            <ul className="mt-2 flex flex-wrap gap-2">
-                              {mod.lessons.map((l) => (
-                                <li key={l.id} className="rounded-full bg-white px-2.5 py-0.5 text-xs text-slate-600">
-                                  {l.title} <span className="text-slate-400">{l.type.toLowerCase()}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {c.resources.length > 0 && (
-                    <ul className="mt-3 flex flex-wrap gap-2">
-                      {c.resources.map((r) => (
-                        <li key={r.url}>
-                          <a
-                            href={r.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100"
-                          >
-                            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                              <path d="M7 17 17 7M9 7h8v8" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            {r.label}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </article>
-              </li>
-            ))}
-          </ol>
-        )}
+        <h2 className="font-display text-xl font-semibold text-ink-700">Course structure ({chapters.length} chapters)</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          You own the syllabus: the roadmap, its chapters and the lessons inside them. Mentors then fill each lesson
+          with concepts, live class links, recordings and resources — they cannot add or remove chapters and lessons.
+        </p>
+        <div className="mt-4 rounded-[16px] bg-white p-5 shadow-elev1">
+          <CourseRoadmap
+            courseId={course.id}
+            chapters={chapters}
+            roadmap={{
+              title: course.roadmapTitle,
+              summary: course.roadmapSummary,
+              meetingUrl: course.roadmapMeetingUrl,
+              recordingUrl: course.roadmapRecordingUrl,
+              resources: course.roadmapResources,
+            }}
+            mode="admin"
+            onChanged={() => void load()}
+          />
+        </div>
       </section>
     </div>
   );

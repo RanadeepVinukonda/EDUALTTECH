@@ -43,9 +43,15 @@ export function MentorCoursePanel({
 
   const load = useCallback(() => {
     void (async () => {
-      const cm = await api<{ mentorship: Array<{ id: string; chapters: RoadmapChapter[] }> }>("/chapters/mine").catch(() => null);
+      const cm = await api<{ mentorship: Array<{ id: string; course: { id: string } }> }>("/chapters/mine").catch(() => null);
       const mine = cm?.mentorship.find((m) => m.id === courseMentorId);
-      if (mine) setChapters(mine.chapters);
+      if (mine) {
+        const r = await api<{ roadmap: RoadmapShell & { chapters: RoadmapChapter[] } }>(`/courses/${courseId}/roadmap`).catch(() => null);
+        if (r) {
+          setRoadmap(r.roadmap);
+          setChapters(r.roadmap.chapters);
+        }
+      }
 
       api<{ meetings: Meeting[] }>(`/meetings/course/${courseId}`)
         .then((d) => setMeetings(d.meetings))
@@ -154,14 +160,13 @@ async function removeResource(id: string) {
 
       {/* Roadmap — the course path. Chapters, concepts and lessons, authored in place. */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h3 className="font-display text-lg font-semibold text-slate-900">Roadmap</h3>
+        <h3 className="font-display text-lg font-semibold text-slate-900">Teach this roadmap</h3>
         <p className="mt-1 text-sm text-slate-500">
-          Create the roadmap first — name it, add your live class link, recordings and resources. Then break it into
-          chapters, lessons and concepts.
+          Chapters and lessons are set by the course admin. Open a lesson to teach it: add concepts, then give each
+          concept its live class link, recording, notes and resources.
         </p>
         <CourseRoadmap
           courseId={courseId}
-          mentorId={courseMentorId}
           chapters={chapters}
           roadmap={roadmap}
           meetings={meetings}

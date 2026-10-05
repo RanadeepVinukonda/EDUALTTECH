@@ -227,9 +227,9 @@ router.get("/courses", async (_req, res, next) => {
       include: {
         teacher: { select: { id: true, name: true, email: true } },
         mentors: {
-          include: { mentor: { select: { id: true, name: true, email: true } }, _count: { select: { chapters: true, enrollments: true } } },
+          include: { mentor: { select: { id: true, name: true, email: true } }, _count: { select: { enrollments: true } } },
         },
-        _count: { select: { enrollments: true } },
+        _count: { select: { enrollments: true, chapters: true, modules: true, lessons: true } },
       },
       orderBy: { createdAt: "desc" },
     });

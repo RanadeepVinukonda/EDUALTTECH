@@ -116,7 +116,6 @@ export function typeLabel(type: RoadmapLesson["type"]): string {
  */
 export default function CourseRoadmap({
   courseId,
-  mentorId,
   chapters,
   roadmap,
   meetings = [],
@@ -125,19 +124,23 @@ export default function CourseRoadmap({
   onChanged,
 }: {
   courseId: string;
-  /** CourseMentor id — chapters hang off the mentorship, not the course. */
-  mentorId: string;
   chapters: RoadmapChapter[];
   roadmap?: RoadmapShell | null;
   meetings?: RoadmapMeeting[];
-  mode: "mentor" | "learn";
+  /** admin = owns the structure, mentor = fills content inside concepts, learn = read only. */
+  mode: "admin" | "mentor" | "learn";
   locked?: boolean;
   onChanged?: () => void;
 }) {
   const mentor = mode === "mentor" && !locked;
+  /** Chapters + lessons are the syllabus: admin/course owner only. */
+  const canStructure = mode === "admin" && !locked;
+  /** Concepts and their content are the mentor's job. */
+  const canConcepts = (mode === "admin" || mode === "mentor") && !locked;
   const [openChapter, setOpenChapter] = useState<string | null>(null);
   const [openModule, setOpenModule] = useState<string | null>(null);
   const [editLesson, setEditLesson] = useState<string | null>(null);
+  const [editChapter, setEditChapter] = useState<string | null>(null);
 
   if (!mentor) {
     return (
@@ -154,7 +157,7 @@ export default function CourseRoadmap({
           </header>
         )}
       <ol className="mt-4 space-y-3">
-        {chapters.length === 0 && mentor && <EmptyRoadmap mentor />}
+        {chapters.length === 0 && <EmptyRoadmap canStructure={false} />}
         {chapters.map((c) => (
           <ChapterNode
             key={c.id}
@@ -174,10 +177,26 @@ export default function CourseRoadmap({
 
   return (
     <>
-      <RoadmapShellForm courseId={courseId} mentorId={mentorId} roadmap={roadmap ?? null} onDone={() => onChanged?.()} />
+      {canStructure ? (
+        <RoadmapShellForm courseId={courseId} roadmap={roadmap ?? null} onDone={() => onChanged?.()} />
+      ) : (
+        roadmap?.title && (
+          <div className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Course roadmap</p>
+            <h3 className="font-display text-lg font-semibold text-slate-900">{roadmap.title}</h3>
+            {roadmap.summary && <p className="mt-1 text-sm text-slate-600">{roadmap.summary}</p>}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {roadmap.meetingUrl && <Link href={roadmap.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800">Join live class</Link>}
+              {roadmap.recordingUrl && <Link href={roadmap.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] border border-[1.5px] border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50">Watch recording</Link>}
+            </div>
+            <ResourceStrip resources={roadmap.resources ?? []} />
+            <p className="mt-3 text-xs text-slate-500">Chapters and lessons are set by the course admin — open a lesson to add your concepts, links and resources.</p>
+          </div>
+        )
+      )}
       <p className="mt-6 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Chapters</p>
       <ol className="mt-2 space-y-3">
-      {chapters.length === 0 && <EmptyRoadmap mentor />}
+      {chapters.length === 0 && <EmptyRoadmap canStructure={canStructure} />}
       {chapters.map((c) => (
         <li key={c.id} className="relative">
           <div className="flex items-start gap-3">
@@ -194,19 +213,46 @@ export default function CourseRoadmap({
                   <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
                   {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
                 </div>
-                <span className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold ${openChapter === c.id ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}>
-                  {openChapter === c.id ? "Close" : `${c.modules.length} concept${c.modules.length === 1 ? "" : "s"}`}
+                <span className="flex shrink-0 items-center gap-2">
+                  <span className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${openChapter === c.id ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}>
+                    {openChapter === c.id ? "Close" : `${c.modules.length} lesson${c.modules.length === 1 ? "" : "s"}`}
+                  </span>
+                  {canStructure && (
+                    <button
+                      type="button"
+                      onClick={() => setEditChapter((e) => (e === c.id ? null : c.id))}
+                      className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
+                    >
+                      {editChapter === c.id ? "Close" : "Edit"}
+                    </button>
+                  )}
+                  {canStructure && (
+                    <RemoveButton
+                      label={`Delete chapter ${c.title}`}
+                      onClick={async () => {
+                        await api(`/chapters/${c.id}`, { method: "DELETE" }).catch(() => undefined);
+                        onChanged?.();
+                      }}
+                    />
+                  )}
                 </span>
               </button>
 
               {openChapter === c.id && (
                 <div className="space-y-4 border-t border-slate-100 p-5">
+                  {canStructure && editChapter === c.id && (
+                    <ChapterForm courseId={courseId} chapter={c} onDone={() => { setEditChapter(null); onChanged?.(); }} />
+                  )}
                   <ChapterLinks chapter={c} meetings={meetings.filter((m) => m.chapter?.id === c.id)} />
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Lessons in this chapter</p>
                     <ul className="mt-2 space-y-2">
-                      {c.modules.length === 0 && <li className="text-sm text-slate-400">No lessons yet — add the first one below.</li>}
+                      {c.modules.length === 0 && (
+                        <li className="text-sm text-slate-400">
+                          {canStructure ? "No lessons yet — add the first one below." : "No lessons here yet."}
+                        </li>
+                      )}
                       {c.modules.map((mod) => (
                         <li key={mod.id} className="rounded-xl border border-slate-200 p-4">
                           <div className="flex items-center justify-between gap-3">
@@ -221,13 +267,15 @@ export default function CourseRoadmap({
                               >
                                 {openModule === mod.id ? "Hide concepts" : `${mod.lessons.length} concept${mod.lessons.length === 1 ? "" : "s"}`}
                               </button>
-                              <RemoveButton
-                                label={`Delete lesson ${mod.title}`}
-                                onClick={async () => {
-                                  await api(`/courses/modules/${mod.id}`, { method: "DELETE" }).catch(() => undefined);
-                                  onChanged?.();
-                                }}
-                              />
+                              {canStructure && (
+                                <RemoveButton
+                                  label={`Delete lesson ${mod.title}`}
+                                  onClick={async () => {
+                                    await api(`/courses/modules/${mod.id}`, { method: "DELETE" }).catch(() => undefined);
+                                    onChanged?.();
+                                  }}
+                                />
+                              )}
                             </span>
                           </div>
 
@@ -244,6 +292,7 @@ export default function CourseRoadmap({
                                       <span className="truncate text-sm font-medium text-slate-800">{l.title}</span>
                                       <span className="shrink-0 text-xs text-slate-400">{typeLabel(l.type)}</span>
                                     </span>
+                                    {canConcepts && (
                                     <span className="flex shrink-0 gap-1">
                                       <button
                                         type="button"
@@ -256,10 +305,11 @@ export default function CourseRoadmap({
                                         label={`Delete concept ${l.title}`}
                                         onClick={async () => {
                                           await api(`/courses/lessons/${l.id}`, { method: "DELETE" }).catch(() => undefined);
-                                          onChanged?.();
-                                        }}
+onChanged?.();
+                                          }}
                                       />
                                     </span>
+                                    )}
                                   </div>
                                   <ResourceStrip resources={l.resources} />
                                   {editLesson === l.id && (
@@ -267,15 +317,17 @@ export default function CourseRoadmap({
                                   )}
                                 </li>
                               ))}
-                              <li>
-                                <ConceptForm courseId={courseId} moduleId={mod.id} concept={null} onDone={() => onChanged?.()} />
-                              </li>
+                              {canConcepts && (
+                                <li>
+                                  <ConceptForm courseId={courseId} moduleId={mod.id} concept={null} onDone={() => onChanged?.()} />
+                                </li>
+                              )}
                             </ul>
                           )}
                         </li>
                       ))}
                     </ul>
-                    <AddLessonForm courseId={courseId} chapterId={c.id} onDone={() => onChanged?.()} />
+                    {canStructure && <AddLessonForm courseId={courseId} chapterId={c.id} onDone={() => onChanged?.()} />}
                   </div>
                 </div>
               )}
@@ -285,7 +337,7 @@ export default function CourseRoadmap({
       ))}
       <li className="flex items-start gap-3">
         <Node tone="ghost" />
-        <AddChapterForm mentorId={mentorId} onDone={() => onChanged?.()} />
+        {canStructure && <AddChapterForm courseId={courseId} onDone={() => onChanged?.()} />}
       </li>
       </ol>
     </>
@@ -295,12 +347,10 @@ export default function CourseRoadmap({
 /** Step 1 — the roadmap itself: title, intro, live class link, recording, resources. */
 function RoadmapShellForm({
   courseId,
-  mentorId,
   roadmap,
   onDone,
 }: {
   courseId: string;
-  mentorId: string;
   roadmap: RoadmapShell | null;
   onDone: () => void;
 }) {
@@ -317,7 +367,7 @@ function RoadmapShellForm({
       await api("/chapters/roadmap", {
         method: "PUT",
         body: JSON.stringify({
-          courseMentorId: mentorId,
+          courseId,
           title: fd.get("title"),
           summary: fd.get("summary") || undefined,
           meetingUrl: fd.get("meetingUrl") || "",
@@ -397,10 +447,10 @@ function RoadmapShellForm({
   );
 }
 
-function EmptyRoadmap({ mentor }: { mentor: boolean }) {
+function EmptyRoadmap({ canStructure }: { canStructure: boolean }) {
   return (
     <li className="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-400">
-      No chapters yet — add the first step of your roadmap below.
+      {canStructure ? "No chapters yet — add the first one below." : "No chapters published yet."}
     </li>
   );
 }
@@ -621,7 +671,65 @@ function FormShell({ children, onSubmit, submitLabel }: { children: React.ReactN
   );
 }
 
-function AddChapterForm({ mentorId, onDone }: { mentorId: string; onDone: () => void }) {
+/** Admin edit of a chapter: title, summary, course-wide live link, recording, resources. */
+function ChapterForm({
+  courseId,
+  chapter,
+  onDone,
+}: {
+  courseId: string;
+  chapter: RoadmapChapter;
+  onDone: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <p className="text-sm font-semibold text-slate-800">Edit chapter {chapter.order}</p>
+      <FormShell
+        submitLabel="Save chapter"
+        onSubmit={async (e) => {
+          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          await api(`/chapters/${chapter.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({
+              title: fd.get("title"),
+              summary: fd.get("summary") || undefined,
+              meetingUrl: fd.get("meetingUrl") || "",
+              recordingUrl: fd.get("recordingUrl") || "",
+              resources: parseResources(fd.get("resources") as string),
+            }),
+          });
+          onDone();
+        }}
+      >
+        <div>
+          <label className={labelCls} htmlFor={`ch-edit-title-${chapter.id}`}>Chapter title</label>
+          <input id={`ch-edit-title-${chapter.id}`} name="title" required defaultValue={chapter.title} className={inputShell + " " + inputCls} />
+        </div>
+        <div>
+          <label className={labelCls} htmlFor={`ch-edit-sum-${chapter.id}`}>Summary</label>
+          <textarea id={`ch-edit-sum-${chapter.id}`} name="summary" rows={2} defaultValue={chapter.summary ?? ""} className={areaCls} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelCls} htmlFor={`ch-edit-meet-${chapter.id}`}>Live class link</label>
+            <input id={`ch-edit-meet-${chapter.id}`} name="meetingUrl" type="url" defaultValue={chapter.meetingUrl ?? ""} placeholder="https://meet.google.com/…" className={inputShell + " " + inputCls} />
+          </div>
+          <div>
+            <label className={labelCls} htmlFor={`ch-edit-rec-${chapter.id}`}>Recording link</label>
+            <input id={`ch-edit-rec-${chapter.id}`} name="recordingUrl" type="url" defaultValue={chapter.recordingUrl ?? ""} placeholder="https://youtube.com/…" className={inputShell + " " + inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor={`ch-edit-res-${chapter.id}`}>Resources — label|url pairs, comma separated</label>
+          <textarea id={`ch-edit-res-${chapter.id}`} name="resources" rows={2} defaultValue={formatResources(chapter.resources)} placeholder="Slides|https://…, Notes|https://…" className={areaCls} />
+        </div>
+      </FormShell>
+      <p className="sr-only">chapter {courseId}</p>
+    </div>
+  );
+}
+
+function AddChapterForm({ courseId, onDone }: { courseId: string; onDone: () => void }) {
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
@@ -649,7 +757,7 @@ function AddChapterForm({ mentorId, onDone }: { mentorId: string; onDone: () => 
           await api("/chapters", {
             method: "POST",
             body: JSON.stringify({
-              courseMentorId: mentorId,
+              courseId,
               title: fd.get("title"),
               ...(fd.get("summary") ? { summary: fd.get("summary") } : {}),
               ...(fd.get("meetingUrl") ? { meetingUrl: fd.get("meetingUrl") } : {}),

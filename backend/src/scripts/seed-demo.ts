@@ -145,12 +145,12 @@ async function seedMentoring(userId: string) {
   let order = 0;
   for (const title of chapters) {
     const exists = await prisma.courseChapter.findUnique({
-      where: { courseMentorId_order: { courseMentorId: cm.id, order } },
+      where: { courseId_order: { courseId: cm.courseId, order } },
     });
     if (!exists) {
       await prisma.courseChapter.create({
         data: {
-          courseMentorId: cm.id,
+          courseId: cm.courseId,
           title,
           order,
           summary: "Hands-on session for " + title,
@@ -183,7 +183,7 @@ async function seedMentoring(userId: string) {
   }
   const meetings = await prisma.liveMeeting.count({ where: { courseId: course.id } });
   const week1 = await prisma.courseChapter.findFirst({
-    where: { courseMentorId: cm.id, order: 0 },
+    where: { courseId: cm.courseId, order: 0 },
     select: { id: true },
   });
   const chapterMods = ["Getting started", "Your first script"];

@@ -271,7 +271,15 @@ model Course {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // The roadmap itself — admin/owner authored structure, mentors fill content.
+  roadmapTitle      String?
+  roadmapSummary    String?
+  roadmapMeetingUrl String?
+  roadmapRecordingUrl String?
+  roadmapResources  Json     @default("[]") // [{ label, url }] — whole-roadmap attachments
+
   modules       Module[]
+  chapters      CourseChapter[]
   notifications Notification[]
   enrollments   Enrollment[]
   lessons       Lesson[]
@@ -287,8 +295,9 @@ model Course {
 }
 
 // A member of the course's teaching team. A course can have several mentors
-// (approved via applications or assigned by an admin); each mentor owns their
-// own roadmap (CourseChapter) and their own cohort of students.
+// (approved via applications or assigned by an admin). Structure belongs to the
+// course; a mentor only fills content (live links, recordings, resources) and
+// carries their own cohort of students.
 model CourseMentor {
   id        String   @id @default(cuid())
   courseId  String
@@ -298,26 +307,18 @@ model CourseMentor {
   capacity  Int      @default(20) // max students this mentor accepts
   createdAt DateTime @default(now())
 
-  // The roadmap itself — created first, then chapters hang off it.
-  roadmapTitle     String?
-  roadmapSummary   String?
-  roadmapMeetingUrl String?
-  roadmapRecordingUrl String?
-  roadmapResources Json     @default("[]") // [{ label, url }] — whole-roadmap attachments
-
-  chapters  CourseChapter[]
   enrollments Enrollment[]
 
   @@unique([courseId, mentorId])
   @@index([mentorId])
 }
 
-// Single chapter of a mentor's roadmap inside a course: one live meeting,
+// Single chapter of a course roadmap: authored by the admin/course owner, one live meeting,
 // recorded video / YouTube link, and a list of attached resources (Drive links).
 model CourseChapter {
   id             String   @id @default(cuid())
-  courseMentorId String
-  courseMentor   CourseMentor @relation(fields: [courseMentorId], references: [id], onDelete: Cascade)
+  courseId       String
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   title          String
   summary        String?
   order          Int
@@ -330,8 +331,8 @@ model CourseChapter {
   meetings LiveMeeting[]
   modules  Module[]
 
-  @@unique([courseMentorId, order])
-  @@index([courseMentorId])
+  @@unique([courseId, order])
+  @@index([courseId])
 }
 
 model Module {

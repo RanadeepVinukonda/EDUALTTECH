@@ -76,6 +76,9 @@ interface CourseDetail {
   thumbnailUrl: string | null;
   teacher: { id: string; name: string };
   mentors: Mentor[];
+  chapters: Chapter[];
+  roadmapTitle: string | null;
+  roadmapSummary: string | null;
   resources: CourseResource[];
   modules: Array<{
     id: string;
@@ -105,7 +108,7 @@ export default function CourseDetailPage() {
   const [mentorApp, setMentorApp] = useState<MentorApplication | null>(null);
   // Unlocked roadmap (with recording/meeting links) — teaser data from the
   // course payload stays title-only until the viewer is in the course.
-  const [roadmap, setRoadmap] = useState<{ mentors: Array<{ id: string } & RoadmapShell & { chapters: RoadmapChapter[] }>; meetings: RoadmapMeeting[] } | null>(null);
+  const [roadmap, setRoadmap] = useState<{ roadmap: RoadmapShell & { chapters: RoadmapChapter[] }; meetings: RoadmapMeeting[] } | null>(null);
 
   useEffect(() => {
     api<{ course: CourseDetail }>(`/courses/${params.slug}`)
@@ -138,7 +141,7 @@ export default function CourseDetailPage() {
           && ["PENDING", "UNDER_REVIEW", "INTERVIEW", "APPROVED"].includes(app.application.status)) {
           setMentorApp(app.application);
         }
-        const rm = await api<{ mentors: Array<{ id: string } & RoadmapShell & { chapters: RoadmapChapter[] }>; meetings: RoadmapMeeting[] }>(`/courses/${course.id}/roadmap`).catch(() => null);
+        const rm = await api<{ roadmap: RoadmapShell & { chapters: RoadmapChapter[] }; meetings: RoadmapMeeting[] }>(`/courses/${course.id}/roadmap`).catch(() => null);
         if (rm) setRoadmap(rm);
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
@@ -482,12 +485,11 @@ export default function CourseDetailPage() {
             )}
           </div>
 
-          {activeMentor ? (
+          {unlocked || roadmap ? (
             <CourseRoadmap
               courseId={course.id}
-              mentorId={activeMentor.id}
-              chapters={roadmap?.mentors.find((m) => m.id === activeMentor.id)?.chapters ?? activeMentor.chapters}
-              roadmap={roadmap?.mentors.find((m) => m.id === activeMentor.id) ?? null}
+              chapters={roadmap?.roadmap.chapters ?? course.chapters ?? []}
+              roadmap={roadmap?.roadmap ?? { title: course.roadmapTitle, summary: course.roadmapSummary, meetingUrl: null, recordingUrl: null, resources: [] }}
               meetings={roadmap?.meetings ?? meetings ?? []}
               mode="learn"
               locked={!unlocked}

@@ -222,13 +222,14 @@ router.get("/:slug", optionalAuth, async (req, res, next) => {
         mentors: {
           include: {
             mentor: { select: { id: true, name: true, avatarUrl: true, bio: true, education: true } },
-            chapters: {
-              orderBy: { order: "asc" },
-              select: canView ? chapterFull : chapterShell,
-            },
             _count: { select: { enrollments: true } },
           },
           orderBy: { createdAt: "asc" },
+        },
+        // One admin-owned structure for the course, teaser-only until enrolled.
+        chapters: {
+          orderBy: { order: "asc" },
+          select: canView ? chapterFull : chapterShell,
         },
         resources: canView ? { where: { isPublished: true }, orderBy: { createdAt: "desc" } } : undefined,
         modules: canView

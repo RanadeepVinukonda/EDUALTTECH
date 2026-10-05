@@ -2,7 +2,7 @@
   "name": "@edu-alt-tech/backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Edu-Alt-Tech API — Express 5 + TypeScript + Prisma + Supabase Postgres",
+  "description": "Edu-Alt-Tech API \u2014 Express 5 + TypeScript + Prisma + Supabase Postgres",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -13,7 +13,9 @@
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "wipe": "tsx scripts/wipe-db.ts",
+    "check:gates": "tsx scripts/check-ownership-gates.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

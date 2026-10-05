@@ -17,7 +17,7 @@ const resourceSchema = z.object({
 });
 
 const createChapterSchema = z.object({
-  courseMentorId: z.string().min(1).max(40),
+  courseId: z.string().min(1).max(40),
   title: z.string().trim().min(2).max(160),
   summary: z.string().trim().max(600).optional(),
   meetingUrl: z.string().url().max(600).optional(),
@@ -25,27 +25,24 @@ const createChapterSchema = z.object({
   resources: z.array(resourceSchema).max(30).optional(),
 });
 
-const updateChapterSchema = createChapterSchema.omit({ courseMentorId: true }).partial();
+const updateChapterSchema = createChapterSchema.omit({ courseId: true }).partial();
 
-/** A chapter is only editable by the mentor who owns that course-mentor row (or an admin). */
-async function assertChapterAccess(chapterId: string, user: AuthUser): Promise<{ courseMentorId: string }> {
-  const chapter = await prisma.courseChapter.findUnique({
-    where: { id: chapterId },
-    include: { courseMentor: { select: { mentorId: true } } },
+/** Structure (roadmap shell, chapters) is admin/course-owner territory. Mentors fill content only. */
+async function assertCourseOwner(courseId: string, user: AuthUser): Promise<void> {
+  if (user.role === "ADMIN") return;
+  const course = await prisma.course.findFirst({
+    where: { id: courseId, teacherId: user.id },
+    select: { id: true },
   });
-  if (!chapter) throw ApiError.notFound("Chapter not found");
-  if (user.role !== "ADMIN" && chapter.courseMentor.mentorId !== user.id) {
-    throw ApiError.forbidden("You can only manage chapters on your own mentoring");
-  }
-  return { courseMentorId: chapter.courseMentorId };
+  if (!course) throw ApiError.forbidden("Only the admin or the course owner can change the course structure");
 }
 
-async function assertMentorOwnsCourseMentor(courseMentorId: string, user: AuthUser): Promise<void> {
-  const cm = await prisma.courseMentor.findUnique({ where: { id: courseMentorId } });
-  if (!cm) throw ApiError.notFound("Mentor assignment not found");
-  if (user.role !== "ADMIN" && cm.mentorId !== user.id) {
-    throw ApiError.forbidden("You can only add chapters to your own mentoring");
-  }
+/** A chapter belongs to the course, so its guard is the course owner (or an admin). */
+async function assertChapterAccess(chapterId: string, user: AuthUser): Promise<{ courseId: string }> {
+  const chapter = await prisma.courseChapter.findUnique({ where: { id: chapterId }, select: { courseId: true } });
+  if (!chapter) throw ApiError.notFound("Chapter not found");
+  await assertCourseOwner(chapter.courseId, user);
+  return { courseId: chapter.courseId };
 }
 
 // ── Mentor: my mentoring rows + chapters ────────────────────────────
@@ -56,16 +53,6 @@ router.get("/mine", requireAuth, async (req, res, next) => {
       where: req.user!.role === "ADMIN" ? {} : { mentorId: req.user!.id },
       include: {
         course: { select: { id: true, title: true, slug: true } },
-        chapters: {
-          orderBy: { order: "asc" },
-          include: {
-            modules: {
-              where: { chapterId: { not: null } },
-              orderBy: { position: "asc" },
-              include: { lessons: { orderBy: { position: "asc" } } },
-            },
-          },
-        },
         _count: { select: { enrollments: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -76,24 +63,32 @@ router.get("/mine", requireAuth, async (req, res, next) => {
   }
 });
 
-// ── Chapters for a mentor within a course (learners see their mentor's) ──
+// ── The course roadmap: one structure, shared by every learner and mentor ──
 
-router.get("/mentor/:mentorId", requireAuth, async (req, res, next) => {
+router.get("/course/:courseId", requireAuth, async (req, res, next) => {
   try {
-    const mentorId = param(req, "mentorId");
+    const courseId = param(req, "courseId");
     const user = req.user!;
 
-    if (user.role !== "ADMIN" && user.id !== mentorId) {
-      const enrolled = await prisma.enrollment.findFirst({
-        where: { studentId: user.id, courseMentor: { mentorId } },
-        select: { id: true },
-      });
-      if (!enrolled) throw ApiError.forbidden("You are not enrolled with this mentor");
+    if (user.role !== "ADMIN") {
+      const [owns, mentors, enrolled] = await Promise.all([
+        prisma.course.findFirst({ where: { id: courseId, teacherId: user.id }, select: { id: true } }),
+        prisma.courseMentor.findFirst({ where: { courseId, mentorId: user.id }, select: { id: true } }),
+        prisma.enrollment.findFirst({ where: { courseId, studentId: user.id, status: "ACTIVE" }, select: { id: true } }),
+      ]);
+      if (!owns && !mentors && !enrolled) throw ApiError.forbidden("Enroll to open the roadmap");
     }
 
     const chapters = await prisma.courseChapter.findMany({
-      where: { courseMentor: { mentorId } },
-      orderBy: [{ courseMentorId: "asc" }, { order: "asc" }],
+      where: { courseId },
+      orderBy: { order: "asc" },
+      include: {
+        modules: {
+          where: { chapterId: { not: null } },
+          orderBy: { position: "asc" },
+          include: { lessons: { orderBy: { position: "asc" } } },
+        },
+      },
     });
     res.json({ success: true, data: { chapters } });
   } catch (err) {
@@ -101,10 +96,10 @@ router.get("/mentor/:mentorId", requireAuth, async (req, res, next) => {
   }
 });
 
-// ── Mentor: create / update / delete chapters ───────────────────────
+// ── Admin / course owner: create, update, delete chapters ────────────
 
 const roadmapSchema = z.object({
-  courseMentorId: z.string().cuid2(),
+  courseId: z.string().min(1).max(40),
   title: z.string().trim().min(3).max(160),
   summary: z.string().trim().max(1_000).optional(),
   meetingUrl: z.union([z.string().url(), z.literal("")]).optional(),
@@ -117,10 +112,10 @@ const roadmapSchema = z.object({
 router.put("/roadmap", requireAuth, validate(roadmapSchema), async (req, res, next) => {
   try {
     const data = req.body as z.infer<typeof roadmapSchema>;
-    await assertMentorOwnsCourseMentor(data.courseMentorId, req.user!);
+    await assertCourseOwner(data.courseId, req.user!);
 
-    const roadmap = await prisma.courseMentor.update({
-      where: { id: data.courseMentorId },
+    const roadmap = await prisma.course.update({
+      where: { id: data.courseId },
       data: {
         roadmapTitle: data.title,
         ...(data.summary !== undefined ? { roadmapSummary: data.summary || null } : {}),
@@ -147,10 +142,10 @@ router.put("/roadmap", requireAuth, validate(roadmapSchema), async (req, res, ne
 router.post("/", requireAuth, validate(createChapterSchema), async (req, res, next) => {
   try {
     const data = req.body as z.infer<typeof createChapterSchema>;
-    await assertMentorOwnsCourseMentor(data.courseMentorId, req.user!);
+    await assertCourseOwner(data.courseId, req.user!);
 
     const last = await prisma.courseChapter.findFirst({
-      where: { courseMentorId: data.courseMentorId },
+      where: { courseId: data.courseId },
       orderBy: { order: "desc" },
       select: { order: true },
     });
@@ -181,10 +176,10 @@ const reorderSchema = z.object({ order: z.number().int().min(1).max(500) });
 
 router.patch("/:id/order", requireAuth, validate(reorderSchema), async (req, res, next) => {
   try {
-    const { courseMentorId } = await assertChapterAccess(param(req, "id"), req.user!);
+    const { courseId } = await assertChapterAccess(param(req, "id"), req.user!);
     const { order } = req.body as z.infer<typeof reorderSchema>;
 
-    const clash = await prisma.courseChapter.findFirst({ where: { courseMentorId, order } });
+    const clash = await prisma.courseChapter.findFirst({ where: { courseId, order } });
     if (clash) throw ApiError.conflict("Another chapter already uses that position");
 
     const chapter = await prisma.courseChapter.update({ where: { id: param(req, "id") }, data: { order } });

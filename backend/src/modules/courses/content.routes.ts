@@ -12,6 +12,13 @@ const router = Router();
 type AuthUser = { id: string; role: Role };
 
 /** Admins, course owners and mentors of the course may edit its content. */
+/** Structure (chapters, lessons, roadmap shell) belongs to the admin/course owner. */
+async function assertStructureAccess(courseId: string, user: AuthUser): Promise<void> {
+  if (user.role === "ADMIN") return;
+  const owns = await prisma.course.findFirst({ where: { id: courseId, teacherId: user.id }, select: { id: true } });
+  if (!owns) throw ApiError.forbidden("Only the admin or the course owner can change the course structure");
+}
+
 async function assertContentAccess(courseId: string, user: AuthUser): Promise<void> {
   if (user.role === "ADMIN") return;
   const [owns, mentors] = await Promise.all([
@@ -48,8 +55,9 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res, next) => {
     })();
     if (!allowed) throw ApiError.forbidden("Enroll to open the roadmap");
 
-    const mentors = await prisma.courseMentor.findMany({
-      where: { courseId },
+    // One structure per course, shared by every learner and every mentor.
+    const course = await prisma.course.findUniqueOrThrow({
+      where: { id: courseId },
       select: {
         id: true,
         roadmapTitle: true,
@@ -78,15 +86,14 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        mentors: mentors.map((m) => ({
-          id: m.id,
-          title: m.roadmapTitle,
-          summary: m.roadmapSummary,
-          meetingUrl: m.roadmapMeetingUrl,
-          recordingUrl: m.roadmapRecordingUrl,
-          resources: m.roadmapResources,
-          chapters: m.chapters,
-        })),
+        roadmap: {
+          title: course.roadmapTitle,
+          summary: course.roadmapSummary,
+          meetingUrl: course.roadmapMeetingUrl,
+          recordingUrl: course.roadmapRecordingUrl,
+          resources: course.roadmapResources,
+          chapters: course.chapters,
+        },
         meetings: meetings.map((m) => ({ ...m, chapter: m.chapterId ? { id: m.chapterId } : null })),
       },
     });
@@ -113,19 +120,14 @@ router.get("/:courseId/modules", requireAuth, async (req, res, next) => {
 router.post("/:courseId/modules", requireAuth, validate(moduleSchema), async (req, res, next) => {
   try {
     const courseId = param(req, "courseId");
-    await assertContentAccess(courseId, req.user!);
+    // Lessons are course structure: admin or the course owner only. Mentors
+    // author content inside the concepts (POST /:courseId/lessons).
+    await assertStructureAccess(courseId, req.user!);
     const chapterId = (req.headers["x-chapter-id"] as string | undefined) ?? null;
     if (chapterId) {
-      const chapter = await prisma.courseChapter.findUnique({
-        where: { id: chapterId },
-        select: { courseMentor: { select: { courseId: true, mentorId: true } } },
-      });
-      if (!chapter || chapter.courseMentor.courseId !== courseId) {
+      const chapter = await prisma.courseChapter.findUnique({ where: { id: chapterId }, select: { courseId: true } });
+      if (!chapter || chapter.courseId !== courseId) {
         throw ApiError.badRequest("That chapter does not belong to this course");
-      }
-      // A mentor only manages their own roadmap — not their colleagues' chapters.
-      if (req.user!.role !== "ADMIN" && chapter.courseMentor.mentorId !== req.user!.id) {
-        throw ApiError.forbidden("You can only add concepts to your own chapters");
       }
     }
     const last = await prisma.module.findFirst({
