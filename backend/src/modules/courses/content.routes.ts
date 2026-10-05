@@ -5,6 +5,7 @@ import { requireAuth } from "../../middlewares/auth.js";
 import { validate } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
+import { notifyCourse } from "../../lib/notify.js";
 import type { Role } from "@prisma/client";
 
 const router = Router();
@@ -12,13 +13,6 @@ const router = Router();
 type AuthUser = { id: string; role: Role };
 
 /** Admins, course owners and mentors of the course may edit its content. */
-/** Structure (chapters, lessons, roadmap shell) belongs to the admin/course owner. */
-async function assertStructureAccess(courseId: string, user: AuthUser): Promise<void> {
-  if (user.role === "ADMIN") return;
-  const owns = await prisma.course.findFirst({ where: { id: courseId, teacherId: user.id }, select: { id: true } });
-  if (!owns) throw ApiError.forbidden("Only the admin or the course owner can change the course structure");
-}
-
 async function assertContentAccess(courseId: string, user: AuthUser): Promise<void> {
   if (user.role === "ADMIN") return;
   const [owns, mentors] = await Promise.all([
@@ -39,6 +33,29 @@ const moduleSchema = z.object({
 
 // Learners only see lesson links (recording / meeting / notes) once they are
 // actually in the course. The public course page deliberately returns titles only.
+/** Tell the class only when a concept actually gains a live link, a recording or resources. */
+function announceConceptContent(
+  courseId: string,
+  body: { meetingUrl?: string; contentUrl?: string; resources?: Array<{ label: string; url: string }> },
+  title: string,
+  senderId: string,
+  hadMeeting?: string | null,
+  hadVideo?: string | null,
+): void {
+  const bits: string[] = [];
+  if (body.meetingUrl && body.meetingUrl !== hadMeeting) bits.push("live class link");
+  if (body.contentUrl && body.contentUrl !== hadVideo) bits.push("recording");
+  if (body.resources && body.resources.length > 0) bits.push(`${body.resources.length} resource(s)`);
+  if (bits.length === 0) return;
+
+  notifyCourse({
+    courseId,
+    title: `New in ${title}`,
+    body: `Your mentor added ${bits.join(", ")}`,
+    senderId,
+  });
+}
+
 router.get("/:courseId/roadmap", requireAuth, async (req, res, next) => {
   try {
     const courseId = param(req, "courseId");
@@ -83,6 +100,15 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res, next) => {
       select: { id: true, title: true, meetingUrl: true, scheduledAt: true, chapterId: true },
     });
 
+    const enrollment = await prisma.enrollment.findFirst({
+      where: { courseId, studentId: user.id, status: { in: ["ACTIVE", "COMPLETED"] } },
+      select: {
+        progressItems: { select: { lessonId: true } },
+      },
+    });
+    const completed = enrollment?.progressItems.map((p) => p.lessonId) ?? [];
+    const total = course.chapters.reduce((sum, c) => sum + c.modules.reduce((n, m) => n + m.lessons.length, 0), 0);
+
     res.json({
       success: true,
       data: {
@@ -95,6 +121,11 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res, next) => {
           chapters: course.chapters,
         },
         meetings: meetings.map((m) => ({ ...m, chapter: m.chapterId ? { id: m.chapterId } : null })),
+        progress: {
+          completedLessonIds: completed,
+          totalLessons: total,
+          pct: total === 0 ? 0 : Math.round((completed.length / total) * 100),
+        },
       },
     });
   } catch (err) {
@@ -120,9 +151,9 @@ router.get("/:courseId/modules", requireAuth, async (req, res, next) => {
 router.post("/:courseId/modules", requireAuth, validate(moduleSchema), async (req, res, next) => {
   try {
     const courseId = param(req, "courseId");
-    // Lessons are course structure: admin or the course owner only. Mentors
-    // author content inside the concepts (POST /:courseId/lessons).
-    await assertStructureAccess(courseId, req.user!);
+    // Lessons live inside admin-authored chapters: owner, mentors and admins all
+    // build them. Only the roadmap shell and the chapters are admin's alone.
+    await assertContentAccess(courseId, req.user!);
     const chapterId = (req.headers["x-chapter-id"] as string | undefined) ?? null;
     if (chapterId) {
       const chapter = await prisma.courseChapter.findUnique({ where: { id: chapterId }, select: { courseId: true } });
@@ -223,6 +254,8 @@ router.post("/:courseId/lessons", requireAuth, validate(lessonSchema.omit({ posi
         isPublished: req.body.isPublished ?? true,
       },
     });
+    announceConceptContent(courseId, req.body, lesson.title, req.user!.id);
+
     res.status(201).json({ success: true, data: { lesson } });
   } catch (err) {
     next(err);
@@ -232,6 +265,7 @@ router.post("/:courseId/lessons", requireAuth, validate(lessonSchema.omit({ posi
 router.patch("/lessons/:id", requireAuth, validate(lessonSchema.partial()), async (req, res, next) => {
   try {
     const lesson = await assertLessonAccess(param(req, "id"), req.user!);
+    const before = await prisma.lesson.findUnique({ where: { id: lesson.id }, select: { meetingUrl: true, contentUrl: true } });
     const positions = lessonSchema.pick({ position: true }).safeParse(req.body);
     if (positions.success && positions.data.position !== undefined) {
       const clash = await prisma.lesson.findFirst({
@@ -248,6 +282,15 @@ router.patch("/lessons/:id", requireAuth, validate(lessonSchema.partial()), asyn
         meetingUrl: req.body.meetingUrl === undefined ? undefined : req.body.meetingUrl || null,
       },
     });
+    announceConceptContent(
+      lesson.courseId,
+      req.body,
+      (await prisma.lesson.findUnique({ where: { id: lesson.id }, select: { title: true } }))!.title,
+      req.user!.id,
+      before?.meetingUrl,
+      before?.contentUrl,
+    );
+
     res.json({ success: true, data: { lesson } });
   } catch (err) {
     next(err);

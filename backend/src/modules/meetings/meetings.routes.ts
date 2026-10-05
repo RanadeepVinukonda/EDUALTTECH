@@ -6,6 +6,7 @@ import { validate } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
 import { sendEmail } from "../../lib/email.js";
+import { notifyCourse } from "../../lib/notify.js";
 import { logger } from "../../utils/logger.js";
 import type { Role } from "@prisma/client";
 
@@ -153,6 +154,13 @@ router.post("/", validate(createSchema), async (req, res, next) => {
         logger.warn("Live class email failed", { error: err });
       }
     })();
+
+    notifyCourse({
+      courseId: data.courseId,
+      title: "New live class scheduled",
+      body: `${data.title} · ${new Date(data.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`,
+      senderId: req.user!.id,
+    });
 
     res.status(201).json({ success: true, data: { meeting } });
   } catch (err) {

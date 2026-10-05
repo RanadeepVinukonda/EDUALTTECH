@@ -14,6 +14,11 @@ interface Meeting {
   chapter: { id: string; title: string } | null;
 }
 
+const fieldCls =
+  "h-[46px] w-full rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-brand-500";
+const submitCls =
+  "rounded-[10px] bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50";
+
 interface CourseResource {
   id: string;
   title: string;
@@ -101,6 +106,32 @@ export function MentorCoursePanel({
   // ── Live classes ──
 
   // ── Course resources ──
+  async function scheduleMeeting(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    setBusy(true);
+    setError(null);
+    try {
+      await api("/meetings", {
+        method: "POST",
+        body: JSON.stringify({
+          courseId,
+          title: fd.get("title"),
+          scheduledAt: new Date(String(fd.get("scheduledAt"))).toISOString(),
+          durationMin: Number(fd.get("durationMin")),
+          meetingUrl: fd.get("meetingUrl"),
+          ...(fd.get("chapterId") ? { chapterId: fd.get("chapterId") } : {}),
+        }),
+      });
+      (e.currentTarget as HTMLFormElement).reset();
+      void load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not schedule the class");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function uploadResource(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const input = e.currentTarget.elements.namedItem("file") as HTMLInputElement;
@@ -173,6 +204,65 @@ async function removeResource(id: string) {
           mode="mentor"
           onChanged={load}
         />
+      </section>
+
+      {/* Live classes — the mentor schedules them, students get a notification + email */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 className="font-display text-lg font-semibold text-slate-900">Live classes</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Schedule a class against a chapter. Every enrolled student is notified in-app and emailed with the join link.
+        </p>
+
+        <form onSubmit={scheduleMeeting} className="mt-4 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="grid gap-3 md:grid-cols-2">
+            <input name="title" required placeholder="Class title" className={fieldCls} />
+            <select name="chapterId" className={fieldCls} defaultValue="">
+              <option value="">Whole course (no chapter)</option>
+              {chapters.map((c) => (
+                <option key={c.id} value={c.id}>{`Chapter ${c.order} — ${c.title}`}</option>
+              ))}
+            </select>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            <input name="scheduledAt" type="datetime-local" required className={fieldCls} />
+            <input name="durationMin" type="number" min={5} max={480} defaultValue={60} required className={fieldCls} />
+            <input name="meetingUrl" type="url" required placeholder="https://meet.google.com/…" className={fieldCls} />
+          </div>
+          <button type="submit" disabled={busy} className={submitCls}>
+            {busy ? "Scheduling…" : "Schedule live class"}
+          </button>
+        </form>
+
+        {meetings.length > 0 && (
+          <ul className="mt-4 space-y-2">
+            {meetings.map((m) => (
+              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-800">{m.title}</p>
+                  <p className="text-xs text-slate-500">
+                    {new Date(m.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                    {m.chapter ? ` · ${m.chapter.title}` : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link href={m.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">
+                    Open link
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await api(`/meetings/${m.id}`, { method: "DELETE" }).catch(() => undefined);
+                      void load();
+                    }}
+                    className="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* Course resources */}

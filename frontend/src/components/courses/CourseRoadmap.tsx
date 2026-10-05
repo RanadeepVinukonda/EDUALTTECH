@@ -4,6 +4,12 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
+export interface RoadmapProgress {
+  completedLessonIds: string[];
+  totalLessons: number;
+  pct: number;
+}
+
 export interface RoadmapLesson {
   id: string;
   title: string;
@@ -119,6 +125,7 @@ export default function CourseRoadmap({
   chapters,
   roadmap,
   meetings = [],
+  initialProgress,
   mode,
   locked = false,
   onChanged,
@@ -127,20 +134,41 @@ export default function CourseRoadmap({
   chapters: RoadmapChapter[];
   roadmap?: RoadmapShell | null;
   meetings?: RoadmapMeeting[];
+  initialProgress?: RoadmapProgress;
   /** admin = owns the structure, mentor = fills content inside concepts, learn = read only. */
   mode: "admin" | "mentor" | "learn";
   locked?: boolean;
   onChanged?: () => void;
 }) {
   const mentor = mode === "mentor" && !locked;
-  /** Chapters + lessons are the syllabus: admin/course owner only. */
+  /** The roadmap shell and the chapter list are the admin's alone. */
   const canStructure = mode === "admin" && !locked;
+  /** Lessons sit inside admin chapters: mentors build them too. */
+  const canLessons = (mode === "admin" || mode === "mentor") && !locked;
   /** Concepts and their content are the mentor's job. */
   const canConcepts = (mode === "admin" || mode === "mentor") && !locked;
   const [openChapter, setOpenChapter] = useState<string | null>(null);
   const [openModule, setOpenModule] = useState<string | null>(null);
   const [editLesson, setEditLesson] = useState<string | null>(null);
   const [editChapter, setEditChapter] = useState<string | null>(null);
+  const [completed, setCompleted] = useState<string[]>(initialProgress?.completedLessonIds ?? []);
+  const [busyLesson, setBusyLesson] = useState<string | null>(null);
+
+  async function complete(lessonId: string) {
+    setBusyLesson(lessonId);
+    setCompleted((list) => [...list, lessonId]);
+    try {
+      await api(`/courses/lessons/${lessonId}/complete`, { method: "POST" });
+      onChanged?.();
+    } catch {
+      setCompleted((list) => list.filter((id) => id !== lessonId));
+    } finally {
+      setBusyLesson(null);
+    }
+  }
+
+  const total = initialProgress?.totalLessons ?? 0;
+  const pct = total === 0 ? 0 : Math.round((completed.length / total) * 100);
 
   if (!mentor) {
     return (
@@ -154,6 +182,17 @@ export default function CourseRoadmap({
               {roadmap.recordingUrl && <Link href={roadmap.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] border border-[1.5px] border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50">Watch recording</Link>}
             </div>
             <ResourceStrip resources={roadmap.resources ?? []} />
+            {total > 0 && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-xs font-medium text-slate-600">
+                  <span>Your progress</span>
+                  <span>{pct}% · {completed.length}/{total} concepts</span>
+                </div>
+                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white">
+                  <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            )}
           </header>
         )}
       <ol className="mt-4 space-y-3">
@@ -168,6 +207,10 @@ export default function CourseRoadmap({
             onToggle={() => setOpenChapter((o) => (o === c.id ? null : c.id))}
             openModule={openModule}
             onToggleModule={(id) => setOpenModule((o) => (o === id ? null : id))}
+            mode={mode}
+            completed={completed}
+            busyLesson={busyLesson}
+            onComplete={(id) => void complete(id)}
           />
         ))}
       </ol>
@@ -250,7 +293,7 @@ export default function CourseRoadmap({
                     <ul className="mt-2 space-y-2">
                       {c.modules.length === 0 && (
                         <li className="text-sm text-slate-400">
-                          {canStructure ? "No lessons yet — add the first one below." : "No lessons here yet."}
+                          {canLessons ? "No lessons yet — add the first one below." : "No lessons here yet."}
                         </li>
                       )}
                       {c.modules.map((mod) => (
@@ -267,7 +310,7 @@ export default function CourseRoadmap({
                               >
                                 {openModule === mod.id ? "Hide concepts" : `${mod.lessons.length} concept${mod.lessons.length === 1 ? "" : "s"}`}
                               </button>
-                              {canStructure && (
+                              {canLessons && (
                                 <RemoveButton
                                   label={`Delete lesson ${mod.title}`}
                                   onClick={async () => {
@@ -327,7 +370,7 @@ onChanged?.();
                         </li>
                       ))}
                     </ul>
-                    {canStructure && <AddLessonForm courseId={courseId} chapterId={c.id} onDone={() => onChanged?.()} />}
+                    {canLessons && <AddLessonForm courseId={courseId} chapterId={c.id} onDone={() => onChanged?.()} />}
                   </div>
                 </div>
               )}
@@ -472,6 +515,10 @@ function ChapterNode({
   onToggle,
   openModule,
   onToggleModule,
+  mode,
+  completed,
+  busyLesson,
+  onComplete,
 }: {
   chapter: RoadmapChapter;
   meetings: RoadmapMeeting[];
@@ -480,6 +527,10 @@ function ChapterNode({
   onToggle: () => void;
   openModule: string | null;
   onToggleModule: (id: string) => void;
+  mode: "admin" | "mentor" | "learn";
+  completed: string[];
+  busyLesson: string | null;
+  onComplete: (lessonId: string) => void;
 }) {
   return (
     <li className="relative">
@@ -532,7 +583,14 @@ function ChapterNode({
                         <ul className="mt-3 space-y-2 border-l-2 border-slate-100 pl-4">
                           {mod.lessons.length === 0 && <li className="text-sm text-slate-400">No concepts yet.</li>}
                           {mod.lessons.map((l) => (
-                            <LessonRow key={l.id} lesson={l} />
+                            <LessonRow
+                              key={l.id}
+                              lesson={l}
+                              done={completed.includes(l.id)}
+                              canComplete={mode === "learn" && !locked}
+                              busy={busyLesson === l.id}
+                              onComplete={() => onComplete(l.id)}
+                            />
                           ))}
                         </ul>
                       )}
@@ -587,14 +645,39 @@ function ChapterLinks({ chapter, meetings }: { chapter: RoadmapChapter; meetings
   );
 }
 
-/** One lesson for learners: watch, join, read. */
-function LessonRow({ lesson }: { lesson: RoadmapLesson }) {
+/** One lesson for learners: watch, join, read, tick off. */
+function LessonRow({
+  lesson,
+  done,
+  canComplete,
+  busy,
+  onComplete,
+}: {
+  lesson: RoadmapLesson;
+  done: boolean;
+  canComplete: boolean;
+  busy: boolean;
+  onComplete: () => void;
+}) {
   return (
-    <li className="rounded-lg bg-slate-50 px-3 py-2">
+    <li className={`rounded-lg px-3 py-2 ${done ? "bg-emerald-50/70" : "bg-slate-50"}`}>
       <p className="flex items-center gap-2 text-sm font-medium text-slate-800">
         <span className={`h-2 w-2 shrink-0 rounded-full ${TYPE_DOT[lesson.type]}`} />
         {lesson.title}
         <span className="shrink-0 text-xs text-slate-400">{typeLabel(lesson.type)}</span>
+        {canComplete && (
+          <button
+            type="button"
+            onClick={onComplete}
+            disabled={done || busy}
+            aria-pressed={done}
+            className={`ml-auto shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition disabled:cursor-default ${
+              done ? "bg-emerald-100 text-emerald-700" : "bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+            }`}
+          >
+            {done ? "✓ Done" : busy ? "Saving…" : "Mark done"}
+          </button>
+        )}
       </p>
       <ResourceStrip resources={lesson.resources} />
       <div className="mt-2 flex flex-wrap gap-2">

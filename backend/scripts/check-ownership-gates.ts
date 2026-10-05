@@ -1,6 +1,7 @@
 /**
- * Ownership gates: admin/owner can author structure, a mentor cannot, and a
- * mentor can still fill concept content. Run with the app's env loaded.
+ * Ownership gates: admin/owner own the roadmap shell + chapters, an accepted
+ * mentor builds the lessons and concepts inside them, and a stranger can do
+ * neither. Run with the app's env loaded. Cleans up everything it creates.
  */
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
@@ -26,48 +27,77 @@ async function main() {
   const mentor = await prisma.user.create({
     data: { id: created!.user.id, email: created!.user.email!, name: "Gate Mentor" },
   });
-
-  const course = await prisma.course.create({
-    data: {
-      slug: `gate-${Date.now()}`,
-      title: "Gate course",
-      description: "gate check",
-      subject: "Test",
-      teacherId: admin.id,
-    },
+  const { data: strangerCreated } = await supabase.auth.admin.createUser({
+    email: `gate-${Date.now()}-x@test.local`,
+    email_confirm: true,
   });
-  const cm = await prisma.courseMentor.create({ data: { courseId: course.id, mentorId: mentor.id } });
-
-  // Mirrors assertCourseOwner / assertStructureAccess.
-  const canStructure = async (user: { id: string; role: string }) =>
-    user.role === "ADMIN" ||
-    Boolean(await prisma.course.findFirst({ where: { id: course.id, teacherId: user.id }, select: { id: true } }));
-
-  // Mirrors assertContentAccess (concept authoring).
-  const canTeach = async (user: { id: string; role: string }) =>
-    (await canStructure(user)) ||
-    Boolean(await prisma.courseMentor.findFirst({ where: { courseId: course.id, mentorId: user.id }, select: { id: true } }));
-
-  check("admin can author structure", await canStructure(admin));
-  check("owner can author structure", await canStructure({ id: course.teacherId, role: "USER" }));
-  check("mentor cannot author structure", !(await canStructure(mentor)));
-  check("mentor can author concept content", await canTeach(mentor));
-
-  const chapter = await prisma.courseChapter.create({ data: { courseId: course.id, title: "Ch 1", order: 1 } });
-  const lesson = await prisma.module.create({
-    data: { courseId: course.id, chapterId: chapter.id, title: "L 1", position: 1 },
+  const stranger = await prisma.user.create({
+    data: { id: strangerCreated!.user.id, email: strangerCreated!.user.email!, name: "Gate Stranger" },
   });
-  const concept = await prisma.lesson.create({
-    data: { moduleId: lesson.id, courseId: course.id, title: "C 1", position: 1, meetingUrl: "https://meet.google.com/x", isPublished: true },
-  });
-  check("chapter belongs to the course", chapter.courseId === course.id);
-  check("concept content survives on a shared structure", Boolean(concept.meetingUrl));
 
-  // A structure write for another course must not resolve against this mentor.
-  const foreign = await prisma.courseChapter.findFirst({ where: { id: chapter.id, course: { mentors: { some: { id: cm.id } } } }, select: { id: true } });
-  check("chapter reachable through the mentor's course", foreign?.id === chapter.id);
+  try {
+    const course = await prisma.course.create({
+      data: {
+        slug: `gate-${Date.now()}`,
+        title: "Gate course",
+        description: "gate check",
+        subject: "Test",
+        teacherId: admin.id,
+      },
+    });
+    const cm = await prisma.courseMentor.create({ data: { courseId: course.id, mentorId: mentor.id } });
 
-  await supabase.auth.admin.deleteUser(mentor.id);
+    // Mirrors assertCourseOwner in chapters.routes (shell + chapters).
+    const canStructure = async (user: { id: string; role: string }) =>
+      user.role === "ADMIN" ||
+      Boolean(await prisma.course.findFirst({ where: { id: course.id, teacherId: user.id }, select: { id: true } }));
+
+    // Mirrors assertContentAccess in content.routes (lessons + concepts).
+    const canTeach = async (user: { id: string; role: string }) =>
+      (await canStructure(user)) ||
+      Boolean(await prisma.courseMentor.findFirst({ where: { courseId: course.id, mentorId: user.id }, select: { id: true } }));
+
+    check("admin owns the structure", await canStructure(admin));
+    check("course owner owns the structure", await canStructure({ id: course.teacherId, role: "USER" }));
+    check("mentor cannot touch the roadmap shell", !(await canStructure(mentor)));
+    check("mentor can author lessons + concepts", await canTeach(mentor));
+    check("stranger can teach nothing", !(await canTeach(stranger)));
+
+    const chapter = await prisma.courseChapter.create({ data: { courseId: course.id, title: "Ch 1", order: 1 } });
+    const lesson = await prisma.module.create({
+      data: { courseId: course.id, chapterId: chapter.id, title: "L 1", position: 1 },
+    });
+    const concept = await prisma.lesson.create({
+      data: { moduleId: lesson.id, courseId: course.id, title: "C 1", position: 1, meetingUrl: "https://meet.google.com/x", isPublished: true },
+    });
+    check("chapter belongs to the course", chapter.courseId === course.id);
+    check("lesson belongs to an admin chapter", lesson.chapterId === chapter.id);
+    check("concept content survives on a shared structure", Boolean(concept.meetingUrl));
+
+    // A structure read for another course must not resolve against this mentor.
+    const foreign = await prisma.courseChapter.findFirst({ where: { id: chapter.id, course: { mentors: { some: { id: cm.id } } } }, select: { id: true } });
+    check("chapter reachable through the mentor's course", foreign?.id === chapter.id);
+
+    const enrolled = await prisma.user.findUnique({ where: { email: stranger.email } });
+    const progress = await prisma.enrollment.create({
+      data: { courseId: course.id, studentId: enrolled!.id, status: "ACTIVE" },
+    });
+    await prisma.lessonProgress.create({ data: { enrollmentId: progress.id, lessonId: concept.id } });
+    const done = await prisma.lessonProgress.count({ where: { enrollmentId: progress.id } });
+    check("learner progress is tracked per enrollment", done === 1);
+
+    await prisma.enrollment.delete({ where: { id: progress.id } });
+    await prisma.lesson.delete({ where: { id: concept.id } });
+    await prisma.module.delete({ where: { id: lesson.id } });
+    await prisma.courseChapter.delete({ where: { id: chapter.id } });
+    await prisma.courseMentor.delete({ where: { id: cm.id } });
+    await prisma.course.delete({ where: { id: course.id } });
+  } finally {
+    await supabase.auth.admin.deleteUser(mentor.id);
+    await supabase.auth.admin.deleteUser(stranger.id);
+    await prisma.user.deleteMany({ where: { id: { in: [mentor.id, stranger.id] } } });
+  }
+
   console.log(failures === 0 ? "\nall gates hold" : `\n${failures} gate(s) failed`);
   process.exit(failures === 0 ? 0 : 1);
 }

@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Bookmark as BookmarkIcon } from "lucide-react";
 import { api, ApiError, getCachedUser, updateCachedUser } from "@/lib/api";
 import { CourseChat } from "@/components/courses/CourseChat";
-import CourseRoadmap, { type RoadmapChapter, type RoadmapMeeting, type RoadmapShell } from "@/components/courses/CourseRoadmap";
+import CourseRoadmap, { type RoadmapChapter, type RoadmapMeeting, type RoadmapProgress, type RoadmapShell } from "@/components/courses/CourseRoadmap";
+
+type RoadmapPayload = {
+  roadmap: RoadmapShell & { chapters: RoadmapChapter[] };
+  meetings: RoadmapMeeting[];
+  progress: RoadmapProgress;
+};
 import { MentorCoursePanel } from "@/components/courses/MentorCoursePanel";
 
 const PLANS = [
@@ -108,7 +114,7 @@ export default function CourseDetailPage() {
   const [mentorApp, setMentorApp] = useState<MentorApplication | null>(null);
   // Unlocked roadmap (with recording/meeting links) — teaser data from the
   // course payload stays title-only until the viewer is in the course.
-  const [roadmap, setRoadmap] = useState<{ roadmap: RoadmapShell & { chapters: RoadmapChapter[] }; meetings: RoadmapMeeting[] } | null>(null);
+  const [roadmap, setRoadmap] = useState<RoadmapPayload | null>(null);
 
   useEffect(() => {
     api<{ course: CourseDetail }>(`/courses/${params.slug}`)
@@ -118,6 +124,11 @@ export default function CourseDetailPage() {
       })
       .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load course"));
   }, [params.slug]);
+
+  const loadRoadmap = useCallback(() => {
+    if (!course) return;
+    void api<RoadmapPayload>(`/courses/${course.id}/roadmap`).then(setRoadmap).catch(() => undefined);
+  }, [course]);
 
   // Backfill status for returning visitors: enrolled, wishlist, upcoming meetings.
   // All three are server-authoritative and quietly skipped when signed out.
@@ -141,7 +152,7 @@ export default function CourseDetailPage() {
           && ["PENDING", "UNDER_REVIEW", "INTERVIEW", "APPROVED"].includes(app.application.status)) {
           setMentorApp(app.application);
         }
-        const rm = await api<{ roadmap: RoadmapShell & { chapters: RoadmapChapter[] }; meetings: RoadmapMeeting[] }>(`/courses/${course.id}/roadmap`).catch(() => null);
+        const rm = await api<RoadmapPayload>(`/courses/${course.id}/roadmap`).catch(() => null);
         if (rm) setRoadmap(rm);
         const wish = await api<{ items: Array<{ id: string }> }>("/wishlist").catch(() => null);
         if (wish?.items.some((i) => i.id === course.id)) setSaved(true);
@@ -393,7 +404,7 @@ export default function CourseDetailPage() {
                   {m.mentor.education && <p className="mt-0.5 text-xs text-slate-500">{m.mentor.education}</p>}
                   {m.mentor.bio && <p className="mt-2 text-sm text-slate-600">{m.mentor.bio}</p>}
                   <p className="mt-3 text-xs font-medium text-brand-700">
-                    {m._count.enrollments} learners · {m.chapters.length} chapters
+                    {m._count.enrollments} learners
                   </p>
                 </button>
               );
@@ -478,9 +489,9 @@ export default function CourseDetailPage() {
         <section className="min-w-0">
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="font-display text-xl font-semibold text-slate-900">Course roadmap</h2>
-            {!unlocked && activeMentor && (
+            {!unlocked && course.chapters.length > 0 && (
               <p className="text-xs font-medium text-slate-400">
-                {activeMentor.chapters.reduce((n, c) => n + (c._count?.modules ?? 0), 0)} concepts inside — enroll to unlock
+                {course.chapters.length} chapter{course.chapters.length === 1 ? "" : "s"} · enroll to unlock the concepts
               </p>
             )}
           </div>
@@ -491,6 +502,8 @@ export default function CourseDetailPage() {
               chapters={roadmap?.roadmap.chapters ?? course.chapters ?? []}
               roadmap={roadmap?.roadmap ?? { title: course.roadmapTitle, summary: course.roadmapSummary, meetingUrl: null, recordingUrl: null, resources: [] }}
               meetings={roadmap?.meetings ?? meetings ?? []}
+              initialProgress={roadmap?.progress}
+              onChanged={loadRoadmap}
               mode="learn"
               locked={!unlocked}
             />
@@ -563,7 +576,7 @@ const MENTOR_APP_UI: Record<MentorApplication["status"], { tone: string; dot: st
   PENDING: { tone: "border-amber-300 bg-amber-50", dot: "bg-amber-500", label: "Pending — admin reviewing", body: "Your mentor application is in the queue. An admin reviews every application by hand; you will get an email with the outcome." },
   UNDER_REVIEW: { tone: "border-amber-300 bg-amber-50", dot: "bg-amber-500", label: "Under review", body: "An admin is reviewing your mentor application right now." },
   INTERVIEW: { tone: "border-sky-300 bg-sky-50", dot: "bg-sky-500", label: "Interview scheduled", body: "You are through review and have an interview booked. Join using the link below." },
-  APPROVED: { tone: "border-emerald-300 bg-emerald-50", dot: "bg-emerald-600", label: "Approved mentor", body: "You are mentoring this course. Add chapters, lessons and resources from the mentor panel below." },
+  APPROVED: { tone: "border-emerald-300 bg-emerald-50", dot: "bg-emerald-600", label: "Approved mentor", body: "You are mentoring this course. Add lessons inside each chapter, plus live classes, recordings and resources, from the mentor panel below." },
   REJECTED: { tone: "border-slate-200 bg-slate-50", dot: "bg-slate-400", label: "Not approved", body: "This application was not approved." },
 };
 

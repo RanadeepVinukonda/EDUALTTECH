@@ -6,6 +6,7 @@ import { ApiError } from "../../utils/ApiError.js";
 import { config } from "../../config/env.js";
 import { uploadFile, deleteFile, publicFileUrl, storageKey } from "../../lib/storage.js";
 import { param as paramId } from "../../utils/params.js";
+import { notifyCourse } from "../../lib/notify.js";
 
 const router = Router();
 
@@ -207,6 +208,15 @@ router.post(
         },
         select: UPLOAD_SELECT,
       });
+
+      if (courseIdRaw) {
+        notifyCourse({
+          courseId: courseIdRaw,
+          title: "New resource added",
+          body: `${title} · ${kindRaw.toUpperCase()}`,
+          senderId: userId,
+        });
+      }
 
       res.status(201).json({ success: true, data: { resource } });
     } catch (err) {
