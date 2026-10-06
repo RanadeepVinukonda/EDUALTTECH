@@ -83,7 +83,7 @@ const TYPE_DOT: Record<RoadmapLesson["type"], string> = {
 };
 
 /** "label|url, label|url" ⇄ [{ label, url }] — one shape for chapter, lesson and concept. */
-export function parseResources(raw: string): Array<{ label: string; url: string }> {
+function parseResources(raw: string): Array<{ label: string; url: string }> {
   return raw
     .split(",")
     .map((pair) => pair.split("|").map((s) => s.trim()))
@@ -91,7 +91,7 @@ export function parseResources(raw: string): Array<{ label: string; url: string 
     .map(([label, url]) => ({ label: label!, url: url! }));
 }
 
-export function formatResources(list?: Array<{ label: string; url: string }>): string {
+function formatResources(list?: Array<{ label: string; url: string }>): string {
   return (list ?? []).map((r) => `${r.label}|${r.url}`).join(", ");
 }
 
@@ -110,7 +110,7 @@ function ResourceStrip({ resources }: { resources?: Array<{ label: string; url: 
   );
 }
 
-export function typeLabel(type: RoadmapLesson["type"]): string {
+function typeLabel(type: RoadmapLesson["type"]): string {
   return LESSON_TYPES.find((t) => t.value === type)?.label ?? type;
 }
 
@@ -284,7 +284,7 @@ export default function CourseRoadmap({
               {openChapter === c.id && (
                 <div className="space-y-4 border-t border-slate-100 p-5">
                   {canStructure && editChapter === c.id && (
-                    <ChapterForm courseId={courseId} chapter={c} onDone={() => { setEditChapter(null); onChanged?.(); }} />
+                    <ChapterForm chapter={c} onDone={() => { setEditChapter(null); onChanged?.(); }} />
                   )}
                   <ChapterLinks chapter={c} meetings={meetings.filter((m) => m.chapter?.id === c.id)} />
 
@@ -756,11 +756,9 @@ function FormShell({ children, onSubmit, submitLabel }: { children: React.ReactN
 
 /** Admin edit of a chapter: title, summary, course-wide live link, recording, resources. */
 function ChapterForm({
-  courseId,
   chapter,
   onDone,
 }: {
-  courseId: string;
   chapter: RoadmapChapter;
   onDone: () => void;
 }) {
@@ -807,7 +805,6 @@ function ChapterForm({
           <textarea id={`ch-edit-res-${chapter.id}`} name="resources" rows={2} defaultValue={formatResources(chapter.resources)} placeholder="Slides|https://…, Notes|https://…" className={areaCls} />
         </div>
       </FormShell>
-      <p className="sr-only">chapter {courseId}</p>
     </div>
   );
 }
