@@ -172,11 +172,11 @@ export default function AdminCourseViewPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold text-ink-700">Course structure ({chapters.length} chapters)</h2>
+        <h2 className="font-display text-xl font-semibold text-ink-700">Course structure ({chapters.length} topic{chapters.length === 1 ? "" : "s"})</h2>
         <p className="mt-1 text-sm text-slate-500">
           {course.isPublished
-            ? "Published — the syllabus is locked. Mentors keep managing live links and recordings inside these chapters."
-            : "Draft — build the roadmap, chapters, lessons and concepts below. Editing disappears once the course is published."}
+            ? "Published — the syllabus is locked. Mentors keep managing live links and recordings inside these topics."
+            : "Draft — build the roadmap path with the + on your roadmap card. Editing disappears once the course is published."}
         </p>
         <div className={course.isPublished ? "mt-4" : "mt-4 rounded-[16px] bg-white p-5 shadow-elev1"}>
           {course.isPublished ? (
