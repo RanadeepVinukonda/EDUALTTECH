@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { api, getCachedUser, updateCachedUser, type User } from "@/lib/api";
 import { Loader } from "@/components/Loader";
 import { useMinLoading } from "@/lib/useMinLoading";

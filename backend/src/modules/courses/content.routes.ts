@@ -274,7 +274,7 @@ router.patch("/lessons/:id", requireAuth, validate(lessonSchema.partial()), asyn
       });
       if (clash) throw ApiError.conflict("Another lesson already uses that position");
     }
-    const updated = await prisma.lesson.update({
+    await prisma.lesson.update({
       where: { id: param(req, "id") },
       data: {
         ...req.body,

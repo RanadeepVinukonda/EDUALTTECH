@@ -10,7 +10,7 @@ const router = Router();
 const sendSchema = z.object({
   title: z.string().trim().min(2).max(120),
   body: z.string().trim().min(1).max(2_000),
-  scope: z.enum(["ALL", "COURSE", "USER"]).default("ALL"),
+  scope: z.enum(["ALL", "COURSE"]).default("ALL"),
   courseId: z.string().cuid2().optional(),
 });
 

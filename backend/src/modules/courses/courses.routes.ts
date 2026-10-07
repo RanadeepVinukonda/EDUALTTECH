@@ -7,7 +7,7 @@ import { validate } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
 import { config } from "../../config/env.js";
-import { uploadFile, publicFileUrl, storageKey } from "../../lib/storage.js";
+import { uploadFile, publicFileUrl } from "../../lib/storage.js";
 import { enrollmentConfirmationEmail } from "../../lib/email.js";
 import { assertNotProvider, lockMentorSeat, lockUser } from "../../lib/course-roles.js";
 import { logger } from "../../utils/logger.js";
@@ -312,7 +312,7 @@ router.post("/",   requireAuth, requireRole("ADMIN"), validate(courseSchema), as
 // drop a real image instead of pasting a URL. Limits enforced before any
 // byte is read, and only admins may write.
 
-router.post("/thumbnail", requireAuth, requireRole("ADMIN"), async (req, res, next) => {
+router.post("/thumbnail", requireAuth, requireRole("ADMIN"), async (req, res, _next) => {
   const mimeType = (req.headers["x-thumbnail-mime"] ?? "image/jpeg").toString();
   if (!mimeType.startsWith("image/")) throw ApiError.badRequest("Thumbnail must be an image");
   const maxBytes = config.limits.maxUploadBytes;
@@ -376,8 +376,9 @@ router.post("/:id/enroll", requireAuth, validate(enrollSchema), async (req, res,
     const enrolled = await prisma.enrollment.findUnique({
       where: { studentId_courseId: { studentId: req.user!.id, courseId } },
     });
-    if (!enrolled) {
-      // Paid platform: enrolling requires an active plan (TRIAL or FULL).
+    if (!enrolled && course.pricePaise != null && course.pricePaise > 0) {
+      // Paid courses require an active plan (TRIAL or FULL); free courses
+      // enroll any signed-in learner.
       const active = await prisma.subscription.count({
         where: { userId: req.user!.id, isActive: true, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
       });

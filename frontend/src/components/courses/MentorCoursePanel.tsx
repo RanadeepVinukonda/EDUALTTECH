@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { api, getAccessToken, API_BASE, getCachedUser } from "@/lib/api";
+import { api, getAccessToken, API_BASE } from "@/lib/api";
 import CourseRoadmap, { type RoadmapChapter, type RoadmapShell } from "./CourseRoadmap";
 
 interface Meeting {
@@ -68,40 +68,6 @@ export function MentorCoursePanel({
   }, [courseId, courseMentorId, courseSlug]);
 
   useEffect(load, [load]);
-
-  // ── Chapters ──
-  async function addChapter(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    setBusy(true);
-    setError(null);
-    try {
-      const resourcesRaw = (fd.get("resources") as string) ?? "";
-      const resources = resourcesRaw
-        .split(",")
-        .map((pair) => pair.split("|").map((s) => s.trim()))
-        .filter(([label, url]) => label && url)
-        .map(([label, url]) => ({ label, url }));
-      await api("/chapters", {
-        method: "POST",
-        body: JSON.stringify({
-          courseMentorId,
-          title: fd.get("title"),
-          ...(fd.get("summary") ? { summary: fd.get("summary") } : {}),
-          ...(fd.get("meetingUrl") ? { meetingUrl: fd.get("meetingUrl") } : {}),
-          ...(fd.get("recordingUrl") ? { recordingUrl: fd.get("recordingUrl") } : {}),
-          ...(resources.length ? { resources } : {}),
-        }),
-      });
-      load();
-      e.currentTarget.reset();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not add the chapter");
-    } finally {
-      setBusy(false);
-    }
-  }
-
 
   // ── Live classes ──
 
@@ -180,8 +146,6 @@ async function removeResource(id: string) {
       .then((d) => setResources(d.items.filter((r) => r.courseId === courseId)))
       .catch(() => undefined);
   }
-
-  const me = getCachedUser();
 
   return (
     <div className="space-y-10">

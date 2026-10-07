@@ -15,7 +15,6 @@ interface NotificationItem {
 const SCOPE_BADGE: Record<string, string> = {
   ALL: "bg-slate-100 text-slate-600",
   COURSE: "bg-brand-50 text-brand-700",
-  USER: "bg-amber-50 text-amber-700",
 };
 
 export default function NotificationsPage() {
@@ -46,7 +45,7 @@ export default function NotificationsPage() {
             <div className="flex items-center gap-2">
               <p className="font-medium text-slate-900">{n.title}</p>
               <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${SCOPE_BADGE[n.scope] ?? "bg-slate-100 text-slate-600"}`}>
-                {n.scope === "ALL" ? "Everyone" : n.scope === "COURSE" ? "Course" : "Direct"}
+                {n.scope === "COURSE" ? "Course" : "Everyone"}
               </span>
             </div>
             <p className="mt-1 text-sm text-slate-600">{n.body}</p>

@@ -48,8 +48,7 @@ export function publicFileUrl(bucket: string, path: string): string {
   return `${config.supabase.url}/storage/v1/object/public/${encodeURIComponent(bucket)}/${path}`;
 }
 
-export function storageKey(userId: string, fileName: string, mimeType: string): string {
-  const ext = mimeType.split("/")[1] === "plain" ? "txt" : (mimeType.split("/")[1] ?? "bin");
+export function storageKey(userId: string, fileName: string): string {
   const safe = fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
   return `${userId}/${randomUUID()}-${safe}`;
 }

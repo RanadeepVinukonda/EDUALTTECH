@@ -55,6 +55,10 @@ export function createApp(): express.Express {
     standardHeaders: "draft-8",
     legacyHeaders: false,
     message: { success: false, error: { message: "Too many requests, please slow down." } },
+    // Razorpay retries webhooks with backoff; a 429 from a shared bucket would
+    // look like an outage. The webhook verifies its HMAC signature and dedupes
+    // on eventId, so it does not need the per-IP bucket.
+    skip: (req) => req.originalUrl.startsWith("/api/payments/webhook"),
   });
 
   app.use("/api", apiLimiter);

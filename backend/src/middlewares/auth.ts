@@ -3,10 +3,9 @@ import { ApiError } from "../utils/ApiError.js";
 import type { Role } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { getUserByToken } from "../lib/supabase.js";
-import { ACCESS_COOKIE, getCookie } from "../lib/cookies.js";
-import { config } from "../config/env.js";
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: { id: string; email: string; role: Role };
@@ -16,12 +15,7 @@ declare global {
 
 export async function requireAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const header = req.headers.authorization;
-  let token: string | undefined;
-  if (header?.startsWith("Bearer ")) {
-    token = header.slice("Bearer ".length);
-  } else if (config.authCookie) {
-    token = getCookie(req, ACCESS_COOKIE) ?? undefined;
-  }
+  const token = header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
   if (!token) {
     return next(ApiError.unauthorized("Missing bearer token"));
   }
@@ -51,12 +45,7 @@ export function requireRole(...roles: Role[]) {
 /** Attach req.user when a valid token is present; never rejects anonymous visitors. */
 export async function optionalAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const header = req.headers.authorization;
-  let token: string | undefined;
-  if (header?.startsWith("Bearer ")) {
-    token = header.slice("Bearer ".length);
-  } else if (config.authCookie) {
-    token = getCookie(req, ACCESS_COOKIE) ?? undefined;
-  }
+  const token = header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
   if (!token) return next();
   const auth = await getUserByToken(token).catch(() => null);
   if (!auth) return next();

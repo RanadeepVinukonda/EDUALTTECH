@@ -103,7 +103,6 @@ export default function CourseDetailPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [enrolled, setEnrolled] = useState(false);
-  const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [showPay, setShowPay] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -142,13 +141,12 @@ export default function CourseDetailPage() {
         const seeking = mine?.seeking.find((e) => e.course.id === course.id);
         if (seeking) {
           setEnrolled(true);
-          setEnrollmentId(seeking.id);
         }
         const mentoring = mine?.mentoring.find((m) => m.course.id === course.id);
         if (mentoring) setMentorView({ courseMentorId: mentoring.id });
         // An open mentor application locks both actions: no second application,
         // and no enrolling in a course you may end up teaching.
-        const app = await api<{ application: MentorApplication | null }>("/teachers/me").catch(() => null);
+        const app = await api<{ application: MentorApplication | null }>(`/teachers/me?courseId=${course.id}`).catch(() => null);
         if (app?.application && app.application.courseId === course.id
           && ["PENDING", "UNDER_REVIEW", "INTERVIEW", "APPROVED"].includes(app.application.status)) {
           setMentorApp(app.application);
@@ -199,12 +197,11 @@ export default function CourseDetailPage() {
     setBusy(true);
     setError(null);
     try {
-      const d = await api<{ enrollment: { id: string } }>(`/courses/${course.id}/enroll`, {
+      await api<{ enrollment: { id: string } }>(`/courses/${course.id}/enroll`, {
         method: "POST",
         body: JSON.stringify(selected ? { courseMentorId: selected } : {}),
       });
       setEnrolled(true);
-      if (d.enrollment) setEnrollmentId(d.enrollment.id);
     } catch (err) {
       const e = err instanceof ApiError ? err : null;
       if (e?.status === 402) {
@@ -277,11 +274,10 @@ export default function CourseDetailPage() {
       });
 
       try {
-        const d = await api<{ enrollment?: { id: string } }>(`/courses/${course.id}/enroll`, {
+        await api<{ enrollment?: { id: string } }>(`/courses/${course.id}/enroll`, {
           method: "POST",
           body: JSON.stringify(selected ? { courseMentorId: selected } : {}),
         });
-        if (d.enrollment) setEnrollmentId(d.enrollment.id);
         const me = await api<{ user: import("@/lib/api").User }>("/auth/me").catch(() => null);
         if (me) updateCachedUser(me.user);
         setShowPay(false);
@@ -300,7 +296,6 @@ export default function CourseDetailPage() {
   if (error && !course) return <div className="mx-auto max-w-5xl px-4 py-16 text-red-600">{error}</div>;
   if (!course) return <div className="mx-auto max-w-5xl px-4 py-16 text-slate-500">Loading course…</div>;
 
-  const activeMentor = course.mentors.find((m) => m.id === selected) ?? course.mentors[0] ?? null;
   const user = getCachedUser();
   // Owner/mentor/admin and ACTIVE enrollees see the real course; everyone else
   // gets the locked roadmap shell until they pay.

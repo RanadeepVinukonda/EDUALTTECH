@@ -222,20 +222,3 @@ function Empty({ children }: { children: React.ReactNode }) {
     <p className="mt-3 rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">{children}</p>
   );
 }
-
-function SessionLink({ href, kind, label }: { href: string; kind: "live" | "recording"; label: string }) {
-  const isLive = kind === "live";
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-        isLive ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-ink-100 text-ink-700 hover:bg-ink-200"
-      }`}
-    >
-      {isLive && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />}
-      {label}
-    </a>
-  );
-}

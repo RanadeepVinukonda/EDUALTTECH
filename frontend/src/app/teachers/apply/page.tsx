@@ -68,16 +68,21 @@ export default function MentorApplyPage() {
         }
       })
       .catch(() => undefined);
+  }, []);
 
-    if (user) {
-      api<{ application: Application | null }>("/teachers/me")
-        .then((d) => setApplication(d.application))
-        .catch(() => undefined)
-        .finally(() => setLoaded(true));
-    } else {
+  // Applications are per-course: show the one for the selected course
+  // (or the most recent when nothing is selected yet).
+  useEffect(() => {
+    if (!user) {
       setLoaded(true);
+      return;
     }
-  }, [user]);
+    const courseId = form.courseId;
+    api<{ application: Application | null }>(courseId ? `/teachers/me?courseId=${courseId}` : "/teachers/me")
+      .then((d) => setApplication(d.application))
+      .catch(() => undefined)
+      .finally(() => setLoaded(true));
+  }, [user, form.courseId]);
 
   function pickCourse(id: string) {
     const course = courses.find((c) => c.id === id);

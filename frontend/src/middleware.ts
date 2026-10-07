@@ -6,7 +6,7 @@ const TOKEN = process.env.MAINTENANCE_TOKEN ?? "";
 export function middleware(req: NextRequest) {
   if (!MAINTENANCE) return NextResponse.next();
 
-  const { pathname, searchParams } = req.nextUrl;
+  const { searchParams } = req.nextUrl;
 
   // Owner unlock: /?token=SECRET sets the cookie, then lands on the app.
   const token = searchParams.get("token");

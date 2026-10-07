@@ -7,7 +7,6 @@ export function notFoundHandler(req: Request, _res: Response, next: NextFunction
   next(ApiError.notFound(`Route not found: ${req.method} ${req.path}`));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
   let status = 500;
   let message = "Internal server error";

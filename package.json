@@ -13,13 +13,20 @@
     "dev:frontend": "npm run dev -w frontend",
     "build": "npm run build -w backend && npm run build -w frontend",
     "typecheck": "npm run typecheck -w backend && npm run typecheck -w frontend",
+    "lint": "eslint .",
     "db:generate": "npm run prisma:generate -w backend",
     "db:push": "npm run prisma:push -w backend",
     "db:studio": "npm run prisma:studio -w backend",
     "db:seed": "npm run seed -w backend"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "^16.4.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "typescript-eslint": "^8.71.1"
   },
   "engines": {
     "node": ">=18.18"

@@ -9,7 +9,7 @@ import { param } from "../../utils/params.js";
 import { applicationStatusEmail } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
 import { canTransition } from "../../lib/invariants.js";
-import { assertNotProvider, assertNotSeeking, lockUser } from "../../lib/course-roles.js";
+import { assertNotSeeking, lockUser } from "../../lib/course-roles.js";
 import { logger } from "../../utils/logger.js";
 import { config } from "../../config/env.js";
 import { publicFileUrl, uploadFile } from "../../lib/storage.js";
@@ -64,24 +64,28 @@ const applySchema = z.object({
 
 router.post("/apply", requireAuth, validate(applySchema), async (req, res, next) => {
   try {
-    const existing = await prisma.teacherApplication.findUnique({ where: { userId: req.user!.id } });
-    if (existing && existing.status !== "REJECTED") {
-      throw ApiError.conflict(
-        existing.status === "APPROVED"
-          ? "You are already an approved mentor — ask an admin to assign you more courses"
-          : "Your application is already in progress — wait for a decision before re-applying",
-      );
-    }
-
     const body = req.body as z.infer<typeof applySchema>;
     if (body.courseId) {
       const course = await prisma.course.findUnique({ where: { id: body.courseId } });
       if (!course) throw ApiError.badRequest("That course does not exist");
     }
 
+    // One application per user per course (DB unique enforces it). An
+    // APPROVED mentor may apply to another course; a non-REJECTED row for
+    // this course blocks re-applying.
     const application = await prisma.$transaction(async (tx) => {
       // Lock the applicant so enroll/approve/assign paths for the same user serialize.
       await lockUser(tx, req.user!.id);
+      const existing = await tx.teacherApplication.findFirst({
+        where: { userId: req.user!.id, courseId: body.courseId ?? null },
+      });
+      if (existing && existing.status !== "REJECTED") {
+        throw ApiError.conflict(
+          existing.status === "APPROVED"
+            ? "You are already an approved mentor for this course"
+            : "Your application for this course is already in progress — wait for a decision before re-applying",
+        );
+      }
       if (body.courseId) {
         const alreadyMentor = await tx.courseMentor.findUnique({
           where: { courseId_mentorId: { courseId: body.courseId, mentorId: req.user!.id } },
@@ -94,11 +98,17 @@ router.post("/apply", requireAuth, validate(applySchema), async (req, res, next)
         if (ownsCourse) throw ApiError.conflict("You already own this course — no application needed");
         await assertNotSeeking(tx, req.user!.id, body.courseId);
       }
-      return tx.teacherApplication.upsert({
-        where: { userId: req.user!.id },
-        update: { status: "PENDING", reviewedAt: null, reviewedBy: null, reviewNote: null, meetingLink: null, ...body },
-        create: { userId: req.user!.id, ...body },
-      });
+      const data = {
+        status: "PENDING" as const,
+        reviewedAt: null,
+        reviewedBy: null,
+        reviewNote: null,
+        meetingLink: null,
+        ...body,
+      };
+      return existing
+        ? tx.teacherApplication.update({ where: { id: existing.id }, data })
+        : tx.teacherApplication.create({ data: { userId: req.user!.id, ...data } });
     });
 
     // Alert admins by mail so applications don't sit in the queue.
@@ -126,7 +136,12 @@ router.post("/apply", requireAuth, validate(applySchema), async (req, res, next)
 
 router.get("/me", requireAuth, async (req, res, next) => {
   try {
-    const application = await prisma.teacherApplication.findUnique({ where: { userId: req.user!.id } });
+    const courseId = typeof req.query.courseId === "string" ? req.query.courseId : undefined;
+    const application = await prisma.teacherApplication.findFirst({
+      where: { userId: req.user!.id, ...(courseId ? { courseId } : {}) },
+      orderBy: { createdAt: "desc" },
+      include: { course: { select: { id: true, title: true, slug: true } } },
+    });
     res.json({ success: true, data: { application } });
   } catch (err) {
     next(err);
