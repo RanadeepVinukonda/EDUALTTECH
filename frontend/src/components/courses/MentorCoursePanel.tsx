@@ -157,8 +157,8 @@ async function removeResource(id: string) {
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <h3 className="font-display text-lg font-semibold text-slate-900">Teach this roadmap</h3>
         <p className="mt-1 text-sm text-slate-500">
-          Chapters and lessons are set by the course admin. Open a lesson to teach it: add concepts, then give each
-          concept its live class link, recording, notes and resources.
+          Topics are set by the course admin. Open a topic to add your chapters, then open a chapter to teach it:
+          add concepts with their live class link, recording, notes and resources.
         </p>
         <CourseRoadmap
           courseId={courseId}
