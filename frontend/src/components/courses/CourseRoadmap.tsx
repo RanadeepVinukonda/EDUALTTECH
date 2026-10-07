@@ -62,11 +62,12 @@ export interface RoadmapMeeting {
 const inputShell =
   "flex h-[50px] w-full items-center rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 transition focus-within:border-brand-500";
 const inputCls = "ml-2 h-full w-full min-w-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400";
-const areaCls =
-  "w-full rounded-[10px] border-[1.5px] border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 placeholder:text-slate-400";
-const labelCls = "mb-1 block text-sm font-semibold text-slate-800";
+/** Signup-card field shell — same look as the register form. */
+const signInputCls =
+  "w-full rounded-[10px] border-[1.5px] border-slate-200 bg-transparent px-3 py-2 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 placeholder:text-slate-400";
+const labelCls = "mb-1 block text-sm font-medium text-slate-700";
 const submitCls =
-  "rounded-[10px] bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50";
+  "rounded-[10px] bg-slate-900 px-5 py-3 text-[15px] font-medium text-white transition hover:bg-slate-800 disabled:opacity-50";
 
 const LESSON_TYPES = [
   { value: "VIDEO", label: "Recorded class" },
@@ -388,7 +389,7 @@ onChanged?.();
   );
 }
 
-/** Step 1 — the roadmap itself: title, intro, live class link, recording, resources. */
+/** Step 1 — the roadmap itself: title + intro. Live/recording/resources are the mentor's. */
 function RoadmapShellForm({
   courseId,
   roadmap,
@@ -414,9 +415,6 @@ function RoadmapShellForm({
           courseId,
           title: fd.get("title"),
           summary: fd.get("summary") || undefined,
-          meetingUrl: fd.get("meetingUrl") || "",
-          recordingUrl: fd.get("recordingUrl") || "",
-          resources: parseResources(fd.get("resources") as string),
         }),
       });
       setEditing(false);
@@ -451,42 +449,28 @@ function RoadmapShellForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-      <div>
-        <h3 className="font-display text-lg font-semibold text-slate-900">
-          {roadmap?.title ? "Edit roadmap" : "Create your roadmap"}
-        </h3>
-        <p className="mt-1 text-sm text-slate-500">
-          Start here. Name the roadmap, add your live class link, recordings and resources — then break it into
-          chapters, lessons and concepts.
-        </p>
-      </div>
-      <div>
-        <label className={labelCls} htmlFor="rm-title">Roadmap title</label>
-        <input id="rm-title" name="title" required defaultValue={roadmap?.title ?? ""} placeholder="e.g. Become a confident React engineer" className={inputShell + " " + inputCls} />
-      </div>
-      <div>
-        <label className={labelCls} htmlFor="rm-summary">What will learners achieve?</label>
-        <textarea id="rm-summary" name="summary" rows={2} defaultValue={roadmap?.summary ?? ""} placeholder="Short intro shown above every chapter" className={areaCls} />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={submit} className="rounded-[20px] bg-white p-8 shadow-elev2">
+      <h3 className="font-display text-2xl font-bold text-ink-700">
+        {roadmap?.title ? "Edit roadmap" : "Create your roadmap"}
+      </h3>
+      <p className="mt-1 text-sm text-slate-600">
+        Start here. Name the roadmap and describe what learners achieve — then break it into
+        chapters, lessons and concepts.
+      </p>
+      <div className="mt-6 space-y-4">
         <div>
-          <label className={labelCls} htmlFor="rm-meet">Live class link</label>
-          <input id="rm-meet" name="meetingUrl" type="url" defaultValue={roadmap?.meetingUrl ?? ""} placeholder="https://meet.google.com/…" className={inputShell + " " + inputCls} />
+          <label className={labelCls} htmlFor="rm-title">Roadmap title</label>
+          <input id="rm-title" name="title" required defaultValue={roadmap?.title ?? ""} placeholder="e.g. Become a confident React engineer" className={signInputCls} />
         </div>
         <div>
-          <label className={labelCls} htmlFor="rm-rec">Recording link</label>
-          <input id="rm-rec" name="recordingUrl" type="url" defaultValue={roadmap?.recordingUrl ?? ""} placeholder="https://youtube.com/…" className={inputShell + " " + inputCls} />
+          <label className={labelCls} htmlFor="rm-summary">What will learners achieve?</label>
+          <textarea id="rm-summary" name="summary" rows={3} defaultValue={roadmap?.summary ?? ""} placeholder="Short intro shown above every chapter" className={signInputCls} />
         </div>
+        {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{error}</p>}
+        <button type="submit" disabled={busy} className={`w-full ${submitCls}`}>
+          {busy ? "Saving…" : roadmap?.title ? "Save roadmap" : "Create roadmap"}
+        </button>
       </div>
-      <div>
-        <label className={labelCls} htmlFor="rm-res">Resources for the whole roadmap — label|url pairs, comma separated</label>
-        <textarea id="rm-res" name="resources" rows={2} defaultValue={formatResources(roadmap?.resources ?? [])} placeholder="Starter pack|https://…, Syllabus|https://…" className={areaCls} />
-      </div>
-      {error && <p className="text-sm font-medium text-red-600">{error}</p>}
-      <button type="submit" disabled={busy} className={submitCls}>
-        {busy ? "Saving…" : roadmap?.title ? "Save roadmap" : "Create roadmap"}
-      </button>
     </form>
   );
 }
@@ -804,7 +788,7 @@ function ChapterForm({
         </div>
         <div>
           <label className={labelCls} htmlFor={`ch-edit-sum-${chapter.id}`}>Summary</label>
-          <textarea id={`ch-edit-sum-${chapter.id}`} name="summary" rows={2} defaultValue={chapter.summary ?? ""} className={areaCls} />
+          <textarea id={`ch-edit-sum-${chapter.id}`} name="summary" rows={2} defaultValue={chapter.summary ?? ""} className={signInputCls} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -818,7 +802,7 @@ function ChapterForm({
         </div>
         <div>
           <label className={labelCls} htmlFor={`ch-edit-res-${chapter.id}`}>Resources — label|url pairs, comma separated</label>
-          <textarea id={`ch-edit-res-${chapter.id}`} name="resources" rows={2} defaultValue={formatResources(chapter.resources)} placeholder="Slides|https://…, Notes|https://…" className={areaCls} />
+          <textarea id={`ch-edit-res-${chapter.id}`} name="resources" rows={2} defaultValue={formatResources(chapter.resources)} placeholder="Slides|https://…, Notes|https://…" className={signInputCls} />
         </div>
       </FormShell>
     </div>
@@ -874,7 +858,7 @@ function AddChapterForm({ courseId, onDone }: { courseId: string; onDone: () => 
         </div>
         <div>
           <label className={labelCls} htmlFor="ch-summary">Summary (optional)</label>
-          <textarea id="ch-summary" name="summary" rows={2} placeholder="What this chapter covers" className={areaCls} />
+          <textarea id="ch-summary" name="summary" rows={2} placeholder="What this chapter covers" className={signInputCls} />
         </div>
         <div>
           <label className={labelCls} htmlFor="ch-meet">Online meeting link (optional)</label>
@@ -890,7 +874,7 @@ function AddChapterForm({ courseId, onDone }: { courseId: string; onDone: () => 
         </div>
         <div>
           <label className={labelCls} htmlFor="ch-res">Resources — label|url pairs, comma separated</label>
-          <textarea id="ch-res" name="resources" rows={2} placeholder="Worksheet|https://…, Notes|https://…" className={areaCls} />
+          <textarea id="ch-res" name="resources" rows={2} placeholder="Worksheet|https://…, Notes|https://…" className={signInputCls} />
         </div>
       </FormShell>
       <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
@@ -1010,11 +994,11 @@ function ConceptForm({
         </div>
         <div>
           <label className={labelCls} htmlFor={`ls-notes-${lesson?.id ?? "new"}`}>Notes & resource links</label>
-          <textarea id={`ls-notes-${lesson?.id ?? "new"}`} name="textContent" rows={3} defaultValue={lesson?.textContent ?? ""} placeholder="Notes for students" className={areaCls} />
+          <textarea id={`ls-notes-${lesson?.id ?? "new"}`} name="textContent" rows={3} defaultValue={lesson?.textContent ?? ""} placeholder="Notes for students" className={signInputCls} />
         </div>
         <div>
           <label className={labelCls} htmlFor={`ls-res-${lesson?.id ?? "new"}`}>Resources — label|url pairs, comma separated</label>
-          <textarea id={`ls-res-${lesson?.id ?? "new"}`} name="resources" rows={2} defaultValue={formatResources(lesson?.resources)} placeholder="Worksheet|https://…, Slides|https://…" className={areaCls} />
+          <textarea id={`ls-res-${lesson?.id ?? "new"}`} name="resources" rows={2} defaultValue={formatResources(lesson?.resources)} placeholder="Worksheet|https://…, Slides|https://…" className={signInputCls} />
         </div>
       </FormShell>
       <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
