@@ -2,12 +2,11 @@
 
 import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import PasswordInput from "@/components/ui/PasswordInput";
 
 function ResetForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);

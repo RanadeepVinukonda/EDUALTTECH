@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Bookmark as BookmarkIcon } from "lucide-react";
 import { api, ApiError, getCachedUser, updateCachedUser } from "@/lib/api";
 import { CourseChat } from "@/components/courses/CourseChat";
-import CourseRoadmap, { type RoadmapChapter, type RoadmapMeeting, type RoadmapProgress, type RoadmapShell } from "@/components/courses/CourseRoadmap";
+import CourseRoadmap, { meetingJoinWindow, type RoadmapChapter, type RoadmapMeeting, type RoadmapProgress, type RoadmapShell } from "@/components/courses/CourseRoadmap";
 
 type RoadmapPayload = {
   roadmap: RoadmapShell & { chapters: RoadmapChapter[] };
@@ -103,7 +103,6 @@ export default function CourseDetailPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [enrolled, setEnrolled] = useState(false);
-  const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [showPay, setShowPay] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -142,13 +141,12 @@ export default function CourseDetailPage() {
         const seeking = mine?.seeking.find((e) => e.course.id === course.id);
         if (seeking) {
           setEnrolled(true);
-          setEnrollmentId(seeking.id);
         }
         const mentoring = mine?.mentoring.find((m) => m.course.id === course.id);
         if (mentoring) setMentorView({ courseMentorId: mentoring.id });
         // An open mentor application locks both actions: no second application,
         // and no enrolling in a course you may end up teaching.
-        const app = await api<{ application: MentorApplication | null }>("/teachers/me").catch(() => null);
+        const app = await api<{ application: MentorApplication | null }>(`/teachers/me?courseId=${course.id}`).catch(() => null);
         if (app?.application && app.application.courseId === course.id
           && ["PENDING", "UNDER_REVIEW", "INTERVIEW", "APPROVED"].includes(app.application.status)) {
           setMentorApp(app.application);
@@ -199,12 +197,11 @@ export default function CourseDetailPage() {
     setBusy(true);
     setError(null);
     try {
-      const d = await api<{ enrollment: { id: string } }>(`/courses/${course.id}/enroll`, {
+      await api<{ enrollment: { id: string } }>(`/courses/${course.id}/enroll`, {
         method: "POST",
         body: JSON.stringify(selected ? { courseMentorId: selected } : {}),
       });
       setEnrolled(true);
-      if (d.enrollment) setEnrollmentId(d.enrollment.id);
     } catch (err) {
       const e = err instanceof ApiError ? err : null;
       if (e?.status === 402) {
@@ -277,11 +274,10 @@ export default function CourseDetailPage() {
       });
 
       try {
-        const d = await api<{ enrollment?: { id: string } }>(`/courses/${course.id}/enroll`, {
+        await api<{ enrollment?: { id: string } }>(`/courses/${course.id}/enroll`, {
           method: "POST",
           body: JSON.stringify(selected ? { courseMentorId: selected } : {}),
         });
-        if (d.enrollment) setEnrollmentId(d.enrollment.id);
         const me = await api<{ user: import("@/lib/api").User }>("/auth/me").catch(() => null);
         if (me) updateCachedUser(me.user);
         setShowPay(false);
@@ -300,7 +296,6 @@ export default function CourseDetailPage() {
   if (error && !course) return <div className="mx-auto max-w-5xl px-4 py-16 text-red-600">{error}</div>;
   if (!course) return <div className="mx-auto max-w-5xl px-4 py-16 text-slate-500">Loading course…</div>;
 
-  const activeMentor = course.mentors.find((m) => m.id === selected) ?? course.mentors[0] ?? null;
   const user = getCachedUser();
   // Owner/mentor/admin and ACTIVE enrollees see the real course; everyone else
   // gets the locked roadmap shell until they pay.
@@ -453,21 +448,31 @@ export default function CourseDetailPage() {
 
       {meetings && meetings.length > 0 && (
         <section className="mt-10">
-          <h2 className="font-display text-xl font-semibold text-slate-900">Upcoming live classes</h2>
+          <h2 className="font-display text-xl font-semibold text-slate-900">Live classes</h2>
           <ul className="mt-4 space-y-3">
-            {meetings.map((m) => (
-              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5">
-                <div>
-                  <p className="font-semibold text-slate-900">{m.title}</p>
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    {new Date(m.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {m.durationMin} min
-                  </p>
-                </div>
-                <a href={m.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
-                  Join
-                </a>
-              </li>
-            ))}
+            {meetings.map((m) => {
+              const win = meetingJoinWindow(m.scheduledAt, m.durationMin);
+              const ended = Date.now() > win.end;
+              return (
+                <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5">
+                  <div>
+                    <p className="font-semibold text-slate-900">{m.title}</p>
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      {new Date(m.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {m.durationMin} min
+                    </p>
+                  </div>
+                  {win.open ? (
+                    <a href={m.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                      Join
+                    </a>
+                  ) : ended ? (
+                    <span className="text-sm font-medium text-slate-400">Session ended — recording appears in the roadmap</span>
+                  ) : (
+                    <MeetingCountdown scheduledAt={m.scheduledAt} />
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

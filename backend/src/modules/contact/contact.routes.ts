@@ -3,7 +3,6 @@ import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import { prisma } from "../../lib/prisma.js";
 import { validate } from "../../middlewares/validate.js";
-import { ApiError } from "../../utils/ApiError.js";
 
 const router = Router();
 

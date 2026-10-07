@@ -9,6 +9,7 @@ import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
 import { passwordSchema } from "../auth/auth.schemas.js";
 import { audit } from "../../lib/audit.js";
+import { lockUser } from "../../lib/course-roles.js";
 
 const router = Router();
 
@@ -292,20 +293,23 @@ router.post("/courses/:id/mentors", validate(assignMentorSchema), async (req, re
     if (!course) throw ApiError.notFound("Course not found");
     if (!mentor || !mentor.isActive) throw ApiError.badRequest("That account cannot be assigned as a mentor");
 
-    // A user can mentor or seek this course, not both. The course owner is the
-    // teaching team's head — assigning them as their own mentor is a duplicate.
-    const [owns, seeks] = await Promise.all([
-      prisma.course.findFirst({ where: { id: courseId, teacherId: mentorId }, select: { id: true } }),
-      prisma.enrollment.findFirst({ where: { courseId, studentId: mentorId, status: "ACTIVE" }, select: { id: true } }),
-    ]);
-    if (owns) throw ApiError.conflict("That user owns this course — no mentor assignment needed");
-    if (seeks) throw ApiError.conflict("That user is actively learning this course — drop the enrollment before assigning them as mentor");
+// Seeker/provider exclusion is enforced under the target user's row lock so
+    // a concurrent enroll can't land between this check and the insert.
+    const assignment = await prisma.$transaction(async (tx) => {
+      await lockUser(tx, mentorId);
+      const [owns, seeks] = await Promise.all([
+        tx.course.findFirst({ where: { id: courseId, teacherId: mentorId }, select: { id: true } }),
+        tx.enrollment.findFirst({ where: { courseId, studentId: mentorId, status: "ACTIVE" }, select: { id: true } }),
+      ]);
+      if (owns) throw ApiError.conflict("That user owns this course — no mentor assignment needed");
+      if (seeks) throw ApiError.conflict("That user is actively learning this course — drop the enrollment before assigning them as mentor");
 
-    const assignment = await prisma.courseMentor.upsert({
-      where: { courseId_mentorId: { courseId, mentorId } },
-      update: {},
-      create: { courseId, mentorId },
-      include: { mentor: { select: { id: true, name: true, email: true } } },
+      return tx.courseMentor.upsert({
+        where: { courseId_mentorId: { courseId, mentorId } },
+        update: {},
+        create: { courseId, mentorId },
+        include: { mentor: { select: { id: true, name: true, email: true } } },
+      });
     });
     res.status(201).json({ success: true, data: { assignment } });
     audit(req.user!.id, "MENTOR_ASSIGNED", "CourseMentor", assignment.id, { courseId, mentorId });
@@ -320,6 +324,16 @@ router.delete("/courses/:id/mentors/:mentorId", async (req, res, next) => {
     const mentorId = param(req, "mentorId");
     const assignment = await prisma.courseMentor.findUnique({ where: { courseId_mentorId: { courseId, mentorId } } });
     if (!assignment) throw ApiError.notFound("Mentor is not assigned to this course");
+
+    // Never orphan learners: their seats point at this row.
+    const activeLearners = await prisma.enrollment.count({
+      where: { courseMentorId: assignment.id, status: "ACTIVE" },
+    });
+    if (activeLearners > 0) {
+      throw ApiError.conflict(
+        `${activeLearners} learner${activeLearners === 1 ? "" : "s"} still study under this mentor — transfer or drop them first`,
+      );
+    }
 
     await prisma.courseMentor.delete({ where: { id: assignment.id } });
     res.json({ success: true, data: { message: "Mentor removed from course" } });

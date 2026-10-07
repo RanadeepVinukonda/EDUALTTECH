@@ -34,7 +34,6 @@ export default function AdminCoursesPage() {
     gradeLevel: "",
     price: "",
     thumbnailUrl: "",
-    isPublished: true,
   });
   const [creating, setCreating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -88,12 +87,11 @@ export default function AdminCoursesPage() {
           gradeLevel: newCourse.gradeLevel,
           pricePaise,
           thumbnailUrl: newCourse.thumbnailUrl,
-          isPublished: newCourse.isPublished,
         }),
       });
       void course;
-      setNewCourse({ title: "", description: "", subject: "", gradeLevel: "", price: "", thumbnailUrl: "", isPublished: true });
-      setCreateMsg("Course created. Mentors are added when you approve their application.");
+      setNewCourse({ title: "", description: "", subject: "", gradeLevel: "", price: "", thumbnailUrl: "" });
+      setCreateMsg("Course created as a draft — add chapters, then publish it from its page.");
       load();
     } catch (err) {
       setError(describeError(err));
@@ -252,20 +250,6 @@ export default function AdminCoursesPage() {
             </span>
             <input id="course-thumb-input" type="file" accept="image/*" onChange={onThumbnail} className="hidden" />
           </label>
-
-          <div className="flex items-center justify-between gap-3 rounded-[10px] border-[1.5px] border-slate-200 px-4">
-            <span className="text-sm font-medium text-slate-700">Publish immediately</span>
-            <label className="relative inline-flex h-[34px] w-[60px] cursor-pointer items-center">
-              <input
-                type="checkbox"
-                className="peer sr-only"
-                checked={newCourse.isPublished}
-                onChange={(e) => setNewCourse((s) => ({ ...s, isPublished: e.target.checked }))}
-              />
-              <span className="absolute inset-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-brand-500" />
-              <span className="absolute left-[3px] h-[28px] w-[28px] rounded-full bg-white shadow transition-transform peer-checked:translate-x-[26px]" />
-            </label>
-          </div>
 
           <div className="sm:col-span-2">
             <button

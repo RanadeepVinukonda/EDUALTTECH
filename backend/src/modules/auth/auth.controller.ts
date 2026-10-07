@@ -6,13 +6,11 @@ import { isProd, config } from "../../config/env.js";
 import { logger } from "../../utils/logger.js";
 import { otpEmail, emailCodeEmail } from "../../lib/email.js";
 import { admin, anon, getUserByToken } from "../../lib/supabase.js";
-import { setAuthCookies, clearAuthCookies, getCookie } from "../../lib/cookies.js";
 import { sendSmsVerification, checkSmsVerification, smsEnabled } from "../../lib/sms.js";
 import type { Role } from "@prisma/client";
 import {
   registerSchema,
   loginSchema,
-  refreshSchema,
   updateProfileSchema,
   changePasswordSchema,
   sendPhoneOtpSchema,
@@ -350,10 +348,6 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     const profile = await syncProfile(authUser);
     if (!profile.isActive) throw ApiError.forbidden("This account has been deactivated");
 
-    if (signIn.session && config.authCookie) {
-      setAuthCookies(res, signIn.session.access_token, signIn.session.refresh_token);
-    }
-
     res.json({
       success: true,
       data: {
@@ -367,7 +361,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   }
 }
 
-export async function forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function forgotPassword(req: Request, res: Response): Promise<void> {
   try {
     const { email } = resendVerificationSchema.parse(req.body);
     // Never reveal whether the address exists. Supabase emails the reset link
@@ -428,8 +422,6 @@ export async function oauthImport(req: Request, res: Response, next: NextFunctio
       email_confirmed_at: auth.confirmedAt?.toISOString(),
     });
     if (!profile.isActive) throw ApiError.forbidden("This account has been deactivated");
-
-    if (config.authCookie) setAuthCookies(res, accessToken, refreshToken);
 
     res.json({
       success: true,
@@ -588,10 +580,7 @@ export async function completeOnboarding(req: Request, res: Response, next: Next
 
 export async function refresh(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    let refreshToken = (req.body as { refreshToken?: string } | undefined)?.refreshToken;
-    if (!refreshToken && config.authCookie) {
-      refreshToken = getCookie(req, "eat.refresh") ?? undefined;
-    }
+    const refreshToken = (req.body as { refreshToken?: string } | undefined)?.refreshToken;
     if (!refreshToken) throw ApiError.unauthorized("Missing refresh token");
     const { data, error } = await anon.auth.refreshSession({ refresh_token: refreshToken });
     if (error) throw translateAuthError(error);
@@ -600,10 +589,6 @@ export async function refresh(req: Request, res: Response, next: NextFunction): 
     if (!authUser) throw ApiError.unauthorized("Session expired — please sign in again");
     const profile = await syncProfile(authUser);
     if (!profile.isActive) throw ApiError.forbidden("This account has been deactivated");
-
-    if (data.session && config.authCookie) {
-      setAuthCookies(res, data.session.access_token, data.session.refresh_token);
-    }
 
     res.json({
       success: true,
@@ -624,7 +609,6 @@ export async function logout(req: Request, res: Response, next: NextFunction): P
     if (header?.startsWith("Bearer ")) {
       await admin.auth.admin.signOut(header.slice("Bearer ".length)).catch(() => undefined);
     }
-    if (config.authCookie) clearAuthCookies(res);
     res.json({ success: true, data: { message: "Logged out" } });
   } catch (err) {
     next(err);
@@ -665,7 +649,6 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     if (header?.startsWith("Bearer ")) {
       await admin.auth.admin.signOut(header.slice("Bearer ".length)).catch(() => undefined);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     res.json({ success: true, data: { message: "Password updated. Please sign in again." } });
   } catch (err) {
     next(err);

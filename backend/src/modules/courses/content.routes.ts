@@ -13,7 +13,7 @@ const router = Router();
 type AuthUser = { id: string; role: Role };
 
 /** Admins, course owners and mentors of the course may edit its content. */
-async function assertContentAccess(courseId: string, user: AuthUser): Promise<void> {
+export async function assertContentAccess(courseId: string, user: AuthUser): Promise<void> {
   if (user.role === "ADMIN") return;
   const [owns, mentors] = await Promise.all([
     prisma.course.findFirst({ where: { id: courseId, teacherId: user.id }, select: { id: true } }),
@@ -274,7 +274,7 @@ router.patch("/lessons/:id", requireAuth, validate(lessonSchema.partial()), asyn
       });
       if (clash) throw ApiError.conflict("Another lesson already uses that position");
     }
-    const updated = await prisma.lesson.update({
+    await prisma.lesson.update({
       where: { id: param(req, "id") },
       data: {
         ...req.body,

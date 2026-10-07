@@ -126,7 +126,7 @@ model User {
   activityLogs       ActivityLog[]
   streaks            Streak?
   taughtCourses      Course[]          @relation("CourseTeacher")
-  teacherApplication TeacherApplication?
+  teacherApplications TeacherApplication[]
   mentorships        CourseMentor[]    @relation("CourseMentorUser")
   classroomMessages  ClassroomMessage[]
   notificationsSent  Notification[]     @relation("NotificationSender")
@@ -232,7 +232,7 @@ model AuditLog {
 
 model TeacherApplication {
   id          String                  @id @default(cuid())
-  userId      String                  @unique
+  userId      String
   user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   status      TeacherApplicationStatus @default(PENDING)
   subject     String
@@ -249,6 +249,10 @@ model TeacherApplication {
   reviewNote  String?
   createdAt   DateTime                @default(now())
   updatedAt   DateTime                @updatedAt
+
+  // One application per user per course; subject-only rows (courseId null)
+  // are kept single by the apply endpoint's lookup.
+  @@unique([userId, courseId])
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -386,6 +390,8 @@ model Enrollment {
   completedAt   DateTime?
   progressItems LessonProgress[]
   conversationConversation Conversation?
+
+  @@index([courseMentorId, status])
 
   @@unique([studentId, courseId])
   @@index([courseId])
@@ -573,10 +579,12 @@ model Notification {
   sender    User?    @relation("NotificationSender", fields: [senderId], references: [id])
   title     String
   body      String
-  scope     String   @default("ALL") // ALL | COURSE | USER
+  scope     String   @default("ALL") // ALL | COURSE
   courseId  String?
   course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@index([courseId, createdAt])
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -614,6 +622,8 @@ model Payment {
   verified         Boolean  @default(false)
   rawPayload       Json?
   createdAt        DateTime @default(now())
+
+  @@index([orderId])
 }
 
 // Webhook events — append-only, never mutated (tamper-proof trail)

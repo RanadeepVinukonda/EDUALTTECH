@@ -10,7 +10,7 @@ const router = Router();
 const sendSchema = z.object({
   title: z.string().trim().min(2).max(120),
   body: z.string().trim().min(1).max(2_000),
-  scope: z.enum(["ALL", "COURSE", "USER"]).default("ALL"),
+  scope: z.enum(["ALL", "COURSE"]).default("ALL"),
   courseId: z.string().cuid2().optional(),
 });
 
@@ -19,6 +19,9 @@ router.post("/", requireAuth, validate(sendSchema), async (req, res, next) => {
   try {
     const { title, body, scope, courseId } = req.body as z.infer<typeof sendSchema>;
 
+    if (scope !== "COURSE" && req.user!.role !== "ADMIN") {
+      throw ApiError.forbidden("Only admins can send platform-wide notifications");
+    }
     if (scope === "COURSE") {
       if (!courseId) throw ApiError.badRequest("courseId is required for COURSE scope");
       if (req.user!.role !== "ADMIN") {

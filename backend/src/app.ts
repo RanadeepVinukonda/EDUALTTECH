@@ -33,7 +33,16 @@ export function createApp(): express.Express {
   app.use(helmet());
   app.use(cors({ origin: config.appOrigin, credentials: true }));
   app.use(compression());
-  app.use(express.json({ limit: "2mb" }));
+  // verify keeps the exact bytes for Razorpay webhook HMAC checks — the route-level
+  // express.raw() below never sees them once json() has parsed the body.
+  app.use(
+    express.json({
+      limit: "2mb",
+      verify: (req, _res, buf) => {
+        (req as unknown as Express.Request & { rawBody?: string }).rawBody = buf.toString("utf8");
+      },
+    }),
+  );
   app.use(express.urlencoded({ extended: true }));
 
   if (config.env !== "test") {
@@ -46,6 +55,10 @@ export function createApp(): express.Express {
     standardHeaders: "draft-8",
     legacyHeaders: false,
     message: { success: false, error: { message: "Too many requests, please slow down." } },
+    // Razorpay retries webhooks with backoff; a 429 from a shared bucket would
+    // look like an outage. The webhook verifies its HMAC signature and dedupes
+    // on eventId, so it does not need the per-IP bucket.
+    skip: (req) => req.originalUrl.startsWith("/api/payments/webhook"),
   });
 
   app.use("/api", apiLimiter);

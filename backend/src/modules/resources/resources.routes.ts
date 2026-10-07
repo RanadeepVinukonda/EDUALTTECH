@@ -190,7 +190,7 @@ router.post(
       const body = Buffer.concat(chunks);
       if (body.byteLength !== length) throw ApiError.badRequest("Body size does not match Content-Length");
 
-      const path = storageKey(userId, fileName, mimeType);
+      const path = storageKey(userId, fileName);
       await uploadFile(config.supabase.storageBucket, path, body, mimeType);
 
       const resource = await prisma.resource.create({

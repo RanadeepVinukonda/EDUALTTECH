@@ -8,6 +8,8 @@ import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
 import { applicationStatusEmail } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
+import { canTransition } from "../../lib/invariants.js";
+import { assertNotSeeking, lockUser } from "../../lib/course-roles.js";
 import { logger } from "../../utils/logger.js";
 import { config } from "../../config/env.js";
 import { publicFileUrl, uploadFile } from "../../lib/storage.js";
@@ -62,36 +64,51 @@ const applySchema = z.object({
 
 router.post("/apply", requireAuth, validate(applySchema), async (req, res, next) => {
   try {
-    const existing = await prisma.teacherApplication.findUnique({ where: { userId: req.user!.id } });
-    if (existing && existing.status === "PENDING") {
-      throw ApiError.conflict("Your application is already under review");
-    }
-
     const body = req.body as z.infer<typeof applySchema>;
     if (body.courseId) {
       const course = await prisma.course.findUnique({ where: { id: body.courseId } });
       if (!course) throw ApiError.badRequest("That course does not exist");
-
-      // Anyone can learn and teach here, but not both seats in the same course.
-      const alreadyMentor = await prisma.courseMentor.findUnique({
-        where: { courseId_mentorId: { courseId: body.courseId, mentorId: req.user!.id } },
-      });
-      if (alreadyMentor) throw ApiError.conflict("You are already a mentor for this course");
-
-      // Same rule on the other side: an active learner can't apply to mentor
-      // the course they're currently enrolled in — drop or finish it first.
-      const alreadySeeking = await prisma.enrollment.findUnique({
-        where: { studentId_courseId: { studentId: req.user!.id, courseId: body.courseId } },
-      });
-      if (alreadySeeking?.status === "ACTIVE") {
-        throw ApiError.conflict("You're enrolled as a learner in this course — finish or drop it before applying to mentor it");
-      }
     }
 
-    const application = await prisma.teacherApplication.upsert({
-      where: { userId: req.user!.id },
-      update: { status: "PENDING", reviewedAt: null, reviewedBy: null, reviewNote: null, meetingLink: null, ...body },
-      create: { userId: req.user!.id, ...body },
+    // One application per user per course (DB unique enforces it). An
+    // APPROVED mentor may apply to another course; a non-REJECTED row for
+    // this course blocks re-applying.
+    const application = await prisma.$transaction(async (tx) => {
+      // Lock the applicant so enroll/approve/assign paths for the same user serialize.
+      await lockUser(tx, req.user!.id);
+      const existing = await tx.teacherApplication.findFirst({
+        where: { userId: req.user!.id, courseId: body.courseId ?? null },
+      });
+      if (existing && existing.status !== "REJECTED") {
+        throw ApiError.conflict(
+          existing.status === "APPROVED"
+            ? "You are already an approved mentor for this course"
+            : "Your application for this course is already in progress — wait for a decision before re-applying",
+        );
+      }
+      if (body.courseId) {
+        const alreadyMentor = await tx.courseMentor.findUnique({
+          where: { courseId_mentorId: { courseId: body.courseId, mentorId: req.user!.id } },
+        });
+        if (alreadyMentor) throw ApiError.conflict("You are already a mentor for this course");
+        const ownsCourse = await tx.course.findFirst({
+          where: { id: body.courseId, teacherId: req.user!.id },
+          select: { id: true },
+        });
+        if (ownsCourse) throw ApiError.conflict("You already own this course — no application needed");
+        await assertNotSeeking(tx, req.user!.id, body.courseId);
+      }
+      const data = {
+        status: "PENDING" as const,
+        reviewedAt: null,
+        reviewedBy: null,
+        reviewNote: null,
+        meetingLink: null,
+        ...body,
+      };
+      return existing
+        ? tx.teacherApplication.update({ where: { id: existing.id }, data })
+        : tx.teacherApplication.create({ data: { userId: req.user!.id, ...data } });
     });
 
     // Alert admins by mail so applications don't sit in the queue.
@@ -119,7 +136,12 @@ router.post("/apply", requireAuth, validate(applySchema), async (req, res, next)
 
 router.get("/me", requireAuth, async (req, res, next) => {
   try {
-    const application = await prisma.teacherApplication.findUnique({ where: { userId: req.user!.id } });
+    const courseId = typeof req.query.courseId === "string" ? req.query.courseId : undefined;
+    const application = await prisma.teacherApplication.findFirst({
+      where: { userId: req.user!.id, ...(courseId ? { courseId } : {}) },
+      orderBy: { createdAt: "desc" },
+      include: { course: { select: { id: true, title: true, slug: true } } },
+    });
     res.json({ success: true, data: { application } });
   } catch (err) {
     next(err);
@@ -236,40 +258,38 @@ router.post("/applications/:id/review", requireAuth, requireRole("ADMIN"), valid
     if (!app) throw ApiError.notFound("Application not found");
 
     const { status, reviewNote, meetingLink } = req.body as z.infer<typeof reviewSchema>;
+    if (!canTransition(app.status, status)) {
+      throw ApiError.conflict(
+        `Cannot move an application from ${app.status} to ${status} — approved and rejected decisions are final`,
+      );
+    }
     if (status === "INTERVIEW" && !meetingLink && !app.meetingLink) {
       throw ApiError.badRequest("Add an interview meeting link before moving to interview");
     }
 
     // Approving a mentor for a course they're actively learning would create a
-    // seek+mentor split. If they enrolled while the application was pending, the
-    // admin route fixes it before the approval can go through.
-    if (status === "APPROVED" && app.courseId) {
-      const seeking = await prisma.enrollment.findFirst({
-        where: { studentId: app.userId, courseId: app.courseId, status: "ACTIVE" },
-        select: { id: true },
-      });
-      if (seeking) {
-        throw ApiError.conflict("This applicant is actively learning the same course — drop that enrollment before approving the mentor role");
+    // seek+mentor split. The lock + re-check inside the transaction is what
+    // actually enforces it — a concurrent enroll can't slip past it.
+    const updated = await prisma.$transaction(async (tx) => {
+      if (status === "APPROVED" && app.courseId) {
+        await lockUser(tx, app.userId);
+        await assertNotSeeking(tx, app.userId, app.courseId);
       }
-    }
-
-    const [updated] = await prisma.$transaction([
-      prisma.teacherApplication.update({
+      const row = await tx.teacherApplication.update({
         where: { id: app.id },
         data: { status, reviewNote, meetingLink, reviewedBy: req.user!.id, reviewedAt: new Date() },
-      }),
+      });
       // Approval attaches them as a provider for the course they applied for.
       // No role change: they are still a normal USER who can also learn.
-      ...(status === "APPROVED" && app.courseId
-        ? [
-            prisma.courseMentor.upsert({
-              where: { courseId_mentorId: { courseId: app.courseId, mentorId: app.userId } },
-              update: {},
-              create: { courseId: app.courseId, mentorId: app.userId },
-            }),
-          ]
-        : []),
-    ]);
+      if (status === "APPROVED" && app.courseId) {
+        await tx.courseMentor.upsert({
+          where: { courseId_mentorId: { courseId: app.courseId, mentorId: app.userId } },
+          update: {},
+          create: { courseId: app.courseId, mentorId: app.userId },
+        });
+      }
+      return row;
+    });
 
     audit(req.user!.id, "MENTOR_APPLICATION_REVIEWED", "TeacherApplication", app.id, { status, toStatus: status, fromStatus: app.status, courseId: app.courseId });
 

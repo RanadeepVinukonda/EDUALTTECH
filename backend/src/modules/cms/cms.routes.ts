@@ -49,7 +49,7 @@ router.post(
       const chunks: Buffer[] = [];
       for await (const chunk of req) chunks.push(chunk as Buffer);
       const body = Buffer.concat(chunks);
-      const path = storageKey(folder, file, type);
+      const path = storageKey(folder, file);
       await uploadFile(config.supabase.storageBucket, path, body, type);
       res.status(201).json({ success: true, data: { url: publicFileUrl(config.supabase.storageBucket, path) } });
     } catch (err) {
