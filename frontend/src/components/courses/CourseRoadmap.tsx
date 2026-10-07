@@ -755,7 +755,7 @@ function FormShell({ children, onSubmit, submitLabel }: { children: React.ReactN
   );
 }
 
-/** Admin edit of a chapter: title, summary, course-wide live link, recording, resources. */
+/** Admin edit of a topic: title + what learners achieve. Links/resources belong to the mentor. */
 function ChapterForm({
   chapter,
   onDone,
@@ -764,8 +764,8 @@ function ChapterForm({
   onDone: () => void;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <p className="text-sm font-semibold text-slate-800">Edit topic {chapter.order}</p>
+    <div className="rounded-[20px] bg-white p-8 shadow-elev2">
+      <p className="font-display text-lg font-semibold text-slate-900">Edit topic {chapter.order}</p>
       <FormShell
         submitLabel="Save topic"
         onSubmit={async (e) => {
@@ -775,9 +775,6 @@ function ChapterForm({
             body: JSON.stringify({
               title: fd.get("title"),
               summary: fd.get("summary") || undefined,
-              meetingUrl: fd.get("meetingUrl") || "",
-              recordingUrl: fd.get("recordingUrl") || "",
-              resources: parseResources(fd.get("resources") as string),
             }),
           });
           onDone();
@@ -785,25 +782,11 @@ function ChapterForm({
       >
         <div>
           <label className={labelCls} htmlFor={`ch-edit-title-${chapter.id}`}>Topic title</label>
-          <input id={`ch-edit-title-${chapter.id}`} name="title" required defaultValue={chapter.title} className={inputShell + " " + inputCls} />
+          <input id={`ch-edit-title-${chapter.id}`} name="title" required defaultValue={chapter.title} placeholder="e.g. Variables" className={signInputCls} />
         </div>
         <div>
-          <label className={labelCls} htmlFor={`ch-edit-sum-${chapter.id}`}>Summary</label>
-          <textarea id={`ch-edit-sum-${chapter.id}`} name="summary" rows={2} defaultValue={chapter.summary ?? ""} className={signInputCls} />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelCls} htmlFor={`ch-edit-meet-${chapter.id}`}>Live class link</label>
-            <input id={`ch-edit-meet-${chapter.id}`} name="meetingUrl" type="url" defaultValue={chapter.meetingUrl ?? ""} placeholder="https://meet.google.com/…" className={inputShell + " " + inputCls} />
-          </div>
-          <div>
-            <label className={labelCls} htmlFor={`ch-edit-rec-${chapter.id}`}>Recording link</label>
-            <input id={`ch-edit-rec-${chapter.id}`} name="recordingUrl" type="url" defaultValue={chapter.recordingUrl ?? ""} placeholder="https://youtube.com/…" className={inputShell + " " + inputCls} />
-          </div>
-        </div>
-        <div>
-          <label className={labelCls} htmlFor={`ch-edit-res-${chapter.id}`}>Resources — label|url pairs, comma separated</label>
-          <textarea id={`ch-edit-res-${chapter.id}`} name="resources" rows={2} defaultValue={formatResources(chapter.resources)} placeholder="Slides|https://…, Notes|https://…" className={signInputCls} />
+          <label className={labelCls} htmlFor={`ch-edit-sum-${chapter.id}`}>What will learners achieve?</label>
+          <textarea id={`ch-edit-sum-${chapter.id}`} name="summary" rows={3} defaultValue={chapter.summary ?? ""} placeholder="Short intro shown above this topic" className={signInputCls} />
         </div>
       </FormShell>
     </div>
@@ -824,26 +807,21 @@ function AddTopicForm({ courseId, onDone }: { courseId: string; onDone: () => vo
     );
   }
   return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white p-5">
-      <p className="text-sm font-semibold text-slate-800">New topic</p>
+    <div className="w-full rounded-[20px] bg-white p-8 shadow-elev2">
+      <h3 className="font-display text-2xl font-bold text-ink-700">New topic</h3>
+      <p className="mt-1 text-sm text-slate-600">
+        Name the topic and say what learners achieve — mentors add the chapters and content inside.
+      </p>
       <FormShell
         submitLabel="Add topic"
         onSubmit={async (e) => {
           const fd = new FormData(e.currentTarget as HTMLFormElement);
-          const resources = (fd.get("resources") as string)
-            .split(",")
-            .map((pair) => pair.split("|").map((s) => s.trim()))
-            .filter(([label, url]) => label && url)
-            .map(([label, url]) => ({ label: label!, url: url! }));
           await api("/chapters", {
             method: "POST",
             body: JSON.stringify({
               courseId,
               title: fd.get("title"),
               ...(fd.get("summary") ? { summary: fd.get("summary") } : {}),
-              ...(fd.get("meetingUrl") ? { meetingUrl: fd.get("meetingUrl") } : {}),
-              ...(fd.get("recordingUrl") ? { recordingUrl: fd.get("recordingUrl") } : {}),
-              ...(resources.length ? { resources } : {}),
             }),
           });
           (e.currentTarget as HTMLFormElement).reset();
@@ -853,29 +831,11 @@ function AddTopicForm({ courseId, onDone }: { courseId: string; onDone: () => vo
       >
         <div>
           <label className={labelCls} htmlFor="ch-title">Topic title</label>
-          <div className={inputShell}>
-            <input id="ch-title" name="title" required placeholder="e.g. Variables" className={inputCls} />
-          </div>
+          <input id="ch-title" name="title" required placeholder="e.g. Variables" className={signInputCls} />
         </div>
         <div>
-          <label className={labelCls} htmlFor="ch-summary">Summary (optional)</label>
-          <textarea id="ch-summary" name="summary" rows={2} placeholder="What this topic covers" className={signInputCls} />
-        </div>
-        <div>
-          <label className={labelCls} htmlFor="ch-meet">Online meeting link (optional)</label>
-          <div className={inputShell}>
-            <input id="ch-meet" name="meetingUrl" type="url" placeholder="https://meet…/…" className={inputCls} />
-          </div>
-        </div>
-        <div>
-          <label className={labelCls} htmlFor="ch-rec">Recorded class link (optional)</label>
-          <div className={inputShell}>
-            <input id="ch-rec" name="recordingUrl" type="url" placeholder="https://…" className={inputCls} />
-          </div>
-        </div>
-        <div>
-          <label className={labelCls} htmlFor="ch-res">Resources — label|url pairs, comma separated</label>
-          <textarea id="ch-res" name="resources" rows={2} placeholder="Worksheet|https://…, Notes|https://…" className={signInputCls} />
+          <label className={labelCls} htmlFor="ch-summary">What will learners achieve?</label>
+          <textarea id="ch-summary" name="summary" rows={3} placeholder="Short intro shown above this topic" className={signInputCls} />
         </div>
       </FormShell>
       <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
