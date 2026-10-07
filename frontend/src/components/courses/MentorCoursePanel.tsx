@@ -74,7 +74,8 @@ export function MentorCoursePanel({
   // ── Course resources ──
   async function scheduleMeeting(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     setBusy(true);
     setError(null);
     try {
@@ -89,7 +90,7 @@ export function MentorCoursePanel({
           ...(fd.get("chapterId") ? { chapterId: fd.get("chapterId") } : {}),
         }),
       });
-      (e.currentTarget as HTMLFormElement).reset();
+      form.reset();
       void load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not schedule the class");
@@ -100,11 +101,12 @@ export function MentorCoursePanel({
 
   async function uploadResource(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const input = e.currentTarget.elements.namedItem("file") as HTMLInputElement;
+    const form = e.currentTarget;
+    const input = form.elements.namedItem("file") as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    const fileName = (e.currentTarget.elements.namedItem("title") as HTMLInputElement).value.trim();
-    const kind = (e.currentTarget.elements.namedItem("kind") as HTMLSelectElement).value;
+    const fileName = (form.elements.namedItem("title") as HTMLInputElement).value.trim();
+    const kind = (form.elements.namedItem("kind") as HTMLSelectElement).value;
     const token = getAccessToken();
     if (!token) return setError("Sign in to upload files");
 
@@ -129,7 +131,7 @@ export function MentorCoursePanel({
         const data = await res.json().catch(() => null);
         throw new Error(data?.error?.message ?? "Upload failed");
       }
-      e.currentTarget.reset();
+      form.reset();
       api<{ items: CourseResource[] }>(`/resources/my`)
         .then((d) => setResources(d.items.filter((r) => r.courseId === courseId)))
         .catch(() => undefined);
