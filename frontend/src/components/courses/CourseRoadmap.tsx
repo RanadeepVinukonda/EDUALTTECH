@@ -117,8 +117,9 @@ function typeLabel(type: RoadmapLesson["type"]): string {
 
 /**
  * The course path. One component, two modes:
- *  - authoring ("admin" draft view / "mentor"): + chapter, + concept, + lesson, inline editors.
- *  - "learn":   read-only path — watch recordings, join meetings, open resources.
+ *  - "admin" (draft): roadmap shell + structure topics; chapters/concepts are the mentor's.
+ *  - "mentor": adds the chapters and concepts inside each topic, plus links and resources.
+ *  - "learn": read-only path — watch recordings, join meetings, open resources.
  * `locked` is the pre-enrollment teaser: titles only, no links.
  */
 export default function CourseRoadmap({
@@ -143,12 +144,11 @@ export default function CourseRoadmap({
 }) {
   /** Draft admin view and mentors both author; published/admin read-only paths skip this branch. */
   const authoring = (mode === "admin" || mode === "mentor") && !locked;
-  /** The roadmap shell and the chapter list are the admin's alone. */
+  /** The roadmap shell + structure topics are the admin's (course stays a draft until published). */
   const canStructure = mode === "admin" && !locked;
-  /** Lessons sit inside admin chapters: mentors build them too. */
-  const canLessons = (mode === "admin" || mode === "mentor") && !locked;
-  /** Concepts and their content are the mentor's job. */
-  const canConcepts = (mode === "admin" || mode === "mentor") && !locked;
+  /** Chapters and concepts inside a topic are the mentor's. */
+  const canLessons = mode === "mentor" && !locked;
+  const canConcepts = mode === "mentor" && !locked;
   const [openChapter, setOpenChapter] = useState<string | null>(null);
   const [openModule, setOpenModule] = useState<string | null>(null);
   const [editLesson, setEditLesson] = useState<string | null>(null);
@@ -235,13 +235,11 @@ export default function CourseRoadmap({
               {roadmap.recordingUrl && <Link href={roadmap.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] border border-[1.5px] border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50">Watch recording</Link>}
             </div>
             <ResourceStrip resources={roadmap.resources ?? []} />
-            <p className="mt-3 text-xs text-slate-500">Chapters and lessons are set by the course admin — open a lesson to add your concepts, links and resources.</p>
+            <p className="mt-3 text-xs text-slate-500">Topics are set by the course admin — open a topic to add your chapters, then teach each chapter with concepts, links and resources.</p>
           </div>
         )
       )}
-      {(chapters.length > 0 || !canStructure) && (
-        <p className="mt-6 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Chapters</p>
-      )}
+      <p className="mt-6 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Roadmap structure</p>
       <ol className="mt-2 space-y-3">
       {chapters.length === 0 && !canStructure && <EmptyRoadmap />}
       {chapters.map((c) => (
@@ -256,13 +254,13 @@ export default function CourseRoadmap({
                 className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50"
               >
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapter {c.order}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Topic {c.order}</p>
                   <h3 className="font-display text-lg font-semibold text-slate-900">{c.title}</h3>
                   {c.summary && <p className="mt-1 text-sm text-slate-600">{c.summary}</p>}
                 </div>
                 <span className="flex shrink-0 items-center gap-2">
                   <span className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${openChapter === c.id ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}>
-                    {openChapter === c.id ? "Close" : `${c.modules.length} lesson${c.modules.length === 1 ? "" : "s"}`}
+                    {openChapter === c.id ? "Close" : `${c.modules.length} chapter${c.modules.length === 1 ? "" : "s"}`}
                   </span>
                   {canStructure && (
                     <button
@@ -275,7 +273,7 @@ export default function CourseRoadmap({
                   )}
                   {canStructure && (
                     <RemoveButton
-                      label={`Delete chapter ${c.title}`}
+                      label={`Delete topic ${c.title}`}
                       onClick={async () => {
                         await api(`/chapters/${c.id}`, { method: "DELETE" }).catch(() => undefined);
                         onChanged?.();
@@ -293,18 +291,18 @@ export default function CourseRoadmap({
                   <ChapterLinks chapter={c} meetings={meetings.filter((m) => m.chapter?.id === c.id)} />
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Lessons in this chapter</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Chapters in this topic</p>
                     <ul className="mt-2 space-y-2">
                       {c.modules.length === 0 && (
                         <li className="text-sm text-slate-400">
-                          {canLessons ? "No lessons yet — add the first one below." : "No lessons here yet."}
+                          {canLessons ? "No chapters yet — add the first one below." : "No chapters here yet."}
                         </li>
                       )}
                       {c.modules.map((mod) => (
                         <li key={mod.id} className="rounded-xl border border-slate-200 p-4">
                           <div className="flex items-center justify-between gap-3">
                             <p className="font-semibold text-slate-800">
-                              <span className="text-slate-400">Lesson {mod.position}.</span> {mod.title}
+                              <span className="text-slate-400">Chapter {mod.position}.</span> {mod.title}
                             </p>
                             <span className="flex shrink-0 items-center gap-2">
                               <button
@@ -316,7 +314,7 @@ export default function CourseRoadmap({
                               </button>
                               {canLessons && (
                                 <RemoveButton
-                                  label={`Delete lesson ${mod.title}`}
+                                  label={`Delete chapter ${mod.title}`}
                                   onClick={async () => {
                                     await api(`/courses/modules/${mod.id}`, { method: "DELETE" }).catch(() => undefined);
                                     onChanged?.();
@@ -382,6 +380,11 @@ onChanged?.();
           </div>
         </li>
       ))}
+      {canStructure && (
+        <li>
+          <AddTopicForm courseId={courseId} onDone={() => onChanged?.()} />
+        </li>
+      )}
       </ol>
     </>
   );
@@ -762,9 +765,9 @@ function ChapterForm({
 }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <p className="text-sm font-semibold text-slate-800">Edit chapter {chapter.order}</p>
+      <p className="text-sm font-semibold text-slate-800">Edit topic {chapter.order}</p>
       <FormShell
-        submitLabel="Save chapter"
+        submitLabel="Save topic"
         onSubmit={async (e) => {
           const fd = new FormData(e.currentTarget as HTMLFormElement);
           await api(`/chapters/${chapter.id}`, {
@@ -781,7 +784,7 @@ function ChapterForm({
         }}
       >
         <div>
-          <label className={labelCls} htmlFor={`ch-edit-title-${chapter.id}`}>Chapter title</label>
+          <label className={labelCls} htmlFor={`ch-edit-title-${chapter.id}`}>Topic title</label>
           <input id={`ch-edit-title-${chapter.id}`} name="title" required defaultValue={chapter.title} className={inputShell + " " + inputCls} />
         </div>
         <div>
@@ -807,13 +810,88 @@ function ChapterForm({
   );
 }
 
+function AddTopicForm({ courseId, onDone }: { courseId: string; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center gap-2 rounded-2xl border border-dashed border-slate-300 px-5 py-4 text-sm font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700"
+      >
+        <PlusIcon /> Add topic
+      </button>
+    );
+  }
+  return (
+    <div className="w-full rounded-2xl border border-slate-200 bg-white p-5">
+      <p className="text-sm font-semibold text-slate-800">New topic</p>
+      <FormShell
+        submitLabel="Add topic"
+        onSubmit={async (e) => {
+          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          const resources = (fd.get("resources") as string)
+            .split(",")
+            .map((pair) => pair.split("|").map((s) => s.trim()))
+            .filter(([label, url]) => label && url)
+            .map(([label, url]) => ({ label: label!, url: url! }));
+          await api("/chapters", {
+            method: "POST",
+            body: JSON.stringify({
+              courseId,
+              title: fd.get("title"),
+              ...(fd.get("summary") ? { summary: fd.get("summary") } : {}),
+              ...(fd.get("meetingUrl") ? { meetingUrl: fd.get("meetingUrl") } : {}),
+              ...(fd.get("recordingUrl") ? { recordingUrl: fd.get("recordingUrl") } : {}),
+              ...(resources.length ? { resources } : {}),
+            }),
+          });
+          (e.currentTarget as HTMLFormElement).reset();
+          setOpen(false);
+          onDone();
+        }}
+      >
+        <div>
+          <label className={labelCls} htmlFor="ch-title">Topic title</label>
+          <div className={inputShell}>
+            <input id="ch-title" name="title" required placeholder="e.g. Variables" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="ch-summary">Summary (optional)</label>
+          <textarea id="ch-summary" name="summary" rows={2} placeholder="What this topic covers" className={signInputCls} />
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="ch-meet">Online meeting link (optional)</label>
+          <div className={inputShell}>
+            <input id="ch-meet" name="meetingUrl" type="url" placeholder="https://meet…/…" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="ch-rec">Recorded class link (optional)</label>
+          <div className={inputShell}>
+            <input id="ch-rec" name="recordingUrl" type="url" placeholder="https://…" className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="ch-res">Resources — label|url pairs, comma separated</label>
+          <textarea id="ch-res" name="resources" rows={2} placeholder="Worksheet|https://…, Notes|https://…" className={signInputCls} />
+        </div>
+      </FormShell>
+      <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
+        Cancel
+      </button>
+    </div>
+  );
+}
+
 function AddLessonForm({ courseId, chapterId, onDone }: { courseId: string; chapterId: string; onDone: () => void }) {
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
       <button
         type="button"
-        aria-label="Add lesson"
+        aria-label="Add chapter"
         onClick={() => setOpen(true)}
         className="mt-3 flex h-9 w-9 items-center justify-center rounded-full border border-dashed border-slate-300 text-slate-500 transition hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700"
       >
@@ -824,7 +902,7 @@ function AddLessonForm({ courseId, chapterId, onDone }: { courseId: string; chap
   return (
     <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
       <FormShell
-        submitLabel="Add lesson"
+        submitLabel="Add chapter"
         onSubmit={async (e) => {
           const fd = new FormData(e.currentTarget as HTMLFormElement);
           await api(`/courses/${courseId}/modules`, {
@@ -837,7 +915,7 @@ function AddLessonForm({ courseId, chapterId, onDone }: { courseId: string; chap
         }}
       >
         <div>
-          <label className={labelCls} htmlFor="mc-title">Lesson title</label>
+          <label className={labelCls} htmlFor="mc-title">Chapter title</label>
           <div className={inputShell}>
             <input id="mc-title" name="title" required placeholder="e.g. Solving quadratic equations" className={inputCls} />
           </div>
