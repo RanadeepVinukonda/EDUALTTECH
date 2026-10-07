@@ -42,8 +42,16 @@ async function webhook(req: Request, res: Response, next: NextFunction): Promise
   try {
     const signature = String(req.headers["x-razorpay-signature"] ?? "");
     if (!signature) throw ApiError.unauthorized("Missing webhook signature");
-    const rawBody = Buffer.isBuffer(req.body) ? (req.body as Buffer).toString("utf8") : String(req.body);
-    if (!verifyWebhookSignature(rawBody, signature)) {
+    const captured = (req as Express.Request & { rawBody?: string }).rawBody;
+    const rawBody =
+      typeof captured === "string"
+        ? captured
+        : Buffer.isBuffer(req.body)
+          ? (req.body as Buffer).toString("utf8")
+          : typeof req.body === "string"
+            ? req.body
+            : "";
+    if (!rawBody || !verifyWebhookSignature(rawBody, signature)) {
       logger.warn("Rejected Razorpay webhook with invalid signature");
       throw ApiError.unauthorized("Invalid webhook signature");
     }

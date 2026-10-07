@@ -620,16 +620,31 @@ function ChapterNode({
   );
 }
 
+/** Join window for a scheduled class: 15 min before start until end + 30 min grace. */
+export function meetingJoinWindow(scheduledAt: string, durationMin = 60): { open: boolean; start: number; end: number } {
+  const start = new Date(scheduledAt).getTime();
+  const end = start + (durationMin + 30) * 60_000;
+  const now = Date.now();
+  return { open: now >= start - 15 * 60_000 && now <= end, start, end };
+}
+
 /** Recording / live links — shared by both modes. */
 function ChapterLinks({ chapter, meetings }: { chapter: RoadmapChapter; meetings: RoadmapMeeting[] }) {
-  const live = meetings.find((m) => new Date(m.scheduledAt).getTime() > Date.now()) ?? meetings[0];
-  const joinUrl = live?.meetingUrl ?? chapter.meetingUrl;
+  const sorted = [...meetings].sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+  const active = sorted.find((m) => meetingJoinWindow(m.scheduledAt).open);
+  const nextUp = sorted.find((m) => new Date(m.scheduledAt).getTime() > Date.now());
+  const joinUrl = active?.meetingUrl ?? chapter.meetingUrl;
   return (
     <div className="flex flex-wrap gap-3 text-sm">
       {joinUrl && (
         <Link href={joinUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-700">
           Join live session
         </Link>
+      )}
+      {!joinUrl && nextUp && (
+        <span className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 font-medium text-slate-500">
+          Next live class {new Date(nextUp.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+        </span>
       )}
       {chapter.recordingUrl && (
         <Link href={chapter.recordingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-700">

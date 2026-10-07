@@ -387,6 +387,8 @@ model Enrollment {
   progressItems LessonProgress[]
   conversationConversation Conversation?
 
+  @@index([courseMentorId, status])
+
   @@unique([studentId, courseId])
   @@index([courseId])
 }
@@ -577,6 +579,8 @@ model Notification {
   courseId  String?
   course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@index([courseId, createdAt])
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -614,6 +618,8 @@ model Payment {
   verified         Boolean  @default(false)
   rawPayload       Json?
   createdAt        DateTime @default(now())
+
+  @@index([orderId])
 }
 
 // Webhook events — append-only, never mutated (tamper-proof trail)

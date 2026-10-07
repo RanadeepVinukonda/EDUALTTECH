@@ -6,6 +6,8 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { createClient } from "@supabase/supabase-js";
+import { canTransition } from "../src/lib/invariants.js";
+import { assertNotProvider, assertNotSeeking, lockUser } from "../src/lib/course-roles.js";
 
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -85,6 +87,44 @@ async function main() {
     await prisma.lessonProgress.create({ data: { enrollmentId: progress.id, lessonId: concept.id } });
     const done = await prisma.lessonProgress.count({ where: { enrollmentId: progress.id } });
     check("learner progress is tracked per enrollment", done === 1);
+
+    // ── Invariants: application transitions + seeker/provider exclusion ──
+    check("PENDING → UNDER_REVIEW is legal", canTransition("PENDING", "UNDER_REVIEW"));
+    check("INTERVIEW → APPROVED is legal", canTransition("INTERVIEW", "APPROVED"));
+    check("REJECTED → APPROVED is refused", !canTransition("REJECTED", "APPROVED"));
+    check("APPROVED → REJECTED is refused", !canTransition("APPROVED", "REJECTED"));
+    check("same-state update is a no-op", canTransition("PENDING", "PENDING"));
+
+    let learnerBlocked = false;
+    await prisma.$transaction(async (tx) => {
+      await lockUser(tx, enrolled.id);
+      try {
+        await assertNotSeeking(tx, enrolled.id, course.id);
+      } catch {
+        learnerBlocked = true;
+      }
+    });
+    check("active learner is refused a provider role", learnerBlocked);
+
+    let mentorBlocked = false;
+    await prisma.$transaction(async (tx) => {
+      await lockUser(tx, mentor.id);
+      try {
+        await assertNotProvider(tx, mentor.id, course.id);
+      } catch {
+        mentorBlocked = true;
+      }
+    });
+    check("mentor is refused a learner role", mentorBlocked);
+
+    let strangerAllowed = false;
+    await prisma.$transaction(async (tx) => {
+      await lockUser(tx, stranger.id);
+      await assertNotSeeking(tx, stranger.id, "no-such-course");
+      await assertNotProvider(tx, stranger.id, "no-such-course");
+      strangerAllowed = true;
+    });
+    check("unrelated user passes both exclusion checks", strangerAllowed);
 
     await prisma.enrollment.delete({ where: { id: progress.id } });
     await prisma.lesson.delete({ where: { id: concept.id } });

@@ -13,7 +13,7 @@ const router = Router();
 type AuthUser = { id: string; role: Role };
 
 /** Admins, course owners and mentors of the course may edit its content. */
-async function assertContentAccess(courseId: string, user: AuthUser): Promise<void> {
+export async function assertContentAccess(courseId: string, user: AuthUser): Promise<void> {
   if (user.role === "ADMIN") return;
   const [owns, mentors] = await Promise.all([
     prisma.course.findFirst({ where: { id: courseId, teacherId: user.id }, select: { id: true } }),

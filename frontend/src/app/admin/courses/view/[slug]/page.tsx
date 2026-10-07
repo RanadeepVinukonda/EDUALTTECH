@@ -46,6 +46,8 @@ export default function AdminCourseViewPage() {
   const params = useParams<{ slug: string }>();
   const [course, setCourse] = useState<AdminCourse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pubBusy, setPubBusy] = useState(false);
+  const [pubMsg, setPubMsg] = useState<string | null>(null);
 
   const load = useCallback(() => {
     return api<{ course: AdminCourse }>(`/courses/${params.slug}`)
@@ -56,6 +58,23 @@ export default function AdminCourseViewPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const togglePublish = async (): Promise<void> => {
+    if (!course) return;
+    setPubBusy(true);
+    setPubMsg(null);
+    try {
+      await api(`/courses/${course.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isPublished: !course.isPublished }),
+      });
+      await load();
+    } catch (err) {
+      setPubMsg(err instanceof ApiError ? err.message : "Failed to update publish status");
+    } finally {
+      setPubBusy(false);
+    }
+  };
 
   if (error) return <div className="mx-auto max-w-6xl px-4 py-16 text-red-600">{error}</div>;
   if (!course) return <LoadingScreen inline label="Loading course…" />;
@@ -85,7 +104,16 @@ export default function AdminCourseViewPage() {
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? "bg-brand-500/20 text-brand-200" : "bg-amber-500/20 text-amber-200"}`}>
                 {course.isPublished ? "Published" : "Draft"}
               </span>
+              <button
+                type="button"
+                onClick={() => void togglePublish()}
+                disabled={pubBusy}
+                className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/25 disabled:opacity-50"
+              >
+                {pubBusy ? "Saving…" : course.isPublished ? "Unpublish" : "Publish course"}
+              </button>
             </div>
+            {pubMsg && <p className="mt-2 text-sm font-medium text-amber-300">{pubMsg}</p>}
             <h1 className="font-display mt-4 text-2xl font-bold sm:text-4xl">{course.title}</h1>
             <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/80">
               <span className="flex items-center gap-1.5">

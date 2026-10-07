@@ -7,6 +7,7 @@ import { ApiError } from "../../utils/ApiError.js";
 import { param } from "../../utils/params.js";
 import { sendEmail } from "../../lib/email.js";
 import { notifyCourse } from "../../lib/notify.js";
+import { assertContentAccess as assertCanManage } from "../courses/content.routes.js";
 import { logger } from "../../utils/logger.js";
 import type { Role } from "@prisma/client";
 
@@ -32,16 +33,6 @@ async function assertCourseAccess(courseId: string, user: AuthUser): Promise<voi
   }
 }
 
-/** Only the owner/mentors/admins can schedule; learners only read. */
-async function assertCanManage(courseId: string, user: AuthUser): Promise<void> {
-  if (user.role === "ADMIN") return;
-  const [owns, mentors] = await Promise.all([
-    prisma.course.findFirst({ where: { id: courseId, teacherId: user.id }, select: { id: true } }),
-    prisma.courseMentor.findFirst({ where: { courseId, mentorId: user.id }, select: { id: true } }),
-  ]);
-  if (!owns && !mentors) throw ApiError.forbidden("Only the course owner, mentors or admins can schedule meetings");
-}
-
 const createSchema = z.object({
   courseId: z.string().min(1).max(40),
   title: z.string().trim().min(3).max(160),
@@ -64,8 +55,11 @@ router.get("/course/:courseId", async (req, res, next) => {
     // of the course experience, not the public catalog.
     await assertCourseAccess(courseId, req.user!);
 
+    // Include sessions that already started (up to 4h back) so learners can
+    // still join mid-meeting and see the live/ended state; the frontend gates
+    // the Join button to the actual meeting window.
     const meetings = await prisma.liveMeeting.findMany({
-      where: { courseId, scheduledAt: { gt: new Date() } },
+      where: { courseId, scheduledAt: { gt: new Date(Date.now() - 4 * 60 * 60 * 1000) } },
       orderBy: { scheduledAt: "asc" },
       take: 20,
       select: {

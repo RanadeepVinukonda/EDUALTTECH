@@ -23,7 +23,15 @@ export interface MentorApplication {
   course: { id: string; title: string; slug: string; thumbnailUrl: string | null } | null;
 }
 
-const STATUSES = ["UNDER_REVIEW", "INTERVIEW", "APPROVED", "REJECTED"] as const;
+// Mirrors backend APPLICATION_TRANSITIONS (lib/invariants.ts) — the server
+// rejects anything else even if a stale tab renders an old button.
+const NEXT: Record<ApplicationStatus, readonly ApplicationStatus[]> = {
+  PENDING: ["UNDER_REVIEW", "INTERVIEW", "APPROVED", "REJECTED"],
+  UNDER_REVIEW: ["INTERVIEW", "APPROVED", "REJECTED"],
+  INTERVIEW: ["APPROVED", "REJECTED"],
+  APPROVED: [],
+  REJECTED: [],
+};
 
 const BADGE: Record<ApplicationStatus, string> = {
   PENDING: "bg-amber-50 text-amber-700",
@@ -213,7 +221,7 @@ function ApplicationCard({
           <button
             type="button"
             onClick={() => onReview("INTERVIEW")}
-            disabled={busy || app.status === "INTERVIEW"}
+            disabled={busy || app.status === "INTERVIEW" || !NEXT[app.status].includes("INTERVIEW")}
             className={`btn-apply shrink-0 disabled:cursor-not-allowed disabled:opacity-40 ${app.status === "INTERVIEW" ? "ring-2 ring-ink-300" : ""}`}
             title="Move to interview with the meeting link above"
           >
@@ -223,7 +231,7 @@ function ApplicationCard({
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
-        {STATUSES.filter((s) => s !== "INTERVIEW").map((status) => (
+        {NEXT[app.status].filter((s) => s !== "INTERVIEW").map((status) => (
           <button
             key={status}
             type="button"
@@ -240,6 +248,13 @@ function ApplicationCard({
             {status.replace("_", " ")}
           </button>
         ))}
+        {NEXT[app.status].length === 0 && (
+          <p className="text-sm font-medium text-slate-500">
+            {app.status === "APPROVED"
+              ? "Approved — their mentor seat lives on the course page."
+              : "Rejected — they can apply again."}
+          </p>
+        )}
       </div>
     </article>
   );

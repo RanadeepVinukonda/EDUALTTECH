@@ -28,8 +28,13 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
   const auth = await getUserByToken(token);
   if (!auth) return next(ApiError.unauthorized("Invalid or expired token"));
 
-  const user = await prisma.user.findUnique({ where: { id: auth.id }, select: { id: true, email: true, role: true } });
-  req.user = user ?? { id: auth.id, email: auth.email, role: "USER" };
+  const user = await prisma.user.findUnique({
+    where: { id: auth.id },
+    select: { id: true, email: true, role: true, isActive: true },
+  });
+  if (!user) return next(ApiError.unauthorized("Account no longer exists"));
+  if (!user.isActive) return next(ApiError.forbidden("This account has been deactivated"));
+  req.user = { id: user.id, email: user.email, role: user.role };
   next();
 }
 
@@ -55,7 +60,11 @@ export async function optionalAuth(req: Request, _res: Response, next: NextFunct
   if (!token) return next();
   const auth = await getUserByToken(token).catch(() => null);
   if (!auth) return next();
-  const user = await prisma.user.findUnique({ where: { id: auth.id }, select: { id: true, email: true, role: true } });
-  req.user = user ?? { id: auth.id, email: auth.email, role: "USER" };
+  const user = await prisma.user.findUnique({
+    where: { id: auth.id },
+    select: { id: true, email: true, role: true, isActive: true },
+  });
+  if (!user?.isActive) return next();
+  req.user = { id: user.id, email: user.email, role: user.role };
   next();
 }

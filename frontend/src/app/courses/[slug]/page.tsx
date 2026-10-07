@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Bookmark as BookmarkIcon } from "lucide-react";
 import { api, ApiError, getCachedUser, updateCachedUser } from "@/lib/api";
 import { CourseChat } from "@/components/courses/CourseChat";
-import CourseRoadmap, { type RoadmapChapter, type RoadmapMeeting, type RoadmapProgress, type RoadmapShell } from "@/components/courses/CourseRoadmap";
+import CourseRoadmap, { meetingJoinWindow, type RoadmapChapter, type RoadmapMeeting, type RoadmapProgress, type RoadmapShell } from "@/components/courses/CourseRoadmap";
 
 type RoadmapPayload = {
   roadmap: RoadmapShell & { chapters: RoadmapChapter[] };
@@ -453,21 +453,31 @@ export default function CourseDetailPage() {
 
       {meetings && meetings.length > 0 && (
         <section className="mt-10">
-          <h2 className="font-display text-xl font-semibold text-slate-900">Upcoming live classes</h2>
+          <h2 className="font-display text-xl font-semibold text-slate-900">Live classes</h2>
           <ul className="mt-4 space-y-3">
-            {meetings.map((m) => (
-              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5">
-                <div>
-                  <p className="font-semibold text-slate-900">{m.title}</p>
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    {new Date(m.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {m.durationMin} min
-                  </p>
-                </div>
-                <a href={m.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
-                  Join
-                </a>
-              </li>
-            ))}
+            {meetings.map((m) => {
+              const win = meetingJoinWindow(m.scheduledAt, m.durationMin);
+              const ended = Date.now() > win.end;
+              return (
+                <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5">
+                  <div>
+                    <p className="font-semibold text-slate-900">{m.title}</p>
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      {new Date(m.scheduledAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {m.durationMin} min
+                    </p>
+                  </div>
+                  {win.open ? (
+                    <a href={m.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                      Join
+                    </a>
+                  ) : ended ? (
+                    <span className="text-sm font-medium text-slate-400">Session ended — recording appears in the roadmap</span>
+                  ) : (
+                    <MeetingCountdown scheduledAt={m.scheduledAt} />
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

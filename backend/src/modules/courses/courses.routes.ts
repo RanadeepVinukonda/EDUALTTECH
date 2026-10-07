@@ -9,6 +9,7 @@ import { param } from "../../utils/params.js";
 import { config } from "../../config/env.js";
 import { uploadFile, publicFileUrl, storageKey } from "../../lib/storage.js";
 import { enrollmentConfirmationEmail } from "../../lib/email.js";
+import { assertNotProvider, lockMentorSeat, lockUser } from "../../lib/course-roles.js";
 import { logger } from "../../utils/logger.js";
 
 const router = Router();
@@ -296,8 +297,9 @@ router.post("/",   requireAuth, requireRole("ADMIN"), validate(courseSchema), as
       slug = `${base}-${i++}`;
     }
 
+    // Courses always start as drafts — publishing requires chapters (PATCH guard).
     const course = await prisma.course.create({
-      data: { ...req.body, slug, teacherId: req.user!.id },
+      data: { ...req.body, isPublished: false, slug, teacherId: req.user!.id },
     });
     res.status(201).json({ success: true, data: { course } });
   } catch (err) {
@@ -339,6 +341,11 @@ router.patch("/:id", requireAuth, async (req, res, next) => {
       throw ApiError.forbidden("You can only edit your own courses");
     }
     const data = courseSchema.partial().parse(req.body);
+    // No structure → no public/purchasable course: an empty shell never ships.
+    if (data.isPublished === true && !course.isPublished) {
+      const chapters = await prisma.courseChapter.count({ where: { courseId: course.id } });
+      if (chapters === 0) throw ApiError.badRequest("Add at least one chapter before publishing this course");
+    }
     const updated = await prisma.course.update({ where: { id: course.id }, data });
     res.json({ success: true, data: { course: updated } });
   } catch (err) {
@@ -359,53 +366,11 @@ router.post("/:id/enroll", requireAuth, validate(enrollSchema), async (req, res,
     });
     if (!course || !course.isPublished) throw ApiError.notFound("Course not found");
 
-    // A course can't be both seeked and mentored at the same time: the
-    // owner / mentors are the teaching team, not students in the same course.
-    const isProvider = await prisma.course.findFirst({
-      where: {
-        id: courseId,
-        OR: [{ teacherId: req.user!.id }, { mentors: { some: { mentorId: req.user!.id } } }],
-      },
-      select: { id: true },
-    });
-    if (isProvider) {
-      throw ApiError.conflict("You teach or mentor this course — you can't enroll in it as a student");
-    }
-
     const { courseMentorId } = req.body as z.infer<typeof enrollSchema>;
+    const chosen = courseMentorId ? course.mentors.find((m) => m.id === courseMentorId) : undefined;
     if (course.mentors.length > 0) {
       if (!courseMentorId) throw ApiError.badRequest("Choose a mentor with seats before enrolling");
-      const chosen = course.mentors.find((m) => m.id === courseMentorId);
       if (!chosen) throw ApiError.badRequest("That mentor does not teach this course");
-
-      // Mentor seats are per-ACTIVE-enrollment. If every mentor is full, the
-      // student gets a readable reason instead of a dead-end 400.
-      const counts = await prisma.enrollment.groupBy({
-        by: ["courseMentorId"],
-        where: { courseId, status: "ACTIVE", courseMentorId: { not: null } },
-        _count: { _all: true },
-      });
-      const used = new Map(counts.map((c) => [c.courseMentorId, c._count._all]));
-      // The seeker's own active seat (re-enrolling, switching mentor back)
-      // doesn't consume a new slot, so it must not count against capacity.
-      const existingSeat = await prisma.enrollment.findUnique({
-        where: { studentId_courseId: { studentId: req.user!.id, courseId } },
-        select: { courseMentorId: true },
-      });
-      if (existingSeat?.courseMentorId === chosen.id) {
-        used.set(chosen.id, Math.max((used.get(chosen.id) ?? 0) - 1, 0));
-      }
-      const open = course.mentors
-        .map((m) => ({ id: m.id, seatsLeft: Math.max(m.capacity - (used.get(m.id) ?? 0), 0) }))
-        .filter((m) => m.seatsLeft > 0);
-
-      if ((used.get(chosen.id) ?? 0) >= chosen.capacity) {
-        throw ApiError.conflict(
-          open.length > 0
-            ? `That mentor is full. Choose from mentors with open seats (${open.length} available).`
-            : "All mentors for this course are full right now.",
-        );
-      }
     }
 
     const enrolled = await prisma.enrollment.findUnique({
@@ -421,10 +386,31 @@ router.post("/:id/enroll", requireAuth, validate(enrollSchema), async (req, res,
       }
     }
 
-    const enrollment = await prisma.enrollment.upsert({
-      where: { studentId_courseId: { studentId: req.user!.id, courseId } },
-      update: { status: "ACTIVE", ...(courseMentorId ? { courseMentorId } : {}) },
-      create: { studentId: req.user!.id, courseId, courseMentorId: courseMentorId ?? null },
+    // The transaction locks the user (seeker/provider exclusion) and the mentor
+    // seat row (capacity), so racing enroll/approve/assign calls serialize here.
+    const enrollment = await prisma.$transaction(async (tx) => {
+      await lockUser(tx, req.user!.id);
+      await assertNotProvider(tx, req.user!.id, courseId);
+      if (chosen) {
+        await lockMentorSeat(tx, chosen.id);
+        const mine = await tx.enrollment.findUnique({
+          where: { studentId_courseId: { studentId: req.user!.id, courseId } },
+          select: { status: true, courseMentorId: true },
+        });
+        const used = await tx.enrollment.count({
+          where: { courseMentorId: chosen.id, status: "ACTIVE" },
+        });
+        // Re-enrolling into the seat the user already holds doesn't add a seat.
+        const holdsSeat = mine?.status === "ACTIVE" && mine.courseMentorId === chosen.id;
+        if (used + (holdsSeat ? 0 : 1) > chosen.capacity) {
+          throw ApiError.conflict("That mentor's seats are full right now — choose another mentor");
+        }
+      }
+      return tx.enrollment.upsert({
+        where: { studentId_courseId: { studentId: req.user!.id, courseId } },
+        update: { status: "ACTIVE", ...(courseMentorId ? { courseMentorId } : {}) },
+        create: { studentId: req.user!.id, courseId, courseMentorId: courseMentorId ?? null },
+      });
     });
 
     await prisma.activityLog.upsert({
