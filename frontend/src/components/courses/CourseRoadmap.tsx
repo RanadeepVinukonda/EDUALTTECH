@@ -116,7 +116,7 @@ function typeLabel(type: RoadmapLesson["type"]): string {
 
 /**
  * The course path. One component, two modes:
- *  - "mentor": full authoring — + chapter, + concept, + lesson, inline editors.
+ *  - authoring ("admin" draft view / "mentor"): + chapter, + concept, + lesson, inline editors.
  *  - "learn":   read-only path — watch recordings, join meetings, open resources.
  * `locked` is the pre-enrollment teaser: titles only, no links.
  */
@@ -140,7 +140,8 @@ export default function CourseRoadmap({
   locked?: boolean;
   onChanged?: () => void;
 }) {
-  const mentor = mode === "mentor" && !locked;
+  /** Draft admin view and mentors both author; published/admin read-only paths skip this branch. */
+  const authoring = (mode === "admin" || mode === "mentor") && !locked;
   /** The roadmap shell and the chapter list are the admin's alone. */
   const canStructure = mode === "admin" && !locked;
   /** Lessons sit inside admin chapters: mentors build them too. */
@@ -170,7 +171,7 @@ export default function CourseRoadmap({
   const total = initialProgress?.totalLessons ?? 0;
   const pct = total === 0 ? 0 : Math.round((completed.length / total) * 100);
 
-  if (!mentor) {
+  if (!authoring) {
     return (
       <>
         {roadmap?.title && (
