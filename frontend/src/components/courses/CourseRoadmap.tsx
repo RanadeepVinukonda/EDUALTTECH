@@ -198,7 +198,7 @@ export default function CourseRoadmap({
           </header>
         )}
       <ol className="mt-4 space-y-3">
-        {chapters.length === 0 && <EmptyRoadmap canStructure={false} />}
+        {chapters.length === 0 && <EmptyRoadmap />}
         {chapters.map((c) => (
           <ChapterNode
             key={c.id}
@@ -239,9 +239,11 @@ export default function CourseRoadmap({
           </div>
         )
       )}
-      <p className="mt-6 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Chapters</p>
+      {(chapters.length > 0 || !canStructure) && (
+        <p className="mt-6 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Chapters</p>
+      )}
       <ol className="mt-2 space-y-3">
-      {chapters.length === 0 && <EmptyRoadmap canStructure={canStructure} />}
+      {chapters.length === 0 && !canStructure && <EmptyRoadmap />}
       {chapters.map((c) => (
         <li key={c.id} className="relative">
           <div className="flex items-start gap-3">
@@ -380,10 +382,6 @@ onChanged?.();
           </div>
         </li>
       ))}
-      <li className="flex items-start gap-3">
-        <Node tone="ghost" />
-        {canStructure && <AddChapterForm courseId={courseId} onDone={() => onChanged?.()} />}
-      </li>
       </ol>
     </>
   );
@@ -475,10 +473,10 @@ function RoadmapShellForm({
   );
 }
 
-function EmptyRoadmap({ canStructure }: { canStructure: boolean }) {
+function EmptyRoadmap() {
   return (
     <li className="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-400">
-      {canStructure ? "No chapters yet — add the first one below." : "No chapters published yet."}
+      No chapters published yet.
     </li>
   );
 }
@@ -809,87 +807,17 @@ function ChapterForm({
   );
 }
 
-function AddChapterForm({ courseId, onDone }: { courseId: string; onDone: () => void }) {
+function AddLessonForm({ courseId, chapterId, onDone }: { courseId: string; chapterId: string; onDone: () => void }) {
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
       <button
         type="button"
+        aria-label="Add lesson"
         onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-2 rounded-2xl border border-dashed border-slate-300 px-5 py-4 text-sm font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700"
+        className="mt-3 flex h-9 w-9 items-center justify-center rounded-full border border-dashed border-slate-300 text-slate-500 transition hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700"
       >
-        <PlusIcon /> Add chapter
-      </button>
-    );
-  }
-  return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white p-5">
-      <p className="text-sm font-semibold text-slate-800">New chapter</p>
-      <FormShell
-        submitLabel="Add chapter"
-        onSubmit={async (e) => {
-          const fd = new FormData(e.currentTarget as HTMLFormElement);
-          const resources = (fd.get("resources") as string)
-            .split(",")
-            .map((pair) => pair.split("|").map((s) => s.trim()))
-            .filter(([label, url]) => label && url)
-            .map(([label, url]) => ({ label: label!, url: url! }));
-          await api("/chapters", {
-            method: "POST",
-            body: JSON.stringify({
-              courseId,
-              title: fd.get("title"),
-              ...(fd.get("summary") ? { summary: fd.get("summary") } : {}),
-              ...(fd.get("meetingUrl") ? { meetingUrl: fd.get("meetingUrl") } : {}),
-              ...(fd.get("recordingUrl") ? { recordingUrl: fd.get("recordingUrl") } : {}),
-              ...(resources.length ? { resources } : {}),
-            }),
-          });
-          (e.currentTarget as HTMLFormElement).reset();
-          setOpen(false);
-          onDone();
-        }}
-      >
-        <div>
-          <label className={labelCls} htmlFor="ch-title">Chapter title</label>
-          <div className={inputShell}>
-            <input id="ch-title" name="title" required placeholder="e.g. Algebra foundations" className={inputCls} />
-          </div>
-        </div>
-        <div>
-          <label className={labelCls} htmlFor="ch-summary">Summary (optional)</label>
-          <textarea id="ch-summary" name="summary" rows={2} placeholder="What this chapter covers" className={signInputCls} />
-        </div>
-        <div>
-          <label className={labelCls} htmlFor="ch-meet">Online meeting link (optional)</label>
-          <div className={inputShell}>
-            <input id="ch-meet" name="meetingUrl" type="url" placeholder="https://meet…/…" className={inputCls} />
-          </div>
-        </div>
-        <div>
-          <label className={labelCls} htmlFor="ch-rec">Recorded class link (optional)</label>
-          <div className={inputShell}>
-            <input id="ch-rec" name="recordingUrl" type="url" placeholder="https://…" className={inputCls} />
-          </div>
-        </div>
-        <div>
-          <label className={labelCls} htmlFor="ch-res">Resources — label|url pairs, comma separated</label>
-          <textarea id="ch-res" name="resources" rows={2} placeholder="Worksheet|https://…, Notes|https://…" className={signInputCls} />
-        </div>
-      </FormShell>
-      <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
-        Cancel
-      </button>
-    </div>
-  );
-}
-
-function AddLessonForm({ courseId, chapterId, onDone }: { courseId: string; chapterId: string; onDone: () => void }) {
-  const [open, setOpen] = useState(false);
-  if (!open) {
-    return (
-      <button type="button" onClick={() => setOpen(true)} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800">
-        <PlusIcon /> Add lesson
+        <PlusIcon />
       </button>
     );
   }
@@ -905,7 +833,6 @@ function AddLessonForm({ courseId, chapterId, onDone }: { courseId: string; chap
             body: JSON.stringify({ title: fd.get("title") }),
           });
           (e.currentTarget as HTMLFormElement).reset();
-          setOpen(false);
           onDone();
         }}
       >
