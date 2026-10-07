@@ -239,8 +239,7 @@ export default function CourseRoadmap({
           </div>
         )
       )}
-      <p className="mt-6 mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Roadmap structure</p>
-      <ol className="mt-2 space-y-3">
+      <ol className="mt-6 space-y-3">
       {chapters.length === 0 && !canStructure && <EmptyRoadmap />}
       {chapters.map((c) => (
         <li key={c.id} className="relative">
@@ -380,11 +379,6 @@ onChanged?.();
           </div>
         </li>
       ))}
-      {canStructure && (
-        <li>
-          <AddTopicForm courseId={courseId} onDone={() => onChanged?.()} />
-        </li>
-      )}
       </ol>
     </>
   );
@@ -403,6 +397,7 @@ function RoadmapShellForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(!roadmap?.title);
+  const [adding, setAdding] = useState(false);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -429,6 +424,7 @@ function RoadmapShellForm({
 
   if (roadmap?.title && !editing) {
     return (
+      <>
       <div className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -436,9 +432,19 @@ function RoadmapShellForm({
             <h3 className="font-display text-lg font-semibold text-slate-900">{roadmap.title}</h3>
             {roadmap.summary && <p className="mt-1 text-sm text-slate-600">{roadmap.summary}</p>}
           </div>
-          <button type="button" onClick={() => setEditing(true)} className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">
-            Edit
-          </button>
+          <span className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              aria-label="Add to roadmap"
+              onClick={() => setAdding((a) => !a)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white transition hover:bg-slate-800"
+            >
+              <PlusIcon />
+            </button>
+            <button type="button" onClick={() => setEditing(true)} className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">
+              Edit
+            </button>
+          </span>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {roadmap.meetingUrl && <Link href={roadmap.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-[10px] bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800">Live class link</Link>}
@@ -446,6 +452,12 @@ function RoadmapShellForm({
         </div>
         <ResourceStrip resources={roadmap.resources ?? []} />
       </div>
+      {adding && (
+        <div className="mt-4">
+          <AddTopicForm courseId={courseId} onDone={() => { setAdding(false); onDone(); }} onCancel={() => setAdding(false)} />
+        </div>
+      )}
+      </>
     );
   }
 
@@ -455,8 +467,8 @@ function RoadmapShellForm({
         {roadmap?.title ? "Edit roadmap" : "Create your roadmap"}
       </h3>
       <p className="mt-1 text-sm text-slate-600">
-        Start here. Name the roadmap and describe what learners achieve — then break it into
-        chapters, lessons and concepts.
+        Start here. Name the roadmap and describe what learners achieve — then use the + to add topics
+        to the path.
       </p>
       <div className="mt-6 space-y-4">
         <div>
@@ -793,29 +805,15 @@ function ChapterForm({
   );
 }
 
-function AddTopicForm({ courseId, onDone }: { courseId: string; onDone: () => void }) {
-  const [open, setOpen] = useState(false);
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-2 rounded-2xl border border-dashed border-slate-300 px-5 py-4 text-sm font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700"
-      >
-        <PlusIcon /> Add topic
-      </button>
-    );
-  }
+function AddTopicForm({ courseId, onDone, onCancel }: { courseId: string; onDone: () => void; onCancel: () => void }) {
   return (
     <div className="w-full rounded-[20px] bg-white p-8 shadow-elev2">
-      <h3 className="font-display text-2xl font-bold text-ink-700">New topic</h3>
-      <p className="mt-1 text-sm text-slate-600">
-        Name the topic and say what learners achieve — mentors add the chapters and content inside.
-      </p>
+      <h3 className="font-display text-2xl font-bold text-ink-700">Add to roadmap</h3>
       <FormShell
-        submitLabel="Add topic"
+        submitLabel="Add to roadmap"
         onSubmit={async (e) => {
-          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          const form = e.currentTarget as HTMLFormElement;
+          const fd = new FormData(form);
           await api("/chapters", {
             method: "POST",
             body: JSON.stringify({
@@ -824,21 +822,20 @@ function AddTopicForm({ courseId, onDone }: { courseId: string; onDone: () => vo
               ...(fd.get("summary") ? { summary: fd.get("summary") } : {}),
             }),
           });
-          (e.currentTarget as HTMLFormElement).reset();
-          setOpen(false);
+          form.reset();
           onDone();
         }}
       >
         <div>
           <label className={labelCls} htmlFor="ch-title">Topic title</label>
-          <input id="ch-title" name="title" required placeholder="e.g. Variables" className={signInputCls} />
+          <input id="ch-title" name="title" required placeholder="e.g. Loops" className={signInputCls} />
         </div>
         <div>
           <label className={labelCls} htmlFor="ch-summary">What will learners achieve?</label>
           <textarea id="ch-summary" name="summary" rows={3} placeholder="Short intro shown above this topic" className={signInputCls} />
         </div>
       </FormShell>
-      <button type="button" onClick={() => setOpen(false)} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
+      <button type="button" onClick={onCancel} className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-800">
         Cancel
       </button>
     </div>
@@ -864,13 +861,14 @@ function AddLessonForm({ courseId, chapterId, onDone }: { courseId: string; chap
       <FormShell
         submitLabel="Add chapter"
         onSubmit={async (e) => {
-          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          const form = e.currentTarget as HTMLFormElement;
+          const fd = new FormData(form);
           await api(`/courses/${courseId}/modules`, {
             method: "POST",
             headers: { "x-chapter-id": chapterId },
             body: JSON.stringify({ title: fd.get("title") }),
           });
-          (e.currentTarget as HTMLFormElement).reset();
+          form.reset();
           onDone();
         }}
       >
@@ -907,7 +905,8 @@ function ConceptForm({
       <FormShell
         submitLabel={lesson ? "Save concept" : "Add concept"}
         onSubmit={async (e) => {
-          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          const form = e.currentTarget as HTMLFormElement;
+          const fd = new FormData(form);
           const payload = {
             title: fd.get("title"),
             type: fd.get("type"),
@@ -925,7 +924,7 @@ function ConceptForm({
               body: JSON.stringify(payload),
             });
           }
-          (e.currentTarget as HTMLFormElement).reset();
+          form.reset();
           onDone();
         }}
       >
