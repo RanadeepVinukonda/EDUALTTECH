@@ -23,7 +23,6 @@ export default function AdminCoursesPage() {
     title: "",
     description: "",
     subject: "",
-    gradeLevel: "",
     price: "",
     thumbnailUrl: "",
   });
@@ -76,13 +75,12 @@ export default function AdminCoursesPage() {
           title: newCourse.title,
           description: newCourse.description,
           subject: newCourse.subject,
-          gradeLevel: newCourse.gradeLevel,
           pricePaise,
           thumbnailUrl: newCourse.thumbnailUrl,
         }),
       });
       void course;
-      setNewCourse({ title: "", description: "", subject: "", gradeLevel: "", price: "", thumbnailUrl: "" });
+      setNewCourse({ title: "", description: "", subject: "", price: "", thumbnailUrl: "" });
       setCreateMsg("Course created as a draft — add chapters, then publish it from its page.");
       load();
     } catch (err) {
@@ -162,24 +160,6 @@ export default function AdminCoursesPage() {
               value={newCourse.subject}
               onChange={(e) => set("subject")(e.target.value)}
               placeholder="e.g. Mathematics"
-              className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
-            />
-          </Field>
-
-          <Field
-            label="Grade level"
-            icon={
-              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                <path d="M22 10 12 5 2 10l10 5 10-5z" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M22 10v6" strokeLinecap="round" />
-              </svg>
-            }
-          >
-            <input
-              value={newCourse.gradeLevel}
-              onChange={(e) => set("gradeLevel")(e.target.value)}
-              placeholder="e.g. Class 8"
               className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
             />
           </Field>

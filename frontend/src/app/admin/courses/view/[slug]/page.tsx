@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import LoadingScreen from "@/components/ui/LoadingScreen";
-import type { RoadmapChapter } from "@/components/courses/CourseRoadmap";
+import CourseRoadmap, { type RoadmapChapter } from "@/components/courses/CourseRoadmap";
 import CourseStructureMap from "@/components/admin/CourseStructureMap";
 
 type AdminChapter = RoadmapChapter;
@@ -174,22 +174,37 @@ export default function AdminCourseViewPage() {
       <section className="mt-10">
         <h2 className="font-display text-xl font-semibold text-ink-700">Course structure ({chapters.length} chapters)</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Read-only overview of the syllabus. Mentors author the lessons, concepts, live classes and resources inside
-          these chapters — this is how the course reads to everyone.
+          {course.isPublished
+            ? "Published — the syllabus is locked. Mentors keep managing live links and recordings inside these chapters."
+            : "Draft — build the roadmap, chapters, lessons and concepts below. Editing disappears once the course is published."}
         </p>
-        <div className="mt-4">
-          <CourseStructureMap
-            chapters={chapters}
-            roadmap={
-              {
+        <div className={course.isPublished ? "mt-4" : "mt-4 rounded-[16px] bg-white p-5 shadow-elev1"}>
+          {course.isPublished ? (
+            <CourseStructureMap
+              chapters={chapters}
+              roadmap={{
                 title: course.roadmapTitle,
                 summary: course.roadmapSummary,
                 meetingUrl: course.roadmapMeetingUrl,
                 recordingUrl: course.roadmapRecordingUrl,
                 resources: course.roadmapResources,
-              }
-            }
-          />
+              }}
+            />
+          ) : (
+            <CourseRoadmap
+              courseId={course.id}
+              chapters={chapters}
+              roadmap={{
+                title: course.roadmapTitle,
+                summary: course.roadmapSummary,
+                meetingUrl: course.roadmapMeetingUrl,
+                recordingUrl: course.roadmapRecordingUrl,
+                resources: course.roadmapResources,
+              }}
+              mode="admin"
+              onChanged={() => void load()}
+            />
+          )}
         </div>
       </section>
     </div>
