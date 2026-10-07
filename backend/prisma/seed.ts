@@ -108,11 +108,11 @@ async function main(): Promise<void> {
       subject: "Computer Science",
       gradeLevel: "Class 9",
       isPublished: true,
-      teacherId: teacher.id,
+      teacherId: adminUser.id,
     },
   });
 
-  const mentorship = await prisma.courseMentor.upsert({
+  await prisma.courseMentor.upsert({
     where: { courseId_mentorId: { courseId: course.id, mentorId: teacher2.id } },
     update: {},
     create: { courseId: course.id, mentorId: teacher2.id },
@@ -150,21 +150,15 @@ async function main(): Promise<void> {
 
   for (const chapter of chapters) {
     await prisma.courseChapter.upsert({
-      where: { courseMentorId_order: { courseMentorId: mentorship.id, order: chapter.order } },
+      where: { courseId_order: { courseId: course.id, order: chapter.order } },
       update: {},
-      create: { courseMentorId: mentorship.id, ...chapter },
+      create: { courseId: course.id, ...chapter },
     });
   }
 
-  const module1 = await prisma.module.upsert({
-    where: { courseId_position: { courseId: course.id, position: 1 } },
-    update: {},
-    create: {
-      courseId: course.id,
-      title: "Getting Started",
-      position: 1,
-    },
-  });
+  const module1 =
+    (await prisma.module.findFirst({ where: { courseId: course.id, chapterId: null, position: 1 } })) ??
+    (await prisma.module.create({ data: { courseId: course.id, title: "Getting Started", position: 1 } }));
 
   await prisma.lesson.upsert({
     where: { moduleId_position: { moduleId: module1.id, position: 1 } },
@@ -194,15 +188,9 @@ async function main(): Promise<void> {
     },
   });
 
-  const module2 = await prisma.module.upsert({
-    where: { courseId_position: { courseId: course.id, position: 2 } },
-    update: {},
-    create: {
-      courseId: course.id,
-      title: "Loops & Logic",
-      position: 2,
-    },
-  });
+  const module2 =
+    (await prisma.module.findFirst({ where: { courseId: course.id, chapterId: null, position: 2 } })) ??
+    (await prisma.module.create({ data: { courseId: course.id, title: "Loops & Logic", position: 2 } }));
 
   await prisma.lesson.upsert({
     where: { moduleId_position: { moduleId: module2.id, position: 1 } },

@@ -12,15 +12,7 @@ interface CourseRow {
   slug: string;
   subject: string;
   thumbnailUrl: string | null;
-  pricePaise: number | null;
   isPublished: boolean;
-  teacher: { id: string; name: string; email: string };
-  mentors: Array<{
-    id: string;
-    mentor: { id: string; name: string; email: string };
-    _count: { chapters: number; enrollments: number };
-  }>;
-  _count: { enrollments: number };
 }
 
 export default function AdminCoursesPage() {
@@ -294,47 +286,7 @@ export default function AdminCoursesPage() {
                     {course.isPublished ? "Published" : "Draft"}
                   </span>
                 </div>
-                <h2 className="font-display mt-2 text-lg font-bold text-slate-900">{course.title}</h2>
-
-                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                      <circle cx="12" cy="8" r="4" />
-                      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
-                    </svg>
-                    {course.teacher.name}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                    {course._count.enrollments} learners
-                  </span>
-                  {course.pricePaise != null && (
-                    <span className="font-semibold text-ink-700">₹{(course.pricePaise / 100).toLocaleString("en-IN")}</span>
-                  )}
-                </div>
-
-                <ul className="mt-4 space-y-2 border-t border-slate-100 pt-4">
-                  {course.mentors.length === 0 && <li className="text-sm text-slate-400">No mentors yet — they join by applying.</li>}
-                  {course.mentors.map((m) => (
-                    <li key={m.id} className="flex items-center gap-3 rounded-[10px] bg-slate-50 px-3 py-2">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[11px] font-bold text-brand-700">
-                        {m.mentor.name.split(" ").map((p) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase()}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-slate-700">{m.mentor.name}</span>
-                        <span className="block truncate text-xs text-slate-400">{m.mentor.email}</span>
-                      </span>
-                      <span className="flex shrink-0 gap-1.5">
-                        <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-600">{m._count.chapters} ch</span>
-                        <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-600">{m._count.enrollments} st</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <h2 className="font-display mb-4 mt-2 text-lg font-bold text-slate-900">{course.title}</h2>
 
                 <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
                   <Link
