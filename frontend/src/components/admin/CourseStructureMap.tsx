@@ -1,20 +1,6 @@
 import Link from "next/link";
 import type { RoadmapChapter, RoadmapShell } from "@/components/courses/CourseRoadmap";
 
-const TYPE_LABEL: Record<string, string> = {
-  VIDEO: "Recorded class",
-  READING: "Reading / notes",
-  QUIZ: "Quiz",
-  ASSIGNMENT: "Assignment",
-};
-
-const TYPE_DOT: Record<string, string> = {
-  VIDEO: "bg-sky-500",
-  READING: "bg-slate-400",
-  QUIZ: "bg-violet-500",
-  ASSIGNMENT: "bg-brand-600",
-};
-
 function ChipLink({ href, children, solid = false }: { href: string; children: React.ReactNode; solid?: boolean }) {
   return (
     <Link
@@ -102,54 +88,6 @@ export default function CourseStructureMap({
                   </span>
                 </div>
                 {c.summary && <p className="mt-1.5 text-sm text-slate-600">{c.summary}</p>}
-
-                {(c.meetingUrl || c.recordingUrl || c.resources.length > 0) && (
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {c.meetingUrl && <ChipLink href={c.meetingUrl} solid>Live class</ChipLink>}
-                    {c.recordingUrl && <ChipLink href={c.recordingUrl}>Recording</ChipLink>}
-                    {c.resources.map((r) => (
-                      <ChipLink key={r.url} href={r.url}>{r.label}</ChipLink>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-4 border-t border-slate-100 pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Lessons</p>
-                  {c.modules.length === 0 ? (
-                    <p className="mt-2 text-sm text-slate-400">No lessons here yet.</p>
-                  ) : (
-                    <ul className="mt-2 space-y-3">
-                      {c.modules.map((mod) => (
-                        <li key={mod.id}>
-                          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                            <span className="text-xs font-semibold text-slate-400">{mod.position}.</span>
-                            <span className="text-sm font-semibold text-slate-800">{mod.title}</span>
-                            <span className="text-xs text-slate-400">
-                              {mod.lessons.length} concept{mod.lessons.length === 1 ? "" : "s"}
-                            </span>
-                          </div>
-
-                          {mod.lessons.length > 0 && (
-                            <ul className="mt-1.5 space-y-1 border-l-2 border-slate-100 pl-4">
-                              {mod.lessons.map((l) => (
-                                <li key={l.id} className="flex flex-wrap items-center gap-x-2.5 gap-y-1 py-0.5">
-                                  <span className={`h-2 w-2 shrink-0 rounded-full ${TYPE_DOT[l.type] ?? "bg-slate-400"}`} />
-                                  <span className="text-sm text-slate-700">{l.title}</span>
-                                  <span className="text-xs text-slate-400">{TYPE_LABEL[l.type] ?? l.type}</span>
-                                  {(l.resources?.length ?? 0) > 0 && (
-                                    <span className="text-xs font-medium text-brand-700">
-                                      {l.resources!.length} resource{l.resources!.length === 1 ? "" : "s"}
-                                    </span>
-                                  )}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
               </div>
             </li>
           ))}
