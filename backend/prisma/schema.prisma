@@ -1,7 +1,13 @@
-// Edu-Alt-Tech — Prisma schema (Supabase Postgres)
-// Students: courses, practice, AI tutor, resources, dashboard
-// Teachers: application flow, courses, classroom chats, notifications
-// Admins:   full platform management, Razorpay payments + order ledger
+// EduAltTech — Prisma schema (Supabase Postgres)
+// Product of Setsuzoku.
+//
+// Two platform roles: ADMIN | USER.
+// Course participation is separate: CourseParticipant.role = LEARNER | MENTOR.
+// A user cannot be both LEARNER and MENTOR in the same course — enforced by
+// @@unique([courseId, userId]) (one row per user per course) plus service-level
+// checks inside transactions.
+//
+// Course → Chapter → Topic → (mentor content: Lesson / Meeting / Resource)
 
 generator client {
   provider = "prisma-client-js"
@@ -17,56 +23,39 @@ datasource db {
 // Enums
 // ────────────────────────────────────────────────────────────────────
 
-// Only two account types. A USER is a learner in courses they join and a
-// provider in courses they own or mentor — there is no separate teacher role.
 enum Role {
   USER
   ADMIN
 }
 
-enum TeacherApplicationStatus {
-  PENDING
-  UNDER_REVIEW
-  INTERVIEW
-  APPROVED
-  REJECTED
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ParticipationRole {
+  LEARNER
+  MENTOR
 }
 
 enum EnrollmentStatus {
   ACTIVE
   COMPLETED
   DROPPED
-  SUSPENDED
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  INTERVIEW_SCHEDULED
+  ACCEPTED
+  REJECTED
 }
 
 enum LessonType {
   VIDEO
   READING
-  QUIZ
-  ASSIGNMENT
-}
-
-enum PracticeLanguage {
-  JAVASCRIPT
-  TYPESCRIPT
-  PYTHON
-  JAVA
-  CPP
-  SQL
-  OTHER
-}
-
-enum AttemptResult {
-  ACCEPTED
-  WRONG_ANSWER
-  TIME_LIMIT
-  RUNTIME_ERROR
-  COMPILE_ERROR
-}
-
-enum MessageRoomType {
-  CLASSROOM
-  DIRECT
 }
 
 enum OrderStatus {
@@ -76,89 +65,69 @@ enum OrderStatus {
   REFUNDED
 }
 
-// Trial → full-plan lifecycle
-enum PlanType {
-  TRIAL
-  FULL
-}
-
 // ────────────────────────────────────────────────────────────────────
 // Identity
 // ────────────────────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String
-  firstName     String?
-  lastName      String?
-  role          Role      @default(USER)
-  avatarUrl     String?
-  schoolName    String?
-  className     String?
-  isActive      Boolean   @default(true)
+  id             String   @id @default(cuid())
+  email          String   @unique
+  firstName      String
+  lastName       String
+  role           Role     @default(USER)
+  avatarUrl      String?
+  isActive       Boolean  @default(true)
 
-  // Verification & onboarding
+  // Verification — email is the account identity; mobile is verified lazily
+  // (purchase / mentor application), never during signup.
   emailVerifiedAt DateTime?
-  phone           String?
-  phoneVerifiedAt DateTime?
-  phoneOtpHash    String?
-  phoneOtpExpiresAt DateTime?
-  interestedTopics String[]  @default([])
-  education       String?
-  educationBoard  String?
-  educationClass  String?
-  qualification   String?
-  degree          String?
-  college         String?
-  gradYear        Int?
+  mobile          String?
+  mobileVerifiedAt DateTime?
+  mobileOtpHash   String?
+  mobileOtpExpiresAt DateTime?
+  mobileOtpAttempts  Int    @default(0)
+
+  // Profile — structured education, no arbitrary blobs
+  dateOfBirth     DateTime?
   bio             String?
-  onboardingDone  Boolean   @default(false)
+  educationLevel  String? // dropdown: School | Diploma | Bachelor | Master | PhD | Other
+  institution     String?
+  fieldOfStudy    String?
+  gradYear        Int?
 
-  notifReadAt DateTime?
+  onboardingDone  Boolean  @default(false)
+  notifReadAt     DateTime?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  enrollments        Enrollment[]
-  quizAttempts       QuizAttempt[]
-  practiceAttempts   PracticeAttempt[]
-  activityLogs       ActivityLog[]
-  streaks            Streak?
-  taughtCourses      Course[]          @relation("CourseTeacher")
-  teacherApplications TeacherApplication[]
-  mentorships        CourseMentor[]    @relation("CourseMentorUser")
-  classroomMessages  ClassroomMessage[]
-  notificationsSent  Notification[]     @relation("NotificationSender")
-  resources          Resource[]
+  participations     CourseParticipant[]
+  applications       MentorApplication[]
   orders             Order[]
-  subscriptions      Subscription[]
-  wishlist           WishlistItem[]
-  resourceBookmarks  ResourceBookmark[]
-  liveMeetings       LiveMeeting[]
+  taughtCourses      Course[]             @relation("CourseCreator")
+  createdLessons     Lesson[]
+  createdMeetings    LiveMeeting[]
+  ownedResources     Resource[]
+  conversationsLearner Conversation[]     @relation("ConversationLearner")
+  conversationsMentor  Conversation[]     @relation("ConversationMentor")
+  sentMessages       ConversationMessage[]
+  notifications      Notification[]       @relation("NotificationRecipient")
+  notificationsSent  Notification[]       @relation("NotificationSender")
   auditLogs          AuditLog[]
+  createdContactMessages ContactMessage[] @relation("ContactMessageCreator")
   organizationMemberships OrganizationMembership[]
-  conversationMentor Conversation[]   @relation("ConversationMentor")
-  conversationSent   ConversationMessage[]
+  wishlist           WishlistItem[]
 
   @@index([role])
 }
 
-// ────────────────────────────────────────────────────────────────────
-// Identity verification codes — email code entered on the signup page,
-// BEFORE the account exists, so rows are keyed by identifier not userId.
-// Hash the code; attempts cap = brute-force protection on top of rate limit.
-// ────────────────────────────────────────────────────────────────────
-
-enum VerificationChannel {
-  EMAIL
-}
-
+// Email verification codes — keyed by identifier, not userId (row exists
+// before the account). Code stored as sha256(`${identifier}:${code}`).
 model VerificationCode {
   id         String              @id @default(cuid())
-  channel    VerificationChannel @default(EMAIL)
-  identifier String              // email address
-  codeHash   String              // sha256(`${identifier}:${code}`)
+  channel    String              @default("email")
+  identifier String // email address
+  codeHash   String
   attempts   Int                 @default(0)
   verifiedAt DateTime?
   expiresAt  DateTime
@@ -168,8 +137,369 @@ model VerificationCode {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Wishlist — saved courses; UNIQUE(userId, courseId) makes heart-toggles
-// idempotent at the database level, so a double-click can never duplicate.
+// Courses — admin owns lifecycle, structure, pricing
+// ────────────────────────────────────────────────────────────────────
+
+model Course {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  description String
+  category    String       @default("General")
+  gradeLevel  String?
+  thumbnailUrl String?
+  pricePaise  Int          @default(0) // 0 = free; backend is always authoritative
+  currency    String       @default("INR")
+  status      CourseStatus @default(DRAFT)
+
+  createdById String
+  createdBy   User         @relation("CourseCreator", fields: [createdById], references: [id])
+
+  // Roadmap shell (whole-course intro)
+  roadmapTitle   String?
+  roadmapSummary String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapters      Chapter[]
+  topics        Topic[]
+  lessons       Lesson[]
+  participants  CourseParticipant[]
+  meetings      LiveMeeting[]
+  resources     Resource[]
+  applications  MentorApplication[]
+  orders        Order[]
+  notifications Notification[]
+  wishlist      WishlistItem[]
+  conversations Conversation[]
+
+  @@index([status, createdAt])
+  @@index([category])
+  @@index([createdById])
+}
+
+// Admin roadmap: Chapter → Topic. Stable explicit ordering — never insertion order.
+model Chapter {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  summary   String?
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  topics  Topic[]
+  meetings LiveMeeting[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
+model Topic {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  title     String
+  summary   String?
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lessons  Lesson[]
+  meetings LiveMeeting[]
+  resources Resource[]
+
+  @@unique([chapterId, order])
+  @@index([courseId])
+  @@index([chapterId])
+}
+
+// Mentor-authored teaching content inside admin topics.
+// Mentors teach within the syllabus — they never restructure it.
+model Lesson {
+  id          String     @id @default(cuid())
+  courseId    String
+  course      Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topicId     String
+  topic       Topic      @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  title       String
+  type        LessonType @default(READING)
+  contentUrl  String?
+  textContent String?
+  isPublished Boolean    @default(true)
+  order       Int
+  createdById String
+  createdBy   User       @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+
+  progress LessonProgress[]
+
+  @@unique([topicId, order])
+  @@index([courseId])
+  @@index([topicId])
+}
+
+model LessonProgress {
+  id            String   @id @default(cuid())
+  participantId String
+  participant   CourseParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  lessonId      String
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completedAt   DateTime @default(now())
+
+  @@unique([participantId, lessonId])
+  @@index([lessonId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Participation — LEARNER | MENTOR, one row per user per course.
+// The unique constraint IS the mentor/learner exclusivity rule.
+// ────────────────────────────────────────────────────────────────────
+
+model CourseParticipant {
+  id        String           @id @default(cuid())
+  courseId  String
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      ParticipationRole
+
+  // LEARNER rows: assigned mentor (transaction-safe seat selection) + progress
+  mentorUserId String?
+  progressPct  Float    @default(0)
+  currentTopicId String?
+
+  // MENTOR rows: seat capacity (null → platform Setting mentor_capacity)
+  capacity  Int?
+
+  status    EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime        @default(now())
+  completedAt DateTime?
+  updatedAt DateTime         @updatedAt
+
+  progress   LessonProgress[]
+
+  @@unique([courseId, userId])
+  @@index([userId, role])
+  @@index([courseId, role])
+  @@index([mentorUserId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Mentor applications — course-specific, state machine enforced server-side
+// ────────────────────────────────────────────────────────────────────
+
+model MentorApplication {
+  id       String            @id @default(cuid())
+  userId   String
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId String
+  course   Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status   ApplicationStatus @default(SUBMITTED)
+
+  // Spec fields: qualification + resume; "why fit" optional.
+  qualification String
+  resumePath    String? // private bucket object key
+  message       String?
+
+  // Interview flow (admin fills when scheduling)
+  interviewUrl String?
+  interviewAt  DateTime?
+
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([status])
+  @@index([courseId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Meetings & resources (mentor content)
+// ────────────────────────────────────────────────────────────────────
+
+model LiveMeeting {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chapterId   String?
+  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  topicId     String?
+  topic       Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  title       String
+  description String?
+  scheduledAt DateTime
+  durationMin Int      @default(60)
+  meetingUrl  String
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([courseId, scheduledAt])
+  @@index([topicId])
+}
+
+// File/link attachments. Private files live in the private bucket behind
+// storagePath and are served via short-lived signed URLs — never public URLs.
+model Resource {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  kind          String   @default("pdf") // pdf | doc | slides | video | link | image
+  url           String? // external link (kind = link) or resolved public asset
+  storagePath   String? // private bucket object key (uploads)
+  fileSizeBytes Int?
+  mimeType      String?
+  courseId      String?
+  course        Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topicId       String?
+  topic         Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  ownerId       String
+  owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  downloads     Int      @default(0)
+  isPublished   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([ownerId])
+  @@index([courseId])
+  @@index([topicId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Chat — course-aware learner ↔ mentor only
+// ────────────────────────────────────────────────────────────────────
+
+model Conversation {
+  id            String   @id @default(cuid())
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  learnerUserId String
+  learner       User     @relation("ConversationLearner", fields: [learnerUserId], references: [id], onDelete: Cascade)
+  mentorUserId  String
+  mentor        User     @relation("ConversationMentor", fields: [mentorUserId], references: [id], onDelete: Cascade)
+  title         String?
+  createdAt     DateTime @default(now())
+
+  messages      ConversationMessage[]
+
+  @@unique([courseId, learnerUserId])
+  @@index([mentorUserId])
+}
+
+model ConversationMessage {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Notifications & audit
+// ────────────────────────────────────────────────────────────────────
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipientId String
+  recipient   User     @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  senderId    String?
+  sender      User?    @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+  title       String
+  body        String
+  courseId    String?
+  course      Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([recipientId, createdAt])
+  @@index([courseId])
+}
+
+// Important admin actions. actorId nullable + SetNull: deactivating a user
+// must never destroy the audit trail.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  targetType String
+  targetId   String?
+  meta       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Payments — Razorpay, server-authoritative, order snapshots course price
+// ────────────────────────────────────────────────────────────────────
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  courseId        String
+  course          Course      @relation(fields: [courseId], references: [id])
+  amountPaise     Int // snapshot of Course.pricePaise at purchase time — immutable
+  currency        String      @default("INR")
+  status          OrderStatus @default(CREATED)
+  idempotencyKey  String?     @unique
+  razorpayOrderId String      @unique
+  receiptUrl      String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  payments Payment[]
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  razorpayPaymentId String   @unique
+  signature         String
+  method            String?
+  verified          Boolean  @default(false)
+  rawPayload        Json?
+  createdAt         DateTime @default(now())
+
+  @@index([orderId])
+}
+
+// Append-only webhook trail — never mutated.
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String    @default("razorpay")
+  eventId     String    @unique
+  eventType   String
+  signature   String
+  processed   Boolean   @default(false)
+  processedAt DateTime?
+  payload     Json
+  receivedAt  DateTime  @default(now())
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Misc — wishlist, contact, settings
 // ────────────────────────────────────────────────────────────────────
 
 model WishlistItem {
@@ -184,488 +514,20 @@ model WishlistItem {
   @@index([userId])
 }
 
-// ────────────────────────────────────────────────────────────────────
-// Live meetings — a scheduled event (not just a URL). Enrolled students
-// read; the course owner/mentors/admins create and manage.
-// ────────────────────────────────────────────────────────────────────
-
-model LiveMeeting {
-  id          String         @id @default(cuid())
-  courseId    String
-  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  chapterId   String?
-  chapter     CourseChapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
-  title       String
-  description String?
-  scheduledAt DateTime
-  durationMin Int            @default(60)
-  meetingUrl  String
-  createdById String
-  createdBy   User           @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdAt   DateTime       @default(now())
-
-  @@index([courseId, scheduledAt])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Audit trail — every important admin review/state change recorded.
-// Fire-and-forget writes; never blocks the request that triggered it.
-// ────────────────────────────────────────────────────────────────────
-
-model AuditLog {
-  id         String   @id @default(cuid())
-  actorId    String
-  actor      User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
-  action     String
-  targetType String
-  targetId   String?
-  meta       Json?
-  createdAt  DateTime @default(now())
-
-  @@index([actorId, createdAt])
-  @@index([targetType, targetId])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Teacher onboarding
-// ────────────────────────────────────────────────────────────────────
-
-model TeacherApplication {
-  id          String                  @id @default(cuid())
-  userId      String
-  user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status      TeacherApplicationStatus @default(PENDING)
-  subject     String
-  experience  Int?                    // years (optional — mentoring experience)
-  education   String?
-  qualifications String?              // detailed qualifications / why they fit
-  courseId    String?                 // optional: course they want to mentor
-  course      Course?                 @relation(fields: [courseId], references: [id])
-  resumeUrl   String?
-  message     String?
-  meetingLink String?                 // set by admin when scheduling an interview
-  reviewedBy  String?
-  reviewedAt  DateTime?
-  reviewNote  String?
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @updatedAt
-
-  // One application per user per course; subject-only rows (courseId null)
-  // are kept single by the apply endpoint's lookup.
-  @@unique([userId, courseId])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Courses & digital classrooms
-// ────────────────────────────────────────────────────────────────────
-
-model Course {
-  id           String   @id @default(cuid())
-  slug         String   @unique
-  title        String
-  description  String
-  thumbnailUrl String?
-  subject      String
-  gradeLevel   String?
-  pricePaise   Int?
-  currency     String   @default("INR")
-  isPublished  Boolean  @default(false)
-  teacherId    String
-  teacher      User     @relation("CourseTeacher", fields: [teacherId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // The roadmap itself — admin/owner authored structure, mentors fill content.
-  roadmapTitle      String?
-  roadmapSummary    String?
-  roadmapMeetingUrl String?
-  roadmapRecordingUrl String?
-  roadmapResources  Json     @default("[]") // [{ label, url }] — whole-roadmap attachments
-
-  modules       Module[]
-  chapters      CourseChapter[]
-  notifications Notification[]
-  enrollments   Enrollment[]
-  lessons       Lesson[]
-  chats         ChatRoom[]
-  mentors       CourseMentor[]
-  teacherApplications TeacherApplication[]
-  wishlist      WishlistItem[]
-  meetings      LiveMeeting[]
-  resources     Resource[]
-
-  @@index([teacherId])
-  @@index([subject])
-}
-
-// A member of the course's teaching team. A course can have several mentors
-// (approved via applications or assigned by an admin). Structure belongs to the
-// course; a mentor only fills content (live links, recordings, resources) and
-// carries their own cohort of students.
-model CourseMentor {
-  id        String   @id @default(cuid())
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  mentorId  String
-  mentor    User     @relation("CourseMentorUser", fields: [mentorId], references: [id], onDelete: Cascade)
-  capacity  Int      @default(20) // max students this mentor accepts
-  createdAt DateTime @default(now())
-
-  enrollments Enrollment[]
-
-  @@unique([courseId, mentorId])
-  @@index([mentorId])
-}
-
-// Single chapter of a course roadmap: authored by the admin/course owner, one live meeting,
-// recorded video / YouTube link, and a list of attached resources (Drive links).
-model CourseChapter {
-  id             String   @id @default(cuid())
-  courseId       String
-  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  title          String
-  summary        String?
-  order          Int
-  meetingUrl     String?
-  recordingUrl   String?
-  resources      Json     @default("[]") // [{ label, url }]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  meetings LiveMeeting[]
-  modules  Module[]
-
-  @@unique([courseId, order])
-  @@index([courseId])
-}
-
-model Module {
-  id        String  @id @default(cuid())
-  courseId  String
-  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  chapterId String?
-  chapter   CourseChapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
-  title     String
-  position  Int
-  resources Json     @default("[]") // [{ label, url }] — concept-level attachments
-  lessons   Lesson[]
-
-  @@unique([courseId, chapterId, position])
-  @@index([chapterId])
-}
-
-model Lesson {
-  id          String     @id @default(cuid())
-  moduleId    String
-  module      Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  courseId    String
-  course      Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  title       String
-  type        LessonType @default(READING)
-  contentUrl  String?
-  meetingUrl  String?
-  textContent String?
-  position    Int
-  isPublished Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-
-  quiz          Quiz?
-  progressItems LessonProgress[]
-
-  @@unique([moduleId, position])
-  @@index([courseId])
-}
-
-model Enrollment {
-  id          String           @id @default(cuid())
-  studentId   String
-  student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  courseId    String
-  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseMentorId String?        // the mentor the seeker chose to learn from
-  courseMentor   CourseMentor? @relation(fields: [courseMentorId], references: [id])
-  status      EnrollmentStatus @default(ACTIVE)
-  progressPct Float            @default(0)
-  enrolledAt    DateTime         @default(now())
-  completedAt   DateTime?
-  progressItems LessonProgress[]
-  conversationConversation Conversation?
-
-  @@index([courseMentorId, status])
-
-  @@unique([studentId, courseId])
-  @@index([courseId])
-}
-
-model LessonProgress {
-  id          String   @id @default(cuid())
-  enrollmentId String
-  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  lessonId    String
-  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  completedAt DateTime @default(now())
-
-  @@unique([enrollmentId, lessonId])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Quizzes
-// ────────────────────────────────────────────────────────────────────
-
-model Quiz {
-  id          String  @id @default(cuid())
-  lessonId    String  @unique
-  lesson      Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  title       String
-  passScore   Int     @default(60) // percent
-  questions   QuizQuestion[]
-  attempts    QuizAttempt[]
-}
-
-model QuizQuestion {
-  id       String @id @default(cuid())
-  quizId   String
-  quiz     Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  prompt   String
-  options  String[] // 2–6 options; correct index stored below
-  correct  Int
-  position Int
-
-  @@unique([quizId, position])
-}
-
-model QuizAttempt {
-  id         String   @id @default(cuid())
-  quizId     String
-  quiz       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  studentId  String
-  student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  score      Float
-  passed     Boolean
-  answers    Json     // { questionId: selectedIndex }
-  createdAt  DateTime @default(now())
-
-  @@index([studentId])
-  @@index([quizId])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Practice zone
-// ────────────────────────────────────────────────────────────────────
-
-model PracticeProblem {
-  id          String           @id @default(cuid())
-  slug        String           @unique
-  title       String
-  description String
-  topic       String
-  category    String          @default("DSA") // DSA | Aptitude | Exam Prep | Science | Math | English
-  difficulty  Int             @default(1) // 1 easy, 2 medium, 3 hard
-  language    PracticeLanguage @default(JAVASCRIPT)
-  starterCode String?
-  solution    String?
-  testCases   Json             @default("[]")
-  createdAt   DateTime         @default(now())
-
-  attempts PracticeAttempt[]
-
-  @@index([topic])
-  @@index([category])
-  @@index([language])
-}
-
-model PracticeAttempt {
-  id         String        @id @default(cuid())
-  problemId  String
-  problem    PracticeProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  studentId  String
-  student    User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  result     AttemptResult
-  code       String
-  runtimeMs  Int?
-  createdAt  DateTime      @default(now())
-
-  @@index([studentId, problemId])
-}
-
-// Daily activity + streaks (personal dashboard)
-model ActivityLog {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  day       DateTime @db.Date
-  kind      String   // "lesson" | "quiz" | "practice" | "enroll" | "resource"
-  count     Int      @default(1)
-
-  @@unique([userId, day, kind])
-  @@index([userId, day])
-}
-
-model Streak {
-  userId       String   @id
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  current      Int      @default(0)
-  longest      Int      @default(0)
-  lastActiveOn DateTime @db.Date
-}
-
-model Resource {
-  id            String   @id @default(cuid())
-  title         String
-  description   String?
-  subject       String
-  kind          String   @default("pdf") // pdf | doc | slides | video | link
-  thumbnailUrl  String?
-  fileUrl       String
-  fileSizeBytes Int?     // uploaded bytes — used for per-user quota
-  mimeType      String?
-  storagePath   String?  // Supabase Storage object key (uploads only)
-  courseId      String?
-  course        Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull) // course-library resource (mentors)
-  ownerId       String?
-  owner         User?    @relation(fields: [ownerId], references: [id], onDelete: SetNull)
-  downloads     Int      @default(0)
-  isPublished   Boolean  @default(true)
-  createdAt     DateTime @default(now())
-
-  bookmarks ResourceBookmark[]
-
-  @@index([subject])
-  @@index([ownerId])
-  @@index([courseId])
-}
-
-model ResourceBookmark {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  resourceId String
-  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-
-  @@unique([userId, resourceId])
-  @@index([userId])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Classroom / chat / notifications
-// ────────────────────────────────────────────────────────────────────
-
-model ChatRoom {
-  id        String         @id @default(cuid())
-  courseId  String         @unique // one classroom per course
-  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  type      MessageRoomType @default(CLASSROOM)
-  title     String?
-  createdAt DateTime       @default(now())
-  messages  ClassroomMessage[]
-}
-
-model ClassroomMessage {
-  id        String   @id @default(cuid())
-  roomId    String
-  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  senderId  String
-  sender    User     @relation(fields: [senderId], references: [id])
-  body      String
-  createdAt DateTime @default(now())
-
-  @@index([roomId])
-}
-
-model Notification {
-  id        String   @id @default(cuid())
-  senderId  String?
-  sender    User?    @relation("NotificationSender", fields: [senderId], references: [id])
-  title     String
-  body      String
-  scope     String   @default("ALL") // ALL | COURSE
-  courseId  String?
-  course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@index([courseId, createdAt])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Payments — Razorpay with tamper-proof order ledger
-// ────────────────────────────────────────────────────────────────────
-
-model Order {
-  id             String      @id @default(cuid())
-  orderNumber    String      @unique @default(cuid())
-  userId         String
-  user           User        @relation(fields: [userId], references: [id])
-  razorpayOrderId String     @unique
-  amountPaise    Int
-  currency       String      @default("INR")
-  plan           PlanType    @default(FULL)
-  status         OrderStatus @default(CREATED)
-  idempotencyKey String?     @unique
-  notes          Json?
-  receiptUrl     String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-
-  payments Payment[]
-
-  @@index([userId])
-}
-
-model Payment {
-  id               String   @id @default(cuid())
-  orderId          String
-  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  razorpayPaymentId String  @unique
-  signature        String
-  method           String?
-  verified         Boolean  @default(false)
-  rawPayload       Json?
-  createdAt        DateTime @default(now())
-
-  @@index([orderId])
-}
-
-// Webhook events — append-only, never mutated (tamper-proof trail)
-model WebhookEvent {
-  id           String   @id @default(cuid())
-  provider     String   @default("razorpay")
-  eventId      String   @unique
-  eventType    String
-  signature    String
-  processed    Boolean  @default(false)
-  processedAt  DateTime?
-  payload      Json
-  receivedAt   DateTime @default(now())
-}
-
-model Subscription {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  plan      PlanType
-  startsAt  DateTime @default(now())
-  expiresAt DateTime?
-  orderRef  String?
-  isActive  Boolean  @default(true)
-
-  @@index([userId])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Admin — contact messages & platform settings
-// ────────────────────────────────────────────────────────────────────
-
 model ContactMessage {
-  id        String    @id @default(cuid())
-  name      String
-  email     String
-  school    String?
-  subject   String?
-  body      String
-  isRead    Boolean   @default(false)
-  handledAt DateTime?
-  createdAt DateTime  @default(now())
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String?
+  body        String
+  handledById String?
+  handler     User?    @relation("ContactMessageCreator", fields: [handledById], references: [id], onDelete: SetNull)
+  isRead      Boolean  @default(false)
+  handledAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([isRead, createdAt])
 }
 
 model Setting {
@@ -675,7 +537,7 @@ model Setting {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Business domains — organizations, media, portfolio, programs
+// Public website CMS — media, work, partners, team, programs
 // ────────────────────────────────────────────────────────────────────
 
 enum OrganizationType {
@@ -687,24 +549,24 @@ enum OrganizationType {
 }
 
 model Organization {
-  id          String           @id @default(cuid())
-  slug        String           @unique
-  name        String
-  type        OrganizationType @default(SCHOOL)
-  summary     String?
-  description String?
-  logoUrl     String?
-  websiteUrl  String?
+  id           String           @id @default(cuid())
+  slug         String           @unique
+  name         String
+  type         OrganizationType @default(PARTNER)
+  summary      String?
+  description  String?
+  logoUrl      String?
+  websiteUrl   String?
   contactEmail String?
-  isPublished Boolean          @default(false)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  isPublished  Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
   members  OrganizationMembership[]
   workItems WorkItem[]
   programs  Program[]
 
-  @@index([type])
+  @@index([type, isPublished])
 }
 
 model OrganizationMembership {
@@ -722,8 +584,8 @@ model OrganizationMembership {
 
 // Reusable asset: logos, covers, screenshots, marketing media.
 // kind: image | video | logo | screenshot
-// category: for logos — SCHOOL | FRANCHISE | NGO | OTHER; for photos — SCHOOLS | DIGITAL | MARKETING
-// position: named homepage slot the photo fills (hero, proof-feature, …)
+// category: SCHOOL | FRANCHISE | NGO | OTHER | SCHOOLS | DIGITAL | MARKETING
+// position: named homepage slot (hero, proof-feature, …)
 model MediaAsset {
   id        String   @id @default(cuid())
   alt       String?
@@ -736,16 +598,15 @@ model MediaAsset {
   @@index([kind, category])
 }
 
-// Portfolio item shown on /work and /work/[slug].
 model WorkItem {
   id             String   @id @default(cuid())
   slug           String   @unique
   title          String
   summary        String
   body           String?
-  category       String   @default("Digital Solution") // Student Build | Mentoring | School Work
+  category       String   @default("Digital Solution")
   coverUrl       String?
-  mediaIds       Json     @default("[]") // [cuid of MediaAsset]
+  mediaIds       Json     @default("[]") // [MediaAsset.id]
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   isPublished    Boolean  @default(false)
@@ -757,52 +618,21 @@ model WorkItem {
   @@index([isPublished, publishedAt])
 }
 
-// Tuition, school programs, workshops (enrollment handled separately).
 model Program {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  summary     String
-  body        String?
-  pricePaise  Int?
-  currency    String   @default("INR")
-  coverUrl    String?
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  summary        String
+  body           String?
+  pricePaise     Int?
+  currency       String   @default("INR")
+  coverUrl       String?
   organizationId String?
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  isPublished Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  isPublished    Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([organizationId])
   @@index([isPublished])
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Private mentor ↔ student conversation (per enrollment, no student↔student)
-// ────────────────────────────────────────────────────────────────────
-
-model Conversation {
-  id           String   @id @default(cuid())
-  enrollmentId String   @unique
-  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  mentorId     String
-  mentor       User     @relation("ConversationMentor", fields: [mentorId], references: [id])
-  title        String?
-  createdAt    DateTime @default(now())
-
-  messages ConversationMessage[]
-
-  @@index([mentorId])
-}
-
-model ConversationMessage {
-  id             String       @id @default(cuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderId       String
-  sender         User         @relation(fields: [senderId], references: [id])
-  body           String
-  createdAt      DateTime     @default(now())
-
-  @@index([conversationId])
 }
