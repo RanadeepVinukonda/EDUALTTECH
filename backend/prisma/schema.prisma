@@ -636,3 +636,18 @@ model Program {
   @@index([organizationId])
   @@index([isPublished])
 }
+
+// Team showcase (about page / footer). Admin-managed.
+model TeamMember {
+  id          String   @id @default(cuid())
+  name        String
+  title       String
+  bio         String?
+  avatarUrl   String?
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, order])
+}
