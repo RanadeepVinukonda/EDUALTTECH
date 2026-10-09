@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type Request } from "express";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { uploadPrivate, removePrivate, signedUrl, assertUploadable } from "../../lib/storage.js";
@@ -143,7 +143,7 @@ router.patch("/:id", requireAuth, validate({
     isPublished: z.boolean().optional(),
     linkUrl: z.string().url().nullable().optional(),
   }),
-}), async (req, res) => {
+}), async (req: Request<{ id: string }>, res) => {
   const existing = await prisma.resource.findUnique({ where: { id: req.params.id }, select: { ownerId: true, courseId: true, storagePath: true } });
   if (!existing) throw ApiError.notFound("Resource not found");
 
@@ -166,7 +166,7 @@ router.patch("/:id", requireAuth, validate({
   res.json({ success: true, data: { resource: updated } });
 });
 
-router.delete("/:id", requireAuth, async (req, res) => {
+router.delete("/:id", requireAuth, async (req: Request<{ id: string }>, res) => {
   const existing = await prisma.resource.findUnique({ where: { id: req.params.id }, select: { ownerId: true, storagePath: true } });
   if (!existing) throw ApiError.notFound("Resource not found");
   if (existing.ownerId !== req.user!.id && req.user!.role !== "ADMIN") {

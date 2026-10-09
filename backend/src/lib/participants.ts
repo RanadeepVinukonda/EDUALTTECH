@@ -1,7 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import { prisma } from "./prisma.js";
 import { mentorCapacityDefault } from "./settings.js";
-import { ApiError } from "../utils/ApiError.js";
 
 type Tx = Prisma.TransactionClient;
 

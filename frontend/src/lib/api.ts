@@ -2,6 +2,13 @@ import { getSupabase } from "./supabase";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/backend";
 
+/** Fired when the backend rejects a request as unauthenticated. Consumed once by the session watcher. */
+export const SESSION_EXPIRED_EVENT = "edu:session-expired";
+
+function signalSessionExpired(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+}
+
 export interface ApiErrorShape {
   code: string;
   message: string;
@@ -54,11 +61,18 @@ export async function api<T = unknown>(path: string, opts: ApiOptions = {}): Pro
     if (token) headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const res = await fetch(`${BASE}${withQuery(path, opts.query)}`, {
-    ...opts,
-    headers,
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${withQuery(path, opts.query)}`, {
+      ...opts,
+      headers,
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    });
+  } catch (err) {
+    // Transport failure / offline / aborted — not an authoritative backend response.
+    if (err instanceof DOMException && err.name === "AbortError") throw err;
+    throw new ApiError(0, { code: "NETWORK", message: "Could not reach the server." });
+  }
 
   const payload = (await res.json().catch(() => null)) as Envelope<T> | null;
 
@@ -66,6 +80,7 @@ export async function api<T = unknown>(path: string, opts: ApiOptions = {}): Pro
     throw new ApiError(res.status, { code: "INVALID_RESPONSE", message: `Unexpected response (${res.status})` });
   }
   if (!payload.success) {
+    if (res.status === 401 || payload.error.code === "UNAUTHORIZED") signalSessionExpired();
     throw new ApiError(res.status, payload.error);
   }
   return payload.data;
