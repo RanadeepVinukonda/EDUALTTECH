@@ -1,13 +1,11 @@
-import { Router } from "express";
-import { z } from "zod";
+import { Router, type Request } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { requireAuth } from "../../middlewares/auth.js";
-import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 
 const router = Router();
 
-router.get("/", requireAuth, async (req, res) => {
+router.get("/", requireAuth, async (req: Request<{ courseId: string }>, res) => {
   const items = await prisma.wishlistItem.findMany({
     where: { userId: req.user!.id },
     orderBy: { createdAt: "desc" },
@@ -20,7 +18,7 @@ router.get("/", requireAuth, async (req, res) => {
   res.json({ success: true, data: { items } });
 });
 
-router.post("/:courseId", requireAuth, async (req, res) => {
+router.post("/:courseId", requireAuth, async (req: Request<{ courseId: string }>, res) => {
   const course = await prisma.course.findUnique({ where: { id: req.params.courseId }, select: { id: true, status: true } });
   if (!course || course.status !== "PUBLISHED") throw ApiError.notFound("Course not found");
 
@@ -32,7 +30,7 @@ router.post("/:courseId", requireAuth, async (req, res) => {
   res.status(201).json({ success: true, data: { item } });
 });
 
-router.delete("/:courseId", requireAuth, async (req, res) => {
+router.delete("/:courseId", requireAuth, async (req: Request<{ courseId: string }>, res) => {
   await prisma.wishlistItem.deleteMany({
     where: { userId: req.user!.id, courseId: req.params.courseId },
   });

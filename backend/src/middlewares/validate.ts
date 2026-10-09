@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import type { ZodType } from "zod";
 import { ApiError } from "../utils/ApiError.js";
