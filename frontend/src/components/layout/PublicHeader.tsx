@@ -26,7 +26,7 @@ export default function PublicHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="EduAltTech home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/media/brand/logo.svg" alt="EduAltTech" width={128} height={36} className="h-8 w-auto" />
+          <img src="/media/brand/logo.png" alt="EduAltTech" width={432} height={436} className="h-8 w-auto" />
         </Link>
 
         <nav aria-label="Primary" className="ml-4 hidden items-center gap-1 lg:flex">

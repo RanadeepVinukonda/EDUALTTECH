@@ -211,7 +211,7 @@ export default async function AboutPage() {
             <div className="grid gap-8 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-12">
               <div className="flex h-20 w-56 items-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/media/brand/logo.svg" alt="EduAltTech" width={128} height={36} className="h-10 w-auto brightness-0 invert" />
+                <img src="/media/brand/logo.png" alt="EduAltTech" width={432} height={436} className="h-10 w-auto brightness-0 invert" />
               </div>
               <div className="max-w-2xl">
                 <h2 className="font-display text-2xl font-bold text-white">Part of Setsuzoku</h2>
