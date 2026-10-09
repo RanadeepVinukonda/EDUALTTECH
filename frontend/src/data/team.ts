@@ -1,0 +1,19 @@
+export interface TeamMember {
+  name: string;
+  image: string;
+}
+
+export const TEAM: TeamMember[] = [
+  { name: "Ranadeep Vinukonda", image: "team/ranadeep.jpg" },
+  { name: "Yuva", image: "team/Yuva.jpeg" },
+  { name: "Venkat", image: "team/venkat.jpg" },
+  { name: "Uma", image: "team/uma.jpg" },
+  { name: "Srinivas", image: "team/srinivas.jpeg" },
+  { name: "Sanju", image: "team/sanju.jpeg" },
+  { name: "Lavaraju", image: "team/lavaraju.jpg" },
+  { name: "Kavya", image: "team/kavya.jpeg" },
+  { name: "Gnanasri", image: "team/gnanasri.jpg" },
+  { name: "Alrihab", image: "team/alrihab.jpg" },
+];
+
+export const teamImage = (file: string) => `/media/${file}`;
