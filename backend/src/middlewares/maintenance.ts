@@ -10,7 +10,9 @@ import { config } from "../config/env.js";
  */
 export function maintenanceGate(req: Request, res: Response, next: NextFunction): void {
   if (!config.maintenance.enabled) return next();
-  if (req.method === "OPTIONS" || req.path === "/health") return next();
+  // CORS preflight, health probes, and provider webhooks (server-to-server,
+  // HMAC-signed) must keep working while the site is locked.
+  if (req.method === "OPTIONS" || req.path === "/health" || req.path.startsWith("/api/payments/webhook")) return next();
 
   const sent = Buffer.from(req.header("x-maintenance-token") ?? "", "hex");
   const expected = Buffer.from(config.maintenance.tokenHash, "hex");

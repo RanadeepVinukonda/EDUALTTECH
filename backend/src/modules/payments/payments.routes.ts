@@ -49,9 +49,12 @@ router.post(
     });
     if (enrolled) throw ApiError.conflict("You are already enrolled in this course", "ALREADY_ENROLLED");
 
-    // Same checkout resumed (page refresh / double click) → return the same order.
-    if (idempotencyKey) {
-      const existing = await prisma.order.findUnique({ where: { idempotencyKey }, include: orderInclude });
+    // Same checkout resumed (page refresh / double click) → return the same
+    // order. The key is namespaced per user so one account can never resume or
+    // peek at another account's order by guessing a key.
+    const orderKey = idempotencyKey ? `${userId}:${idempotencyKey}` : null;
+    if (orderKey) {
+      const existing = await prisma.order.findUnique({ where: { idempotencyKey: orderKey }, include: orderInclude });
       if (existing) {
         return res.json({ success: true, data: checkoutPayload(existing) });
       }
@@ -71,18 +74,26 @@ router.post(
         courseId,
         amountPaise: course.pricePaise, // immutable snapshot
         currency: course.currency,
-        idempotencyKey: idempotencyKey ?? null,
+        idempotencyKey: orderKey,
         razorpayOrderId: `pending_${randomUUID()}`,
       },
       include: orderInclude,
     });
 
-    const rzp = await razorpay().orders.create({
-      amount: order.amountPaise,
-      currency: order.currency,
-      receipt: order.orderNumber.slice(0, 40),
-      notes: { dbOrderId: order.id, courseId, userId },
-    });
+    let rzp: { id: string };
+    try {
+      rzp = await razorpay().orders.create({
+        amount: order.amountPaise,
+        currency: order.currency,
+        receipt: order.orderNumber.slice(0, 40),
+        notes: { dbOrderId: order.id, courseId, userId },
+      });
+    } catch (err) {
+      // Provider call failed before a real order existed — drop the placeholder
+      // so the idempotency key stays usable for a clean retry.
+      await prisma.order.delete({ where: { id: order.id } }).catch(() => undefined);
+      throw err;
+    }
 
     const updated = await prisma.order.update({
       where: { id: order.id },
@@ -172,13 +183,17 @@ router.post("/webhook", async (req, res) => {
   const rawBody = (req as unknown as { rawBody?: Buffer }).rawBody ?? (Buffer.isBuffer(req.body) ? req.body : undefined);
   if (typeof signature !== "string" || !rawBody) throw ApiError.unauthorized("Missing signature");
 
-  const ok = verifyHmac(rawBody.toString("utf8"), signature, config.razorpay.webhookSecret || config.razorpay.keySecret || "");
+  const secret = config.razorpay.webhookSecret || config.razorpay.keySecret;
+  if (!secret) throw new ApiError(503, "Payments are not configured.", "PAYMENTS_NOT_CONFIGURED");
+
+  const ok = verifyHmac(rawBody.toString("utf8"), signature, secret);
   if (!ok) throw ApiError.unauthorized("Invalid webhook signature");
 
   const event = JSON.parse(rawBody.toString("utf8")) as {
     id: string; event: string;
     payload?: { payment?: { entity?: { id?: string; order_id?: string; method?: string; error?: unknown } } };
   };
+  if (!event?.id || !event.event) throw ApiError.badRequest("Malformed webhook payload");
 
   // Store-once: second delivery of the same event id short-circuits below.
   const record = await prisma.webhookEvent.upsert({
