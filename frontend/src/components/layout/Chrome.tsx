@@ -5,7 +5,7 @@ import PublicHeader from "./PublicHeader";
 import PublicFooter from "./PublicFooter";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 
-const APP_PREFIXES = ["/dashboard", "/onboarding", "/checkout"];
+const APP_PREFIXES = ["/dashboard", "/onboarding", "/checkout", "/maintenance"];
 
 export default function Chrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";

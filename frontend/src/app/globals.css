@@ -63,6 +63,99 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ─── Maintenance page animations ─────────────────────────────── */
+
+.maint-mark {
+  position: relative;
+  width: 112px;
+  height: 112px;
+}
+
+.m-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+}
+
+.m-ring-1 {
+  border: 1px solid rgba(130, 213, 160, 0.28);
+}
+
+.m-ring-2 {
+  inset: 14px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.3);
+  animation: maint-spin 5s linear infinite;
+}
+
+.m-ring-3 {
+  inset: 28px;
+  border: 2px solid transparent;
+  border-top-color: var(--color-brand-400);
+  animation: maint-spin 1.8s ease-in-out infinite;
+}
+
+.m-core {
+  position: absolute;
+  inset: 46px;
+  border-radius: 9999px;
+  background: var(--color-brand-400);
+  box-shadow: 0 0 0 6px rgba(79, 188, 117, 0.14), 0 0 24px rgba(79, 188, 117, 0.35);
+  animation: maint-pulse 2.4s ease-in-out infinite;
+}
+
+.maint-dots {
+  background-image: radial-gradient(1px, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: center;
+}
+
+.maint-bar {
+  position: relative;
+  width: 180px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.maint-bar-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, var(--color-brand-300), transparent);
+  animation: maint-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes maint-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes maint-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes maint-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(290%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
