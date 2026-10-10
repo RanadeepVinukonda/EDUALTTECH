@@ -10,9 +10,10 @@ import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import LessonManager from "./LessonManager";
 import MeetingManager from "./MeetingManager";
+import LearnerRoster from "./LearnerRoster";
 import { buttonClass } from "@/components/ui/Button";
 
-type Tab = "overview" | "curriculum" | "meetings";
+type Tab = "overview" | "learners" | "curriculum" | "meetings";
 
 export default function TeachingWorkspace({ slug }: { slug: string }) {
   const { detail, roadmap, loading, error, reload } = useCourseRoadmap(slug);
@@ -41,6 +42,7 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
+    { id: "learners", label: "Learners" },
     { id: "curriculum", label: "Curriculum" },
     { id: "meetings", label: "Meetings" },
   ];
@@ -106,12 +108,10 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
             Course metadata and settings are managed by admins. As a mentor you manage lessons and
             meetings for this course.
           </p>
-          <p role="note" className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-            An individual learner roster isn&apos;t available in the current backend; only the
-            enrolled count is shown.
-          </p>
         </div>
       )}
+
+      {tab === "learners" && <LearnerRoster slug={course.slug} />}
 
       {tab === "curriculum" && (
         roadmap

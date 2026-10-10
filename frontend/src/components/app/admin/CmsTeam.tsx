@@ -101,6 +101,7 @@ export default function CmsTeam() {
                   </button>
                 </div>
                 {m.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={m.avatarUrl} alt="" loading="lazy" className="h-11 w-11 rounded-full object-cover" />
                 ) : (
                   <span aria-hidden className="grid h-11 w-11 place-items-center rounded-full bg-slate-100 text-sm font-semibold text-slate-500">

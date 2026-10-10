@@ -74,7 +74,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
     try {
       await apiPost(`/courses/${courseId}/enroll`);
       notifySuccess("You're enrolled. Welcome aboard.");
-      window.location.assign(`/dashboard/courses/${slug}/roadmap`);
+      router.push(`/dashboard/courses/${slug}/roadmap`);
     } catch (err) {
       handleApiError(err);
       setBusy(false);
@@ -105,10 +105,10 @@ export default function CheckoutView({ slug }: { slug: string }) {
           try {
             await apiPost("/payments/verify", response);
             sessionStorage.removeItem(`checkout:key:${courseId}`);
-            window.location.assign(`/checkout/result?order=${encodeURIComponent(payload.razorpayOrderId)}`);
+            router.push(`/checkout/result?order=${encodeURIComponent(payload.razorpayOrderId)}`);
           } catch (err) {
             handleApiError(err);
-            window.location.assign(`/checkout/result?order=${encodeURIComponent(payload.razorpayOrderId)}`);
+            router.push(`/checkout/result?order=${encodeURIComponent(payload.razorpayOrderId)}`);
           }
         },
         modal: {

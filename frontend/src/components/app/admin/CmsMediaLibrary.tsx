@@ -106,7 +106,8 @@ export default function CmsMediaLibrary() {
               <li key={a.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <div className="aspect-[4/3] overflow-hidden bg-slate-100">
                   {a.kind === "image" || a.kind === "logo" || a.kind === "icon" ? (
-                    <img src={a.url} alt={a.alt ?? ""} loading="lazy" className="h-full w-full object-cover" />
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={a.url} alt={a.alt ?? ""} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
                     <div className="grid h-full place-items-center text-xs font-semibold uppercase tracking-wide text-slate-500">
                       {a.kind}
@@ -292,6 +293,7 @@ function MediaEditor({ item, onClose, onSaved }: { item: MediaAssetRow | null; o
         </div>
         {isUrl(url.trim()) && (kind === "image" || kind === "logo" || kind === "icon") && (
           <div className="overflow-hidden rounded-xl border border-slate-200">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={url.trim()} alt={alt || "Preview"} className="max-h-48 w-full object-contain bg-slate-50" />
           </div>
         )}

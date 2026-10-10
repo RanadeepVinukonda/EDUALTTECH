@@ -14,6 +14,7 @@
     "build": "npm run build -w backend && npm run build -w frontend",
     "typecheck": "npm run typecheck -w backend && npm run typecheck -w frontend",
     "lint": "eslint .",
+    "test": "vitest run",
     "db:generate": "npm run prisma:generate -w backend",
     "prisma:generate": "npm run prisma:generate -w backend",
     "db:push": "npm run prisma:push -w backend",
@@ -28,7 +29,8 @@
     "eslint": "^10.12.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
-    "typescript-eslint": "^8.71.1"
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=18.18"

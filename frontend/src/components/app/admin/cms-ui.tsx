@@ -166,6 +166,7 @@ export function MediaPicker({
                       }`}
                     >
                       <span className="block aspect-square overflow-hidden bg-slate-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={a.url} alt={a.alt ?? ""} loading="lazy" className="h-full w-full object-cover" />
                       </span>
                       <span className="block truncate px-2 py-1 text-xs text-slate-600">{a.category ?? a.kind}</span>
@@ -211,6 +212,7 @@ export function MediaReference({
   }
   return (
     <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-2">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={url} alt={alt ?? ""} loading="lazy" className="h-14 w-20 rounded-lg object-cover" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs text-slate-500">{url}</p>

@@ -201,6 +201,52 @@ router.get("/:slug", optionalAuth, async (req, res) => {
   });
 });
 
+// ── Learner roster (course staff only) ─────────────────────────────
+
+router.get("/:slug/learners", requireAuth, async (req, res) => {
+  const course = await prisma.course.findFirst({
+    where: { OR: [{ id: req.params.slug }, { slug: req.params.slug }] },
+    select: { id: true },
+  });
+  if (!course) throw ApiError.notFound("Course not found");
+
+  const access = await getCourseAccess(course.id, req.user!);
+  if (!access.isStaff) throw ApiError.forbidden("Only course staff can view the learner roster");
+
+  const rows = await prisma.courseParticipant.findMany({
+    where: { courseId: course.id, role: "LEARNER", status: "ACTIVE" },
+    orderBy: { enrolledAt: "desc" },
+    select: {
+      id: true, status: true, progressPct: true, enrolledAt: true, mentorUserId: true,
+      user: { select: { id: true, firstName: true, lastName: true, avatarUrl: true, email: true } },
+    },
+  });
+
+  const mentorIds = [...new Set(rows.map((r) => r.mentorUserId).filter((id): id is string => !!id))];
+  const mentors = mentorIds.length === 0
+    ? []
+    : await prisma.user.findMany({
+        where: { id: { in: mentorIds } },
+        select: { id: true, firstName: true, lastName: true },
+      });
+  const mentorMap = new Map(mentors.map((m) => [m.id, m]));
+
+  res.json({
+    success: true,
+    data: {
+      learners: rows.map((r) => ({
+        id: r.id,
+        user: r.user,
+        status: r.status,
+        progressPct: r.progressPct,
+        enrolledAt: r.enrolledAt,
+        mentor: r.mentorUserId ? (mentorMap.get(r.mentorUserId) ?? null) : null,
+      })),
+      total: rows.length,
+    },
+  });
+});
+
 // ── Create (admin) ─────────────────────────────────────────────────
 
 const courseBody = z.object({

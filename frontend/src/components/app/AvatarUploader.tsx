@@ -60,7 +60,10 @@ export default function AvatarUploader({ avatarUrl, firstName, lastName }: { ava
         </span>
       )}
       <div>
-        <input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={onPick} />
+        <label className="sr-only" htmlFor="avatar-file">
+          Profile photo (PNG or JPG, up to 2 MB)
+        </label>
+        <input ref={inputRef} id="avatar-file" type="file" accept="image/*" className="sr-only" onChange={onPick} />
         <Button type="button" variant="secondary" size="sm" loading={busy} onClick={() => inputRef.current?.click()}>
           {avatarUrl ? "Change photo" : "Upload photo"}
         </Button>

@@ -110,6 +110,7 @@ export default function CmsOrganizations() {
                     <td className="px-2 py-3">
                       <div className="flex items-center gap-2">
                         {o.logoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={o.logoUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-contain" />
                         ) : (
                           <span aria-hidden className="grid h-8 w-8 place-items-center rounded bg-slate-100 text-xs font-semibold text-slate-500">
