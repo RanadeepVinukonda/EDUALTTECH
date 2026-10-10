@@ -1,6 +1,11 @@
 import { cookies } from "next/headers";
 
-const ORIGIN = process.env.BACKEND_ORIGIN ?? "http://localhost:5000";
+// Server-side origin for backend API calls. BACKEND_ORIGIN is required in
+// production; fall back to the deployed backend so misconfigured env vars
+// can't silently break server-rendered public pages.
+const ORIGIN =
+  process.env.BACKEND_ORIGIN ??
+  (process.env.NODE_ENV === "production" ? "https://edualttech.onrender.com" : "http://localhost:5000");
 
 type Query = Record<string, string | number | undefined>;
 

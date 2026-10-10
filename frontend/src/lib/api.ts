@@ -1,6 +1,12 @@
 import { getSupabase } from "./supabase";
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/backend";
+// Browser-side base for the backend API. NEXT_PUBLIC_API_BASE is inlined at
+// build time; when it's missing we fall back to the deployed backend in
+// production so the site works even if the env var is misconfigured, and to
+// the dev-only /backend proxy in development.
+const BASE =
+  process.env.NEXT_PUBLIC_API_BASE ??
+  (process.env.NODE_ENV === "production" ? "https://edualttech.onrender.com" : "/backend");
 
 const MAINT_KEY_COOKIE = "maint_key";
 
