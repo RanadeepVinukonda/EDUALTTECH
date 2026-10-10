@@ -1,6 +1,20 @@
+import { cookies } from "next/headers";
+
 const ORIGIN = process.env.BACKEND_ORIGIN ?? "http://localhost:5000";
 
 type Query = Record<string, string | number | undefined>;
+
+async function maintHeaders(): Promise<HeadersInit> {
+  const headers: Record<string, string> = {};
+  try {
+    const store = await cookies();
+    const key = store.get("maint_key")?.value;
+    if (key) headers["x-maintenance-token"] = key;
+  } catch {
+    // Outside a request context — no cookie available. Fine.
+  }
+  return headers;
+}
 
 /**
  * Server-side fetch for public (unauthenticated) content.
@@ -15,7 +29,10 @@ export async function publicFetch<T>(path: string, query: Query = {}, revalidate
   const qs = params.toString();
 
   try {
-    const res = await fetch(`${ORIGIN}/api${path}${qs ? `?${qs}` : ""}`, { next: { revalidate } });
+    const res = await fetch(`${ORIGIN}/api${path}${qs ? `?${qs}` : ""}`, {
+      next: { revalidate },
+      headers: await maintHeaders(),
+    });
     if (!res.ok) return null;
     const json = (await res.json()) as { success?: boolean; data?: T };
     return json.success && json.data !== undefined ? json.data : null;
@@ -41,7 +58,10 @@ export async function publicFetchStrict<T>(
   const qs = params.toString();
 
   try {
-    const res = await fetch(`${ORIGIN}/api${path}${qs ? `?${qs}` : ""}`, { next: { revalidate } });
+    const res = await fetch(`${ORIGIN}/api${path}${qs ? `?${qs}` : ""}`, {
+      next: { revalidate },
+      headers: await maintHeaders(),
+    });
     if (res.status === 404) return { data: null, error: false };
     if (!res.ok) return { data: null, error: true };
     const json = (await res.json()) as { success?: boolean; data?: T };

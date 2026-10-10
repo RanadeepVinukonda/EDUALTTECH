@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const COOKIE = "maint_access";
+const KEY_COOKIE = "maint_key";
 
 const hash = (value: string) => createHash("sha256").update(value).digest();
 
@@ -25,13 +26,23 @@ export async function GET(req: NextRequest) {
 
   if (isLock) {
     res.cookies.delete(COOKIE);
+    res.cookies.delete(KEY_COOKIE);
     return res;
   }
 
-  res.cookies.set(COOKIE, hash(secret ?? token).toString("hex"), {
+  const value = hash(secret ?? token).toString("hex");
+  const secure = process.env.NODE_ENV === "production";
+  res.cookies.set(COOKIE, value, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure,
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+  res.cookies.set(KEY_COOKIE, value, {
+    httpOnly: false,
+    sameSite: "lax",
+    secure,
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });

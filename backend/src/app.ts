@@ -6,6 +6,7 @@ import morgan from "morgan";
 import { config } from "./config/env.js";
 import { logger } from "./utils/logger.js";
 import { requestId } from "./middlewares/request-id.js";
+import { maintenanceGate } from "./middlewares/maintenance.js";
 import { apiLimiter } from "./middlewares/rate-limit.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.js";
 
@@ -44,6 +45,8 @@ export function createApp() {
     }),
   );
   app.use(express.urlencoded({ extended: true }));
+
+  app.use(maintenanceGate);
 
   app.get("/health", (_req, res) => {
     res.json({ success: true, data: { ok: true, env: config.env } });

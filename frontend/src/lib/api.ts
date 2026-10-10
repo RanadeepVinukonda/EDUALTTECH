@@ -2,6 +2,18 @@ import { getSupabase } from "./supabase";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/backend";
 
+const MAINT_KEY_COOKIE = "maint_key";
+
+/** Reads the unlock cookie and returns the value, or undefined when missing. */
+function maintKey(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  for (const part of document.cookie.split(";")) {
+    const s = part.trim();
+    if (s.startsWith(`${MAINT_KEY_COOKIE}=`)) return s.slice(MAINT_KEY_COOKIE.length + 1);
+  }
+  return undefined;
+}
+
 /** Fired when the backend rejects a request as unauthenticated. Consumed once by the session watcher. */
 export const SESSION_EXPIRED_EVENT = "edu:session-expired";
 
@@ -60,6 +72,8 @@ export async function api<T = unknown>(path: string, opts: ApiOptions = {}): Pro
     const token = data.session?.access_token;
     if (token) headers.set("Authorization", `Bearer ${token}`);
   }
+  const key = maintKey();
+  if (key) headers.set("x-maintenance-token", key);
 
   let res: Response;
   try {

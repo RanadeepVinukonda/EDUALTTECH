@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
+import { createHash } from "node:crypto";
 
 dotenv.config();
+
+const sha256Hex = (value: string) => createHash("sha256").update(value).digest("hex");
 
 function required(name: string): string {
   const value = process.env[name];
@@ -67,6 +70,14 @@ export const config = {
   // Production default: OFF. Explicit env wins in both cases.
   auth: {
     skipOtp: bool("AUTH_SKIP_OTP", env !== "production"),
+  },
+
+  // Full-site lock: MAINTENANCE_MODE=true blocks every /api/* request (except
+  // health + CORS preflight) unless the caller sends the correct token hash in
+  // the `x-maintenance-token` header. Hash, not the raw secret, is compared.
+  maintenance: {
+    enabled: bool("MAINTENANCE_MODE", false),
+    tokenHash: sha256Hex(process.env.MAINTENANCE_TOKEN?.trim() ?? ""),
   },
 
   logLevel: process.env.LOG_LEVEL ?? "info",
