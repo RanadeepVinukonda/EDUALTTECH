@@ -42,9 +42,11 @@ export async function middleware(req: NextRequest) {
   url.pathname = "/maintenance";
   url.search = "";
   const res = NextResponse.rewrite(url);
+  const raw = req.headers.get("cookie") ?? "";
+  const names = req.cookies.getAll().map((c) => c.name).join("/");
   res.headers.set(
     "x-maintenance",
-    `locked;t=${token ? token.length : 0};c=${cookie ? cookie.length : 0};h=${computed.slice(0, 10)};ck=${(cookie ?? "").slice(0, 10)}`,
+    `locked;t=${token ? token.length : 0};c=${cookie ? cookie.length : 0};raw=${raw.length};names=${names};h=${computed.slice(0, 10)};ck=${(cookie ?? "").slice(0, 10)}`,
   );
   res.headers.set("Cache-Control", "no-store, must-revalidate");
   res.headers.set("Vary", "Cookie");
