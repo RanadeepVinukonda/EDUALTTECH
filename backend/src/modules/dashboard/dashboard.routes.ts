@@ -23,7 +23,7 @@ router.get("/", requireAuth, async (req, res) => {
       include: {
         course: {
           select: {
-            id: true, slug: true, title: true, thumbnailUrl: true, status: true,
+            id: true, slug: true, title: true, thumbnailUrl: true, category: true, status: true,
             _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE", mentorUserId: userId } } } },
           },
         },

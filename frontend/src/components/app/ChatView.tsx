@@ -35,7 +35,7 @@ export default function ChatView() {
   const loadConversations = useCallback(async () => {
     setConvError(null);
     try {
-      const { conversations } = await apiGet<{ conversations: Conversation[] }>("/conversations");
+      const { conversations } = await apiGet<{ conversations: Conversation[] }>("/chat/conversations");
       setConvs(conversations);
       return conversations;
     } catch (e) {
@@ -53,7 +53,7 @@ export default function ChatView() {
     setThreadError(null);
     try {
       const { messages: page, hasMore: more } = await apiGet<{ messages: ChatMessage[]; hasMore: boolean }>(
-        `/conversations/${id}/messages`,
+        `/chat/conversations/${id}/messages`,
         older ? { cursor: older, limit: 50 } : { limit: 50 },
       );
       const asc = [...page].reverse();
@@ -98,7 +98,7 @@ export default function ChatView() {
     sendingRef.current = true;
     setSending(true);
     try {
-      const { message } = await apiPost<{ message: ChatMessage }>(`/conversations/${selectedId}/messages`, { body: text });
+      const { message } = await apiPost<{ message: ChatMessage }>(`/chat/conversations/${selectedId}/messages`, { body: text });
       setMessages((prev) => [...prev, message]);
       setDraft("");
       void loadConversations();

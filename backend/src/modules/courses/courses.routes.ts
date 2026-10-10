@@ -95,7 +95,12 @@ router.get("/mine", requireAuth, async (req, res) => {
       where: { userId, role: "MENTOR" },
       orderBy: { enrolledAt: "desc" },
       include: {
-        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true, status: true } },
+        course: {
+          select: {
+            id: true, slug: true, title: true, thumbnailUrl: true, category: true, status: true,
+            _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE" } } } },
+          },
+        },
       },
     }),
   ]);
@@ -184,6 +189,9 @@ router.get("/:slug", optionalAuth, async (req, res) => {
 
   const { participants, _count, meetings, ...rest } = course;
   const isStaff = access.isStaff;
+  // Live-session join links are for people actually on the course, never for
+  // anonymous/public visitors or signed-in non-participants browsing the page.
+  const canSeeMeetingLinks = access.isStaff || access.isLearner;
 
   res.json({
     success: true,
@@ -193,7 +201,7 @@ router.get("/:slug", optionalAuth, async (req, res) => {
         chapters: course.chapters,
         mentors: participants.map((m) => ({ user: m.user, capacity: m.capacity })),
         enrolledCount: _count.participants,
-        upcomingMeetings: meetings,
+        upcomingMeetings: meetings.map((m) => (canSeeMeetingLinks ? m : { ...m, meetingUrl: "" })),
         isStaff,
       },
       access,
