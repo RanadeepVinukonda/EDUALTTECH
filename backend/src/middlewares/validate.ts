@@ -3,22 +3,23 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 import type { ZodType } from "zod";
 import { ApiError } from "../utils/ApiError.js";
 
-interface Validated {
-  body?: unknown;
-  query?: unknown;
-  params?: unknown;
+/**
+ * Replaces a request accessor with the parsed value. Express 5 defines
+ * `req.query` as a getter-only accessor, so a plain assignment is a no-op/
+ * throws — an own data property shadows it instead.
+ */
+function setParsed(req: Request<any>, key: "query" | "params", value: unknown): void {
+  Object.defineProperty(req, key, { value, writable: true, configurable: true, enumerable: true });
 }
 
 /** Zod validation for body/query/params — 422 with per-field details. */
 export function validate(schemas: { body?: ZodType; query?: ZodType; params?: ZodType }): RequestHandler<any, any, any, any, any> {
   return (req: Request<any>, _res: Response, next: NextFunction): void => {
     try {
-      const out: Validated = {};
-      if (schemas.body) out.body = schemas.body.parse(req.body);
-      if (schemas.query) out.query = schemas.query.parse(req.query);
-      if (schemas.params) out.params = schemas.params.parse(req.params);
+      if (schemas.body) (req as Request & { validatedBody?: unknown }).validatedBody = schemas.body.parse(req.body);
+      if (schemas.query) setParsed(req, "query", schemas.query.parse(req.query));
+      if (schemas.params) setParsed(req, "params", schemas.params.parse(req.params));
 
-      if (out.body !== undefined) (req as Request & { validatedBody?: unknown }).validatedBody = out.body;
       next();
     } catch (err) {
       if (err && typeof err === "object" && "issues" in err) {
