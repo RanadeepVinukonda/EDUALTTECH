@@ -19,8 +19,9 @@ const meetingBody = z.object({
   topicId: z.string().nullable().optional(),
 });
 
-// List for course members (staff sees all; learners see future by default)
-router.get("/:courseId/meetings", requireAuth, validate({ query: z.object({
+// List for course members (staff sees all; learners see future by default).
+// Mounted at /api → served as /api/courses/:courseId/meetings.
+router.get("/courses/:courseId/meetings", requireAuth, validate({ query: z.object({
   scope: z.enum(["upcoming", "past", "all"]).default("upcoming"),
 }) }), async (req, res) => {
   const access = await getCourseAccess(req.params.courseId, req.user!);
@@ -51,7 +52,7 @@ async function meetingCourse(meetingId: string) {
   return meeting;
 }
 
-router.post("/:courseId/meetings", requireAuth, validate({ body: meetingBody }), async (req, res) => {
+router.post("/courses/:courseId/meetings", requireAuth, validate({ body: meetingBody }), async (req, res) => {
   const access = await getCourseAccess(req.params.courseId, req.user!);
   if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required");
   const input = body<z.infer<typeof meetingBody>>(req);

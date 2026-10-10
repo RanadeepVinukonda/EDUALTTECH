@@ -52,7 +52,7 @@ export default function CourseBrowser() {
   const rawSort = searchParams.get("sort") ?? "";
   const sort = (SORTS.some((s) => s.value === rawSort) ? rawSort : "newest") as string;
   const page = Math.max(1, Number.parseInt(searchParams.get("page") ?? "1", 10) || 1);
-  const hasFilters = Boolean(q || category || rawSort || page > 1);
+  const hasFilters = Boolean(q || category || sort !== "newest" || page > 1);
 
   const [term, setTerm] = useState(q);
   const [categories, setCategories] = useState<string[]>([]);

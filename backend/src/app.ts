@@ -60,7 +60,6 @@ export function createApp() {
   app.use("/api/courses", coursesRoutes);
   app.use("/api/applications", applicationsRoutes);
   app.use("/api/payments", paymentsRoutes);
-  app.use("/api/meetings", meetingsRoutes);
   app.use("/api/resources", resourcesRoutes);
   app.use("/api/chat", chatRoutes);
   app.use("/api/notifications", notificationsRoutes);
@@ -70,6 +69,9 @@ export function createApp() {
   app.use("/api/admin", adminRoutes);
   app.use("/api/cms", cmsRoutes);
   app.use("/api/auth", authRoutes);
+  // Mounted at /api: course-scoped meeting routes are /courses/:courseId/meetings,
+  // item routes are /meetings/:id — matching the frontend's apiGet paths.
+  app.use("/api", meetingsRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

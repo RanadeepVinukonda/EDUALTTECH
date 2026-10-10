@@ -151,7 +151,10 @@ router.get("/:slug", optionalAuth, async (req, res) => {
   let access: CourseAccess;
   if (req.user) {
     access = await getCourseAccess(course.id, req.user);
-    if (!access.canRead) throw ApiError.notFound("Course not found");
+    // Published courses stay readable to signed-in non-participants (wishlist,
+    // apply, and paid checkout all depend on the detail API working while logged in).
+    if (!access.canRead && course.status !== "PUBLISHED") throw ApiError.notFound("Course not found");
+    if (!access.canRead) access = PUBLIC_READ;
   } else if (course.status === "PUBLISHED") {
     access = PUBLIC_READ;
   } else {
@@ -300,7 +303,14 @@ router.patch("/:id", requireAuth, validate({ body: courseBody.partial().extend({
     data.status = status;
   }
 
-  if (patch.title && patch.title !== course.title) data.slug = slugify(patch.title);
+  if (patch.title && patch.title !== course.title) {
+    const slug = slugify(patch.title);
+    if (slug && (await prisma.course.findUnique({ where: { slug } }))) {
+      data.slug = `${slug}-${Date.now().toString(36)}`;
+    } else if (slug) {
+      data.slug = slug;
+    }
+  }
 
   const updated = await prisma.course.update({ where: { id: course.id }, data: data as never });
   if (status && status !== course.status) {
