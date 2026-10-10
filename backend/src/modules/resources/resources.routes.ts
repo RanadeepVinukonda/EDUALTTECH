@@ -24,6 +24,7 @@ async function assertResourceRead(resource: { id: string; courseId: string | nul
   if (resource.courseId) {
     const access = await getCourseAccess(resource.courseId, user as never);
     if (!access.canRead) throw ApiError.forbidden("You are not part of this course");
+    if (!resource.isPublished && !access.isStaff) throw ApiError.notFound("Resource not found");
     return;
   }
   if (!resource.isPublished) throw ApiError.notFound("Resource not found");
@@ -45,7 +46,7 @@ router.get("/", requireAuth, async (req, res) => {
       OR: [
         { ownerId: userId },
         { courseId: null, isPublished: true },
-        ...(myCourseIds.length > 0 ? [{ courseId: { in: myCourseIds } }] : []),
+        ...(myCourseIds.length > 0 ? [{ courseId: { in: myCourseIds }, isPublished: true }] : []),
       ],
     },
     orderBy: { createdAt: "desc" },
@@ -71,8 +72,8 @@ router.get("/:id/download", requireAuth, async (req, res) => {
   if (!resource) throw ApiError.notFound("Resource not found");
   await assertResourceRead(resource, req.user!);
 
-  await prisma.resource.update({ where: { id: resource.id }, data: { downloads: { increment: 1 } } });
   const downloadUrl = resource.storagePath ? await signedUrl(resource.storagePath, 300) : resource.url;
+  await prisma.resource.update({ where: { id: resource.id }, data: { downloads: { increment: 1 } } });
   res.json({ success: true, data: { downloadUrl } });
 });
 

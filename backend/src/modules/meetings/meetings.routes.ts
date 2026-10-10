@@ -41,6 +41,7 @@ router.get("/courses/:courseId/meetings", requireAuth, validate({ query: z.objec
       createdBy: { select: { firstName: true, lastName: true, avatarUrl: true } },
       chapter: { select: { id: true, title: true } },
       topic: { select: { id: true, title: true } },
+      course: { select: { id: true, slug: true, title: true } },
     },
   });
   res.json({ success: true, data: { meetings } });

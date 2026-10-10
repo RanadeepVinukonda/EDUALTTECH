@@ -73,7 +73,7 @@ export default function ResourceDetailView({ id }: { id: string }) {
   if (!resource) return <Spinner label="Loading resource…" />;
 
   const size = formatBytes(resource.fileSizeBytes);
-  const hasContent = !!(resource.storagePath || resource.url);
+  const hasContent = !!(resource.storagePath || resource.url || resource.downloadUrl);
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">

@@ -9,7 +9,7 @@ import { getCourseAccess, assertCourseOwner } from "../../lib/course-access.js";
 
 const router = Router();
 
-const nextOrder = async (count: number) => count + 1;
+const nextOrder = async (last: { order: number }[]) => last.reduce((m, r) => Math.max(m, r.order), 0) + 1;
 
 // ── Read roadmap ───────────────────────────────────────────────────
 
@@ -44,7 +44,7 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res) => {
     });
     if (participant) {
       const rows = await prisma.lessonProgress.findMany({
-        where: { participantId: participant.id },
+        where: { participantId: participant.id, lesson: { courseId: req.params.courseId, isPublished: true } },
         select: { lessonId: true },
       });
       completedLessonIds = rows.map((r) => r.lessonId);
@@ -70,9 +70,14 @@ async function chapterCourse(chapterId: string) {
 router.post("/:courseId/chapters", requireAuth, validate({ body: chapterBody }), async (req, res) => {
   await assertCourseOwner(req.params.courseId, req.user!);
   const input = body<z.infer<typeof chapterBody>>(req);
-  const count = await prisma.chapter.count({ where: { courseId: req.params.courseId } });
+  const last = await prisma.chapter.findMany({
+    where: { courseId: req.params.courseId },
+    select: { order: true },
+    orderBy: { order: "desc" },
+    take: 1,
+  });
   const chapter = await prisma.chapter.create({
-    data: { courseId: req.params.courseId, ...input, order: await nextOrder(count) },
+    data: { courseId: req.params.courseId, ...input, order: await nextOrder(last) },
   });
   audit(req.user!.id, "chapter.created", "chapter", chapter.id, { courseId: req.params.courseId });
   res.status(201).json({ success: true, data: { chapter } });
@@ -110,9 +115,14 @@ router.post("/chapters/:chapterId/topics", requireAuth, validate({ body: topicBo
   const chapter = await chapterCourse(req.params.chapterId);
   await assertCourseOwner(chapter.courseId, req.user!);
   const input = body<z.infer<typeof topicBody>>(req);
-  const count = await prisma.topic.count({ where: { chapterId: chapter.id } });
+  const last = await prisma.topic.findMany({
+    where: { chapterId: chapter.id },
+    select: { order: true },
+    orderBy: { order: "desc" },
+    take: 1,
+  });
   const topic = await prisma.topic.create({
-    data: { courseId: chapter.courseId, chapterId: chapter.id, ...input, order: await nextOrder(count) },
+    data: { courseId: chapter.courseId, chapterId: chapter.id, ...input, order: await nextOrder(last) },
   });
   audit(req.user!.id, "topic.created", "topic", topic.id, { chapterId: chapter.id });
   res.status(201).json({ success: true, data: { topic } });
@@ -155,13 +165,18 @@ router.post("/topics/:topicId/lessons", requireAuth, validate({ body: lessonBody
   if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required");
 
   const input = body<z.infer<typeof lessonBody>>(req);
-  const count = await prisma.lesson.count({ where: { topicId: topic.id } });
+  const last = await prisma.lesson.findMany({
+    where: { topicId: topic.id },
+    select: { order: true },
+    orderBy: { order: "desc" },
+    take: 1,
+  });
   const lesson = await prisma.lesson.create({
     data: {
       courseId: topic.courseId,
       topicId: topic.id,
       ...input,
-      order: await nextOrder(count),
+      order: await nextOrder(last),
       createdById: req.user!.id,
     },
   });

@@ -354,7 +354,8 @@ router.post("/:id/open-topic", requireAuth, validate({ body: z.object({ topicId:
   const { topicId } = body<{ topicId: string }>(req);
   const course = await prisma.course.findUnique({ where: { id: req.params.id } });
   if (!course) throw ApiError.notFound("Course not found");
-  await assertCourseParticipant(course.id, req.user!);
+  const access = await assertCourseParticipant(course.id, req.user!);
+  if (!access.isLearner) throw ApiError.forbidden("Only enrolled learners can set a topic");
 
   const topic = await prisma.topic.findFirst({ where: { id: topicId, courseId: course.id }, select: { id: true } });
   if (!topic) throw ApiError.notFound("Topic not found");

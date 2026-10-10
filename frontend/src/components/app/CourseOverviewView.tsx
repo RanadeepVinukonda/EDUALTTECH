@@ -60,10 +60,12 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
       const d = await apiGet<CourseDetailResponse>(`/courses/${slug}`);
       setDetail(d);
       setProgress(d.myParticipation?.progressPct ?? 0);
-      if (d.access.canRead) {
+      if (d.myParticipation || d.access.isStaff) {
         const rm = await apiGet<Roadmap>(`/courses/${d.course.id}/roadmap`);
         setRoadmap(rm);
         setCompleted(new Set(rm.completedLessonIds));
+      } else {
+        setRoadmap(null);
       }
     } catch (err) {
       setError(describeError(err, "Could not load this course."));
@@ -85,8 +87,19 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
   );
 
   useEffect(() => {
-    if (!selected && nextLesson) setSelected(nextLesson);
-  }, [selected, nextLesson]);
+    if (selected || !roadmap || !detail) return;
+    const resumeTopicId = detail.myParticipation?.currentTopicId;
+    if (resumeTopicId) {
+      for (const chapter of roadmap.chapters) {
+        const topic = chapter.topics.find((t) => t.id === resumeTopicId);
+        if (topic && topic.lessons.length > 0) {
+          setSelected(topic.lessons[0]);
+          return;
+        }
+      }
+    }
+    if (nextLesson) setSelected(nextLesson);
+  }, [selected, roadmap, detail, nextLesson]);
 
   async function openTopic(topicId: string) {
     if (!detail || detail.myParticipation?.role !== "LEARNER") return;
@@ -136,12 +149,13 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
     }
     return <ErrorState message={error} onRetry={() => void load()} />;
   }
-  if (!detail || !roadmap) return <CourseSkeleton />;
+  if (!detail) return <CourseSkeleton />;
 
   const { course, access, myParticipation } = detail;
   const isLearner = myParticipation?.role === "LEARNER";
+  const enrolled = Boolean(myParticipation) || access.isStaff;
 
-  if (!access.canRead || (!isLearner && !access.isStaff)) {
+  if (!enrolled) {
     return (
       <div
         role="alert"
@@ -160,6 +174,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
       </div>
     );
   }
+  if (!roadmap) return <CourseSkeleton />;
 
   return (
     <div className="space-y-6">
