@@ -14,48 +14,34 @@ async function sha256Hex(value: string): Promise<string> {
 /**
  * Full-site maintenance lock.
  *
- * Runs on the Node.js runtime (stable in Next 15.5) so `process.env` is read at
+ * Runs on the Node.js runtime (stable in Next 15.5+) so `process.env` is read at
  * request time. On the Edge runtime these values are inlined at build time, which
- * made the unlock cookie silently never match — the whole site stayed locked.
+ * made the unlock cookie silently never match — the whole site stayed locked for
+ * everyone, even after visiting /api/maintenance with the correct token.
  *
  * The lock response is also marked `no-store` + `Vary: Cookie` so the CDN never
  * caches the maintenance page and serves it to an unlocked visitor.
  */
 export async function middleware(req: NextRequest) {
-  if (process.env.MAINTENANCE_MODE !== "true") {
-    return pass("off");
-  }
+  if (process.env.MAINTENANCE_MODE !== "true") return NextResponse.next();
 
   const { pathname } = req.nextUrl;
   if (PASSTHROUGH.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
-    return pass("passthrough");
+    return NextResponse.next();
   }
 
   const token = process.env.MAINTENANCE_TOKEN;
   const cookie = req.cookies.get(MAINT_COOKIE)?.value;
-  const computed = token ? await sha256Hex(token) : "";
-  if (token && cookie && cookie === computed) {
-    return pass("bypass");
+  if (token && cookie && cookie === (await sha256Hex(token))) {
+    return NextResponse.next();
   }
 
   const url = req.nextUrl.clone();
   url.pathname = "/maintenance";
   url.search = "";
   const res = NextResponse.rewrite(url);
-  const raw = req.headers.get("cookie") ?? "";
-  const names = req.cookies.getAll().map((c) => c.name).join("/");
-  res.headers.set(
-    "x-maintenance",
-    `locked;t=${token ? token.length : 0};c=${cookie ? cookie.length : 0};raw=${raw.length};names=${names};h=${computed.slice(0, 10)};ck=${(cookie ?? "").slice(0, 10)}`,
-  );
   res.headers.set("Cache-Control", "no-store, must-revalidate");
   res.headers.set("Vary", "Cookie");
-  return res;
-}
-
-function pass(state: string): NextResponse {
-  const res = NextResponse.next();
-  res.headers.set("x-maintenance", state);
   return res;
 }
 
