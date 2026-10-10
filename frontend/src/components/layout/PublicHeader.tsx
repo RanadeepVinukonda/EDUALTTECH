@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Menu from "@mui/icons-material/Menu";
 import Close from "@mui/icons-material/Close";
 import { cn } from "@/lib/cn";
+import { hasSession } from "@/lib/auth";
 import LinkButton from "@/components/ui/LinkButton";
 
 const NAV = [
@@ -19,7 +20,22 @@ const NAV = [
 export default function PublicHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
+  useEffect(() => {
+    let active = true;
+    hasSession()
+      .then((yes) => {
+        if (active) setSignedIn(yes);
+      })
+      .catch(() => {
+        if (active) setSignedIn(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -46,15 +62,26 @@ export default function PublicHeader() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-2 lg:flex">
-          <Link
-            href="/login"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:text-ink-900"
-          >
-            Sign in
-          </Link>
-          <LinkButton href="/signup" size="sm">
-            Get started
-          </LinkButton>
+          {signedIn ? (
+            <Link
+              href="/dashboard"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:text-ink-900"
+              >
+                Sign in
+              </Link>
+              <LinkButton href="/signup" size="sm">
+                Get started
+              </LinkButton>
+            </>
+          )}
         </div>
 
         <button
@@ -93,16 +120,28 @@ export default function PublicHeader() {
             ))}
           </ul>
           <div className="mt-3 flex flex-col gap-2 border-t border-slate-200 pt-3">
-            <LinkButton href="/signup" className="w-full">
-              Get started
-            </LinkButton>
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="rounded-lg px-3 py-2 text-center text-sm font-medium text-ink-600 hover:bg-slate-100"
-            >
-              Sign in
-            </Link>
+            {signedIn ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-2 text-center text-sm font-medium text-brand-700 hover:bg-brand-50"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <LinkButton href="/signup" className="w-full">
+                  Get started
+                </LinkButton>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2 text-center text-sm font-medium text-ink-600 hover:bg-slate-100"
+                >
+                  Sign in
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       </div>

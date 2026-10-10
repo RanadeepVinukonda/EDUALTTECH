@@ -24,7 +24,7 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
   useEffect(() => {
     let active = true;
     hasSession().then((yes) => {
-      if (active && yes) router.replace(safeNext(next));
+      if (active && yes) router.replace(safeNext(next, "/dashboard"));
     });
     return () => {
       active = false;
