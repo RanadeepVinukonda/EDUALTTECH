@@ -20,6 +20,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - name: Build backend
+        run: npm run build -w backend
       - name: Build frontend
         run: npm run build -w frontend
         env:
