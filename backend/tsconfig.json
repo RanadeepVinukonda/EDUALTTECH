@@ -14,7 +14,12 @@
     "resolveJsonModule": true,
     "declaration": false,
     "sourceMap": true,
-    "types": ["node"]
+    "types": ["node"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../node_modules/@types",
+      "../frontend/node_modules/@types"
+    ]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
