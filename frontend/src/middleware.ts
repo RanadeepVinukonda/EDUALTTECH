@@ -33,7 +33,8 @@ export async function middleware(req: NextRequest) {
 
   const token = process.env.MAINTENANCE_TOKEN;
   const cookie = req.cookies.get(MAINT_COOKIE)?.value;
-  if (token && cookie && cookie === (await sha256Hex(token))) {
+  const computed = token ? await sha256Hex(token) : "";
+  if (token && cookie && cookie === computed) {
     return pass("bypass");
   }
 
@@ -41,7 +42,10 @@ export async function middleware(req: NextRequest) {
   url.pathname = "/maintenance";
   url.search = "";
   const res = NextResponse.rewrite(url);
-  res.headers.set("x-maintenance", "locked");
+  res.headers.set(
+    "x-maintenance",
+    `locked;t=${token ? token.length : 0};c=${cookie ? cookie.length : 0};h=${computed.slice(0, 10)};ck=${(cookie ?? "").slice(0, 10)}`,
+  );
   res.headers.set("Cache-Control", "no-store, must-revalidate");
   res.headers.set("Vary", "Cookie");
   return res;
