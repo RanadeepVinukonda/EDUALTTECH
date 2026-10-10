@@ -5,7 +5,7 @@ const CODE_MESSAGES: Record<string, string> = {
   UNAUTHORIZED: "Your session expired. Please sign in again.",
   FORBIDDEN: "You don’t have permission to do that.",
   NOT_FOUND: "That item no longer exists.",
-  VALIDATION: "Please check the highlighted fields and try again.",
+  VALIDATION_ERROR: "Please check the highlighted fields and try again.",
   RATE_LIMITED: "Too many requests. Please wait a moment and try again.",
   EMAIL_TAKEN: "That email address is already registered.",
   ROADMAP_INCOMPLETE: "Add at least one chapter and topic before publishing.",

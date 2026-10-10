@@ -11,8 +11,9 @@ export const apiLimiter = rateLimit({
 });
 
 /**
- * Auth endpoints — one shared bucket would let code-spam lock victims out of
- * login, so verification endpoints use this tighter per-route limiter instead.
+ * Auth endpoints — a shared bucket lets code-spam lock victims out of login,
+ * so login/register/refresh use this 30/15m limiter while email-code issuance
+ * (codeLimiter) and password resets (passwordResetLimiter) get their own.
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -20,6 +21,15 @@ export const authLimiter = rateLimit({
   standardHeaders: "draft-8",
   legacyHeaders: false,
   message: { success: false, error: { code: "RATE_LIMITED", message: "Too many attempts. Please wait and try again." } },
+});
+
+/** Password-reset issuance — own bucket so reset spam can't exhaust login. */
+export const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { success: false, error: { code: "RATE_LIMITED", message: "Too many reset requests. Please wait a few minutes." } },
 });
 
 /** Tight bucket for code issuance — throttles resend spam per IP. */

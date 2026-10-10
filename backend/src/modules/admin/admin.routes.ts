@@ -7,6 +7,7 @@ import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { audit } from "../../lib/audit.js";
 import { getSetting, setSetting, mentorCapacityDefault } from "../../lib/settings.js";
+import { config } from "../../config/env.js";
 
 const router = Router();
 router.use(requireAuth, requireRole("ADMIN"));
@@ -151,7 +152,7 @@ router.post("/users", validate({ body: z.object({
 
   const { data, error } = await supabaseAdmin().auth.admin.inviteUserByEmail(input.email, {
     data: { first_name: input.firstName, last_name: input.lastName },
-    redirectTo: `${process.env.APP_BASE_URL ?? "http://localhost:3000"}/auth/callback`,
+    redirectTo: `${config.appBaseUrl}/auth/callback`,
   });
   if (error || !data.user) throw ApiError.badRequest(error?.message ?? "Could not send the invite");
 

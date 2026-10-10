@@ -35,7 +35,7 @@ export default function CourseActions({
   currency: string;
 }) {
   const router = useRouter();
-  const loginHref = `/login?redirect=${encodeURIComponent(`/courses/${slug}`)}`;
+  const loginHref = `/login?next=${encodeURIComponent(`/courses/${slug}`)}`;
 
   const [ready, setReady] = useState(false);
   const [authed, setAuthed] = useState(false);

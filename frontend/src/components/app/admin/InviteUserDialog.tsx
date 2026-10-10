@@ -12,7 +12,7 @@ function inviteError(err: ApiError): string {
   switch (err.code) {
     case "EMAIL_TAKEN":
       return "An account with this email already exists.";
-    case "VALIDATION":
+    case "VALIDATION_ERROR":
       return err.message || "Please check the details and try again.";
     case "FORBIDDEN":
       return "You don’t have permission to create accounts.";

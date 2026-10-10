@@ -8,10 +8,10 @@ import { uploadPublic } from "../../lib/storage.js";
 import { sendEmail, layout } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
 import { requireAuth } from "../../middlewares/auth.js";
-import { authLimiter, codeLimiter } from "../../middlewares/rate-limit.js";
+import { authLimiter, codeLimiter, passwordResetLimiter } from "../../middlewares/rate-limit.js";
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { DEV_CODE, sendEmailCode, verifyEmailCode, hasVerifiedCode, consumeCodes } from "./auth.service.js";
+import { DEV_CODE, sendEmailCode, verifyEmailCode, hasVerifiedCode, consumeCodes, hashEquals } from "./auth.service.js";
 
 const router = Router();
 
@@ -124,7 +124,13 @@ router.post(
 
 async function signIn(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
   const { data, error } = await supabaseAdmin().auth.signInWithPassword({ email, password });
-  if (error || !data.session) throw ApiError.unauthorized("Incorrect email or password");
+  if (error || !data.session) {
+    const code = (error as { code?: string } | null)?.code;
+    if (code === "email_not_confirmed") {
+      throw ApiError.forbidden("Please verify your email before signing in.", "EMAIL_NOT_VERIFIED");
+    }
+    throw ApiError.unauthorized("Incorrect email or password");
+  }
   return { accessToken: data.session.access_token, refreshToken: data.session.refresh_token };
 }
 
@@ -168,14 +174,14 @@ router.post("/logout", requireAuth, async (req, res) => {
 
 router.post(
   "/forgot-password",
-  authLimiter,
+  passwordResetLimiter,
   validate({ body: z.object({ email: emailSchema }) }),
   async (req, res) => {
     const { email } = body<{ email: string }>(req);
     const user = await prisma.user.findUnique({ where: { email } });
     if (user) {
       const { data } = await supabaseAdmin().auth.admin.generateLink({
-        type: "magiclink",
+        type: "recovery",
         email,
         options: { redirectTo: `${config.appBaseUrl}/reset-password` },
       });
@@ -256,6 +262,7 @@ const phoneHash = (mobile: string, code: string) =>
 router.post(
   "/phone/send-otp",
   authLimiter,
+  requireAuth,
   validate({ body: z.object({ mobile: z.string().trim().min(8).max(15).regex(/^\+?\d+$/, "Enter a valid mobile number") }) }),
   async (req, res) => {
     const { mobile } = body<{ mobile: string }>(req);
@@ -297,6 +304,7 @@ router.post(
 router.post(
   "/phone/verify-otp",
   authLimiter,
+  requireAuth,
   validate({ body: z.object({ code: z.string().trim().length(6) }) }),
   async (req, res) => {
     const { code } = body<{ code: string }>(req);
@@ -307,7 +315,7 @@ router.post(
     if (user.mobileOtpExpiresAt < new Date()) throw ApiError.badRequest("That code has expired. Request a new one.");
     if (user.mobileOtpAttempts >= PHONE_MAX_ATTEMPTS) throw ApiError.tooMany("Too many attempts. Request a new code.");
 
-    const match = user.mobileOtpHash === phoneHash(user.mobile, code) || (config.auth.skipOtp && code === DEV_CODE);
+    const match = hashEquals(user.mobileOtpHash, phoneHash(user.mobile, code)) || (config.auth.skipOtp && code === DEV_CODE);
     if (!match) {
       await prisma.user.update({ where: { id: user.id }, data: { mobileOtpAttempts: { increment: 1 } } });
       throw ApiError.badRequest("Incorrect code.");
@@ -352,6 +360,9 @@ router.post(
   validate({ body: z.object({ provider: z.enum(["google", "azure"]), redirectTo: z.string().url().optional() }) }),
   async (req, res) => {
     const { provider, redirectTo } = body<{ provider: "google" | "azure"; redirectTo?: string }>(req);
+    if (redirectTo && !sameOrigin(redirectTo, config.appBaseUrl)) {
+      throw ApiError.badRequest("Invalid redirect target");
+    }
     const { data, error } = await supabaseAdmin().auth.signInWithOAuth({
       provider: provider === "google" ? "google" : "azure",
       options: { redirectTo: redirectTo ?? `${config.appBaseUrl}/auth/callback` },
@@ -360,6 +371,47 @@ router.post(
     res.json({ success: true, data: { url: data.url } });
   },
 );
+
+/** First sign-in with an OAuth provider has a Supabase user but no Prisma row; provision it here. */
+router.post("/oauth/sync", authLimiter, async (req, res) => {
+  const header = req.headers.authorization;
+  const token = header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
+  if (!token) throw ApiError.unauthorized("Missing token");
+
+  const { data, error } = await supabaseAdmin().auth.getUser(token);
+  const authUser = data?.user;
+  if (error || !authUser?.email) throw ApiError.unauthorized("Invalid token");
+
+  let user = await prisma.user.findUnique({ where: { id: authUser.id } });
+  if (!user) {
+    const meta = (authUser.user_metadata ?? {}) as Record<string, unknown>;
+    const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : "");
+    const fullName = str(meta.full_name) || str(meta.name);
+    const fallback = authUser.email.split("@")[0] ?? "";
+    const nameParts = fullName.split(/\s+/);
+    const firstName = (str(meta.first_name) || (nameParts[0] ?? "") || fallback).slice(0, 80);
+    const lastName = (str(meta.last_name) || nameParts.slice(1).join(" ") || "Member").slice(0, 80);
+    try {
+      user = await prisma.user.create({
+        data: { id: authUser.id, email: authUser.email, firstName, lastName, emailVerifiedAt: new Date() },
+      });
+      audit(user.id, "user.registered", "user", user.id, { via: "oauth" });
+    } catch {
+      // A concurrent request may have created it already.
+      user = await prisma.user.findUnique({ where: { id: authUser.id } });
+    }
+  }
+  if (!user) throw ApiError.badRequest("Could not provision your account. Please sign in again.");
+  res.json({ success: true, data: { user: shape(user) } });
+});
+
+function sameOrigin(candidate: string, base: string): boolean {
+  try {
+    return new URL(candidate).origin === new URL(base).origin;
+  } catch {
+    return false;
+  }
+}
 
 // ── Dev-only helpers (404 in production) ───────────────────────────
 

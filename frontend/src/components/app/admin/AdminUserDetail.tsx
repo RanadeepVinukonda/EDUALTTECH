@@ -24,7 +24,7 @@ function detailError(err: unknown, fallback: string): string {
     if (err.code === "FORBIDDEN" || err.status === 403) return "Your account doesn’t have permission to do that.";
     if (err.code === "UNAUTHORIZED" || err.status === 401) return "Your session expired. Please sign in again.";
     if (err.code === "LAST_ADMIN") return "At least one active admin must remain.";
-    if (err.code === "VALIDATION") return err.message || "Please check the details and try again.";
+    if (err.code === "VALIDATION_ERROR") return err.message || "Please check the details and try again.";
     if (err.code === "RATE_LIMITED" || err.status === 429) return "Too many requests. Please wait a moment.";
   }
   return err instanceof Error ? err.message : fallback;

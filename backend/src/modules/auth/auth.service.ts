@@ -1,4 +1,4 @@
-import { createHash, randomInt } from "node:crypto";
+import { createHash, randomInt, timingSafeEqual } from "node:crypto";
 import { prisma } from "../../lib/prisma.js";
 import { config } from "../../config/env.js";
 import { sendEmail, layout } from "../../lib/email.js";
@@ -10,6 +10,13 @@ export const DEV_CODE = "000000";
 
 const hash = (identifier: string, code: string) =>
   createHash("sha256").update(`${identifier.toLowerCase()}:${code}`).digest("hex");
+
+/** Constant-time comparison of two hex digests (length-checked to satisfy timingSafeEqual). */
+export function hashEquals(a: string, b: string): boolean {
+  const ab = Buffer.from(a, "utf8");
+  const bb = Buffer.from(b, "utf8");
+  return ab.length === bb.length && timingSafeEqual(ab, bb);
+}
 
 async function issueCode(identifier: string): Promise<{ devCode?: string }> {
   const expiresAt = new Date(Date.now() + CODE_TTL_MIN * 60_000);
@@ -75,17 +82,17 @@ export async function verifyEmailCode(email: string, code: string): Promise<{ ok
     orderBy: { createdAt: "desc" },
   });
   if (!row) throw ApiError.badRequest("No active code for that email. Request a new one.");
-  if (row.verifiedAt) return { ok: true };
   if (row.expiresAt < new Date()) {
     await prisma.verificationCode.delete({ where: { id: row.id } }).catch(() => undefined);
     throw ApiError.badRequest("That code has expired. Request a new one.");
   }
+  if (row.verifiedAt) return { ok: true };
   if (row.attempts >= MAX_ATTEMPTS) {
     await prisma.verificationCode.delete({ where: { id: row.id } }).catch(() => undefined);
     throw ApiError.tooMany("Too many wrong attempts. Request a new code.");
   }
 
-  const match = row.codeHash === hash(identifier, code);
+  const match = hashEquals(row.codeHash, hash(identifier, code));
   if (!match) {
     await prisma.verificationCode.update({ where: { id: row.id }, data: { attempts: { increment: 1 } } });
     throw ApiError.badRequest("Incorrect code.");

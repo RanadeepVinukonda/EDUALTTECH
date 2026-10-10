@@ -60,6 +60,8 @@ export default function ResetPasswordForm() {
       setPending(false);
       return;
     }
+    // Revoke every other session so a stolen token can't survive a reset.
+    await getSupabase().auth.signOut({ scope: "others" });
     await clearSession();
     router.replace("/login?reset=1");
   }

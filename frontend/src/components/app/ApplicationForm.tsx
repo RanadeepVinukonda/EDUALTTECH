@@ -115,7 +115,7 @@ export default function ApplicationForm() {
           setCourseId("");
           setResume(null);
           await load();
-        } else if (err.code === "VALIDATION" && err.details) {
+        } else if (err.code === "VALIDATION_ERROR" && err.details) {
           setSubmitError(err.message);
         } else {
           setSubmitError(err.message);

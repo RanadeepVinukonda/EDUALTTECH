@@ -21,7 +21,7 @@ function bool(name: string, fallback = false): boolean {
   return v === "true" || v === "1";
 }
 
-export const env = process.env.NODE_ENV ?? "development";
+export const env = (process.env.NODE_ENV ?? "development").trim().toLowerCase();
 export const isProd = env === "production";
 
 export const config = {
@@ -66,10 +66,10 @@ export const config = {
   },
 
   // OTP/verification bypass — testing switch until Supabase OTP is wired in.
-  // Dev/test default: ON (send endpoints return devCode 000000, verify accepts it).
-  // Production default: OFF. Explicit env wins in both cases.
+  // Secure by default: OFF unless AUTH_SKIP_OTP is explicitly "true"/"1".
+  // Local dev sets AUTH_SKIP_OTP=true to accept the dev code 000000.
   auth: {
-    skipOtp: bool("AUTH_SKIP_OTP", env !== "production"),
+    skipOtp: bool("AUTH_SKIP_OTP", false),
   },
 
   // Full-site lock: MAINTENANCE_MODE=true blocks every /api/* request (except

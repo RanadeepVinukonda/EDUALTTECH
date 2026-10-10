@@ -31,7 +31,7 @@ function courseError(err: unknown, fallback: string): string {
     if (err.code === "FORBIDDEN" || err.status === 403) return "You don’t have permission for this course action.";
     if (err.code === "UNAUTHORIZED" || err.status === 401) return "Your session expired. Please sign in again.";
     if (err.code === "RATE_LIMITED" || err.status === 429) return "Too many requests. Please wait a moment.";
-    if (err.code === "INVALID_TRANSITION" || err.code === "VALIDATION") return err.message;
+    if (err.code === "INVALID_TRANSITION" || err.code === "VALIDATION_ERROR") return err.message;
   }
   return err instanceof Error ? err.message : fallback;
 }

@@ -151,7 +151,7 @@ export default function CompleteRegistrationForm() {
               </Link>
             </p>
           )}
-          {error.code === "VALIDATION" && (
+          {error.code === "VALIDATION_ERROR" && (
             <p className="mt-1">
               Your code may have expired.{" "}
               <Link href="/verify-email" className="font-semibold underline">

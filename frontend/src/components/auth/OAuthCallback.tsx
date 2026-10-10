@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { safeNext } from "@/lib/auth";
+import { api } from "@/lib/api";
 import Spinner from "@/components/ui/Spinner";
 import LinkButton from "@/components/ui/LinkButton";
 
@@ -30,13 +31,22 @@ export default function OAuthCallback({ next }: { next?: string }) {
     const sb = getSupabase();
     let done = false;
 
-    const finish = (ok: boolean) => {
+    const finish = async (ok: boolean) => {
       if (done) return;
       done = true;
       // Strip credentials/params from the visible URL before navigating.
       window.history.replaceState(null, "", "/auth/callback");
-      if (ok) router.replace(safeNext(next));
-      else setError("We could not complete sign-in. Please try again.");
+      if (!ok) {
+        setError("We could not complete sign-in. Please try again.");
+        return;
+      }
+      // A first OAuth sign-in has a Supabase user but no Prisma row yet — provision it.
+      try {
+        await api("/auth/oauth/sync", { method: "POST" });
+      } catch {
+        // Best-effort; navigating anyway lets /me surface a clear error if it failed.
+      }
+      router.replace(safeNext(next));
     };
 
     (async () => {
@@ -44,7 +54,7 @@ export default function OAuthCallback({ next }: { next?: string }) {
       if (code) {
         const { error: exchangeError } = await sb.auth.exchangeCodeForSession(code);
         if (exchangeError) {
-          finish(false);
+          await finish(false);
           return;
         }
       }
@@ -54,10 +64,13 @@ export default function OAuthCallback({ next }: { next?: string }) {
         const {
           data: { session },
         } = await sb.auth.getSession();
-        if (session) return finish(true);
+        if (session) {
+          await finish(true);
+          return;
+        }
         await new Promise((r) => setTimeout(r, 250));
       }
-      finish(false);
+      await finish(false);
     })();
 
     return undefined;

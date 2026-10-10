@@ -15,7 +15,7 @@ function rmError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
     if (err.code === "FORBIDDEN" || err.status === 403) return "You don’t have permission to edit this roadmap.";
     if (err.code === "UNAUTHORIZED" || err.status === 401) return "Your session expired. Please sign in again.";
-    if (err.code === "VALIDATION") return err.message || "Please check the fields and try again.";
+    if (err.code === "VALIDATION_ERROR") return err.message || "Please check the fields and try again.";
     if (err.code === "NOT_FOUND" || err.status === 404) return "This item no longer exists. The roadmap was refreshed.";
     if (err.code === "RATE_LIMITED" || err.status === 429) return "Too many requests. Please wait a moment.";
   }
