@@ -32,8 +32,8 @@ const OFFERINGS = [
     icon: AutoStories,
     title: "Resources and skill development",
     body: "Downloadable materials, recorded sessions, and reference content that support hands-on practice long after a lesson ends.",
-    href: "/resources",
-    cta: "View resources",
+    href: "/courses",
+    cta: "See course resources",
   },
 ];
 

@@ -6,7 +6,6 @@ const COLUMNS = [
     links: [
       { href: "/courses", label: "Courses" },
       { href: "/services", label: "Services & Programs" },
-      { href: "/resources", label: "Resources" },
     ],
   },
   {
@@ -14,6 +13,8 @@ const COLUMNS = [
     links: [
       { href: "/about", label: "About" },
       { href: "/work", label: "Our Work" },
+      { href: "/partners", label: "Partners" },
+      { href: "/team", label: "Team" },
       { href: "/contact", label: "Contact" },
     ],
   },

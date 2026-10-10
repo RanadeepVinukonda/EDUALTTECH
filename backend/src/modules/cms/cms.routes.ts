@@ -263,8 +263,8 @@ admin.get("/team", async (_req, res) => {
 
 admin.post("/team", validate({ body: teamBody }), async (req, res) => {
   const input = body<z.infer<typeof teamBody>>(req);
-  const count = await prisma.teamMember.count();
-  const item = await prisma.teamMember.create({ data: { ...input, order: input.order ?? count } });
+  const max = await prisma.teamMember.aggregate({ _max: { order: true } });
+  const item = await prisma.teamMember.create({ data: { ...input, order: input.order ?? (max._max.order ?? -1) + 1 } });
   audit(req.user!.id, "team.created", "teamMember", item.id);
   res.status(201).json({ success: true, data: { item } });
 });

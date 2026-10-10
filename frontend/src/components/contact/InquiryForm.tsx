@@ -11,10 +11,12 @@ const EMPTY: Fields = { name: "", email: "", phone: "", subject: "", body: "" };
 function validate(f: Fields): Partial<Record<keyof Fields, string>> {
   const e: Partial<Record<keyof Fields, string>> = {};
   if (f.name.trim().length < 2) e.name = "Please enter your name (at least 2 characters).";
+  else if (f.name.trim().length > 120) e.name = "Please keep your name under 120 characters.";
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.trim())) e.email = "Please enter a valid email address.";
   if (f.phone.trim().length > 20) e.phone = "Phone number is too long.";
   if (f.subject.trim().length > 200) e.subject = "Subject is too long.";
   if (f.body.trim().length < 5) e.body = "Please describe your inquiry (at least 5 characters).";
+  else if (f.body.trim().length > 5000) e.body = "Please keep your message under 5,000 characters.";
   return e;
 }
 
@@ -100,7 +102,7 @@ export default function InquiryForm() {
             autoComplete="name"
           />
           {errors.name && (
-            <p id="inq-name-err" className="mt-1 text-sm text-red-600">
+            <p id="inq-name-err" role="alert" className="mt-1 text-sm text-red-600">
               {errors.name}
             </p>
           )}
@@ -120,7 +122,7 @@ export default function InquiryForm() {
             autoComplete="email"
           />
           {errors.email && (
-            <p id="inq-email-err" className="mt-1 text-sm text-red-600">
+            <p id="inq-email-err" role="alert" className="mt-1 text-sm text-red-600">
               {errors.email}
             </p>
           )}
@@ -142,7 +144,7 @@ export default function InquiryForm() {
             autoComplete="tel"
           />
           {errors.phone && (
-            <p id="inq-phone-err" className="mt-1 text-sm text-red-600">
+            <p id="inq-phone-err" role="alert" className="mt-1 text-sm text-red-600">
               {errors.phone}
             </p>
           )}
@@ -160,7 +162,7 @@ export default function InquiryForm() {
             className={inputCls}
           />
           {errors.subject && (
-            <p id="inq-subject-err" className="mt-1 text-sm text-red-600">
+            <p id="inq-subject-err" role="alert" className="mt-1 text-sm text-red-600">
               {errors.subject}
             </p>
           )}
@@ -181,7 +183,7 @@ export default function InquiryForm() {
           className={inputCls}
         />
         {errors.body && (
-          <p id="inq-body-err" className="mt-1 text-sm text-red-600">
+          <p id="inq-body-err" role="alert" className="mt-1 text-sm text-red-600">
             {errors.body}
           </p>
         )}

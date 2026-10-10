@@ -29,8 +29,10 @@ export default function CmsTeam() {
     const b = list[j];
     setOrderBusy(true);
     try {
-      await apiPatch(`/cms/admin/team/${a.id}`, { order: j });
-      await apiPatch(`/cms/admin/team/${b.id}`, { order: index });
+      // Swap the actual order values, not the array indices — indices drift
+      // from persisted order once members are added/deleted.
+      await apiPatch(`/cms/admin/team/${a.id}`, { order: b.order });
+      await apiPatch(`/cms/admin/team/${b.id}`, { order: a.order });
       items.reload();
     } catch (e) {
       notifyError(cmsError(e, "Could not reorder the team"));
@@ -131,8 +133,8 @@ export default function CmsTeam() {
       </Panel>
 
       <p className="text-sm text-slate-500">
-        Reordering patches the two swapped positions. If the backend has no public order field beyond this sequence, keep
-        them contiguous; there is no drag-and-drop endpoint.
+        Reordering swaps the display order of two adjacent members. New members are appended to the end;
+        the backend keeps order values unique. There is no drag-and-drop endpoint.
       </p>
 
       {(creating || editing) && (
