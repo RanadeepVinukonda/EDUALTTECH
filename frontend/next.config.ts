@@ -14,7 +14,7 @@ const securityHeaders: Array<[string, string]> = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://*.supabase.co https://images.pexels.com",
+      "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://edualttech.onrender.com https://*.supabase.co https://*.razorpay.com",
       "frame-src 'self' https://*.razorpay.com https://*.supabase.co",
