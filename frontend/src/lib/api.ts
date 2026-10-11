@@ -27,6 +27,13 @@ function signalSessionExpired(): void {
   if (typeof window !== "undefined") window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
 }
 
+/** Fired when the notification read-state changes, so shell badges refresh without a full reload. */
+export const NOTIFICATIONS_CHANGED_EVENT = "edu:notifications-changed";
+
+export function signalNotificationsChanged(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));
+}
+
 export interface ApiErrorShape {
   code: string;
   message: string;

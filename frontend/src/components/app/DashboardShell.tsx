@@ -13,7 +13,7 @@ import Person from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { apiGet } from "@/lib/api";
+import { apiGet, NOTIFICATIONS_CHANGED_EVENT } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import Spinner from "@/components/ui/Spinner";
 import { cn } from "@/lib/cn";
@@ -74,13 +74,17 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   useEffect(() => {
     if (!user) return;
     let alive = true;
-    apiGet<{ unread: number }>("/notifications")
-      .then((d) => {
-        if (alive) setUnread(d.unread ?? 0);
-      })
-      .catch(() => undefined);
+    const loadUnread = () =>
+      apiGet<{ unread: number }>("/notifications")
+        .then((d) => {
+          if (alive) setUnread(d.unread ?? 0);
+        })
+        .catch(() => undefined);
+    void loadUnread();
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, loadUnread);
     return () => {
       alive = false;
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, loadUnread);
     };
   }, [user]);
 

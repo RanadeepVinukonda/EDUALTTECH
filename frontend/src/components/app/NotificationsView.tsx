@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, signalNotificationsChanged } from "@/lib/api";
 import type { NotificationItem } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/notify";
@@ -67,6 +67,7 @@ export default function NotificationsView() {
     try {
       await apiPost("/notifications/read", {});
       notifySuccess("All notifications marked read.");
+      signalNotificationsChanged();
       await load(1, true);
     } catch (e) {
       notifyError(e instanceof Error ? e.message : "Could not mark notifications read.");
@@ -82,6 +83,7 @@ export default function NotificationsView() {
       await apiPost("/notifications/read", { ids: [n.id] });
       setItems((prev) => prev?.map((x) => (x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x)) ?? prev);
       setUnread((u) => Math.max(0, u - 1));
+      signalNotificationsChanged();
     } catch (e) {
       notifyError(e instanceof Error ? e.message : "Could not update the notification.");
       await load(1, true);
