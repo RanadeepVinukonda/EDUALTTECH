@@ -74,25 +74,31 @@ export default function MentorDashboardView() {
           <ul className="mt-3 grid gap-4 sm:grid-cols-2">
             {courses.map((c) => (
               <li key={c.id} className="rounded-[20px] border border-slate-200 bg-white p-4">
-                <div className="flex gap-4">
+                <div className="flex items-start gap-3">
                   <CoverImage
                     src={c.course.thumbnailUrl ?? null}
                     alt=""
                     fallback={c.course.title}
-                    className="h-20 w-28 shrink-0 rounded-xl"
+                    className="h-16 w-24 shrink-0 rounded-xl"
                   />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{c.course.category}</p>
-                    <p className="mt-1 truncate font-display text-lg font-bold text-ink-900">{c.course.title}</p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {c.course._count?.participants ?? 0} learners
-                      {c.course.status !== "PUBLISHED" && ` · ${c.course.status.toLowerCase()}`}
+                    <p className="mt-0.5 truncate font-display text-lg font-bold leading-tight text-ink-900">
+                      {c.course.title}
                     </p>
+                    <p className="mt-1.5 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                      {c.course._count?.participants ?? 0} learner{c.course._count?.participants === 1 ? "" : "s"}
+                    </p>
+                    {c.course.status !== "PUBLISHED" && (
+                      <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                        {c.course.status.toLowerCase()}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <Link
                   href={`/dashboard/mentor/courses/${c.course.slug}`}
-                  className={buttonClass("secondary", "sm", "mt-4")}
+                  className={buttonClass("secondary", "sm", "mt-3")}
                 >
                   Open workspace
                 </Link>
