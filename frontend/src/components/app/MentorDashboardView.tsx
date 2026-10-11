@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
+import CoverImage from "@/components/ui/CoverImage";
 import { buttonClass } from "@/components/ui/Button";
 
 export default function MentorDashboardView() {
@@ -72,13 +73,23 @@ export default function MentorDashboardView() {
         ) : (
           <ul className="mt-3 grid gap-4 sm:grid-cols-2">
             {courses.map((c) => (
-              <li key={c.id} className="rounded-[20px] border border-slate-200 bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{c.course.category}</p>
-                <p className="mt-1 font-display text-lg font-bold text-ink-900">{c.course.title}</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  {c.course._count?.participants ?? 0} learners
-                  {c.course.status !== "PUBLISHED" && ` · ${c.course.status.toLowerCase()}`}
-                </p>
+              <li key={c.id} className="rounded-[20px] border border-slate-200 bg-white p-4">
+                <div className="flex gap-4">
+                  <CoverImage
+                    src={c.course.thumbnailUrl ?? null}
+                    alt=""
+                    fallback={c.course.title}
+                    className="h-20 w-28 shrink-0 rounded-xl"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{c.course.category}</p>
+                    <p className="mt-1 truncate font-display text-lg font-bold text-ink-900">{c.course.title}</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {c.course._count?.participants ?? 0} learners
+                      {c.course.status !== "PUBLISHED" && ` · ${c.course.status.toLowerCase()}`}
+                    </p>
+                  </div>
+                </div>
                 <Link
                   href={`/dashboard/mentor/courses/${c.course.slug}`}
                   className={buttonClass("secondary", "sm", "mt-4")}
