@@ -10,7 +10,7 @@ import Input from "@/components/ui/Input";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, ConfirmDialog, FilterSelect, Panel, Skeleton, useAsync } from "./admin-ui";
-import { CmsDialog, Field, cmsError } from "./cms-ui";
+import { CmsDialog, Field, MediaUploadButton, cmsError } from "./cms-ui";
 
 const KINDS = ["image", "logo", "icon", "document", "video", "other"];
 const KIND_FILTER = [{ value: "", label: "All kinds" }, ...KINDS.map((k) => ({ value: k, label: k }))];
@@ -61,18 +61,21 @@ export default function CmsMediaLibrary() {
     <div className="space-y-6">
       <AdminHeader
         title="Media Library"
-        description="Register reusable images and files by URL, then reference them from work items, programs, and team profiles."
+        description="Upload or register images by URL, then reference them from work items, programs, org logos, and team profiles."
         actions={
-          <Button size="sm" onClick={() => setCreating(true)}>
-            Add by URL
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <MediaUploadButton label="Upload image" onUploaded={() => items.reload()} />
+            <Button size="sm" onClick={() => setCreating(true)}>
+              Add by URL
+            </Button>
+          </div>
         }
       />
 
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        <strong>No direct upload here.</strong> The backend has no file-upload endpoint for the media library — assets are
-        registered by pasting a public URL. Avatars are the only file-upload flow (from account settings). Deleting an
-        asset removes its record only; the underlying file is not deleted and any referencing page will show a broken image.
+        <strong>Uploaded images</strong> are stored in the public storage bucket. Assets added by URL are registered as-is.
+        Deleting an asset removes its record only; the underlying file is not deleted and any referencing page will show a
+        broken image.
       </div>
 
       <Panel

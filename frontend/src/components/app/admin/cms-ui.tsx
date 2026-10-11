@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ApiError, apiGet } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import { ApiError, apiGet, apiPost } from "@/lib/api";
 import type { MediaAssetRow } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import Button from "@/components/ui/Button";
@@ -196,6 +196,74 @@ export function MediaPicker({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Upload an image to the public bucket and register it in the media library. */
+export function MediaUploadButton({
+  kind = "image",
+  category,
+  onUploaded,
+  label = "Upload image",
+}: {
+  kind?: string;
+  category?: string;
+  onUploaded: (asset: MediaAssetRow) => void;
+  label?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Choose an image file (PNG or JPG).");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Image is too large — keep it under 2 MB.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Could not read that file."));
+        reader.readAsDataURL(file);
+      });
+      const data = dataUrl.slice(dataUrl.indexOf(",") + 1);
+      const res = await apiPost<{ asset: MediaAssetRow }>("/cms/admin/media/upload", {
+        name: file.name,
+        type: file.type,
+        data,
+        kind,
+        category: category ?? null,
+      });
+      onUploaded(res.asset);
+    } catch (err) {
+      setError(cmsError(err, "Could not upload the image."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div>
+      <input ref={inputRef} type="file" accept="image/*" className="sr-only" aria-label={label} onChange={onPick} />
+      <Button type="button" size="sm" variant="secondary" loading={busy} onClick={() => inputRef.current?.click()}>
+        {label}
+      </Button>
+      {error && (
+        <p role="alert" className="mt-1 text-sm text-red-700">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

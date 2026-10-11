@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandLogo from "@/components/brand/BrandLogo";
 
 const COLUMNS = [
   {
@@ -42,8 +43,7 @@ export default function PublicFooter() {
         <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>
             <Link href="/" className="inline-flex items-center gap-2" aria-label="EduAltTech home">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/brand/logo.png" alt="EduAltTech" width={432} height={436} className="h-8 w-auto brightness-0 invert" />
+              <BrandLogo onDark />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
               Practical AI, entrepreneurship, and technology learning — and working software built for schools.

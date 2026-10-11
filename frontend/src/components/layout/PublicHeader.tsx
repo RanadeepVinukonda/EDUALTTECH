@@ -8,6 +8,7 @@ import Close from "@mui/icons-material/Close";
 import { cn } from "@/lib/cn";
 import { hasSession } from "@/lib/auth";
 import LinkButton from "@/components/ui/LinkButton";
+import BrandLogo from "@/components/brand/BrandLogo";
 
 const NAV = [
   { href: "/courses", label: "Courses" },
@@ -41,8 +42,7 @@ export default function PublicHeader() {
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="EduAltTech home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/media/brand/logo.png" alt="EduAltTech" width={432} height={436} className="h-8 w-auto" />
+          <BrandLogo />
         </Link>
 
         <nav aria-label="Primary" className="ml-4 hidden items-center gap-1 lg:flex">

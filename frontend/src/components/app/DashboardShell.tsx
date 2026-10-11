@@ -17,6 +17,7 @@ import { apiGet } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import Spinner from "@/components/ui/Spinner";
 import { cn } from "@/lib/cn";
+import BrandLogo from "@/components/brand/BrandLogo";
 import type { DashboardData } from "@/lib/app-types";
 
 interface NavLink {
@@ -137,11 +138,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-2 px-4 sm:px-6 lg:px-8">
           <Link href={brandHref} className="flex shrink-0 items-center gap-2" aria-label="EduAltTech">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/brand/logo.png" alt="" width={432} height={436} className="h-8 w-auto" />
-            <span className="hidden font-display text-lg font-extrabold tracking-tight text-ink-900 sm:inline">
-              EduAltTech
-            </span>
+            <BrandLogo withWordmark wordmarkClassName="hidden sm:inline" />
           </Link>
 
           <nav aria-label="Primary" className="ml-4 hidden items-center gap-1 lg:flex">

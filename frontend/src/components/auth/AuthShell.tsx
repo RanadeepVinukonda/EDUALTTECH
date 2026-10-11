@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandLogo from "@/components/brand/BrandLogo";
 
 export default function AuthShell({
   title,
@@ -15,8 +16,7 @@ export default function AuthShell({
     <div className="bg-slate-50">
       <div className="mx-auto flex max-w-md flex-col px-4 py-12 sm:py-16">
         <Link href="/" className="mx-auto inline-flex items-center gap-2" aria-label="EduAltTech home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/media/brand/logo.png" alt="EduAltTech" width={432} height={436} className="h-8 w-auto" />
+          <BrandLogo />
         </Link>
 
         <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-elev1 sm:p-8">

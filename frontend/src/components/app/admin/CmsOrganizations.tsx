@@ -10,7 +10,7 @@ import Input from "@/components/ui/Input";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, ConfirmDialog, FilterSelect, Panel, Skeleton, StatusPill, useAsync } from "./admin-ui";
-import { CmsDialog, Field, MediaPicker, MediaReference, cmsError } from "./cms-ui";
+import { CmsDialog, Field, MediaPicker, MediaReference, MediaUploadButton, cmsError } from "./cms-ui";
 
 const TYPES: OrganizationType[] = ["SCHOOL", "PARTNER", "FRANCHISE", "NGO", "OTHER"];
 
@@ -308,8 +308,11 @@ function OrgEditor({ item, onClose, onSaved }: { item: OrganizationRow | null; o
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
           />
         </Field>
-        <Field label="Logo" hint="Choose a URL-registered asset from the Media Library.">
+        <Field label="Logo" hint="Pick from the Media Library or upload a new image.">
           <MediaReference url={logoUrl} alt={name} onPick={() => setPicker(true)} onClear={() => setLogoUrl("")} />
+          <div className="mt-2">
+            <MediaUploadButton kind="logo" label="Upload a logo" onUploaded={(asset) => setLogoUrl(asset.url)} />
+          </div>
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Website URL" htmlFor="o-site" hint="Public — shown on the Partners page.">

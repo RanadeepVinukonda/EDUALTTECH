@@ -5,6 +5,8 @@ import { requireAuth, requireRole } from "../../middlewares/auth.js";
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { audit } from "../../lib/audit.js";
+import { assertUploadable, uploadPublic } from "../../lib/storage.js";
+import { config } from "../../config/env.js";
 
 const router = Router();
 
@@ -86,6 +88,29 @@ admin.post("/media", validate({ body: z.object({
 }) }), async (req, res) => {
   const asset = await prisma.mediaAsset.create({ data: body<Record<string, unknown>>(req) as never });
   audit(req.user!.id, "media.created", "mediaAsset", asset.id);
+  res.status(201).json({ success: true, data: { asset } });
+});
+
+const uploadBody = z.object({
+  name: z.string().trim().min(1).max(200),
+  type: z.string().regex(/^image\/[\w.+-]+$/),
+  data: z.string().min(16),
+  kind: z.string().trim().max(30).default("image"),
+  alt: z.string().trim().max(300).nullable().optional(),
+  category: z.string().trim().max(60).nullable().optional(),
+});
+
+admin.post("/media/upload", validate({ body: uploadBody }), async (req, res) => {
+  const input = body<z.infer<typeof uploadBody>>(req);
+  const bytes = Buffer.from(input.data, "base64");
+  if (bytes.length === 0) throw ApiError.badRequest("Uploaded file is empty");
+  if (bytes.length > config.limits.maxUploadBytes) throw ApiError.badRequest("Image is too large");
+  assertUploadable(input.name, bytes.length);
+  const url = await uploadPublic("cms", input.name, bytes, input.type);
+  const asset = await prisma.mediaAsset.create({
+    data: { url, kind: input.kind, alt: input.alt ?? null, category: input.category ?? null },
+  });
+  audit(req.user!.id, "media.uploaded", "mediaAsset", asset.id);
   res.status(201).json({ success: true, data: { asset } });
 });
 
