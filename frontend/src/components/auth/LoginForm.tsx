@@ -48,7 +48,7 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
         { auth: false },
       );
       await setSessionFromTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken });
-      router.replace(safeNext(next));
+      router.replace(safeNext(next, "/dashboard"));
     } catch (err) {
       if (err instanceof ApiError) setError({ text: err.message, code: err.code });
       else setError({ text: "Something went wrong. Please try again." });

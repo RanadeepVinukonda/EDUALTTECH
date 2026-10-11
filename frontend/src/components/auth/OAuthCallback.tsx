@@ -46,7 +46,7 @@ export default function OAuthCallback({ next }: { next?: string }) {
       } catch {
         // Best-effort; navigating anyway lets /me surface a clear error if it failed.
       }
-      router.replace(safeNext(next));
+      router.replace(safeNext(next, "/dashboard"));
     };
 
     (async () => {
