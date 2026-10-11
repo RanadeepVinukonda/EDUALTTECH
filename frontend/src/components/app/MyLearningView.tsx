@@ -13,6 +13,22 @@ import CoverImage from "@/components/ui/CoverImage";
 
 type Tab = "learning" | "mentoring";
 
+const STATUS_LABEL: Record<string, string> = {
+  PUBLISHED: "Published",
+  DRAFT: "Draft",
+  ARCHIVED: "Archived",
+};
+
+function statusLabel(status: string): string {
+  return STATUS_LABEL[status] ?? status.replace(/_/g, " ").toLowerCase();
+}
+
+function statusTone(status: string): string {
+  if (status === "PUBLISHED") return "bg-green-100 text-green-800";
+  if (status === "ARCHIVED") return "bg-slate-100 text-slate-600";
+  return "bg-amber-100 text-amber-800";
+}
+
 export default function MyLearningView() {
   const [data, setData] = useState<MyCourses | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +95,12 @@ export default function MyLearningView() {
                   <CoverImage src={row.course.thumbnailUrl} alt="" fallback={row.course.title} className="h-20 w-28 shrink-0 rounded-xl" />
                   <div className="min-w-0 flex-1">
                     <h2 className="truncate font-display font-bold text-ink-900">{row.course.title}</h2>
-                    <p className="mt-0.5 text-xs text-slate-500">{row.course.category}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">{row.course.category}</span>
+                      <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", statusTone(row.course.status))}>
+                        {statusLabel(row.course.status)}
+                      </span>
+                    </div>
                     {row.mentor ? (
                       <p className="mt-1 text-xs text-slate-500">
                         Mentor: {row.mentor.firstName} {row.mentor.lastName}
@@ -112,10 +133,12 @@ export default function MyLearningView() {
                 <CoverImage src={row.course.thumbnailUrl} alt="" fallback={row.course.title} className="h-20 w-28 shrink-0 rounded-xl" />
                 <div className="min-w-0 flex-1">
                   <h2 className="truncate font-display font-bold text-ink-900">{row.course.title}</h2>
-                  <p className="mt-0.5 text-xs text-slate-500">{row.course.category}</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {row.course.status.replace(/_/g, " ").toLowerCase()}
-                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">{row.course.category}</span>
+                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", statusTone(row.course.status))}>
+                      {statusLabel(row.course.status)}
+                    </span>
+                  </div>
                 </div>
               </div>
               <Link href={`/dashboard/courses/${row.course.slug}`} className={buttonClass("secondary", "sm", "self-start")}>
