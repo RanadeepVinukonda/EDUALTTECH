@@ -1,6 +1,6 @@
-import AdminParticipants from "@/components/app/admin/AdminParticipants";
+import { redirect } from "next/navigation";
 
 export default async function AdminCourseParticipantsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <AdminParticipants courseId={id} />;
+  redirect(`/dashboard/admin/courses/${id}?tab=participants`);
 }

@@ -75,8 +75,8 @@ export default function AdminContent() {
           description={selected ? undefined : "Select a course to inspect its chapters, topics and lessons."}
           actions={
             selected ? (
-              <Link href={`/dashboard/admin/courses/${selected.id}/roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
-                Edit in roadmap builder →
+              <Link href={`/dashboard/admin/courses/${selected.id}?tab=roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
+                Open in course workspace →
               </Link>
             ) : undefined
           }

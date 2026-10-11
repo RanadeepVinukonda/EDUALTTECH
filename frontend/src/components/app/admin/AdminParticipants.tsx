@@ -8,7 +8,7 @@ import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, MetricCard, Panel, Skeleton, StatusPill, useAsync, userName } from "./admin-ui";
 
-export default function AdminParticipants({ courseId }: { courseId: string }) {
+export default function AdminParticipants({ courseId, embedded = false }: { courseId: string; embedded?: boolean }) {
   const detail = useAsync(() => apiGet<CourseDetailResponse>(`/courses/${courseId}`), [courseId]);
 
   if (detail.error) return <ErrorState message={detail.error} onRetry={detail.reload} />;
@@ -19,16 +19,18 @@ export default function AdminParticipants({ courseId }: { courseId: string }) {
   const mentors = course.mentors ?? [];
 
   return (
-    <div className="space-y-6">
-      <AdminHeader
-        title={`Participants — ${course.title}`}
-        description="Course-specific participation. MENTOR and LEARNER are per-course roles, never global account roles."
-        actions={
-          <Link href={`/dashboard/admin/courses/${course.id}`} className="text-sm font-semibold text-brand-700 hover:underline">
-            ← Course editor
-          </Link>
-        }
-      />
+    <div className={embedded ? "space-y-4" : "space-y-6"}>
+      {!embedded && (
+        <AdminHeader
+          title={`Participants — ${course.title}`}
+          description="Course-specific participation. MENTOR and LEARNER are per-course roles, never global account roles."
+          actions={
+            <Link href={`/dashboard/admin/courses/${course.id}`} className="text-sm font-semibold text-brand-700 hover:underline">
+              ← Course editor
+            </Link>
+          }
+        />
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard label="Enrolled learners" value={String(course.enrolledCount)} />

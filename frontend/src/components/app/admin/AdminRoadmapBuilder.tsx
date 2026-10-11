@@ -39,20 +39,30 @@ function isUrl(value: string): boolean {
   }
 }
 
-export default function AdminRoadmapBuilder({ courseId, courseTitle }: { courseId: string; courseTitle?: string }) {
+export default function AdminRoadmapBuilder({
+  courseId,
+  courseTitle,
+  embedded = false,
+}: {
+  courseId: string;
+  courseTitle?: string;
+  embedded?: boolean;
+}) {
   const { data, error, loading, reload } = useAsync(() => apiGet<Roadmap>(`/courses/${courseId}/roadmap`), [courseId]);
 
   return (
-    <div className="space-y-6">
-      <AdminHeader
-        title="Roadmap builder"
-        description={courseTitle ? `${courseTitle} · chapters, topics and lessons in order.` : "Structure the course into chapters, topics and lessons."}
-        actions={
-          <Link href={`/dashboard/admin/courses/${courseId}`} className="text-sm font-semibold text-brand-700 hover:underline">
-            ← Course editor
-          </Link>
-        }
-      />
+    <div className={embedded ? "space-y-4" : "space-y-6"}>
+      {!embedded && (
+        <AdminHeader
+          title="Roadmap builder"
+          description={courseTitle ? `${courseTitle} · chapters, topics and lessons in order.` : "Structure the course into chapters, topics and lessons."}
+          actions={
+            <Link href={`/dashboard/admin/courses/${courseId}`} className="text-sm font-semibold text-brand-700 hover:underline">
+              ← Course editor
+            </Link>
+          }
+        />
+      )}
 
       {error ? (
         <ErrorState message={rmError(error, "Could not load the roadmap.")} onRetry={reload} />

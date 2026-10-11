@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ApiError, apiGet, apiPatch, apiPost } from "@/lib/api";
@@ -12,8 +12,19 @@ import Input from "@/components/ui/Input";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync } from "./admin-ui";
+import { MediaPicker, MediaReference } from "./cms-ui";
+import AdminRoadmapBuilder from "./AdminRoadmapBuilder";
+import AdminParticipants from "./AdminParticipants";
 
 const MAX_PAISE = 10_000_000;
+
+type CourseWorkspaceTab = "details" | "roadmap" | "participants";
+
+const WORKSPACE_TABS: { key: CourseWorkspaceTab; label: string }[] = [
+  { key: "details", label: "Details" },
+  { key: "roadmap", label: "Roadmap" },
+  { key: "participants", label: "Participants" },
+];
 
 interface EditorCourse {
   id: string;
@@ -41,24 +52,50 @@ function editorError(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
 }
 
-export default function AdminCourseEditor({ courseId }: { courseId: string | null }) {
-  return courseId ? <EditLoader id={courseId} /> : <NewCourseEditor />;
+function toWorkspaceTab(value: string | undefined): CourseWorkspaceTab {
+  return value === "roadmap" || value === "participants" ? value : "details";
 }
 
-function EditLoader({ id }: { id: string }) {
+export default function AdminCourseEditor({ courseId, tab }: { courseId: string | null; tab?: string }) {
+  return courseId ? <EditWorkspace id={courseId} initialTab={toWorkspaceTab(tab)} /> : <NewCourseEditor />;
+}
+
+function EditWorkspace({ id, initialTab }: { id: string; initialTab: CourseWorkspaceTab }) {
+  const router = useRouter();
   const { data, error, loading, reload } = useAsync(() => apiGet<CourseDetailResponse>(`/courses/${id}`), [id]);
+  const [tab, setTab] = useState<CourseWorkspaceTab>(initialTab);
+
+  useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab]);
+
+  function switchTab(next: CourseWorkspaceTab) {
+    setTab(next);
+    router.replace(`/dashboard/admin/courses/${id}?tab=${next}`, { scroll: false });
+  }
 
   if (loading && !data) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
         <Skeleton className="h-10 w-72 rounded-xl" />
+        <Skeleton className="h-10 w-80 rounded-xl" />
         <Skeleton className="h-96 rounded-[20px]" />
       </div>
     );
   }
   if (error) return <ErrorState message={editorError(error, "Could not load this course.")} onRetry={reload} />;
   if (!data) {
-    return <EmptyState title="Course not found" description="This course may have been removed." action={<Link href="/dashboard/admin/courses" className={buttonClass("secondary", "sm")}>Back to courses</Link>} />;
+    return (
+      <EmptyState
+        title="Course not found"
+        description="This course may have been removed."
+        action={
+          <Link href="/dashboard/admin/courses" className={buttonClass("secondary", "sm")}>
+            Back to courses
+          </Link>
+        }
+      />
+    );
   }
 
   const c = data.course;
@@ -73,7 +110,51 @@ function EditLoader({ id }: { id: string }) {
     status: c.status as EditorCourse["status"],
     thumbnailUrl: c.thumbnailUrl,
   };
-  return <CourseForm initial={initial} mode="edit" onSaved={reload} />;
+
+  return (
+    <div className="space-y-6">
+      <AdminHeader
+        title={c.title || "Edit course"}
+        description={`Editing · ${initial.status.toLowerCase()}. Price is entered in rupees; stored as integer paise.`}
+        actions={
+          <Link href="/dashboard/admin/courses" className="text-sm font-semibold text-brand-700 hover:underline">
+            ← All courses
+          </Link>
+        }
+      />
+
+      <CourseTabs active={tab} onChange={switchTab} />
+
+      {tab === "details" && <CourseForm initial={initial} mode="edit" onSaved={reload} />}
+      {tab === "roadmap" && <AdminRoadmapBuilder courseId={id} courseTitle={c.title} embedded />}
+      {tab === "participants" && <AdminParticipants courseId={id} embedded />}
+    </div>
+  );
+}
+
+function CourseTabs({ active, onChange }: { active: CourseWorkspaceTab; onChange: (tab: CourseWorkspaceTab) => void }) {
+  return (
+    <nav
+      aria-label="Course workspace"
+      className="flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-elev1"
+    >
+      {WORKSPACE_TABS.map((t) => (
+        <button
+          key={t.key}
+          type="button"
+          onClick={() => onChange(t.key)}
+          aria-current={active === t.key ? "page" : undefined}
+          className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+            active === t.key
+              ? "bg-brand-600 text-white shadow-sm"
+              : "text-slate-600 hover:bg-slate-100 hover:text-ink-900"
+          }`}
+        >
+          {t.label}
+        </button>
+      ))}
+    </nav>
+  );
 }
 
 function NewCourseEditor() {
@@ -110,6 +191,7 @@ function CourseForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
 
   const dirty =
     title !== initial.title ||
@@ -164,23 +246,19 @@ function CourseForm({
 
   return (
     <div className="space-y-6">
-      <AdminHeader
-        title={mode === "create" ? "New course" : initial.title || "Edit course"}
-        description={
-          mode === "create"
-            ? "Create a draft course. Add its roadmap, then publish from the editor."
-            : `Editing · ${initial.status.toLowerCase()}. Price is entered in rupees; stored as integer paise.`
-        }
-        actions={
-          <Link href="/dashboard/admin/courses" className="text-sm font-semibold text-brand-700 hover:underline">
-            ← All courses
-          </Link>
-        }
-      />
-
-      {mode === "edit" && (
-        <EditHeader course={initial} onSaved={onSaved} />
+      {mode === "create" && (
+        <AdminHeader
+          title="New course"
+          description="Create a draft course. Add its roadmap, then publish from the editor."
+          actions={
+            <Link href="/dashboard/admin/courses" className="text-sm font-semibold text-brand-700 hover:underline">
+              ← All courses
+            </Link>
+          }
+        />
       )}
+
+      {mode === "edit" && <EditHeader course={initial} onSaved={onSaved} />}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <form onSubmit={submit} className="space-y-5 lg:col-span-2" noValidate>
@@ -242,9 +320,40 @@ function CourseForm({
                   </p>
                 </div>
                 <div>
-                  <label htmlFor="c-thumb" className="mb-1 block text-sm font-semibold text-ink-700">Thumbnail URL</label>
-                  <Input id="c-thumb" type="url" value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} error={urlInvalid} placeholder="https://…" />
-                  <p className="mt-1 text-xs text-slate-500">{urlInvalid ? "Enter a valid URL or leave blank." : "Optional image URL."}</p>
+                  <label htmlFor="c-thumb" className="mb-1 block text-sm font-semibold text-ink-700">Thumbnail</label>
+                  <div className="mt-1 space-y-3">
+                    <MediaReference
+                      url={thumbnailUrl}
+                      onPick={() => setPicking(true)}
+                      onClear={() => setThumbnailUrl("")}
+                      alt="Course thumbnail"
+                    />
+                    <details className="group">
+                      <summary className="cursor-pointer text-xs font-semibold text-brand-700 hover:underline">
+                        or paste an image URL
+                      </summary>
+                      <Input
+                        id="c-thumb"
+                        type="url"
+                        value={thumbnailUrl}
+                        onChange={(e) => setThumbnailUrl(e.target.value)}
+                        error={urlInvalid}
+                        placeholder="https://…"
+                        className="mt-2"
+                      />
+                    </details>
+                    {urlInvalid && <p className="text-xs text-danger">Enter a valid URL or leave blank.</p>}
+                  </div>
+                  <MediaPicker
+                    open={picking}
+                    selected={[]}
+                    onClose={() => setPicking(false)}
+                    onConfirm={(assets) => {
+                      const picked = assets[0];
+                      if (picked) setThumbnailUrl(picked.url);
+                      setPicking(false);
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -261,22 +370,16 @@ function CourseForm({
         </form>
 
         <div className="space-y-6">
-          {mode === "edit" && (
-            <Panel title="Roadmap" description="Structure the course into chapters, topics and lessons.">
-              <div className="flex flex-wrap gap-2">
-                <Link href={`/dashboard/admin/courses/${initial.id}/roadmap`} className={buttonClass("secondary", "sm")}>
-                  Open roadmap builder
-                </Link>
-                <Link href={`/dashboard/admin/courses/${initial.id}/participants`} className={buttonClass("secondary", "sm")}>
-                  View participants
-                </Link>
-              </div>
-            </Panel>
-          )}
           <Panel title="Preview">
             <p className="text-sm text-slate-500">
               Current price: <strong className="text-ink-900">{priceInvalid ? "—" : formatMoney(pricePaise ?? 0, initial.currency)}</strong>
             </p>
+            {thumbnailUrl && (
+              <div className="mt-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={thumbnailUrl} alt="" className="aspect-[16/10] w-full rounded-xl object-cover" />
+              </div>
+            )}
           </Panel>
         </div>
       </div>
