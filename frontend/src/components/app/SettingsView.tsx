@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Edit from "@mui/icons-material/Edit";
 import { apiPatch, apiPost } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import MobileVerification from "./MobileVerification";
@@ -45,25 +46,35 @@ export default function SettingsView() {
 
   const [saving, setSaving] = useState(false);
   const [lifecycleBusy, setLifecycleBusy] = useState(false);
+  const [editing, setEditing] = useState(false);
+
+  function fillFromUser(u: Me) {
+    setEducationLevel(u.educationLevel ?? "");
+    setInstitution(u.institution ?? "");
+    setFieldOfStudy(u.fieldOfStudy ?? "");
+    setGradYear(u.gradYear ? String(u.gradYear) : "");
+    setTargetRole(u.targetRole ?? "");
+    setSkillLevel(u.skillLevel ?? "");
+    setLearningPace(u.learningPace ?? "");
+    setWeeklyHours(u.weeklyHours ? String(u.weeklyHours) : "");
+    setLearningFormat(u.learningFormat ?? "");
+    setInterests(u.interests ?? "");
+    setSkills(u.skills ?? "");
+    setCertifications(u.certifications ?? "");
+    setLearningGoals(u.learningGoals ?? "");
+    setShortTermGoals(u.shortTermGoals ?? "");
+    setLongTermGoals(u.longTermGoals ?? "");
+  }
 
   useEffect(() => {
     if (!user) return;
-    setEducationLevel(user.educationLevel ?? "");
-    setInstitution(user.institution ?? "");
-    setFieldOfStudy(user.fieldOfStudy ?? "");
-    setGradYear(user.gradYear ? String(user.gradYear) : "");
-    setTargetRole(user.targetRole ?? "");
-    setSkillLevel(user.skillLevel ?? "");
-    setLearningPace(user.learningPace ?? "");
-    setWeeklyHours(user.weeklyHours ? String(user.weeklyHours) : "");
-    setLearningFormat(user.learningFormat ?? "");
-    setInterests(user.interests ?? "");
-    setSkills(user.skills ?? "");
-    setCertifications(user.certifications ?? "");
-    setLearningGoals(user.learningGoals ?? "");
-    setShortTermGoals(user.shortTermGoals ?? "");
-    setLongTermGoals(user.longTermGoals ?? "");
+    fillFromUser(user);
   }, [user]);
+
+  function cancelEdit() {
+    if (user) fillFromUser(user);
+    setEditing(false);
+  }
 
   if (loading || !user) return <Spinner label="Loading settings…" />;
 
@@ -98,6 +109,7 @@ export default function SettingsView() {
         longTermGoals: longTermGoals.trim() || null,
       });
       await refresh();
+      setEditing(false);
       notifySuccess("Learning profile saved.");
     } catch (err) {
       notifyError(err instanceof Error ? err.message : "Could not save your settings.");
@@ -169,12 +181,32 @@ export default function SettingsView() {
       </section>
 
       <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
-        <h2 className="font-display text-lg font-bold text-ink-900">Learning profile</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Helps us recommend courses, learning paths, and mentors that fit you.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="font-display text-lg font-bold text-ink-900">Learning profile</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Helps us recommend courses, learning paths, and mentors that fit you.
+            </p>
+          </div>
+          {editing ? (
+            <Button size="sm" variant="ghost" onClick={cancelEdit}>
+              Cancel
+            </Button>
+          ) : (
+            <button
+              type="button"
+              aria-label="Edit learning profile"
+              onClick={() => setEditing(true)}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-ink-600 transition hover:bg-slate-50 hover:text-ink-900"
+            >
+              <Edit fontSize="small" />
+            </button>
+          )}
+        </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        {editing ? (
+          <>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="set-education" className="mb-1 block text-sm font-semibold text-ink-700">
               Education level
@@ -338,11 +370,109 @@ export default function SettingsView() {
             />
           </div>
         </div>
-        <div className="mt-4">
-          <Button onClick={() => void saveLearning()} loading={saving}>
-            Save
-          </Button>
-        </div>
+          <div className="mt-4 flex items-center gap-3">
+            <Button onClick={() => void saveLearning()} loading={saving}>
+              Save changes
+            </Button>
+            <Button size="sm" variant="ghost" onClick={cancelEdit}>
+              Cancel
+            </Button>
+          </div>
+          </>
+        ) : (
+          <dl className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Education level</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {educationLevel || <span className="text-slate-400">Prefer not to say</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Field of study</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {fieldOfStudy || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Institution</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {institution || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Graduation year</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {gradYear || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Target role</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {targetRole || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Current skill level</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {skillLevel || <span className="text-slate-400">Prefer not to say</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Learning pace</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {learningPace || <span className="text-slate-400">Prefer not to say</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Weekly study time (hours)</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {weeklyHours || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-semibold text-ink-700">Preferred learning format</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {learningFormat || <span className="text-slate-400">No preference</span>}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-semibold text-ink-700">Interests &amp; preferred topics</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {interests || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-semibold text-ink-700">Existing skills &amp; areas to improve</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {skills || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-semibold text-ink-700">Certifications or qualifications</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {certifications || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-semibold text-ink-700">Learning goals</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {learningGoals || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Short-term objectives</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {shortTermGoals || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-ink-700">Long-term objectives</dt>
+              <dd className="mt-1 text-[15px] text-slate-600">
+                {longTermGoals || <span className="text-slate-400">Not set</span>}
+              </dd>
+            </div>
+          </dl>
+        )}
       </section>
 
       <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
