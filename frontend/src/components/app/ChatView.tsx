@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import type { ChatMessage, Conversation } from "@/lib/app-types";
@@ -15,7 +15,7 @@ function peerOf(c: Conversation, meId: string) {
   return c.learnerUserId === meId ? c.mentor : c.learner;
 }
 
-export default function ChatView() {
+export default function ChatView({ courseId, title }: { courseId?: string; title?: string } = {}) {
   const { user } = useAuth();
   const [convs, setConvs] = useState<Conversation[] | null>(null);
   const [convError, setConvError] = useState<string | null>(null);
@@ -68,10 +68,19 @@ export default function ChatView() {
   }, []);
 
   useEffect(() => {
-    void loadConversations().then((list) => {
-      if (list && list.length > 0) setSelectedId((cur) => cur ?? list[0].id);
-    });
+    void loadConversations();
   }, [loadConversations]);
+
+  // Optionally scope the thread list to a single course.
+  const visible = useMemo(
+    () => (convs ? (courseId ? convs.filter((c) => c.courseId === courseId) : convs) : null),
+    [convs, courseId],
+  );
+
+  useEffect(() => {
+    if (!visible) return;
+    setSelectedId((cur) => (cur && visible.some((c) => c.id === cur) ? cur : visible[0]?.id ?? null));
+  }, [visible]);
 
   useEffect(() => {
     if (selectedId) void loadThread(selectedId);
@@ -112,23 +121,29 @@ export default function ChatView() {
   }
 
   if (convError) return <ErrorState message={convError} onRetry={() => void loadConversations()} />;
-  if (!convs || !user) return <Spinner label="Loading messages…" />;
+  if (!visible || !user) return <Spinner label="Loading messages…" />;
 
-  const selected = convs.find((c) => c.id === selectedId) ?? null;
+  const selected = visible.find((c) => c.id === selectedId) ?? null;
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="font-display text-2xl font-extrabold text-ink-900">Messages</h1>
+      <h1 className="font-display text-2xl font-extrabold text-ink-900">
+        {title ? `Messages · ${title}` : "Messages"}
+      </h1>
 
-      {convs.length === 0 ? (
+      {visible.length === 0 ? (
         <EmptyState
           title="No conversations yet"
-          description="Conversations with your mentors or learners appear here."
+          description={
+            courseId
+              ? "Messages with your mentor (or learners) in this course appear here."
+              : "Conversations with your mentors or learners appear here."
+          }
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
           <nav aria-label="Conversations" className={cn("flex flex-col gap-1", selectedId && "hidden lg:flex")}>
-            {convs.map((c) => {
+            {visible.map((c) => {
               const peer = peerOf(c, user.id);
               const active = c.id === selectedId;
               return (

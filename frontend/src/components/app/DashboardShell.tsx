@@ -8,7 +8,6 @@ import PlayCircle from "@mui/icons-material/PlayCircle";
 import CoPresent from "@mui/icons-material/CoPresent";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import Favorite from "@mui/icons-material/Favorite";
-import LibraryBooks from "@mui/icons-material/LibraryBooks";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Person from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -30,7 +29,6 @@ interface NavLink {
 const SECONDARY: NavLink[] = [
   { href: "/dashboard/orders", label: "Orders", Icon: ReceiptLong },
   { href: "/dashboard/wishlist", label: "Wishlist", Icon: Favorite },
-  { href: "/dashboard/resources", label: "Resources", Icon: LibraryBooks },
 ];
 
 function initials(first: string, last: string): string {

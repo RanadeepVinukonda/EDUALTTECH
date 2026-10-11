@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
-import type { MeetingRow } from "@/lib/app-types";
+import type { MeetingRow, Roadmap } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import { cn } from "@/lib/cn";
@@ -23,16 +23,18 @@ function isValidUrl(v: string): boolean {
   }
 }
 
-export default function MeetingManager({ courseId }: { courseId: string }) {
+export default function MeetingManager({ courseId, readOnly = false }: { courseId: string; readOnly?: boolean }) {
   const [scope, setScope] = useState<Scope>("upcoming");
   const [meetings, setMeetings] = useState<MeetingRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [topics, setTopics] = useState<{ id: string; title: string; chapterId: string; chapterTitle: string }[]>([]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [durationMin, setDurationMin] = useState(60);
   const [meetingUrl, setMeetingUrl] = useState("");
+  const [topicId, setTopicId] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -50,6 +52,25 @@ export default function MeetingManager({ courseId }: { courseId: string }) {
     void load();
   }, [load]);
 
+  // Staff can attach a session to a roadmap topic; learners never create.
+  useEffect(() => {
+    if (readOnly) return;
+    let alive = true;
+    apiGet<Roadmap>(`/courses/${courseId}/roadmap`)
+      .then((rm) => {
+        if (!alive) return;
+        setTopics(
+          rm.chapters.flatMap((ch) =>
+            ch.topics.map((t) => ({ id: t.id, title: t.title, chapterId: ch.id, chapterTitle: ch.title })),
+          ),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [courseId, readOnly]);
+
   async function create(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
@@ -60,12 +81,15 @@ export default function MeetingManager({ courseId }: { courseId: string }) {
     setFormError(null);
     setBusy(true);
     try {
+      const topic = topics.find((t) => t.id === topicId);
       await apiPost(`/courses/${courseId}/meetings`, {
         title: title.trim(),
         description: description.trim() ? description.trim() : null,
         scheduledAt: new Date(scheduledAt).toISOString(),
         durationMin,
         meetingUrl: meetingUrl.trim(),
+        chapterId: topic?.chapterId ?? null,
+        topicId: topic?.id ?? null,
       });
       notifySuccess("Meeting scheduled.");
       setTitle("");
@@ -73,6 +97,7 @@ export default function MeetingManager({ courseId }: { courseId: string }) {
       setScheduledAt("");
       setDurationMin(60);
       setMeetingUrl("");
+      setTopicId("");
       setScope("upcoming");
       await load();
     } catch (e) {
@@ -95,7 +120,8 @@ export default function MeetingManager({ courseId }: { courseId: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <section aria-labelledby="new-meeting-h" className="rounded-[20px] border border-slate-200 bg-white p-5">
+      {!readOnly && (
+        <section aria-labelledby="new-meeting-h" className="rounded-[20px] border border-slate-200 bg-white p-5">
         <h3 id="new-meeting-h" className="font-display text-lg font-bold text-ink-900">
           Schedule a meeting
         </h3>
@@ -122,6 +148,21 @@ export default function MeetingManager({ courseId }: { courseId: string }) {
               />
             </label>
           </div>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-semibold text-ink-700">Attach to topic (optional)</span>
+            <select
+              value={topicId}
+              onChange={(e) => setTopicId(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+            >
+              <option value="">Course-wide</option>
+              {topics.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.chapterTitle} · {t.title}
+                </option>
+              ))}
+            </select>
+          </label>
           <Input
             type="url"
             value={meetingUrl}
@@ -144,7 +185,8 @@ export default function MeetingManager({ courseId }: { courseId: string }) {
             </Button>
           </div>
         </form>
-      </section>
+        </section>
+      )}
 
       <section aria-labelledby="meetings-h">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -200,9 +242,11 @@ export default function MeetingManager({ courseId }: { courseId: string }) {
                   >
                     Join link
                   </a>
-                  <button type="button" className={buttonClass("ghost", "sm")} onClick={() => void remove(m)}>
-                    Cancel
-                  </button>
+                  {!readOnly && (
+                    <button type="button" className={buttonClass("ghost", "sm")} onClick={() => void remove(m)}>
+                      Cancel
+                    </button>
+                  )}
                 </div>
               </li>
             ))}
