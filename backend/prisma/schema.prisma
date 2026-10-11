@@ -95,6 +95,23 @@ model User {
   fieldOfStudy    String?
   gradYear        Int?
 
+  // Account lifecycle — archive keeps access for a grace month then deactivates
+  deactivationScheduledAt DateTime?
+  deactivatedAt           DateTime?
+
+  // Richer learning profile (personalization: recommendations, paths, mentor matching)
+  learningGoals  String?
+  shortTermGoals String?
+  longTermGoals  String?
+  targetRole     String?
+  skillLevel     String? // Beginner | Intermediate | Advanced
+  learningPace   String? // Relaxed | Moderate | Intensive
+  weeklyHours    Int?
+  learningFormat String? // Live sessions | Recorded content | Practical projects | Mixed
+  interests      String?
+  skills         String?
+  certifications String?
+
   onboardingDone  Boolean  @default(false)
   notifReadAt     DateTime?
 

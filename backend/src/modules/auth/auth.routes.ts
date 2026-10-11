@@ -38,6 +38,19 @@ function shape(user: NonNullable<Profile>) {
     institution: user.institution,
     fieldOfStudy: user.fieldOfStudy,
     gradYear: user.gradYear,
+    deactivationScheduledAt: user.deactivationScheduledAt,
+    deactivatedAt: user.deactivatedAt,
+    learningGoals: user.learningGoals,
+    shortTermGoals: user.shortTermGoals,
+    longTermGoals: user.longTermGoals,
+    targetRole: user.targetRole,
+    skillLevel: user.skillLevel,
+    learningPace: user.learningPace,
+    weeklyHours: user.weeklyHours,
+    learningFormat: user.learningFormat,
+    interests: user.interests,
+    skills: user.skills,
+    certifications: user.certifications,
     onboardingDone: user.onboardingDone,
     isActive: user.isActive,
     createdAt: user.createdAt,
@@ -134,6 +147,18 @@ async function signIn(email: string, password: string): Promise<{ accessToken: s
   return { accessToken: data.session.access_token, refreshToken: data.session.refresh_token };
 }
 
+// ── Account lifecycle helper — an archived account auto-deactivates once its
+// grace month expires. Applied wherever a session is established or refreshed.
+async function applyArchiveDeadline(user: NonNullable<Profile>) {
+  if (user.isActive && user.deactivationScheduledAt && user.deactivationScheduledAt <= new Date()) {
+    return prisma.user.update({
+      where: { id: user.id },
+      data: { isActive: false, deactivatedAt: new Date(), deactivationScheduledAt: null },
+    });
+  }
+  return user;
+}
+
 // ── Sessions ───────────────────────────────────────────────────────
 
 router.post(
@@ -144,8 +169,11 @@ router.post(
     const { email, password } = body<{ email: string; password: string }>(req);
     const tokens = await signIn(email, password);
     const authUser = await getUserByToken(tokens.accessToken);
-    const user = authUser ? await prisma.user.findUnique({ where: { id: authUser.id } }) : null;
-    if (!user || !user.isActive) throw ApiError.forbidden("This account has been deactivated");
+    const found = authUser ? await prisma.user.findUnique({ where: { id: authUser.id } }) : null;
+    if (!found) throw ApiError.unauthorized("Incorrect email or password");
+    const user = await applyArchiveDeadline(found);
+    // Deactivated accounts sign in to reach the reactivation prompt; the
+    // authenticated API still rejects them (see the requireAuth middleware).
     res.json({ success: true, data: { user: shape(user), ...tokens } });
   },
 );
@@ -208,8 +236,10 @@ router.post(
 // ── Profile ────────────────────────────────────────────────────────
 
 router.get("/me", requireAuth, async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
-  if (!user) throw ApiError.notFound("Account not found");
+  const found = await prisma.user.findUnique({ where: { id: req.user!.id } });
+  if (!found) throw ApiError.notFound("Account not found");
+  const user = await applyArchiveDeadline(found);
+  if (!user.isActive) throw ApiError.unauthorized("This account has been deactivated");
   res.json({ success: true, data: { user: shape(user) } });
 });
 
@@ -224,6 +254,17 @@ const profileSchema = z.object({
   fieldOfStudy: z.string().trim().max(160).nullable().optional(),
   gradYear: z.number().int().min(1950).max(2100).nullable().optional(),
   onboardingDone: z.boolean().optional(),
+  learningGoals: z.string().trim().max(2000).nullable().optional(),
+  shortTermGoals: z.string().trim().max(1000).nullable().optional(),
+  longTermGoals: z.string().trim().max(1000).nullable().optional(),
+  targetRole: z.string().trim().max(160).nullable().optional(),
+  skillLevel: z.enum(["Beginner", "Intermediate", "Advanced"]).nullable().optional(),
+  learningPace: z.enum(["Relaxed", "Moderate", "Intensive"]).nullable().optional(),
+  weeklyHours: z.number().int().min(1).max(60).nullable().optional(),
+  learningFormat: z.enum(["Live sessions", "Recorded content", "Practical projects", "Mixed"]).nullable().optional(),
+  interests: z.string().trim().max(1000).nullable().optional(),
+  skills: z.string().trim().max(1000).nullable().optional(),
+  certifications: z.string().trim().max(1000).nullable().optional(),
 });
 
 router.patch("/me", requireAuth, validate({ body: profileSchema }), async (req, res) => {
@@ -231,6 +272,62 @@ router.patch("/me", requireAuth, validate({ body: profileSchema }), async (req, 
   const user = await prisma.user.update({ where: { id: req.user!.id }, data: patch });
   res.json({ success: true, data: { user: shape(user) } });
 });
+
+// ── Account lifecycle — archive (1-month grace) / deactivate / reactivate ──
+
+const ARCHIVE_DAYS = 30;
+
+router.post("/archive", requireAuth, async (req, res) => {
+  const existing = await prisma.user.findUnique({ where: { id: req.user!.id }, select: { isActive: true } });
+  if (!existing) throw ApiError.notFound("Account not found");
+  if (!existing.isActive) throw ApiError.conflict("Deactivated accounts can't be archived");
+  const due = new Date(Date.now() + ARCHIVE_DAYS * 24 * 60 * 60 * 1000);
+  const user = await prisma.user.update({
+    where: { id: req.user!.id },
+    data: { deactivationScheduledAt: due, deactivatedAt: null },
+  });
+  audit(req.user!.id, "user.archived", "user", req.user!.id, { due });
+  res.json({ success: true, data: { user: shape(user) } });
+});
+
+router.post("/cancel-archive", requireAuth, async (req, res) => {
+  const user = await prisma.user.update({
+    where: { id: req.user!.id },
+    data: { deactivationScheduledAt: null },
+  });
+  audit(req.user!.id, "user.archive_cancelled", "user", req.user!.id);
+  res.json({ success: true, data: { user: shape(user) } });
+});
+
+router.post("/deactivate", requireAuth, async (req, res) => {
+  const user = await prisma.user.update({
+    where: { id: req.user!.id },
+    data: { isActive: false, deactivatedAt: new Date(), deactivationScheduledAt: null },
+  });
+  audit(req.user!.id, "user.deactivated", "user", req.user!.id);
+  res.json({ success: true, data: { user: shape(user) } });
+});
+
+router.post(
+  "/reactivate",
+  authLimiter,
+  validate({ body: z.object({ email: emailSchema, password: z.string().min(1) }) }),
+  async (req, res) => {
+    const { email, password } = body<{ email: string; password: string }>(req);
+    const tokens = await signIn(email, password);
+    const authUser = await getUserByToken(tokens.accessToken);
+    const found = authUser ? await prisma.user.findUnique({ where: { id: authUser.id } }) : null;
+    if (!found) throw ApiError.notFound("Account not found");
+    const user = found.isActive
+      ? found
+      : await prisma.user.update({
+          where: { id: found.id },
+          data: { isActive: true, deactivatedAt: null, deactivationScheduledAt: null },
+        });
+    audit(user.id, "user.reactivated", "user", user.id);
+    res.json({ success: true, data: { user: shape(user), ...tokens } });
+  },
+);
 
 router.post(
   "/avatar",
@@ -402,7 +499,8 @@ router.post("/oauth/sync", authLimiter, async (req, res) => {
     }
   }
   if (!user) throw ApiError.badRequest("Could not provision your account. Please sign in again.");
-  res.json({ success: true, data: { user: shape(user) } });
+  const settled = await applyArchiveDeadline(user);
+  res.json({ success: true, data: { user: shape(settled) } });
 });
 
 function sameOrigin(candidate: string, base: string): boolean {

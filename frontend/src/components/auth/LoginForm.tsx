@@ -10,7 +10,7 @@ import { PasswordField, TextField } from "./Field";
 import OAuthButtons from "./OAuthButtons";
 
 interface LoginResult extends AuthTokens {
-  user: { id: string; email: string; role: string; emailVerifiedAt: boolean };
+  user: { id: string; email: string; role: string; emailVerifiedAt: boolean; isActive: boolean };
 }
 
 export default function LoginForm({ next, notice }: { next?: string; notice?: string }) {
@@ -47,6 +47,10 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
         { email: email.trim(), password },
         { auth: false },
       );
+      if (!data.user.isActive) {
+        router.replace(`/reactivate?email=${encodeURIComponent(data.user.email)}&deactivated=1`);
+        return;
+      }
       await setSessionFromTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken });
       router.replace(safeNext(next, "/dashboard"));
     } catch (err) {

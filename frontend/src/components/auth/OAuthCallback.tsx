@@ -42,7 +42,14 @@ export default function OAuthCallback({ next }: { next?: string }) {
       }
       // A first OAuth sign-in has a Supabase user but no Prisma row yet — provision it.
       try {
-        await api("/auth/oauth/sync", { method: "POST" });
+        const data = await api<{ user: { email: string; isActive: boolean } }>("/auth/oauth/sync", {
+          method: "POST",
+        });
+        if (data.user && !data.user.isActive) {
+          await getSupabase().auth.signOut();
+          router.replace(`/reactivate?email=${encodeURIComponent(data.user.email)}&deactivated=1`);
+          return;
+        }
       } catch {
         // Best-effort; navigating anyway lets /me surface a clear error if it failed.
       }
