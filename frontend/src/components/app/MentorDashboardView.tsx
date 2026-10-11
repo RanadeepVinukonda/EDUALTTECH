@@ -73,8 +73,8 @@ export default function MentorDashboardView() {
         ) : (
           <ul className="mt-3 grid gap-4 sm:grid-cols-2">
             {courses.map((c) => (
-              <li key={c.id} className="rounded-[20px] border border-slate-200 bg-white p-4">
-                <div className="flex items-start gap-3">
+              <li key={c.id} className="flex h-full flex-col rounded-[20px] border border-slate-200 bg-white p-4">
+                <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
                   <CoverImage
                     src={c.course.thumbnailUrl ?? null}
                     alt=""
@@ -85,22 +85,24 @@ export default function MentorDashboardView() {
                     <p className="truncate font-display text-lg font-bold leading-tight text-ink-900">
                       {c.course.title}
                     </p>
-                    <p className="mt-1.5 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                      {c.course._count?.participants ?? 0} learner{c.course._count?.participants === 1 ? "" : "s"}
-                    </p>
                     {c.course.status !== "PUBLISHED" && (
-                      <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                      <span className="mt-2 inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
                         {c.course.status.toLowerCase()}
                       </span>
                     )}
                   </div>
                 </div>
-                <Link
-                  href={`/dashboard/mentor/courses/${c.course.slug}`}
-                  className={buttonClass("secondary", "sm", "mt-3")}
-                >
-                  Open workspace
-                </Link>
+                <p className="mt-3 inline-flex w-fit items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                  {c.course._count?.participants ?? 0} learner{c.course._count?.participants === 1 ? "" : "s"}
+                </p>
+                <div className="mt-auto pt-4">
+                  <Link
+                    href={`/dashboard/mentor/courses/${c.course.slug}`}
+                    className={buttonClass("secondary", "sm")}
+                  >
+                    Open workspace
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>
