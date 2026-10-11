@@ -82,8 +82,7 @@ export default function MentorDashboardView() {
                     className="h-16 w-24 shrink-0 rounded-xl"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{c.course.category}</p>
-                    <p className="mt-0.5 truncate font-display text-lg font-bold leading-tight text-ink-900">
+                    <p className="truncate font-display text-lg font-bold leading-tight text-ink-900">
                       {c.course.title}
                     </p>
                     <p className="mt-1.5 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
