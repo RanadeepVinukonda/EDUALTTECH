@@ -1,13 +1,25 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Sora, Inter, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Chrome from "@/components/layout/Chrome";
 import Toaster from "@/components/ui/Toaster";
 import "./globals.css";
 
-const sora = Sora({ subsets: ["latin"], variable: "--font-sora", weight: ["600", "700", "800"] });
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
+const sora = localFont({
+  src: "./fonts/sora-latin.woff2",
+  variable: "--font-sora",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
+});
+const inter = localFont({
+  src: "./fonts/inter-latin.woff2",
+  variable: "--font-inter",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
+});
+const jetbrains = localFont({
+  src: "./fonts/jetbrains-mono-latin.woff2",
+  variable: "--font-jetbrains",
+  fallback: ["ui-monospace", "monospace"],
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   // metadataBase drives absolute canonical/OG URLs. Prefer the configured
