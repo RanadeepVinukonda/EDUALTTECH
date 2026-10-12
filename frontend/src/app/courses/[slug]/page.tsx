@@ -6,6 +6,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuBook from "@mui/icons-material/MenuBook";
 import Groups from "@mui/icons-material/Groups";
 import { publicFetchStrict } from "@/lib/server-api";
+import { siteUrl } from "@/lib/site";
 import type { CourseDetailResponse } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import CoverImage from "@/components/ui/CoverImage";
@@ -23,11 +24,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { data } = await load(slug);
   const c = data?.course;
   if (!c) return { title: "Course" };
+  const description = c.description.slice(0, 160);
   return {
     title: c.title,
-    description: c.description.slice(0, 160),
+    description,
     alternates: { canonical: `/courses/${c.slug}` },
-    openGraph: { title: c.title, description: c.description.slice(0, 160), images: c.thumbnailUrl ? [c.thumbnailUrl] : undefined },
+    openGraph: {
+      type: "website",
+      siteName: "EduAltTech",
+      locale: "en_IN",
+      url: `/courses/${c.slug}`,
+      title: c.title,
+      description,
+      images: c.thumbnailUrl ? [c.thumbnailUrl] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: c.title,
+      description,
+      images: c.thumbnailUrl ? [c.thumbnailUrl] : undefined,
+    },
   };
 }
 
@@ -59,8 +75,29 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     0,
   );
 
+  const base = await siteUrl();
+  const courseJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: course.title,
+    description: course.description,
+    url: `${base}/courses/${course.slug}`,
+    ...(course.thumbnailUrl ? { image: course.thumbnailUrl } : {}),
+    provider: { "@type": "EducationalOrganization", name: "EduAltTech", sameAs: base },
+    inLanguage: "en-IN",
+    offers: {
+      "@type": "Offer",
+      price: (course.pricePaise / 100).toFixed(2),
+      priceCurrency: course.currency,
+      category: course.pricePaise === 0 ? "Free" : "Paid",
+      availability: "https://schema.org/InStock",
+      url: `${base}/courses/${course.slug}`,
+    },
+  };
+
   return (
     <div className="bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }} />
       {/* Hero */}
       <section className="border-b border-slate-200 bg-slate-50">
         <div className={`${wrap} py-8 sm:py-12`}>

@@ -1,10 +1,21 @@
-import type { Metadata } from "next";
-import { headers } from "next/headers";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { siteUrl } from "@/lib/site";
 import Chrome from "@/components/layout/Chrome";
 import AuthProvider from "@/components/app/AuthProvider";
 import Toaster from "@/components/ui/Toaster";
 import "./globals.css";
+
+const SITE_NAME = "EduAltTech";
+const SITE_DESCRIPTION =
+  "EduAltTech — courses, mentors, and structured roadmaps for ambitious learners. Learn in-demand skills with real mentors. A product by Setsuzoku.";
+
+export const viewport: Viewport = {
+  themeColor: "#038c3e",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+};
 
 const sora = localFont({
   src: "./fonts/sora-latin.woff2",
@@ -26,27 +37,90 @@ export async function generateMetadata(): Promise<Metadata> {
   // metadataBase drives absolute canonical/OG URLs. Prefer the configured
   // APP_BASE_URL; otherwise derive from the request so deployed sites never
   // emit localhost links by accident.
-  const h = await headers().catch(() => null);
-  const proto = h?.get("x-forwarded-proto")?.split(",")[0]?.trim() ?? "http";
-  const host = h?.get("x-forwarded-host")?.split(",")[0]?.trim() ?? h?.get("host") ?? "localhost:3000";
-  const metadataBase = new URL(process.env.APP_BASE_URL ?? `${proto}://${host}`);
+  const metadataBase = new URL(await siteUrl());
 
   return {
-    title: { default: "EduAltTech — Learn. Build. Grow.", template: "%s · EduAltTech" },
-    description: "EduAltTech — courses, mentors, and roadmaps for ambitious learners. A product by Setsuzoku.",
     metadataBase,
+    title: { default: "EduAltTech — Learn. Build. Grow.", template: "%s · EduAltTech" },
+    description: SITE_DESCRIPTION,
+    applicationName: SITE_NAME,
+    keywords: [
+      "EduAltTech",
+      "online courses India",
+      "learn AI",
+      "entrepreneurship courses",
+      "tech mentorship",
+      "structured roadmaps",
+      "career skills",
+    ],
+    authors: [{ name: "Setsuzoku" }],
+    creator: "Setsuzoku",
+    publisher: "Setsuzoku",
+    category: "education",
+    alternates: { canonical: "/" },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
     openGraph: {
-      title: "EduAltTech",
-      description: "Courses, mentors, and roadmaps for ambitious learners.",
+      type: "website",
+      siteName: SITE_NAME,
+      locale: "en_IN",
+      url: "/",
+      title: "EduAltTech — Learn. Build. Grow.",
+      description: SITE_DESCRIPTION,
+      images: [{ url: "/media/photos/og-image.jpg", width: 1200, height: 630, alt: "EduAltTech" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "EduAltTech — Learn. Build. Grow.",
+      description: SITE_DESCRIPTION,
       images: ["/media/photos/og-image.jpg"],
     },
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const base = await siteUrl();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "EducationalOrganization",
+        "@id": `${base}/#organization`,
+        name: SITE_NAME,
+        url: base,
+        logo: `${base}/media/brand/logo.png`,
+        description: SITE_DESCRIPTION,
+        sameAs: [] as string[],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${base}/#website`,
+        url: base,
+        name: SITE_NAME,
+        inLanguage: "en-IN",
+        publisher: { "@id": `${base}/#organization` },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: { "@type": "EntryPoint", urlTemplate: `${base}/courses?q={search_term_string}` },
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+
   return (
     <html lang="en" suppressHydrationWarning className={`${sora.variable} ${inter.variable} ${jetbrains.variable}`}>
       <body className="flex min-h-dvh flex-col font-sans">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <AuthProvider>
           <a
             href="#main"
