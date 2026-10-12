@@ -63,7 +63,7 @@ export default function AdminCourses() {
     <div className="space-y-6">
       <AdminHeader
         title="Course management"
-        description="Draft, publish and maintain the catalogue. Publishing requires at least one chapter with a topic."
+        description="Draft, publish and maintain the catalogue."
         actions={
           <Link href="/dashboard/admin/courses/new" className={buttonClass("primary", "sm")}>
             New course

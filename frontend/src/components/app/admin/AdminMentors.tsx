@@ -24,7 +24,7 @@ export default function AdminMentors() {
     <div className="space-y-6">
       <AdminHeader
         title="Mentor management"
-        description="Approved course-specific mentor assignments. MENTOR is a per-course role, never a global account role."
+        description="Approved mentor assignments per course."
         actions={
           <Button size="sm" onClick={() => setAssigning(true)}>
             Assign mentor
@@ -34,7 +34,7 @@ export default function AdminMentors() {
 
       <Panel
         title="Assignments"
-        description="Server returns all mentor assignments. Capacity is enforced during learner seat selection, not by this screen."
+        description="All mentor assignments."
         actions={
           <input
             type="search"

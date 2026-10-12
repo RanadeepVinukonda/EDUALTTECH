@@ -43,7 +43,7 @@ export default function AdminSettings() {
     <div className="space-y-6">
       <AdminHeader
         title="Settings"
-        description="Platform settings backed by the database. Environment variables and secrets are not exposed here."
+        description="Platform settings."
       />
 
       {settings.error ? (
@@ -53,7 +53,7 @@ export default function AdminSettings() {
       ) : (
         <Panel
           title="Mentor capacity"
-          description="Default number of learners each mentor can be assigned when a course-specific capacity is not set. Enforced server-side during mentor seat selection."
+          description="Default seats per mentor when no course-specific capacity is set."
         >
           <div className="max-w-sm space-y-2">
             <label htmlFor="mentor-capacity" className="text-sm font-semibold text-ink-900">

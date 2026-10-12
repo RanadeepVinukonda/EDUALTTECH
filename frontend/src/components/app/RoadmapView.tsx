@@ -94,12 +94,25 @@ export default function RoadmapView({ slug }: { slug: string }) {
       {totalLessons === 0 ? (
         <EmptyState title="The curriculum is empty" description="No lessons have been published for this course yet." />
       ) : (
-        <ol className="space-y-4">
+        <ol className="relative space-y-6">
           {roadmap.chapters.map((chapter, index) => {
             const chapterDone = chapter.topics.flatMap((t) => t.lessons).filter((l) => completed.has(l.id)).length;
             const chapterTotal = chapter.topics.reduce((n, t) => n + t.lessons.length, 0);
+            const isLast = index === roadmap.chapters.length - 1;
             return (
-              <li key={chapter.id}>
+              <li key={chapter.id} className="relative pl-12">
+                {!isLast && <span aria-hidden className="absolute left-[15px] top-9 h-[calc(100%+12px)] w-px bg-slate-200" />}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute left-0 top-4 grid h-8 w-8 place-items-center rounded-full font-display text-sm font-bold",
+                    chapterTotal > 0 && chapterDone === chapterTotal
+                      ? "bg-emerald-500 text-white"
+                      : "bg-brand-600 text-white shadow-elev1",
+                  )}
+                >
+                  {chapterTotal > 0 && chapterDone === chapterTotal ? "✓" : index + 1}
+                </span>
                 <details className="rounded-[20px] border border-slate-200 bg-white shadow-elev1" open={index === 0}>
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
                     <span>
@@ -107,7 +120,7 @@ export default function RoadmapView({ slug }: { slug: string }) {
                       {chapter.summary && <span className="mt-0.5 block text-sm text-slate-500">{chapter.summary}</span>}
                     </span>
                     <span className="shrink-0 text-xs font-semibold text-slate-500">
-                      {chapterTotal > 0 ? `${chapterDone}/${chapterTotal}` : "No lessons"}
+                      {chapterTotal > 0 ? `${chapterDone}/${chapterTotal} lessons` : "No lessons"}
                     </span>
                   </summary>
 

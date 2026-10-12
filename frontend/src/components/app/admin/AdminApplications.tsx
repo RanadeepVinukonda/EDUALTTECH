@@ -44,12 +44,12 @@ export default function AdminApplications() {
     <div className="space-y-6">
       <AdminHeader
         title="Mentor applications"
-        description="Course-specific applications. A pending application never grants teaching access — approval is a backend state transition."
+        description="Course-specific mentor applications."
       />
 
       <Panel
         title="Queue"
-        description="Server-filtered by status and paginated. Open an application to review it."
+        description="Filter and review applications."
         actions={
           <FilterSelect
             id="app-status"
@@ -106,7 +106,7 @@ export default function AdminApplications() {
         ) : (
           <EmptyState
             title={status ? "No applications with this status" : "No applications yet"}
-            description="Mentor applications submitted for published courses appear here."
+            description="Mentor applications appear here."
           />
         )}
       </Panel>

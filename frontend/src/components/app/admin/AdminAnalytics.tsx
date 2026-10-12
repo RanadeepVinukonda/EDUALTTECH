@@ -28,7 +28,7 @@ export default function AdminAnalytics() {
     <div className="space-y-8">
       <AdminHeader
         title="Analytics"
-        description="Registrations, enrolments and paid revenue over the selected period. Figures come from live payment and enrolment records."
+        description="Registrations, enrolments and revenue."
         actions={
           <div role="group" aria-label="Date range" className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
             {RANGES.map((r) => (
@@ -184,7 +184,7 @@ function SeriesChart({
 
 function TopCourses({ courses }: { courses: AnalyticsTopCourse[] }) {
   return (
-    <Panel title="Most-enrolled courses" description="Non-draft courses ranked by active learners.">
+    <Panel title="Most-enrolled courses" description="Courses ranked by active learners.">
       {courses.length === 0 ? (
         <p className="text-sm text-slate-500">No courses to rank yet.</p>
       ) : (

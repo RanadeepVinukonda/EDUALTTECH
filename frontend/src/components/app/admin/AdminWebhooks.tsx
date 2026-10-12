@@ -16,10 +16,10 @@ export default function AdminWebhooks() {
     <div className="space-y-6">
       <AdminHeader
         title="Payment webhook events"
-        description="Append-only provider event trail. The backend returns the 50 most recent events; there is no filtering, pagination, or replay endpoint."
+        description="Recent payment events from the provider."
       />
 
-      <Panel title="Recent events" description="Signature verification and payment fulfilment remain backend responsibilities.">
+      <Panel title="Recent events" description="Latest provider events.">
         {events.error ? (
           <ErrorState message={events.error} onRetry={events.reload} />
         ) : events.loading && !events.data ? (

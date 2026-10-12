@@ -11,7 +11,7 @@ import { AdminHeader, MetricCard, Panel, Skeleton, StatusPill, statusTone, useAs
 
 const PENDING = ["SUBMITTED", "UNDER_REVIEW", "INTERVIEW_SCHEDULED"];
 
-export default function AdminDashboard({ firstName }: { firstName?: string }) {
+export default function AdminDashboard() {
   const stats = useAsync(() => apiGet<AdminStats>("/admin/stats"), []);
   const apps = useAsync(
     () => apiGet<{ applications: AdminApplicationRow[]; total: number }>("/applications", { status: "SUBMITTED", limit: 5 }),
@@ -25,7 +25,7 @@ export default function AdminDashboard({ firstName }: { firstName?: string }) {
     <div className="space-y-8">
       <AdminHeader
         title="Admin overview"
-        description={`Signed in as ${firstName ?? "admin"}. Operational health across users, courses, enrolments and payments.`}
+        description="Your platform at a glance."
         actions={
           <>
             <Link href="/dashboard/admin/courses/new" className={buttonClass("primary", "sm")}>
@@ -52,7 +52,7 @@ export default function AdminDashboard({ firstName }: { firstName?: string }) {
 
       <Panel
         title="Mentor applications awaiting review"
-        description="Submitted and in-review applications that need an admin decision."
+        description="Applications that need your decision."
         actions={
           <span className="text-sm font-semibold text-slate-500">
             {apps.loading ? "…" : `${apps.data?.total ?? 0} total`}
@@ -95,9 +95,9 @@ export default function AdminDashboard({ firstName }: { firstName?: string }) {
       </Panel>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <QuickLink href="/dashboard/admin/analytics" title="Analytics" body="Registrations, enrolments and revenue over time." />
-        <QuickLink href="/dashboard/admin/users" title="User management" body="Search accounts, invite admins, edit roles." />
-        <QuickLink href="/dashboard/admin/courses" title="Course management" body="Draft, publish and maintain the catalogue." />
+        <QuickLink href="/dashboard/admin/analytics" title="Analytics" body="Platform trends and revenue." />
+        <QuickLink href="/dashboard/admin/users" title="User management" body="Accounts, roles and invites." />
+        <QuickLink href="/dashboard/admin/courses" title="Course management" body="Draft and publish courses." />
       </div>
     </div>
   );

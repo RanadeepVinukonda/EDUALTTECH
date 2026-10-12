@@ -98,7 +98,7 @@ export default function AdminApplicationReview({ id }: { id: string }) {
     <div className="space-y-6">
       <AdminHeader
         title="Application review"
-        description="Read the applicant's submission, then apply one of the backend-supported decisions."
+        description="Review the submission and choose a decision."
         actions={
           <Link href="/dashboard/admin/applications" className="text-sm font-semibold text-brand-700 hover:underline">
             ← Back to queue
@@ -157,7 +157,7 @@ export default function AdminApplicationReview({ id }: { id: string }) {
         </Panel>
       )}
 
-      <Panel title="Decision" description="Only transitions permitted by the backend state machine are offered.">
+      <Panel title="Decision" description="Pick the next step for this application.">
         {next.length === 0 ? (
           <p className="text-sm text-slate-500">This application is in a terminal state ({application.status.toLowerCase()}). No further decisions are available.</p>
         ) : (

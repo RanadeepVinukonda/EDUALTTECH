@@ -4,36 +4,57 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SpaceDashboard from "@mui/icons-material/SpaceDashboard";
 import Insights from "@mui/icons-material/Insights";
-import People from "@mui/icons-material/People";
 import MenuBook from "@mui/icons-material/MenuBook";
-import Article from "@mui/icons-material/Article";
-import Layers from "@mui/icons-material/Layers";
-import HowToReg from "@mui/icons-material/HowToReg";
 import CoPresent from "@mui/icons-material/CoPresent";
+import HowToReg from "@mui/icons-material/HowToReg";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import Webhook from "@mui/icons-material/Webhook";
-import MarkEmailUnread from "@mui/icons-material/MarkEmailUnread";
-import History from "@mui/icons-material/History";
 import Tune from "@mui/icons-material/Tune";
 import { useAuth } from "@/components/app/AuthProvider";
 import AccessDenied from "@/components/ui/AccessDenied";
 import Spinner from "@/components/ui/Spinner";
 import { cn } from "@/lib/cn";
 
-const TABS = [
-  { href: "/dashboard/admin", label: "Overview", Icon: SpaceDashboard, exact: true },
-  { href: "/dashboard/admin/analytics", label: "Analytics", Icon: Insights, exact: false },
-  { href: "/dashboard/admin/users", label: "Users", Icon: People, exact: false },
-  { href: "/dashboard/admin/courses", label: "Courses", Icon: MenuBook, exact: false },
-  { href: "/dashboard/admin/content", label: "Content", Icon: Article, exact: false },
-  { href: "/dashboard/admin/cms", label: "CMS", Icon: Layers, exact: false },
-  { href: "/dashboard/admin/applications", label: "Applications", Icon: HowToReg, exact: false },
-  { href: "/dashboard/admin/mentors", label: "Mentors", Icon: CoPresent, exact: false },
-  { href: "/dashboard/admin/orders", label: "Orders", Icon: ReceiptLong, exact: false },
-  { href: "/dashboard/admin/payments", label: "Webhooks", Icon: Webhook, exact: false },
-  { href: "/dashboard/admin/inbox", label: "Inbox", Icon: MarkEmailUnread, exact: false },
-  { href: "/dashboard/admin/audit", label: "Audit", Icon: History, exact: false },
-  { href: "/dashboard/admin/settings", label: "Settings", Icon: Tune, exact: false },
+interface TabItem {
+  href: string;
+  label: string;
+  Icon: typeof SpaceDashboard;
+  exact?: boolean;
+}
+
+interface TabGroup {
+  label: string;
+  items: TabItem[];
+}
+
+const GROUPS: TabGroup[] = [
+  {
+    label: "Main",
+    items: [
+      { href: "/dashboard/admin", label: "Overview", Icon: SpaceDashboard, exact: true },
+      { href: "/dashboard/admin/analytics", label: "Analytics", Icon: Insights, exact: false },
+      { href: "/dashboard/admin/courses", label: "Courses", Icon: MenuBook, exact: false },
+    ],
+  },
+  {
+    label: "Mentoring",
+    items: [
+      { href: "/dashboard/admin/mentors", label: "Mentors", Icon: CoPresent, exact: false },
+      { href: "/dashboard/admin/applications", label: "Applications", Icon: HowToReg, exact: false },
+      { href: "/dashboard/admin/cms/work", label: "CMS", Icon: MenuBook, exact: false },
+    ],
+  },
+  {
+    label: "Sales",
+    items: [
+      { href: "/dashboard/admin/orders", label: "Orders", Icon: ReceiptLong, exact: false },
+      { href: "/dashboard/admin/payments", label: "Webhooks", Icon: Webhook, exact: false },
+    ],
+  },
+  {
+    label: "System",
+    items: [{ href: "/dashboard/admin/settings", label: "Settings", Icon: Tune, exact: false }],
+  },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -50,36 +71,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user) return null;
 
   if (user.role !== "ADMIN") {
-    return (
-      <AccessDenied
-        title="Admins only"
-        description="Your account doesn’t have access to the admin console. Access is enforced by the backend independently of this page."
-      />
-    );
+    return <AccessDenied title="Admins only" description="Your account doesn’t have access to the admin console." />;
   }
 
+  const linkClass = (active: boolean) =>
+    cn(
+      "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold transition",
+      active ? "bg-brand-600 text-white shadow-elev1" : "text-ink-700 hover:bg-slate-100",
+    );
+
   return (
-    <div className="space-y-6">
-      <nav aria-label="Admin sections" className="flex gap-1 overflow-x-auto border-b border-slate-200 pb-px">
-        {TABS.map(({ href, label, Icon, exact }) => {
-          const active = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
-          return (
-            <Link
-              key={href}
-              href={href}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "-mb-px flex shrink-0 items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition",
-                active ? "border-brand-600 text-brand-700" : "border-transparent text-slate-500 hover:text-ink-900",
-              )}
-            >
-              <Icon sx={{ fontSize: 18 }} aria-hidden />
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
-      {children}
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+      <aside className="lg:sticky lg:top-24 lg:w-60 lg:shrink-0">
+        <nav aria-label="Admin sections" className="flex flex-col gap-5">
+          {GROUPS.map((group) => (
+            <div key={group.label}>
+              <p className="px-3 pb-1.5 text-xs font-bold uppercase tracking-wide text-slate-400">{group.label}</p>
+              <div className="flex flex-col gap-0.5">
+                {group.items.map(({ href, label, Icon, exact }) => {
+                  const active = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      aria-current={active ? "page" : undefined}
+                      className={linkClass(active)}
+                    >
+                      <Icon sx={{ fontSize: 18 }} aria-hidden />
+                      {label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+      </aside>
+
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }

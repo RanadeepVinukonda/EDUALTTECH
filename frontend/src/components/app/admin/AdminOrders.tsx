@@ -28,12 +28,12 @@ export default function AdminOrders() {
     <div className="space-y-6">
       <AdminHeader
         title="Orders & payments"
-        description="Authoritative order records and the latest verified payment attempt for each. Amounts are stored as integer paise."
+        description="Order records with their latest payment attempt."
       />
 
       <Panel
         title="Orders"
-        description="Server-filtered and paginated. Amounts come from the immutable order snapshot."
+        description="Filter and page through orders."
         actions={
           <FilterSelect
             id="order-status"
