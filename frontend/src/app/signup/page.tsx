@@ -18,10 +18,7 @@ export default async function SignupPage({
   const next = Array.isArray(sp.next) ? sp.next[0] : sp.next;
 
   return (
-    <AuthShell
-      title="Create your account"
-      subtitle="Register to enrol in courses and learn with mentors. You are one account — you can learn on some courses and apply to mentor on others."
-    >
+    <AuthShell title="Create your account" subtitle="Create your account to start learning.">
       <SignupForm next={next} />
     </AuthShell>
   );

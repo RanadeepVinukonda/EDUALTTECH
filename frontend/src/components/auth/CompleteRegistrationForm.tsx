@@ -137,7 +137,7 @@ export default function CompleteRegistrationForm() {
           onChange={(e) => setConfirm(e.target.value)}
         />
         <Button type="submit" className="w-full" loading={pending}>
-          Complete registration
+          Sign up
         </Button>
       </form>
 

@@ -8,6 +8,7 @@ import Close from "@mui/icons-material/Close";
 import { cn } from "@/lib/cn";
 import { hasSession } from "@/lib/auth";
 import LinkButton from "@/components/ui/LinkButton";
+import OfflineBanner from "@/components/ui/OfflineBanner";
 import BrandLogo from "@/components/brand/BrandLogo";
 
 const NAV = [
@@ -41,11 +42,11 @@ export default function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="EduAltTech home">
-          <BrandLogo />
+        <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Edu Alt Tech home">
+          <BrandLogo withWordmark wordmarkClassName="hidden text-base sm:inline" />
         </Link>
 
-        <nav aria-label="Primary" className="ml-4 hidden items-center gap-1 lg:flex">
+        <nav aria-label="Primary" className="ml-auto hidden items-center gap-1 lg:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -59,9 +60,7 @@ export default function PublicHeader() {
               {item.label}
             </Link>
           ))}
-        </nav>
-
-        <div className="ml-auto hidden items-center gap-2 lg:flex">
+          <span className="mx-1 h-5 w-px bg-slate-200" aria-hidden />
           {signedIn ? (
             <Link
               href="/dashboard"
@@ -82,7 +81,7 @@ export default function PublicHeader() {
               </LinkButton>
             </>
           )}
-        </div>
+        </nav>
 
         <button
           type="button"
@@ -145,6 +144,7 @@ export default function PublicHeader() {
           </div>
         </nav>
       </div>
+      <OfflineBanner />
     </header>
   );
 }
