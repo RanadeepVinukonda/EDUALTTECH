@@ -33,7 +33,7 @@ export function createApp() {
   app.use(helmet());
   app.use(cors({ origin: config.appBaseUrl, credentials: true }));
   app.use(compression());
-  if (!config.isProd) app.use(morgan("dev"));
+  app.use(morgan(config.isProd ? "combined" : "dev"));
 
   // rawBody kept for webhook HMAC verification (see payments.routes).
   app.use(

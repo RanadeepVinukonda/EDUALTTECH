@@ -5,12 +5,22 @@ const configured = (process.env.LOG_LEVEL ?? "info") as Level;
 
 const SENSITIVE = /(password|token|secret|authorization|signature|otp)/i;
 
-/** Structured JSON logs. Never pass secrets in `meta` — keys matching SENSITIVE are redacted. */
+function scrub(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(scrub);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) =>
+        SENSITIVE.test(k) ? [k, "[redacted]"] : [k, scrub(v)],
+      ),
+    );
+  }
+  return value;
+}
+
+/** Structured JSON logs. Never pass secrets in `meta` — keys matching SENSITIVE are redacted (recursively). */
 function log(level: Level, msg: string, meta?: Record<string, unknown>) {
   if (LEVELS[level] < LEVELS[configured]) return;
-  const safe = meta
-    ? Object.fromEntries(Object.entries(meta).map(([k, v]) => (SENSITIVE.test(k) ? [k, "[redacted]"] : [k, v])))
-    : undefined;
+  const safe = meta ? (scrub(meta) as Record<string, unknown>) : undefined;
   const line = JSON.stringify({ ts: new Date().toISOString(), level, msg, ...safe });
   if (level === "error") console.error(line);
   else if (level === "warn") console.warn(line);

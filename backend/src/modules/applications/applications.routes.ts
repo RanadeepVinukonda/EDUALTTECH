@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
+import { config } from "../../config/env.js";
 import { uploadPrivate, signedUrl, assertUploadable, contentTypeFor } from "../../lib/storage.js";
 import { sendEmail, layout } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
@@ -225,7 +226,7 @@ router.post(
         "Application update",
         `Your mentor application for <strong>${application.course.title}</strong> is now <strong>${action.replace("_", " ").toLowerCase()}</strong>.`,
         "View your applications",
-        `${process.env.APP_BASE_URL ?? "http://localhost:3000"}/dashboard/applications`,
+        `${config.appBaseUrl}/dashboard/applications`,
       ),
     }).catch(() => false);
 

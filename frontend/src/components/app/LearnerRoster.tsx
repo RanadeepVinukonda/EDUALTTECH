@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
+import { initials } from "@/lib/name";
 
 type RosterLearner = {
   id: string;
@@ -15,10 +16,6 @@ type RosterLearner = {
   enrolledAt: string;
   mentor: { id: string; firstName: string; lastName: string } | null;
 };
-
-function initials(first: string, last: string) {
-  return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase() || "?";
-}
 
 export default function LearnerRoster({ slug }: { slug: string }) {
   const [learners, setLearners] = useState<RosterLearner[] | null>(null);

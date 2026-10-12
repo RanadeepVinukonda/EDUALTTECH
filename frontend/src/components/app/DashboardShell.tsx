@@ -21,6 +21,7 @@ import { apiGet, NOTIFICATIONS_CHANGED_EVENT } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import Spinner from "@/components/ui/Spinner";
 import { cn } from "@/lib/cn";
+import { initials } from "@/lib/name";
 import BrandLogo from "@/components/brand/BrandLogo";
 
 interface NavLink {
@@ -36,11 +37,6 @@ const SECONDARY: NavLink[] = [
   { href: "/dashboard/orders", label: "Orders", Icon: ReceiptLong },
   { href: "/dashboard/wishlist", label: "Wishlist", Icon: Favorite },
 ];
-
-function initials(first: string, last: string): string {
-  const i = `${first.charAt(0)}${last.charAt(0)}`.trim().toUpperCase();
-  return i || "?";
-}
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();

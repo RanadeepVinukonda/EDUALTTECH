@@ -6,6 +6,7 @@ import SectionHeading from "@/components/landing/SectionHeading";
 import CoverImage from "@/components/ui/CoverImage";
 import LinkButton from "@/components/ui/LinkButton";
 import DataUnavailable from "@/components/landing/DataUnavailable";
+import { initialsFromName } from "@/lib/name";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -23,15 +24,6 @@ export const metadata: Metadata = {
   description: "The people behind EduAltTech's educational and technology work.",
   alternates: { canonical: "/team" },
 };
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 export default async function TeamPage() {
   const team = await publicFetch<{ items: TeamMember[] }>("/cms/public/team");
@@ -75,7 +67,7 @@ export default async function TeamPage() {
               {items.map((m) => (
                 <li key={m.id} className="flex gap-4">
                   <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
-                    <CoverImage src={m.avatarUrl} alt={`Portrait of ${m.name}`} fallback={initials(m.name)} />
+                    <CoverImage src={m.avatarUrl} alt={`Portrait of ${m.name}`} fallback={initialsFromName(m.name)} />
                   </div>
                   <div className="min-w-0">
                     <h2 className="font-display text-lg font-bold text-ink-900">{m.name}</h2>

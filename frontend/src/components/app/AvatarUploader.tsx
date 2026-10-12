@@ -4,13 +4,10 @@ import { useRef, useState } from "react";
 import { apiPost } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import { notifyError, notifySuccess } from "@/lib/notify";
+import { initials } from "@/lib/name";
 import Button from "@/components/ui/Button";
 
 const MAX_BYTES = 2 * 1024 * 1024;
-
-function initials(first: string, last: string) {
-  return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase() || "?";
-}
 
 export default function AvatarUploader({ avatarUrl, firstName, lastName }: { avatarUrl: string | null; firstName: string; lastName: string }) {
   const { refresh } = useAuth();
