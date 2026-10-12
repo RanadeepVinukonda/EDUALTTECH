@@ -180,7 +180,7 @@ export default function InquiryForm() {
           onChange={set("body")}
           aria-invalid={Boolean(errors.body)}
           aria-describedby={errors.body ? "inq-body-err" : undefined}
-          className={inputCls}
+          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 aria-[invalid=true]:border-danger aria-[invalid=true]:focus:border-danger aria-[invalid=true]:focus:ring-danger/20"
         />
         {errors.body && (
           <p id="inq-body-err" role="alert" className="mt-1 text-sm text-red-600">

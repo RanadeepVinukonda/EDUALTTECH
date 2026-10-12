@@ -23,12 +23,12 @@ export default function AdminAudit() {
     <div className="space-y-6">
       <AdminHeader
         title="Audit log"
-        description="Read-only record of important administrative actions. Events are append-only; no endpoint edits or deletes them."
+        description="Read-only history of important admin actions."
       />
 
       <Panel
         title="Events"
-        description="Filter matches the action name. There is no outcome, resource-type, or date-range filter in the API."
+        description="Filter by action name."
         actions={
           <input
             type="search"

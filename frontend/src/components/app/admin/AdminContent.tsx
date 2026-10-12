@@ -21,7 +21,7 @@ export default function AdminContent() {
     <div className="space-y-6">
       <AdminHeader
         title="Content oversight"
-        description="Inspect course content structure and publication state. Courses are the only content type with backend-wide moderation states."
+        description="Inspect course structure and publication state."
       />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_1fr]">

@@ -42,7 +42,7 @@ export default function AdminInbox() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Contact inbox" description="Messages submitted through the public contact form." />
+      <AdminHeader title="Contact inbox" description="Messages from the public contact form." />
 
       <Panel
         title="Messages"
