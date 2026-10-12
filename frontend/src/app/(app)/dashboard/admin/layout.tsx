@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import SpaceDashboard from "@mui/icons-material/SpaceDashboard";
 import Insights from "@mui/icons-material/Insights";
 import MenuBook from "@mui/icons-material/MenuBook";
@@ -16,7 +17,6 @@ import Article from "@mui/icons-material/Article";
 import History from "@mui/icons-material/History";
 import Web from "@mui/icons-material/Web";
 import { useAuth } from "@/components/app/AuthProvider";
-import AccessDenied from "@/components/ui/AccessDenied";
 import Spinner from "@/components/ui/Spinner";
 import { cn } from "@/lib/cn";
 
@@ -75,7 +75,14 @@ const GROUPS: TabGroup[] = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const router = useRouter();
   const pathname = usePathname() || "/dashboard/admin";
+
+  const isAdmin = user?.role === "ADMIN";
+
+  useEffect(() => {
+    if (!loading && user && !isAdmin) router.replace("/dashboard");
+  }, [loading, user, isAdmin, router]);
 
   if (loading) {
     return (
@@ -86,8 +93,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
   if (!user) return null;
 
-  if (user.role !== "ADMIN") {
-    return <AccessDenied title="Admins only" description="Your account doesn’t have access to the admin console." />;
+  if (!isAdmin) {
+    return (
+      <div className="grid place-items-center py-24">
+        <Spinner label="Redirecting…" />
+      </div>
+    );
   }
 
   const linkClass = (active: boolean) =>

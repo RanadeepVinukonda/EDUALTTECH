@@ -4,18 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { apiDelete, apiGet } from "@/lib/api";
 import type { WishlistItem } from "@/lib/app-types";
-import { formatPrice } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import { buttonClass } from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import CoverImage from "@/components/ui/CoverImage";
-
-function excerpt(text: string, max = 140) {
-  if (text.length <= max) return text;
-  return `${text.slice(0, max).trimEnd()}…`;
-}
+import CourseCard from "@/components/landing/CourseCard";
 
 export default function WishlistView() {
   const [items, setItems] = useState<WishlistItem[] | null>(null);
@@ -81,30 +75,17 @@ export default function WishlistView() {
         <p className="mt-1 text-[15px] text-slate-500">Saved courses. Saving does not enroll you — that happens at checkout.</p>
       </header>
 
-      <ul className="space-y-4">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => {
           const available = item.course.status === "PUBLISHED";
           const busy = pending.has(item.courseId);
           return (
-            <li key={item.id} className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-elev1">
-              <div className="flex flex-wrap items-start gap-4">
-                <CoverImage src={item.course.thumbnailUrl} alt="" fallback={item.course.title} className="h-20 w-28 shrink-0 rounded-xl" />
-                <div className="min-w-0 flex-1">
-                  <h2 className="font-display font-bold text-ink-900">{item.course.title}</h2>
-                  <p className="mt-0.5 text-xs text-slate-500">{item.course.category}</p>
-                  <p className="mt-2 text-sm text-slate-600">{excerpt(item.course.description)}</p>
-                  <p className="mt-2 font-display font-bold text-ink-900">{formatPrice(item.course.pricePaise, item.course.currency)}</p>
-                </div>
-                <div className="flex flex-col items-stretch gap-2">
-                  {available ? (
-                    <Link href={`/courses/${item.course.slug}`} className={buttonClass("primary", "sm")}>
-                      View course
-                    </Link>
-                  ) : (
-                    <span className="rounded-xl bg-slate-100 px-4 py-2 text-center text-sm font-semibold text-slate-500">
-                      No longer available
-                    </span>
-                  )}
+            <li key={item.id}>
+              <CourseCard
+                course={item.course}
+                unavailable={!available}
+                viewLabel="View"
+                actions={
                   <button
                     type="button"
                     onClick={() => void remove(item.courseId)}
@@ -114,8 +95,8 @@ export default function WishlistView() {
                   >
                     {busy ? "Removing…" : "Remove"}
                   </button>
-                </div>
-              </div>
+                }
+              />
             </li>
           );
         })}

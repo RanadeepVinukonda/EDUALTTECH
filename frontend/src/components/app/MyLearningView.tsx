@@ -9,7 +9,7 @@ import { buttonClass } from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import CoverImage from "@/components/ui/CoverImage";
+import CourseCard from "@/components/landing/CourseCard";
 
 type Tab = "learning" | "mentoring";
 
@@ -21,12 +21,6 @@ const STATUS_LABEL: Record<string, string> = {
 
 function statusLabel(status: string): string {
   return STATUS_LABEL[status] ?? status.replace(/_/g, " ").toLowerCase();
-}
-
-function statusTone(status: string): string {
-  if (status === "PUBLISHED") return "bg-green-100 text-green-800";
-  if (status === "ARCHIVED") return "bg-slate-100 text-slate-600";
-  return "bg-amber-100 text-amber-800";
 }
 
 export default function MyLearningView() {
@@ -90,36 +84,16 @@ export default function MyLearningView() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {data.learning.map((row) => (
-              <article key={row.id} className="flex flex-col gap-4 rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1">
-                <div className="flex gap-4">
-                  <CoverImage src={row.course.thumbnailUrl} alt="" fallback={row.course.title} className="h-20 w-28 shrink-0 rounded-xl" />
-                  <div className="min-w-0 flex-1">
-                    <h2 className="truncate font-display font-bold text-ink-900">{row.course.title}</h2>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">{row.course.category}</span>
-                      <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", statusTone(row.course.status))}>
-                        {statusLabel(row.course.status)}
-                      </span>
-                    </div>
-                    {row.mentor ? (
-                      <p className="mt-1 text-xs text-slate-500">
-                        Mentor: {row.mentor.firstName} {row.mentor.lastName}
-                      </p>
-                    ) : (
-                      <p className="mt-1 text-xs text-slate-400">Mentor not assigned yet</p>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-brand-600" style={{ width: `${row.progressPct}%` }} />
-                  </div>
-                  <p className="mt-1 text-xs text-slate-500">{row.progressPct}% complete</p>
-                </div>
-                <Link href={`/dashboard/courses/${row.course.slug}`} className={buttonClass("primary", "sm", "self-start")}>
-                  {row.progressPct > 0 ? "Continue" : "Start learning"}
-                </Link>
-              </article>
+              <CourseCard
+                key={row.id}
+                course={row.course}
+                href={`/dashboard/courses/${row.course.slug}`}
+                badge={statusLabel(row.course.status)}
+                priceLabel="Enrolled"
+                progressPct={row.progressPct}
+                mentor={row.mentor ? `${row.mentor.firstName} ${row.mentor.lastName}` : undefined}
+                viewLabel={row.progressPct > 0 ? "Continue" : "Start learning"}
+              />
             ))}
           </div>
         )
@@ -128,23 +102,14 @@ export default function MyLearningView() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {data.mentoring.map((row) => (
-            <article key={row.id} className="flex flex-col gap-4 rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1">
-              <div className="flex gap-4">
-                <CoverImage src={row.course.thumbnailUrl} alt="" fallback={row.course.title} className="h-20 w-28 shrink-0 rounded-xl" />
-                <div className="min-w-0 flex-1">
-                  <h2 className="truncate font-display font-bold text-ink-900">{row.course.title}</h2>
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">{row.course.category}</span>
-                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", statusTone(row.course.status))}>
-                      {statusLabel(row.course.status)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <Link href={`/dashboard/courses/${row.course.slug}`} className={buttonClass("secondary", "sm", "self-start")}>
-                Open course
-              </Link>
-            </article>
+            <CourseCard
+              key={row.id}
+              course={row.course}
+              href={`/dashboard/courses/${row.course.slug}`}
+              badge={statusLabel(row.course.status)}
+              priceLabel="Mentoring"
+              viewLabel="Open course"
+            />
           ))}
         </div>
       )}

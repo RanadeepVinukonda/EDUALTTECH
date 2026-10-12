@@ -247,6 +247,7 @@ export interface ApplicationCourse {
   title: string;
   category: string;
   status: string;
+  thumbnailUrl: string | null;
 }
 
 export interface Application {

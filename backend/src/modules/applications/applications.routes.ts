@@ -13,7 +13,7 @@ const router = Router();
 
 const includeFull = {
   user: { select: { id: true, firstName: true, lastName: true, email: true, avatarUrl: true, mobile: true } },
-  course: { select: { id: true, slug: true, title: true, category: true, status: true } },
+  course: { select: { id: true, slug: true, title: true, category: true, status: true, thumbnailUrl: true } },
 } as const;
 
 const fileMeta = z.object({

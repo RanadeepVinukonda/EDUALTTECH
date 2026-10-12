@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
+import CoverImage from "@/components/ui/CoverImage";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import LinkIcon from "@mui/icons-material/Link";
@@ -110,14 +111,27 @@ export default function AdminApplicationReview({ id }: { id: string }) {
       />
 
       <Panel title="Applicant">
-        <dl className="grid gap-4 sm:grid-cols-2">
-          <Field label="Name" value={userName(application.user)} />
-          <Field label="Email" value={application.user?.email ?? "—"} />
-          <Field label="Mobile" value={application.user?.mobile ?? "—"} />
-          <Field label="Course" value={application.course.title} />
-          <Field label="Status" value={<StatusPill tone={statusTone(application.status)}>{application.status.replace(/_/g, " ").toLowerCase()}</StatusPill>} />
-          <Field label="Submitted" value={formatDate(application.createdAt)} />
-        </dl>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+          <dl className="grid flex-1 gap-4 sm:grid-cols-2">
+            <Field label="Name" value={userName(application.user)} />
+            <Field label="Email" value={application.user?.email ?? "—"} />
+            <Field label="Mobile" value={application.user?.mobile ?? "—"} />
+            <Field label="Status" value={<StatusPill tone={statusTone(application.status)}>{application.status.replace(/_/g, " ").toLowerCase()}</StatusPill>} />
+            <Field label="Submitted" value={formatDate(application.createdAt)} />
+          </dl>
+          <div className="w-full shrink-0 sm:w-56">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Course</p>
+            <Link href={`/courses/${application.course.slug}`} className="mt-1 block overflow-hidden rounded-xl border border-slate-200">
+              <CoverImage
+                src={application.course.thumbnailUrl}
+                alt=""
+                fallback={application.course.title}
+                className="aspect-[16/9] w-full"
+              />
+            </Link>
+            <p className="mt-2 text-[15px] font-semibold text-ink-900">{application.course.title}</p>
+          </div>
+        </div>
       </Panel>
 
       <Panel title="Submission">

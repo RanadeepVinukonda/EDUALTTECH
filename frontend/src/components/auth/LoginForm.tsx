@@ -53,7 +53,10 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
         return;
       }
       await setSessionFromTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken });
-      router.replace(safeNext(next, "/dashboard"));
+      const dest = safeNext(next, "/dashboard");
+      router.replace(
+        data.user.role !== "ADMIN" && dest.startsWith("/dashboard/admin") ? "/dashboard" : dest,
+      );
     } catch (err) {
       if (err instanceof ApiError) setError({ text: err.message, code: err.code });
       else setError({ text: "Something went wrong. Please try again." });

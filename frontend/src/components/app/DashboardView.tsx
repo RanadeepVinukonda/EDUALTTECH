@@ -139,21 +139,31 @@ export default function DashboardView() {
 
   return (
     <div className="space-y-10">
-      <header>
-        <h1 className="font-display text-3xl font-bold text-ink-900">Welcome back, {user?.firstName}</h1>
-        <p className="mt-1 text-[15px] text-slate-500">Discover something new and pick up where you left off.</p>
+      <header className="relative overflow-hidden rounded-3xl bg-ink-900 p-6 text-white shadow-elev2 sm:p-8">
+        <span aria-hidden className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full border border-white/10" />
+        <span aria-hidden className="pointer-events-none absolute -right-6 -top-16 h-44 w-44 rounded-full border border-white/10" />
+        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-brand-200">Welcome back</p>
+            <h1 className="mt-1 font-display text-3xl font-bold sm:text-4xl">{user?.firstName}</h1>
+            <p className="mt-2 max-w-md text-[15px] text-ink-100">Pick up where you left off, or discover something new.</p>
+          </div>
+          <div className="min-w-0 shrink-0">
+            {data.learning.length > 0 ? (
+              <Link
+                href={`/dashboard/courses/${data.learning[0].course.slug}`}
+                className={buttonClass("primary", "md", "max-w-full shadow-elev2")}
+              >
+                <span className="truncate">Continue: {data.learning[0].course.title}</span>
+              </Link>
+            ) : (
+              <Link href="/dashboard/courses" className={buttonClass("primary", "md", "shadow-elev2")}>
+                Browse courses
+              </Link>
+            )}
+          </div>
+        </div>
       </header>
-
-      {(latest.length > 0 || forYou.length > 0 || trending.length > 0) && (
-        <section aria-labelledby="discover-h" className="space-y-10">
-          <span id="discover-h" className="sr-only">
-            Discover courses
-          </span>
-          <DiscoverShelf title="Latest courses" hint="Fresh additions to the catalogue" items={latest} />
-          <DiscoverShelf title="For you" hint="Courses in the areas you are learning" items={forYou} />
-          <DiscoverShelf title="Trending" hint="Most popular with our mentors and learners" items={trending} />
-        </section>
-      )}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label="Courses you're learning" value={data.learning.length} href="/dashboard/my-learning" />
@@ -203,6 +213,18 @@ export default function DashboardView() {
           </div>
         )}
       </section>
+
+      {(latest.length > 0 || forYou.length > 0 || trending.length > 0) && (
+        <section aria-labelledby="discover-h" className="space-y-10">
+          <div>
+            <h2 id="discover-h" className="font-display text-xl font-bold text-ink-900">Discover courses</h2>
+            <p className="mt-0.5 text-sm text-slate-500">Fresh picks from the catalogue, tailored to you.</p>
+          </div>
+          <DiscoverShelf title="Latest courses" hint="Fresh additions to the catalogue" items={latest} />
+          <DiscoverShelf title="For you" hint="Courses in the areas you are learning" items={forYou} />
+          <DiscoverShelf title="Trending" hint="Most popular with our mentors and learners" items={trending} />
+        </section>
+      )}
 
       <section aria-labelledby="progress-h">
         <h2 id="progress-h" className="mb-3 font-display text-xl font-bold text-ink-900">Your progress</h2>

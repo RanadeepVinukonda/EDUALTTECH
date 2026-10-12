@@ -290,6 +290,14 @@ body {
   animation-delay: 0.15s;
 }
 
+.chapter-chevron {
+  transition: transform 0.2s ease;
+}
+
+details[open] > summary .chapter-chevron {
+  transform: rotate(180deg);
+}
+
 @keyframes nf-float {
   0%,
   100% {
