@@ -43,7 +43,7 @@ function SkeletonGrid() {
   );
 }
 
-export default function CourseBrowser() {
+export default function CourseBrowser({ basePath = "/courses" }: { basePath?: string } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -71,9 +71,9 @@ export default function CourseBrowser() {
         else sp.set(k, v);
       }
       const qs = sp.toString();
-      router.replace(qs ? `/courses?${qs}` : "/courses", { scroll: false });
+      router.replace(qs ? `${basePath}?${qs}` : basePath, { scroll: false });
     },
-    [router, searchParams],
+    [router, searchParams, basePath],
   );
 
   // Keep the search box in sync when the URL changes (back/forward, reset).
@@ -210,7 +210,7 @@ export default function CourseBrowser() {
         {hasFilters && (
           <button
             type="button"
-            onClick={() => router.replace("/courses", { scroll: false })}
+            onClick={() => router.replace(basePath, { scroll: false })}
             className="text-sm font-semibold text-brand-700 hover:text-brand-800"
           >
             Reset filters
@@ -242,7 +242,7 @@ export default function CourseBrowser() {
             </p>
             <button
               type="button"
-              onClick={() => router.replace("/courses", { scroll: false })}
+              onClick={() => router.replace(basePath, { scroll: false })}
               className="mt-5 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-[15px] font-semibold text-ink-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
             >
               Reset filters

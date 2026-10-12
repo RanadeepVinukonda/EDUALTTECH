@@ -102,7 +102,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const primary: NavLink[] = isAdmin
     ? []
     : [
-        { href: "/courses", label: "Courses", Icon: MenuBook },
+        { href: "/dashboard/courses", label: "Courses", Icon: MenuBook },
         { href: "/dashboard/my-learning", label: "Learn", Icon: PlayCircle },
         { href: "/dashboard/progress", label: "Progress", Icon: ShowChart },
         { href: "/dashboard/resources", label: "Resources", Icon: FolderOpen },

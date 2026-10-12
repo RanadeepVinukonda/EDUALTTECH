@@ -117,7 +117,7 @@ export default function DashboardView() {
             <h3 className="font-display text-xl font-bold text-ink-900">{title}</h3>
             {hint && <p className="mt-0.5 text-sm text-slate-500">{hint}</p>}
           </div>
-          <Link href="/courses" className="text-sm font-semibold text-brand-700 hover:underline">
+          <Link href="/dashboard/courses" className="text-sm font-semibold text-brand-700 hover:underline">
             View all
           </Link>
         </div>
@@ -166,7 +166,7 @@ export default function DashboardView() {
             title="No courses yet"
             description="Browse the catalogue and enroll to start learning."
             action={
-              <Link href="/courses" className={buttonClass("primary", "sm")}>
+              <Link href="/dashboard/courses" className={buttonClass("primary", "sm")}>
                 Browse courses
               </Link>
             }
