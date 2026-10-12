@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { safeNext, firstParam } from "@/lib/auth";
 import { describeError, isApiError, isNetworkError, isAuthError } from "@/lib/errors";
-import { formatPrice, formatMoney } from "@/lib/format";
+import { formatPrice, formatMoney, formatCountdown } from "@/lib/format";
 import { ApiError } from "@/lib/api";
 
 describe("safeNext (open-redirect guard)", () => {
@@ -56,6 +56,22 @@ describe("error predicates", () => {
     expect(isNetworkError(err)).toBe(false);
     expect(isAuthError(new ApiError(401, { code: "UNAUTHORIZED", message: "no" }))).toBe(true);
     expect(isNetworkError(new ApiError(0, { code: "NETWORK", message: "no" }))).toBe(true);
+  });
+});
+
+describe("formatCountdown", () => {
+  it("returns empty for past or invalid values", () => {
+    expect(formatCountdown(0)).toBe("");
+    expect(formatCountdown(-1000)).toBe("");
+    expect(formatCountdown(NaN)).toBe("");
+    expect(formatCountdown(Infinity)).toBe("");
+  });
+
+  it("formats seconds, minutes, hours and days", () => {
+    expect(formatCountdown(45_000)).toBe("45s");
+    expect(formatCountdown(90_000)).toBe("1m 30s");
+    expect(formatCountdown(2 * 3600_000 + 5 * 60_000)).toBe("2h 5m");
+    expect(formatCountdown(86400_000 + 3600_000)).toBe("1d 1h");
   });
 });
 

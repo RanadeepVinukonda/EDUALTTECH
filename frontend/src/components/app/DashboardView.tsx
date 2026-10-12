@@ -7,7 +7,7 @@ import { apiGet } from "@/lib/api";
 import { describeError } from "@/lib/errors";
 import { useAuth } from "./AuthProvider";
 import type { DashboardData } from "@/lib/app-types";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatCountdown } from "@/lib/format";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -15,6 +15,7 @@ import CoverImage from "@/components/ui/CoverImage";
 import CourseCard from "@/components/landing/CourseCard";
 import type { CourseListItem } from "@/lib/types";
 import { buttonClass } from "@/components/ui/Button";
+import ProgressView from "./ProgressView";
 
 function Stat({ label, value, href }: { label: string; value: number; href?: string }) {
   const inner = (
@@ -71,6 +72,7 @@ export default function DashboardView() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [discover, setDiscover] = useState<CourseListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const load = useCallback(async () => {
     setError(null);
@@ -89,6 +91,12 @@ export default function DashboardView() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Ticks the live countdown for upcoming sessions.
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   // Admins have their own home; the learner dashboard is not theirs.
   useEffect(() => {
@@ -196,27 +204,41 @@ export default function DashboardView() {
         )}
       </section>
 
+      <section aria-labelledby="progress-h">
+        <h2 id="progress-h" className="mb-3 font-display text-xl font-bold text-ink-900">Your progress</h2>
+        <ProgressView compact />
+      </section>
+
       <section>
         <h2 className="mb-3 font-display text-xl font-bold text-ink-900">Upcoming live sessions</h2>
         {data.upcomingMeetings.length === 0 ? (
           <EmptyState title="No sessions scheduled" description="Live sessions for your courses will appear here." />
         ) : (
           <ul className="space-y-3">
-            {data.upcomingMeetings.map((m) => (
-              <li key={m.id} className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-ink-900">{m.title}</p>
-                    <p className="text-sm text-slate-500">
-                      {m.course.title} · {formatDate(m.scheduledAt)} · {m.durationMin} min
-                    </p>
+            {data.upcomingMeetings.map((m) => {
+              const start = new Date(m.scheduledAt).getTime();
+              const end = start + m.durationMin * 60_000;
+              return (
+                <li key={m.id} className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-ink-900">{m.title}</p>
+                      <p className="text-sm text-slate-500">
+                        {m.course.title} · {formatDate(m.scheduledAt)} · {m.durationMin} min
+                      </p>
+                      {start > now ? (
+                        <p className="mt-1 text-sm font-semibold text-brand-600">Starts in {formatCountdown(start - now)}</p>
+                      ) : end >= now ? (
+                        <p className="mt-1 text-sm font-semibold text-green-700">Live now</p>
+                      ) : null}
+                    </div>
+                    <a href={m.meetingUrl} target="_blank" rel="noreferrer" className={buttonClass("secondary", "sm")}>
+                      Join session
+                    </a>
                   </div>
-                  <a href={m.meetingUrl} target="_blank" rel="noreferrer" className={buttonClass("secondary", "sm")}>
-                    Join session
-                  </a>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

@@ -7,6 +7,7 @@ import Close from "@mui/icons-material/Close";
 import { apiPatch } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import AvatarUploader from "./AvatarUploader";
+import LearningProfileCard from "./LearningProfileCard";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -191,6 +192,8 @@ export default function ProfileView() {
           )}
         </section>
       )}
+
+      <LearningProfileCard />
     </div>
   );
 }

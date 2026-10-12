@@ -3,15 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Home from "@mui/icons-material/Home";
 import MenuBook from "@mui/icons-material/MenuBook";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import CoPresent from "@mui/icons-material/CoPresent";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import Favorite from "@mui/icons-material/Favorite";
-import FolderOpen from "@mui/icons-material/FolderOpen";
-import ShowChart from "@mui/icons-material/ShowChart";
-import Forum from "@mui/icons-material/Forum";
-import VideoCall from "@mui/icons-material/VideoCall";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Person from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -31,9 +28,7 @@ interface NavLink {
   exact?: boolean;
 }
 
-const SECONDARY: NavLink[] = [
-  { href: "/dashboard/messages", label: "Messages", Icon: Forum },
-  { href: "/dashboard/meetings", label: "Meetings", Icon: VideoCall },
+const ACCOUNT: NavLink[] = [
   { href: "/dashboard/orders", label: "Orders", Icon: ReceiptLong },
   { href: "/dashboard/wishlist", label: "Wishlist", Icon: Favorite },
 ];
@@ -102,13 +97,12 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const primary: NavLink[] = isAdmin
     ? []
     : [
+        { href: "/dashboard", label: "Home", Icon: Home },
         { href: "/dashboard/courses", label: "Courses", Icon: MenuBook },
         { href: "/dashboard/my-learning", label: "Learn", Icon: PlayCircle },
-        { href: "/dashboard/progress", label: "Progress", Icon: ShowChart },
-        { href: "/dashboard/resources", label: "Resources", Icon: FolderOpen },
         { href: "/dashboard/mentor", label: "Mentor", Icon: CoPresent },
       ];
-  const secondary = isAdmin ? [] : SECONDARY;
+  const secondary = isAdmin ? [] : ACCOUNT;
   const brandHref = isAdmin ? "/dashboard/admin" : "/dashboard";
 
   const isActive = (link: NavLink) =>

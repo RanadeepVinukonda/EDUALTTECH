@@ -36,7 +36,7 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
-export default function ApplicationForm() {
+export default function ApplicationForm({ initialCourseSlug }: { initialCourseSlug?: string } = {}) {
   const router = useRouter();
   const [courses, setCourses] = useState<CourseOption[] | null>(null);
   const [apps, setApps] = useState<Application[] | null>(null);
@@ -75,6 +75,13 @@ export default function ApplicationForm() {
     [apps],
   );
   const available = useMemo(() => (courses ?? []).filter((c) => !blocked.has(c.id)), [courses, blocked]);
+
+  // Preselect when arriving from a course page (?course=<slug>).
+  useEffect(() => {
+    if (!initialCourseSlug) return;
+    const match = available.find((c) => c.slug === initialCourseSlug);
+    if (match) setCourseId((cur) => cur || match.id);
+  }, [initialCourseSlug, available]);
 
   function validate(): boolean {
     const errs: Record<string, string> = {};

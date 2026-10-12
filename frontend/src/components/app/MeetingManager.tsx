@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import type { MeetingRow, Roadmap } from "@/lib/app-types";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatCountdown } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import { cn } from "@/lib/cn";
 import Spinner from "@/components/ui/Spinner";
@@ -27,6 +27,7 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
   const [scope, setScope] = useState<Scope>("upcoming");
   const [meetings, setMeetings] = useState<MeetingRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const [topics, setTopics] = useState<{ id: string; title: string; chapterId: string; chapterTitle: string }[]>([]);
 
   const [title, setTitle] = useState("");
@@ -51,6 +52,12 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Live countdown so both learner and mentor see the session approaching.
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   // Staff can attach a session to a roadmap topic; learners never create.
   useEffect(() => {
@@ -224,32 +231,43 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
           </div>
         ) : (
           <ul className="mt-3 flex flex-col divide-y divide-slate-200 rounded-[20px] border border-slate-200 bg-white">
-            {meetings.map((m) => (
-              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
-                <div className="min-w-0">
-                  <p className="font-semibold text-ink-900">{m.title}</p>
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    {formatDate(m.scheduledAt)} · {m.durationMin} min
-                    {m.topic?.title ? ` · ${m.topic.title}` : ""}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={m.meetingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={buttonClass("secondary", "sm")}
-                  >
-                    Join link
-                  </a>
-                  {!readOnly && (
-                    <button type="button" className={buttonClass("ghost", "sm")} onClick={() => void remove(m)}>
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
+            {meetings.map((m) => {
+              const start = new Date(m.scheduledAt).getTime();
+              const end = start + m.durationMin * 60_000;
+              return (
+                <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-ink-900">{m.title}</p>
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      {formatDate(m.scheduledAt)} · {m.durationMin} min
+                      {m.topic?.title ? ` · ${m.topic.title}` : ""}
+                    </p>
+                    {start > now ? (
+                      <p className="mt-0.5 text-sm font-semibold text-brand-600">
+                        Starts in {formatCountdown(start - now)}
+                      </p>
+                    ) : end >= now ? (
+                      <p className="mt-0.5 text-sm font-semibold text-green-700">Live now</p>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={m.meetingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonClass("secondary", "sm")}
+                    >
+                      Join link
+                    </a>
+                    {!readOnly && (
+                      <button type="button" className={buttonClass("ghost", "sm")} onClick={() => void remove(m)}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

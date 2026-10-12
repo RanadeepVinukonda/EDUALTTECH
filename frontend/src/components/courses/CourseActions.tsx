@@ -144,6 +144,12 @@ export default function CourseActions({
           </Button>
         )}
 
+        {ready && authed && !isLearner && !isMentor && !application && (
+          <LinkButton href={`/dashboard/mentor/apply?course=${encodeURIComponent(slug)}`} variant="secondary" className="w-full">
+            Apply to mentor
+          </LinkButton>
+        )}
+
         <button
           type="button"
           onClick={toggleWishlist}

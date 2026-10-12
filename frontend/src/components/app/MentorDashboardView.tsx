@@ -44,14 +44,9 @@ export default function MentorDashboardView() {
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-extrabold text-ink-900">Mentor</h1>
-          <p className="mt-1 text-sm text-slate-500">Your teaching assignments and applications.</p>
-        </div>
-        <Link href="/dashboard/mentor/apply" className={buttonClass("primary", "sm")}>
-          New application
-        </Link>
+      <header>
+        <h1 className="font-display text-2xl font-extrabold text-ink-900">Mentor</h1>
+        <p className="mt-1 text-sm text-slate-500">Your teaching assignments and applications.</p>
       </header>
 
       <section aria-labelledby="teaching-h">
@@ -62,12 +57,7 @@ export default function MentorDashboardView() {
           <div className="mt-3">
             <EmptyState
               title="No teaching assignments"
-              description="You are not assigned to teach any course yet. Accepted mentors appear here once assigned."
-              action={
-                <Link href="/dashboard/mentor/apply" className={buttonClass("secondary", "sm")}>
-                  Apply to mentor
-                </Link>
-              }
+              description="You are not assigned to teach any course yet. Accepted mentors appear here once assigned. Apply from a course page."
             />
           </div>
         ) : (

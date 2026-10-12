@@ -87,6 +87,23 @@ export default function CourseResources({ slug }: { slug: string }) {
     return resources.filter((r) => r.courseId === courseId && (isStaff || r.isPublished));
   }, [resources, courseId, isStaff]);
 
+  // Group resources under their roadmap topic so learners see them per lesson.
+  const topicLabels = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const ch of roadmap?.chapters ?? [])
+      for (const t of ch.topics) m.set(t.id, `${ch.title} · ${t.title}`);
+    return m;
+  }, [roadmap]);
+
+  const groups = useMemo(() => {
+    const m = new Map<string | null, ResourceRow[]>();
+    for (const r of courseResources) {
+      const key = r.topicId && topicLabels.has(r.topicId) ? r.topicId : null;
+      m.set(key, [...(m.get(key) ?? []), r]);
+    }
+    return [...m.entries()];
+  }, [courseResources, topicLabels]);
+
   async function create(e: React.FormEvent) {
     e.preventDefault();
     if (busy || !courseId) return;
@@ -173,6 +190,25 @@ export default function CourseResources({ slug }: { slug: string }) {
     } finally {
       setRowBusy(null);
     }
+  }
+
+  async function openResource(r: ResourceRow) {
+    if (r.storagePath) {
+      const win = window.open("", "_blank");
+      if (!win) {
+        notifyError("Allow pop-ups to open this resource.");
+        return;
+      }
+      try {
+        const { downloadUrl } = await apiGet<{ downloadUrl: string }>(`/resources/${r.id}/download`);
+        win.location.href = downloadUrl;
+      } catch (e) {
+        win.close();
+        notifyError(e instanceof Error ? e.message : "Could not open the resource.");
+      }
+      return;
+    }
+    if (r.url) window.open(r.url, "_blank", "noopener,noreferrer");
   }
 
   if (loading) return <Spinner label="Loading resources…" />;
@@ -295,66 +331,75 @@ export default function CourseResources({ slug }: { slug: string }) {
             />
           </div>
         ) : (
-          <ul className="mt-3 grid gap-4 sm:grid-cols-2">
-            {courseResources.map((r) => (
-              <li key={r.id} className="rounded-[20px] border border-slate-200 bg-white p-5">
-                {editingId === r.id ? (
-                  <div className="flex flex-col gap-3">
-                    <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} aria-label="Resource title" />
-                    <textarea
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      rows={2}
-                      aria-label="Resource description"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
-                    />
-                    <label className="flex items-center gap-2 text-sm text-ink-700">
-                      <input type="checkbox" checked={editPublished} onChange={(e) => setEditPublished(e.target.checked)} />
-                      Published
-                    </label>
-                    <div className="flex gap-2">
-                      <Button size="sm" loading={rowBusy === r.id} onClick={() => void saveEdit(r.id)}>
-                        Save
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex h-full flex-col">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{r.kind}</span>
-                    <span className="mt-1 font-display text-lg font-bold text-ink-900">{r.title}</span>
-                    {r.description && <span className="mt-1 line-clamp-2 text-sm text-slate-600">{r.description}</span>}
-                    <span className="mt-2 text-sm text-slate-500">
-                      {r.storagePath ? "File" : r.url ? "Link" : "Resource"}
-                      {!r.isPublished && <span className="text-amber-700"> · Draft</span>}
-                    </span>
-                    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-                      <Link href={`/dashboard/resources/${r.id}`} className={buttonClass("secondary", "sm")}>
-                        Open
-                      </Link>
-                      {isStaff && (
-                        <>
-                          <button type="button" className={buttonClass("ghost", "sm")} onClick={() => startEdit(r)}>
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            className={cn(buttonClass("ghost", "sm"), "text-danger")}
-                            onClick={() => void remove(r)}
-                            disabled={rowBusy === r.id}
-                          >
-                            Delete
-                          </button>
-                        </>
+          <div className="mt-3 space-y-6">
+            {groups.map(([topicId, items]) => (
+              <div key={topicId ?? "general"}>
+                <h4 className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {topicId ? topicLabels.get(topicId) : "Course-wide"}
+                </h4>
+                <ul className="mt-2 grid gap-4 sm:grid-cols-2">
+                  {items.map((r) => (
+                    <li key={r.id} className="rounded-[20px] border border-slate-200 bg-white p-5">
+                      {editingId === r.id ? (
+                        <div className="flex flex-col gap-3">
+                          <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} aria-label="Resource title" />
+                          <textarea
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            rows={2}
+                            aria-label="Resource description"
+                            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+                          />
+                          <label className="flex items-center gap-2 text-sm text-ink-700">
+                            <input type="checkbox" checked={editPublished} onChange={(e) => setEditPublished(e.target.checked)} />
+                            Published
+                          </label>
+                          <div className="flex gap-2">
+                            <Button size="sm" loading={rowBusy === r.id} onClick={() => void saveEdit(r.id)}>
+                              Save
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex h-full flex-col">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{r.kind}</span>
+                          <span className="mt-1 font-display text-lg font-bold text-ink-900">{r.title}</span>
+                          {r.description && <span className="mt-1 line-clamp-2 text-sm text-slate-600">{r.description}</span>}
+                          <span className="mt-2 text-sm text-slate-500">
+                            {r.storagePath ? "File" : r.url ? "Link" : "Resource"}
+                            {!r.isPublished && <span className="text-amber-700"> · Draft</span>}
+                          </span>
+                          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+                            <button type="button" className={buttonClass("secondary", "sm")} onClick={() => void openResource(r)}>
+                              Open
+                            </button>
+                            {isStaff && (
+                              <>
+                                <button type="button" className={buttonClass("ghost", "sm")} onClick={() => startEdit(r)}>
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className={cn(buttonClass("ghost", "sm"), "text-danger")}
+                                  onClick={() => void remove(r)}
+                                  disabled={rowBusy === r.id}
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
                       )}
-                    </div>
-                  </div>
-                )}
-              </li>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </section>
     </div>

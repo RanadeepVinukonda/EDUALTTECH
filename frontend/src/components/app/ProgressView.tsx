@@ -21,7 +21,7 @@ interface CourseProgress {
   completedLessons: number | null;
 }
 
-export default function ProgressView() {
+export default function ProgressView({ compact = false }: { compact?: boolean }) {
   const [rows, setRows] = useState<CourseProgress[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,11 +69,13 @@ export default function ProgressView() {
   const activeCourses = rows.length - completedCourses;
 
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="font-display text-3xl font-bold text-ink-900">Progress</h1>
-        <p className="mt-1 text-[15px] text-slate-500">Your learning across enrolled courses.</p>
-      </header>
+    <div className={compact ? "space-y-6" : "space-y-8"}>
+      {!compact && (
+        <header>
+          <h1 className="font-display text-3xl font-bold text-ink-900">Progress</h1>
+          <p className="mt-1 text-[15px] text-slate-500">Your learning across enrolled courses.</p>
+        </header>
+      )}
 
       {rows.length === 0 ? (
         <EmptyState
