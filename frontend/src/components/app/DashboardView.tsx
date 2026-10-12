@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { apiGet } from "@/lib/api";
 import { describeError } from "@/lib/errors";
 import { useAuth } from "./AuthProvider";
@@ -66,6 +67,7 @@ function DashboardSkeleton() {
 
 export default function DashboardView() {
   const { user } = useAuth();
+  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [discover, setDiscover] = useState<CourseListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +90,12 @@ export default function DashboardView() {
     void load();
   }, [load]);
 
+  // Admins have their own home; the learner dashboard is not theirs.
+  useEffect(() => {
+    if (user?.role === "ADMIN") router.replace("/dashboard/admin");
+  }, [user, router]);
+
+  if (user?.role === "ADMIN") return null;
   if (error) return <ErrorState message={error} onRetry={() => void load()} />;
   if (!data) return <DashboardSkeleton />;
 
