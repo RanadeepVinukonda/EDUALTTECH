@@ -77,7 +77,7 @@ export default function CmsOrganizations() {
         description="Search and type filter apply to the loaded list; the server returns all organizations sorted by name."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <FilterSelect id="org-type" label="Type" value={type} onChange={setType} options={TYPE_FILTER} />
+            <FilterSelect id="org-type" label="Type" value={type} onChange={setType} options={TYPE_FILTER} icon={<Business fontSize="inherit" />} />
             <div className="w-48">
               <Input
                 type="search"

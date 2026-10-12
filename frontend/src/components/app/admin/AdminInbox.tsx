@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Mail from "@mui/icons-material/Mail";
 import { apiGet, apiPatch, ApiError } from "@/lib/api";
 import type { ContactMessageRow } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
@@ -56,6 +57,7 @@ export default function AdminInbox() {
               setPage(1);
             }}
             options={FILTERS}
+            icon={<Mail fontSize="inherit" />}
           />
         }
       >

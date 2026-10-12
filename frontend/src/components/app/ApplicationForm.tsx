@@ -11,7 +11,7 @@ import { cn } from "@/lib/cn";
 import { notifyError } from "@/lib/notify";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
-import Input from "@/components/ui/Input";
+import Dropzone from "@/components/ui/Dropzone";
 import Select from "@/components/ui/Select";
 import Button, { buttonClass } from "@/components/ui/Button";
 
@@ -230,17 +230,16 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
             <label htmlFor="resume" className="text-sm font-semibold text-ink-700">
               Resume <span className="text-danger">*</span>
             </label>
-            <Input
+            <Dropzone
               id="resume"
               name="resume"
-              type="file"
               accept={ACCEPT}
               error={!!fieldErrors.resume}
               icon={<AttachFile fontSize="small" />}
-              onChange={(e) => setResume(e.target.files?.[0] ?? null)}
-              className="py-2"
+              file={resume}
+              hint="PDF, DOC, DOCX, TXT or image · up to 5 MB"
+              onFile={setResume}
             />
-            <p className="text-xs text-slate-400">PDF, DOC, DOCX, TXT, or image · up to 5 MB.</p>
             {fieldErrors.resume && <p className="text-sm text-danger">{fieldErrors.resume}</p>}
           </div>
 

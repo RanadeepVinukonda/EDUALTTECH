@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import CheckCircle from "@mui/icons-material/CheckCircle";
 import { apiGet } from "@/lib/api";
 import type { Application, ApplicationStatus } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
@@ -60,6 +61,7 @@ export default function AdminApplications() {
               setPage(1);
             }}
             options={STATUS_OPTIONS}
+            icon={<CheckCircle fontSize="inherit" />}
           />
         }
       >

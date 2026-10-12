@@ -10,6 +10,7 @@ import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
+import Dropzone from "@/components/ui/Dropzone";
 import Select from "@/components/ui/Select";
 import Checkbox from "@/components/ui/Checkbox";
 import Button, { buttonClass } from "@/components/ui/Button";
@@ -291,16 +292,13 @@ export default function CourseResources({ slug }: { slug: string }) {
             </fieldset>
 
             {mode === "file" ? (
-              <div>
-                <Input
-                  type="file"
-                  accept={ACCEPT}
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  aria-label="Resource file"
-                  className="py-2"
-                />
-                <p className="mt-1 text-xs text-slate-400">Up to 5 MB. Type is validated by the server.</p>
-              </div>
+              <Dropzone
+                accept={ACCEPT}
+                file={file}
+                ariaLabel="Resource file"
+                hint="Up to 5 MB · type validated by the server"
+                onFile={setFile}
+              />
             ) : (
               <Input type="url" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://…" aria-label="Resource link" />
             )}

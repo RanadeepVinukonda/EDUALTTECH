@@ -276,6 +276,41 @@ body {
   }
 }
 
+.nf-face {
+  animation: nf-float 3.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.nf-eye {
+  transform-origin: center;
+  animation: nf-blink 4.6s ease-in-out infinite;
+}
+
+.nf-eye-r {
+  animation-delay: 0.15s;
+}
+
+@keyframes nf-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes nf-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.08);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

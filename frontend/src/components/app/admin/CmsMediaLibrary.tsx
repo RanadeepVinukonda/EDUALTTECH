@@ -90,7 +90,7 @@ export default function CmsMediaLibrary() {
         description="Newest first. Activity filtering and search apply to the loaded list."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <FilterSelect id="media-kind" label="Kind" value={kind} onChange={setKind} options={KIND_FILTER} />
+            <FilterSelect id="media-kind" label="Kind" value={kind} onChange={setKind} options={KIND_FILTER} icon={<Category fontSize="inherit" />} />
             <div className="w-48">
               <Input
                 type="search"

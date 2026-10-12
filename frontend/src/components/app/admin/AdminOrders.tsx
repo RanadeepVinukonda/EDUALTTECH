@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
 import { apiGet } from "@/lib/api";
 import type { AdminOrderRow, Page } from "@/lib/app-types";
 import { formatDate, formatMoney } from "@/lib/format";
@@ -44,6 +45,7 @@ export default function AdminOrders() {
               setPage(1);
             }}
             options={STATUS_OPTIONS}
+            icon={<CurrencyRupee fontSize="inherit" />}
           />
         }
       >

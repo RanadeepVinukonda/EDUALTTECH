@@ -5,7 +5,9 @@ import { apiGet, apiPost } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import type { ChatMessage, Conversation } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
+import { initials } from "@/lib/name";
 import { cn } from "@/lib/cn";
+import Send from "@mui/icons-material/Send";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -215,17 +217,25 @@ export default function ChatView({ courseId, title }: { courseId?: string; title
                   ) : (
                     messages.map((m) => {
                       const mine = m.senderId === user.id;
+                      const peer = peerOf(selected, user.id);
                       return (
-                        <div key={m.id} className={cn("flex flex-col", mine ? "items-end" : "items-start")}>
-                          <div
-                            className={cn(
-                              "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm",
-                              mine ? "bg-brand-600 text-white" : "bg-slate-100 text-ink-900",
-                            )}
-                          >
-                            <p className="whitespace-pre-wrap">{m.body}</p>
+                        <div key={m.id} className={cn("flex gap-2", mine ? "flex-row-reverse" : "flex-row")}>
+                          {!mine && (
+                            <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-50 text-[11px] font-bold text-brand-700">
+                              {initials(peer.firstName, peer.lastName)}
+                            </span>
+                          )}
+                          <div className={cn("flex flex-col", mine ? "items-end" : "items-start")}>
+                            <div
+                              className={cn(
+                                "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm",
+                                mine ? "rounded-br-md bg-brand-600 text-white" : "rounded-bl-md bg-slate-100 text-ink-900",
+                              )}
+                            >
+                              <p className="whitespace-pre-wrap">{m.body}</p>
+                            </div>
+                            <span className="mt-0.5 text-[11px] text-slate-400">{formatDate(m.createdAt)}</span>
                           </div>
-                          <span className="mt-0.5 text-[11px] text-slate-400">{formatDate(m.createdAt)}</span>
                         </div>
                       );
                     })
@@ -243,15 +253,22 @@ export default function ChatView({ courseId, title }: { courseId?: string; title
                   <label htmlFor="chat-input" className="sr-only">
                     Message
                   </label>
-                  <textarea
-                    id="chat-input"
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    rows={2}
-                    maxLength={4000}
-                    placeholder="Write a message…"
-                    className="flex-1 resize-none rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
-                  />
+                  <div className="relative flex-1">
+                    <textarea
+                      id="chat-input"
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      rows={2}
+                      maxLength={4000}
+                      placeholder="Write a message…"
+                      className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-2.5 pr-10 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+                    />
+                    <Send
+                      fontSize="small"
+                      aria-hidden
+                      className="pointer-events-none absolute right-3 top-3 text-slate-300"
+                    />
+                  </div>
                   <Button type="submit" loading={sending} disabled={!draft.trim()}>
                     Send
                   </Button>

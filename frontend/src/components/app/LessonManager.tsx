@@ -9,6 +9,8 @@ import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
 import Title from "@mui/icons-material/Title";
 import LinkIcon from "@mui/icons-material/Link";
+import Category from "@mui/icons-material/Category";
+import Select from "@/components/ui/Select";
 
 type LessonType = "VIDEO" | "READING";
 
@@ -95,16 +97,18 @@ function LessonForm({
         aria-label="Lesson title"
       />
       <div className="flex flex-wrap items-center gap-4">
-        <label className="text-sm text-ink-700">
-          <span className="mr-2 font-semibold">Type</span>
-          <select
+        <label className="flex items-center gap-2 text-sm text-ink-700">
+          <span className="font-semibold">Type</span>
+          <Select
             value={draft.type}
+            icon={<Category fontSize="small" />}
             onChange={(e) => setDraft({ ...draft, type: e.target.value as LessonType })}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"
+            aria-label="Lesson type"
+            className="w-40 py-2"
           >
             <option value="READING">Reading</option>
             <option value="VIDEO">Video</option>
-          </select>
+          </Select>
         </label>
         <label className="flex items-center gap-2 text-sm text-ink-700">
           <Checkbox checked={draft.isPublished} onChange={(v) => setDraft({ ...draft, isPublished: v })} />

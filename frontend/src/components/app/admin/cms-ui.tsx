@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiError, apiGet, apiPost } from "@/lib/api";
 import type { MediaAssetRow } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import Button from "@/components/ui/Button";
+import Dropzone from "@/components/ui/Dropzone";
 import { Skeleton, useAsync } from "./admin-ui";
 
 export function cmsError(err: unknown, fallback: string): string {
@@ -212,14 +213,10 @@ export function MediaUploadButton({
   onUploaded: (asset: MediaAssetRow) => void;
   label?: string;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  async function upload(file: File) {
     if (!file.type.startsWith("image/")) {
       setError("Choose an image file (PNG or JPG).");
       return;
@@ -255,10 +252,17 @@ export function MediaUploadButton({
 
   return (
     <div>
-      <input ref={inputRef} type="file" accept="image/*" className="sr-only" aria-label={label} onChange={onPick} />
-      <Button type="button" size="sm" variant="secondary" loading={busy} onClick={() => inputRef.current?.click()}>
-        {label}
-      </Button>
+      <Dropzone
+        accept="image/*"
+        ariaLabel={label}
+        label={busy ? "Uploading…" : label}
+        hint="PNG or JPG · up to 2 MB"
+        error={!!error}
+        className={busy ? "pointer-events-none py-4 opacity-60" : "py-4"}
+        onFile={(f) => {
+          if (f && !busy) void upload(f);
+        }}
+      />
       {error && (
         <p role="alert" className="mt-1 text-sm text-red-700">
           {error}

@@ -110,7 +110,7 @@ export default function WishlistView() {
                     onClick={() => void remove(item.courseId)}
                     disabled={busy}
                     aria-label={`Remove ${item.course.title} from wishlist`}
-                    className={buttonClass("secondary", "sm")}
+                    className={buttonClass("danger", "sm")}
                   >
                     {busy ? "Removing…" : "Remove"}
                   </button>

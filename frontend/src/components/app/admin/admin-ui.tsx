@@ -276,37 +276,51 @@ export function ConfirmDialog({
   );
 }
 
-/** Small labelled select for filters. */
+/** Small labelled select for filters (compact chip style). */
 export function FilterSelect({
   id,
   label,
   value,
   onChange,
   options,
+  icon,
 }: {
   id: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
+  icon?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5">
       <label htmlFor={id} className="text-xs font-semibold uppercase tracking-wide text-slate-500">
         {label}
       </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-ink-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative inline-flex items-center">
+        {icon && <span className="pointer-events-none absolute left-2.5 text-slate-500 [&>svg]:text-base">{icon}</span>}
+        <select
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`cursor-pointer appearance-none rounded-full border border-slate-300 bg-white py-1.5 pr-7 text-xs font-semibold text-ink-900 transition hover:border-brand-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 ${
+            icon ? "pl-8" : "pl-3"
+          }`}
+        >
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <svg
+          aria-hidden
+          viewBox="0 0 20 20"
+          className="pointer-events-none absolute right-2 h-3.5 w-3.5 fill-slate-500"
+        >
+          <path d="M5.5 7.5 10 12l4.5-4.5" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
     </div>
   );
 }
