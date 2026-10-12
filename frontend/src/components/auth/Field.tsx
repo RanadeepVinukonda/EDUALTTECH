@@ -42,16 +42,7 @@ export function TextField({
       <label htmlFor={id} className="block text-sm font-medium text-ink-900">
         {label}
       </label>
-      {icon ? (
-        <div className="relative mt-1.5">
-          <span className="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center text-slate-400">
-            {icon}
-          </span>
-          <Input id={id} error={Boolean(error)} aria-describedby={describedBy} className="pl-10" {...props} />
-        </div>
-      ) : (
-        <Input id={id} error={Boolean(error)} aria-describedby={describedBy} className="mt-1.5" {...props} />
-      )}
+      <Input id={id} error={Boolean(error)} aria-describedby={describedBy} icon={icon} className="mt-1.5" {...props} />
       <FieldMessage id={`${id}-msg`} error={error} hint={hint} />
     </div>
   );
@@ -88,9 +79,6 @@ export function PasswordField({
         {label}
       </label>
       <div className="relative mt-1.5">
-        <span className="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center text-slate-400">
-          <Lock fontSize="small" />
-        </span>
         <Input
           id={id}
           type={visible ? "text" : "password"}
@@ -98,7 +86,8 @@ export function PasswordField({
           error={Boolean(error)}
           autoComplete={autoComplete}
           aria-describedby={describedBy || undefined}
-          className="pl-10 pr-12"
+          icon={<Lock fontSize="small" />}
+          className="pr-12"
           {...props}
         />
         <button

@@ -5,14 +5,16 @@ import Link from "next/link";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { useCourseRoadmap } from "./useCourseRoadmap";
 import type { ResourceRow } from "@/lib/app-types";
-import { cn } from "@/lib/cn";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Checkbox from "@/components/ui/Checkbox";
 import Button, { buttonClass } from "@/components/ui/Button";
+import Category from "@mui/icons-material/Category";
+import MenuBook from "@mui/icons-material/MenuBook";
 
 const ACCEPT = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.png,.jpg,.jpeg,.webp,.gif,.svg,.mp4,.webm";
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -259,14 +261,14 @@ export default function CourseResources({ slug }: { slug: string }) {
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="flex flex-col gap-1 text-sm">
                 <span className="font-semibold text-ink-700">Type</span>
-                <Input value={kind} onChange={(e) => setKind(e.target.value)} placeholder="pdf, slides, video, link…" />
+                <Input value={kind} icon={<Category fontSize="small" />} onChange={(e) => setKind(e.target.value)} placeholder="pdf, slides, video, link…" />
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 <span className="font-semibold text-ink-700">Attach to topic (optional)</span>
-                <select
+                <Select
                   value={topicId}
+                  icon={<MenuBook fontSize="small" />}
                   onChange={(e) => setTopicId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
                 >
                   <option value="">Course-wide</option>
                   {topics.map((t) => (
@@ -274,7 +276,7 @@ export default function CourseResources({ slug }: { slug: string }) {
                       {t.chapterTitle} · {t.title}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             </div>
 
@@ -384,7 +386,7 @@ export default function CourseResources({ slug }: { slug: string }) {
                                 </button>
                                 <button
                                   type="button"
-                                  className={cn(buttonClass("ghost", "sm"), "text-danger")}
+                                  className={buttonClass("danger", "sm")}
                                   onClick={() => void remove(r)}
                                   disabled={rowBusy === r.id}
                                 >

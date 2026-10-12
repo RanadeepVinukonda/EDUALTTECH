@@ -10,7 +10,10 @@ import { useAuth } from "@/components/app/AuthProvider";
 import { notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Checkbox from "@/components/ui/Checkbox";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
+import Badge from "@mui/icons-material/Badge";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, Panel, Skeleton, StatusPill, useAsync, userName } from "./admin-ui";
@@ -218,25 +221,26 @@ function UserEditor({ user, expectedId, onSaved }: { user: AdminUserRow; expecte
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="u-first" className="mb-1 block text-sm font-semibold text-ink-700">First name</label>
-                <Input id="u-first" value={firstName} onChange={(e) => setFirstName(e.target.value)} maxLength={80} disabled={isSelf} required />
+                <Input id="u-first" value={firstName} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setFirstName(e.target.value)} maxLength={80} disabled={isSelf} required />
               </div>
               <div>
                 <label htmlFor="u-last" className="mb-1 block text-sm font-semibold text-ink-700">Last name</label>
-                <Input id="u-last" value={lastName} onChange={(e) => setLastName(e.target.value)} maxLength={80} disabled={isSelf} required />
+                <Input id="u-last" value={lastName} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setLastName(e.target.value)} maxLength={80} disabled={isSelf} required />
               </div>
             </div>
             <div>
               <label htmlFor="u-role" className="mb-1 block text-sm font-semibold text-ink-700">Account role</label>
-              <select
+              <Select
                 id="u-role"
                 value={role}
+                icon={<Badge fontSize="small" />}
                 onChange={(e) => setRole(e.target.value as Role)}
                 disabled={isSelf}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 disabled:bg-slate-50"
+                className="disabled:bg-slate-50"
               >
                 <option value="USER">USER</option>
                 <option value="ADMIN">ADMIN</option>
-              </select>
+              </Select>
               <p className="mt-1 text-xs text-slate-500">
                 MENTOR and LEARNER are course-specific and not editable here.
               </p>

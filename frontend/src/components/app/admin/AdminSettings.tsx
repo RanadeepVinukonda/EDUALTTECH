@@ -6,6 +6,8 @@ import type { SettingsMap } from "@/lib/app-types";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import ErrorState from "@/components/ui/ErrorState";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Numbers from "@mui/icons-material/Numbers";
 import { AdminHeader, Panel, Skeleton, useAsync } from "./admin-ui";
 
 const MIN = 1;
@@ -59,15 +61,15 @@ export default function AdminSettings() {
             <label htmlFor="mentor-capacity" className="text-sm font-semibold text-ink-900">
               Default seats per mentor
             </label>
-            <input
+            <Input
               id="mentor-capacity"
               type="number"
               min={MIN}
               max={MAX}
               step={1}
               value={value}
+              icon={<Numbers fontSize="small" />}
               onChange={(e) => setValue(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
             />
             {invalid && value !== "" && (
               <p className="text-xs text-red-700">Enter a whole number between {MIN} and {MAX}.</p>

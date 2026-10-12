@@ -4,11 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Search from "@mui/icons-material/Search";
 import Close from "@mui/icons-material/Close";
+import Category from "@mui/icons-material/Category";
+import Sort from "@mui/icons-material/Sort";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { api, ApiError } from "@/lib/api";
 import type { CourseListItem } from "@/lib/types";
 import CourseCard from "@/components/landing/CourseCard";
+import Select from "@/components/ui/Select";
 import { cn } from "@/lib/cn";
 
 const LIMIT = 12;
@@ -167,11 +170,11 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
             <label htmlFor="course-category" className="mb-1.5 block text-sm font-semibold text-ink-700">
               Category
             </label>
-            <select
+            <Select
               id="course-category"
               value={category}
+              icon={<Category fontSize="small" />}
               onChange={(e) => replaceParams({ category: e.target.value || undefined, page: undefined })}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-[15px] text-ink-900 focus-visible:border-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
             >
               <option value="">All categories</option>
               {categories.map((c) => (
@@ -179,7 +182,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
                   {c}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         )}
 
@@ -187,18 +190,18 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
           <label htmlFor="course-sort" className="mb-1.5 block text-sm font-semibold text-ink-700">
             Sort by
           </label>
-          <select
+          <Select
             id="course-sort"
             value={sort}
+            icon={<Sort fontSize="small" />}
             onChange={(e) => replaceParams({ sort: e.target.value === "newest" ? undefined : e.target.value, page: undefined })}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-[15px] text-ink-900 focus-visible:border-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
           >
             {SORTS.map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 

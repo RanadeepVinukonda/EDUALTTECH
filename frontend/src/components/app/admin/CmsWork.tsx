@@ -7,6 +7,10 @@ import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Search from "@mui/icons-material/Search";
+import Category from "@mui/icons-material/Category";
+import Business from "@mui/icons-material/Business";
 import Checkbox from "@/components/ui/Checkbox";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -58,14 +62,16 @@ export default function CmsWork() {
         title="Entries"
         description="The server returns every entry. Search filters this list; ordering is by publication date."
         actions={
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search work…"
-            aria-label="Search work items"
-            className="w-56 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-          />
+          <div className="w-56">
+            <Input
+              type="search"
+              value={q}
+              icon={<Search fontSize="small" />}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search work…"
+              aria-label="Search work items"
+            />
+          </div>
         }
       >
         {items.error ? (
@@ -273,20 +279,20 @@ function WorkEditor({
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Category" htmlFor="w-category">
-            <Input id="w-category" value={category} onChange={(e) => setCategory(e.target.value)} maxLength={80} />
+            <Input id="w-category" value={category} icon={<Category fontSize="small" />} onChange={(e) => setCategory(e.target.value)} maxLength={80} />
           </Field>
           <Field label="Organization" htmlFor="w-org">
-            <select
+            <Select
               id="w-org"
               value={organizationId}
+              icon={<Business fontSize="small" />}
               onChange={(e) => setOrganizationId(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
             >
               <option value="">No organization</option>
               {organizations.map((o) => (
                 <option key={o.id} value={o.id}>{o.name}</option>
               ))}
-            </select>
+            </Select>
           </Field>
         </div>
         <Field label="Cover image" hint="Choose a URL-registered asset from the Media Library.">

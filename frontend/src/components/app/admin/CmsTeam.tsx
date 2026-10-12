@@ -7,6 +7,8 @@ import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
+import Badge from "@mui/icons-material/Badge";
 import Checkbox from "@/components/ui/Checkbox";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -237,10 +239,10 @@ function TeamEditor({ item, onClose, onSaved }: { item: TeamMemberRow | null; on
         {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Name" htmlFor="t-name" required>
-            <Input id="t-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={120} error={name.length > 0 && nameInvalid} />
+            <Input id="t-name" value={name} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setName(e.target.value)} maxLength={120} error={name.length > 0 && nameInvalid} />
           </Field>
           <Field label="Title / role" htmlFor="t-title" required>
-            <Input id="t-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} error={title.length > 0 && titleInvalid} />
+            <Input id="t-title" value={title} icon={<Badge fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={120} error={title.length > 0 && titleInvalid} />
           </Field>
         </div>
         <Field label="Bio" htmlFor="t-bio" hint="Optional. Up to 2,000 characters.">

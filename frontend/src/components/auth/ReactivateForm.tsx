@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import MailOutlined from "@mui/icons-material/MailOutlined";
 import { apiPost, ApiError } from "@/lib/api";
 import { setSessionFromTokens, type AuthTokens } from "@/lib/auth";
 import { notifySuccess } from "@/lib/notify";
@@ -68,6 +69,7 @@ export default function ReactivateForm({ email: initialEmail }: { email?: string
           inputMode="email"
           placeholder="you@example.com"
           value={email}
+          icon={<MailOutlined fontSize="small" />}
           onChange={(e) => setEmail(e.target.value)}
         />
         <PasswordField label="Password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />

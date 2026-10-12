@@ -7,6 +7,8 @@ import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
+import Input from "@/components/ui/Input";
+import Search from "@mui/icons-material/Search";
 import { AdminHeader, Pagination, Panel, Skeleton, useAsync, useDebouncedValue } from "./admin-ui";
 
 export default function AdminAudit() {
@@ -30,17 +32,19 @@ export default function AdminAudit() {
         title="Events"
         description="Filter by action name."
         actions={
-          <input
-            type="search"
-            value={action}
-            onChange={(e) => {
-              setAction(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Filter by action…"
-            aria-label="Filter by action"
-            className="w-56 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-          />
+          <div className="w-56">
+            <Input
+              type="search"
+              value={action}
+              icon={<Search fontSize="small" />}
+              onChange={(e) => {
+                setAction(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Filter by action…"
+              aria-label="Filter by action"
+            />
+          </div>
         }
       >
         {logs.error ? (

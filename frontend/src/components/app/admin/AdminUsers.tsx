@@ -9,6 +9,9 @@ import Button from "@/components/ui/Button";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Search from "@mui/icons-material/Search";
+import Badge from "@mui/icons-material/Badge";
 import { AdminHeader, Panel, Skeleton, StatusPill, useAsync, useDebouncedValue, userName } from "./admin-ui";
 import InviteUserDialog from "./InviteUserDialog";
 
@@ -77,6 +80,7 @@ export default function AdminUsers() {
               id="user-search"
               type="search"
               value={query}
+              icon={<Search fontSize="small" />}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Name or email"
             />
@@ -85,16 +89,17 @@ export default function AdminUsers() {
             <label htmlFor="user-role" className="mb-1 block text-sm font-semibold text-ink-700">
               Role
             </label>
-            <select
+            <Select
               id="user-role"
               value={role}
+              icon={<Badge fontSize="small" />}
+              className="w-auto"
               onChange={(e) => setRole(e.target.value as "" | Role)}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
             >
               <option value="">All roles</option>
               <option value="USER">USER</option>
               <option value="ADMIN">ADMIN</option>
-            </select>
+            </Select>
           </div>
           {filtersActive && (
             <Button

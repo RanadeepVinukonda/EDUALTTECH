@@ -10,7 +10,13 @@ import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Button, { buttonClass } from "@/components/ui/Button";
+import Title from "@mui/icons-material/Title";
+import Event from "@mui/icons-material/Event";
+import AccessTime from "@mui/icons-material/AccessTime";
+import MenuBook from "@mui/icons-material/MenuBook";
+import LinkIcon from "@mui/icons-material/Link";
 
 type Scope = "upcoming" | "past" | "all";
 
@@ -138,11 +144,12 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Meeting title"
             aria-label="Meeting title"
+            icon={<Title fontSize="small" />}
           />
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-semibold text-ink-700">Date &amp; time</span>
-              <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} />
+              <Input type="datetime-local" value={scheduledAt} icon={<Event fontSize="small" />} onChange={(e) => setScheduledAt(e.target.value)} />
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-semibold text-ink-700">Duration (minutes)</span>
@@ -151,16 +158,17 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
                 min={15}
                 max={480}
                 value={durationMin}
+                icon={<AccessTime fontSize="small" />}
                 onChange={(e) => setDurationMin(Number(e.target.value))}
               />
             </label>
           </div>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-semibold text-ink-700">Attach to topic (optional)</span>
-            <select
+            <Select
               value={topicId}
+              icon={<MenuBook fontSize="small" />}
               onChange={(e) => setTopicId(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
             >
               <option value="">Course-wide</option>
               {topics.map((t) => (
@@ -168,7 +176,7 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
                   {t.chapterTitle} · {t.title}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <Input
             type="url"
@@ -176,6 +184,7 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
             onChange={(e) => setMeetingUrl(e.target.value)}
             placeholder="https://… (meeting link)"
             aria-label="Meeting link"
+            icon={<LinkIcon fontSize="small" />}
           />
           <textarea
             value={description}
@@ -260,7 +269,7 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
                       Join link
                     </a>
                     {!readOnly && (
-                      <button type="button" className={buttonClass("ghost", "sm")} onClick={() => void remove(m)}>
+                      <button type="button" className={buttonClass("danger", "sm")} onClick={() => void remove(m)}>
                         Cancel
                       </button>
                     )}

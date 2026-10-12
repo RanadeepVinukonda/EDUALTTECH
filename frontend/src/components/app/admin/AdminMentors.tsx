@@ -8,6 +8,12 @@ import { notifySuccess, notifyError } from "@/lib/notify";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Search from "@mui/icons-material/Search";
+import MenuBook from "@mui/icons-material/MenuBook";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
+import Numbers from "@mui/icons-material/Numbers";
 import { AdminHeader, ConfirmDialog, Panel, Skeleton, StatusPill, statusTone, useAsync, useDebouncedValue, userName } from "./admin-ui";
 
 export default function AdminMentors() {
@@ -36,14 +42,16 @@ export default function AdminMentors() {
         title="Assignments"
         description="All mentor assignments."
         actions={
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search mentor or course…"
-            aria-label="Search assignments"
-            className="w-56 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-          />
+          <div className="w-56">
+            <Input
+              type="search"
+              value={q}
+              icon={<Search fontSize="small" />}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search mentor or course…"
+              aria-label="Search assignments"
+            />
+          </div>
         }
       >
         {mentors.error ? (
@@ -150,11 +158,13 @@ function AssignDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
       <div className="mt-4 space-y-4">
         <div>
           <label htmlFor="a-course" className="block text-sm font-semibold text-ink-900">Course</label>
-          <select
+          <label htmlFor="a-course" className="block text-sm font-semibold text-ink-900">Course</label>
+          <Select
             id="a-course"
             value={courseId}
+            icon={<MenuBook fontSize="small" />}
+            className="mt-1"
             onChange={(e) => setCourseId(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
           >
             <option value="">Select a course…</option>
             {(courses.data?.courses ?? []).map((c) => (
@@ -162,7 +172,7 @@ function AssignDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
                 {c.title} ({c.status.toLowerCase()})
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
@@ -174,13 +184,14 @@ function AssignDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
             </div>
           ) : (
             <>
-              <input
+              <Input
                 id="a-user"
                 type="search"
                 value={userQuery}
+                icon={<PersonOutlined fontSize="small" />}
                 onChange={(e) => setUserQuery(e.target.value)}
                 placeholder="Search by name or email…"
-                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                className="mt-1"
               />
               {users.data && users.data.users.length > 0 && (
                 <ul className="mt-1 max-h-40 overflow-y-auto rounded-xl border border-slate-200">
@@ -202,15 +213,16 @@ function AssignDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
 
         <div>
           <label htmlFor="a-cap" className="block text-sm font-semibold text-ink-900">Capacity (optional)</label>
-          <input
+          <Input
             id="a-cap"
             type="number"
             min={1}
             max={1000}
             value={capacity}
+            icon={<Numbers fontSize="small" />}
             onChange={(e) => setCapacity(e.target.value)}
             placeholder="Leave blank for the platform default"
-            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            className="mt-1"
           />
           {capInvalid && <p className="mt-1 text-xs text-red-700">Capacity must be a whole number between 1 and 1000.</p>}
         </div>

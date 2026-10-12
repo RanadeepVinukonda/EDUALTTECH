@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Edit from "@mui/icons-material/Edit";
 import Close from "@mui/icons-material/Close";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
+import MailOutlined from "@mui/icons-material/MailOutlined";
+import CalendarMonth from "@mui/icons-material/CalendarMonth";
 import { apiPatch } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import AvatarUploader from "./AvatarUploader";
@@ -109,25 +112,25 @@ export default function ProfileView() {
               <label htmlFor="pf-first" className="mb-1 block text-sm font-semibold text-ink-700">
                 First name
               </label>
-              <Input id="pf-first" value={firstName} maxLength={80} onChange={(e) => setFirstName(e.target.value)} />
+              <Input id="pf-first" value={firstName} maxLength={80} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setFirstName(e.target.value)} />
             </div>
             <div>
               <label htmlFor="pf-last" className="mb-1 block text-sm font-semibold text-ink-700">
                 Last name
               </label>
-              <Input id="pf-last" value={lastName} maxLength={80} onChange={(e) => setLastName(e.target.value)} />
+              <Input id="pf-last" value={lastName} maxLength={80} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setLastName(e.target.value)} />
             </div>
             <div>
               <label htmlFor="pf-dob" className="mb-1 block text-sm font-semibold text-ink-700">
                 Date of birth
               </label>
-              <Input id="pf-dob" type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+              <Input id="pf-dob" type="date" value={dateOfBirth} icon={<CalendarMonth fontSize="small" />} onChange={(e) => setDateOfBirth(e.target.value)} />
             </div>
             <div>
               <label htmlFor="pf-email" className="mb-1 block text-sm font-semibold text-ink-700">
                 Email
               </label>
-              <Input id="pf-email" value={user.email} readOnly disabled />
+              <Input id="pf-email" value={user.email} readOnly disabled icon={<MailOutlined fontSize="small" />} />
             </div>
           </div>
           <div className="mt-4">

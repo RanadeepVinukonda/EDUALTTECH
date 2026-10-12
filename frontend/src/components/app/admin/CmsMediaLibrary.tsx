@@ -7,6 +7,13 @@ import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Search from "@mui/icons-material/Search";
+import LinkIcon from "@mui/icons-material/Link";
+import Category from "@mui/icons-material/Category";
+import Tag from "@mui/icons-material/Tag";
+import Description from "@mui/icons-material/Description";
+import LocationOn from "@mui/icons-material/LocationOn";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, ConfirmDialog, FilterSelect, Panel, Skeleton, useAsync } from "./admin-ui";
@@ -84,14 +91,16 @@ export default function CmsMediaLibrary() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect id="media-kind" label="Kind" value={kind} onChange={setKind} options={KIND_FILTER} />
-            <input
-              type="search"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search…"
-              aria-label="Search media"
-              className="w-48 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-            />
+            <div className="w-48">
+              <Input
+                type="search"
+                value={q}
+                icon={<Search fontSize="small" />}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search…"
+                aria-label="Search media"
+              />
+            </div>
           </div>
         }
       >
@@ -264,6 +273,7 @@ function MediaEditor({ item, onClose, onSaved }: { item: MediaAssetRow | null; o
             id="m-url"
             type="url"
             value={url}
+            icon={<LinkIcon fontSize="small" />}
             onChange={(e) => setUrl(e.target.value)}
             error={url.length > 0 && urlInvalid}
             placeholder="https://…"
@@ -271,27 +281,27 @@ function MediaEditor({ item, onClose, onSaved }: { item: MediaAssetRow | null; o
         </Field>
         {!isEdit && (
           <Field label="Kind" htmlFor="m-kind" required>
-            <select
+            <Select
               id="m-kind"
               value={kind}
+              icon={<Category fontSize="small" />}
               onChange={(e) => setKind(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
             >
               {KINDS.map((k) => (
                 <option key={k} value={k}>{k}</option>
               ))}
-            </select>
+            </Select>
           </Field>
         )}
         <Field label="Alt text" htmlFor="m-alt" hint="Optional. Describe the image for screen readers. Up to 300 characters.">
-          <Input id="m-alt" value={alt} onChange={(e) => setAlt(e.target.value)} maxLength={300} />
+          <Input id="m-alt" value={alt} icon={<Description fontSize="small" />} onChange={(e) => setAlt(e.target.value)} maxLength={300} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Category" htmlFor="m-cat" hint="Optional grouping, e.g. hero, team, work.">
-            <Input id="m-cat" value={category} onChange={(e) => setCategory(e.target.value)} maxLength={60} />
+            <Input id="m-cat" value={category} icon={<Tag fontSize="small" />} onChange={(e) => setCategory(e.target.value)} maxLength={60} />
           </Field>
           <Field label="Position" htmlFor="m-pos" hint="Optional hint, e.g. top, left, banner.">
-            <Input id="m-pos" value={position} onChange={(e) => setPosition(e.target.value)} maxLength={60} />
+            <Input id="m-pos" value={position} icon={<LocationOn fontSize="small" />} onChange={(e) => setPosition(e.target.value)} maxLength={60} />
           </Field>
         </div>
         {isUrl(url.trim()) && (kind === "image" || kind === "logo" || kind === "icon") && (

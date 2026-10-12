@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import MailOutlined from "@mui/icons-material/MailOutlined";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
+import Badge from "@mui/icons-material/Badge";
 import { ApiError, apiPost } from "@/lib/api";
 import type { AdminUserRow, Role } from "@/lib/app-types";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Button, { buttonClass } from "@/components/ui/Button";
 import { notifySuccess } from "@/lib/notify";
 
@@ -142,6 +146,7 @@ export default function InviteUserDialog({
                 autoComplete="email"
                 autoFocus
                 value={email}
+                icon={<MailOutlined fontSize="small" />}
                 onChange={(e) => setEmail(e.target.value)}
                 error={email.length > 0 && !EMAIL_RE.test(email.trim())}
                 placeholder="name@example.com"
@@ -156,28 +161,28 @@ export default function InviteUserDialog({
                 <label htmlFor="invite-first" className="mb-1 block text-sm font-semibold text-ink-700">
                   First name
                 </label>
-                <Input id="invite-first" value={firstName} onChange={(e) => setFirstName(e.target.value)} maxLength={80} required />
+                <Input id="invite-first" value={firstName} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setFirstName(e.target.value)} maxLength={80} required />
               </div>
               <div>
                 <label htmlFor="invite-last" className="mb-1 block text-sm font-semibold text-ink-700">
                   Last name
                 </label>
-                <Input id="invite-last" value={lastName} onChange={(e) => setLastName(e.target.value)} maxLength={80} required />
+                <Input id="invite-last" value={lastName} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setLastName(e.target.value)} maxLength={80} required />
               </div>
             </div>
             <div>
               <label htmlFor="invite-role" className="mb-1 block text-sm font-semibold text-ink-700">
                 Account role
               </label>
-              <select
+              <Select
                 id="invite-role"
                 value={role}
+                icon={<Badge fontSize="small" />}
                 onChange={(e) => setRole(e.target.value as Role)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
               >
                 <option value="USER">USER</option>
                 <option value="ADMIN">ADMIN</option>
-              </select>
+              </Select>
               <p className="mt-1 text-xs text-slate-500">
                 MENTOR and LEARNER are course-specific roles and can’t be assigned here.
               </p>

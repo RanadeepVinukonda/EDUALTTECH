@@ -10,6 +10,9 @@ import Button, { buttonClass } from "@/components/ui/Button";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Search from "@mui/icons-material/Search";
+import Flag from "@mui/icons-material/Flag";
 import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync, useDebouncedValue } from "./admin-ui";
 
 const LIMIT = 20;
@@ -75,21 +78,22 @@ export default function AdminCourses() {
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[220px] flex-1">
             <label htmlFor="course-search" className="mb-1 block text-sm font-semibold text-ink-700">Search</label>
-            <Input id="course-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Course title" />
+            <Input id="course-search" type="search" value={query} icon={<Search fontSize="small" />} onChange={(e) => setQuery(e.target.value)} placeholder="Course title" />
           </div>
           <div>
             <label htmlFor="course-status" className="mb-1 block text-sm font-semibold text-ink-700">Status</label>
-            <select
+            <Select
               id="course-status"
               value={status}
+              icon={<Flag fontSize="small" />}
+              className="w-auto"
               onChange={(e) => setStatus(e.target.value as Status)}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
             >
               <option value="">All statuses</option>
               <option value="DRAFT">DRAFT</option>
               <option value="PUBLISHED">PUBLISHED</option>
               <option value="ARCHIVED">ARCHIVED</option>
-            </select>
+            </Select>
           </div>
           {filtersActive && (
             <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setStatus(""); }}>

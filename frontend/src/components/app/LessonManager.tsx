@@ -7,6 +7,8 @@ import { notifyError, notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
+import Title from "@mui/icons-material/Title";
+import LinkIcon from "@mui/icons-material/Link";
 
 type LessonType = "VIDEO" | "READING";
 
@@ -87,6 +89,7 @@ function LessonForm({
     <form onSubmit={submit} className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
       <Input
         value={draft.title}
+        icon={<Title fontSize="small" />}
         onChange={(e) => setDraft({ ...draft, title: e.target.value })}
         placeholder="Lesson title"
         aria-label="Lesson title"
@@ -112,6 +115,7 @@ function LessonForm({
         <Input
           type="url"
           value={draft.contentUrl}
+          icon={<LinkIcon fontSize="small" />}
           onChange={(e) => setDraft({ ...draft, contentUrl: e.target.value })}
           placeholder="https://… (video URL)"
           aria-label="Video URL"
@@ -259,7 +263,7 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
                   </button>
                   <button
                     type="button"
-                    className={buttonClass("ghost", "sm")}
+                    className={buttonClass("danger", "sm")}
                     onClick={() => void removeLesson(l)}
                     disabled={busyId === l.id}
                   >

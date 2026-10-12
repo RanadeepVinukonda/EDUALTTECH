@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import School from "@mui/icons-material/School";
+import Business from "@mui/icons-material/Business";
+import Category from "@mui/icons-material/Category";
+import CalendarMonth from "@mui/icons-material/CalendarMonth";
 import { apiPatch } from "@/lib/api";
 import { useAuth } from "@/components/app/AuthProvider";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Spinner from "@/components/ui/Spinner";
 import type { Me } from "@/lib/app-types";
 
@@ -100,11 +105,11 @@ export default function OnboardingFlow() {
               <label htmlFor="onb-education" className="mb-1 block text-sm font-semibold text-ink-700">
                 Education level
               </label>
-              <select
+              <Select
                 id="onb-education"
                 value={educationLevel}
+                icon={<School fontSize="small" />}
                 onChange={(e) => setEducationLevel(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
               >
                 <option value="">Prefer not to say</option>
                 {EDUCATION.map((e) => (
@@ -112,19 +117,19 @@ export default function OnboardingFlow() {
                     {e}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
               <label htmlFor="onb-institution" className="mb-1 block text-sm font-semibold text-ink-700">
                 Institution
               </label>
-              <Input id="onb-institution" value={institution} maxLength={160} onChange={(e) => setInstitution(e.target.value)} placeholder="e.g. IIT Delhi" />
+              <Input id="onb-institution" value={institution} maxLength={160} icon={<Business fontSize="small" />} onChange={(e) => setInstitution(e.target.value)} placeholder="e.g. IIT Delhi" />
             </div>
             <div>
               <label htmlFor="onb-field" className="mb-1 block text-sm font-semibold text-ink-700">
                 Field of study
               </label>
-              <Input id="onb-field" value={fieldOfStudy} maxLength={160} onChange={(e) => setFieldOfStudy(e.target.value)} placeholder="e.g. Computer Science" />
+              <Input id="onb-field" value={fieldOfStudy} maxLength={160} icon={<Category fontSize="small" />} onChange={(e) => setFieldOfStudy(e.target.value)} placeholder="e.g. Computer Science" />
             </div>
             <div>
               <label htmlFor="onb-year" className="mb-1 block text-sm font-semibold text-ink-700">
@@ -137,8 +142,8 @@ export default function OnboardingFlow() {
                 min={1950}
                 max={2100}
                 value={gradYear}
+                icon={<CalendarMonth fontSize="small" />}
                 onChange={(e) => setGradYear(e.target.value)}
-                placeholder="e.g. 2026"
               />
             </div>
           </div>

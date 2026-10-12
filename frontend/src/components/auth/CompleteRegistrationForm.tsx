@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import { apiPost, ApiError } from "@/lib/api";
 import { hasSession, PASSWORD_MIN_LENGTH, safeNext, setSessionFromTokens, type AuthTokens } from "@/lib/auth";
 import { clearSignupFlow, getSignupFlow } from "@/lib/signup-flow";
@@ -108,6 +109,7 @@ export default function CompleteRegistrationForm() {
             autoComplete="given-name"
             value={firstName}
             error={errors.firstName}
+            icon={<PersonOutlined fontSize="small" />}
             onChange={(e) => setFirstName(e.target.value)}
           />
           <TextField
@@ -116,6 +118,7 @@ export default function CompleteRegistrationForm() {
             autoComplete="family-name"
             value={lastName}
             error={errors.lastName}
+            icon={<PersonOutlined fontSize="small" />}
             onChange={(e) => setLastName(e.target.value)}
           />
         </div>

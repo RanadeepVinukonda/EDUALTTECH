@@ -9,6 +9,11 @@ import { notifySuccess } from "@/lib/notify";
 import { formatMoney } from "@/lib/format";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Title from "@mui/icons-material/Title";
+import Category from "@mui/icons-material/Category";
+import School from "@mui/icons-material/School";
+import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
+import Image from "@mui/icons-material/Image";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync } from "./admin-ui";
@@ -276,7 +281,7 @@ function CourseForm({
             <div className="space-y-4">
               <div>
                 <label htmlFor="c-title" className="mb-1 block text-sm font-semibold text-ink-700">Title</label>
-                <Input id="c-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} required error={title.length > 0 && title.trim().length < 3} />
+                <Input id="c-title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} required error={title.length > 0 && title.trim().length < 3} />
                 <p className="mt-1 text-xs text-slate-500">3–160 characters. Changing the title updates the URL slug.</p>
               </div>
               <div>
@@ -295,11 +300,11 @@ function CourseForm({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="c-category" className="mb-1 block text-sm font-semibold text-ink-700">Category</label>
-                  <Input id="c-category" value={category} onChange={(e) => setCategory(e.target.value)} maxLength={60} placeholder="General" />
+                  <Input id="c-category" value={category} icon={<Category fontSize="small" />} onChange={(e) => setCategory(e.target.value)} maxLength={60} placeholder="General" />
                 </div>
                 <div>
                   <label htmlFor="c-grade" className="mb-1 block text-sm font-semibold text-ink-700">Grade level</label>
-                  <Input id="c-grade" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} maxLength={40} placeholder="Optional" />
+                  <Input id="c-grade" value={gradeLevel} icon={<School fontSize="small" />} onChange={(e) => setGradeLevel(e.target.value)} maxLength={40} placeholder="Optional" />
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -311,6 +316,7 @@ function CourseForm({
                     min={0}
                     step="0.01"
                     value={priceRupees}
+                    icon={<CurrencyRupee fontSize="small" />}
                     onChange={(e) => setPriceRupees(e.target.value)}
                     error={priceInvalid}
                     placeholder="0 for free"
@@ -336,6 +342,7 @@ function CourseForm({
                         id="c-thumb"
                         type="url"
                         value={thumbnailUrl}
+                        icon={<Image fontSize="small" />}
                         onChange={(e) => setThumbnailUrl(e.target.value)}
                         error={urlInvalid}
                         placeholder="https://…"

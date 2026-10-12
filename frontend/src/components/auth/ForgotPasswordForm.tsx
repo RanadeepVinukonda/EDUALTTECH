@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import MailOutlined from "@mui/icons-material/MailOutlined";
 import { apiPost, ApiError } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import { TextField } from "./Field";
@@ -72,6 +73,7 @@ export default function ForgotPasswordForm() {
         placeholder="you@example.com"
         value={email}
         error={fieldError}
+        icon={<MailOutlined fontSize="small" />}
         onChange={(e) => setEmail(e.target.value)}
       />
       <Button type="submit" className="w-full" loading={pending}>

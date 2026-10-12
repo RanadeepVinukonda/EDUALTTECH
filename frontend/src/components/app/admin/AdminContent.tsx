@@ -6,6 +6,8 @@ import { apiGet } from "@/lib/api";
 import type { AdminCourseSummary, Roadmap } from "@/lib/app-types";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
+import Input from "@/components/ui/Input";
+import Search from "@mui/icons-material/Search";
 import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync, useDebouncedValue } from "./admin-ui";
 
 export default function AdminContent() {
@@ -26,13 +28,13 @@ export default function AdminContent() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_1fr]">
         <Panel title="Courses">
-          <input
+          <Input
             type="search"
             value={q}
+            icon={<Search fontSize="small" />}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search courses…"
             aria-label="Search courses"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
           />
           <div className="mt-3 max-h-[520px] overflow-y-auto">
             {courses.error ? (

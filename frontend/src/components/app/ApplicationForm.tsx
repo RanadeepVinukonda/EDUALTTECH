@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Category from "@mui/icons-material/Category";
+import AttachFile from "@mui/icons-material/AttachFile";
 import { apiGet, apiPost, ApiError } from "@/lib/api";
 import type { Application } from "@/lib/app-types";
 import { cn } from "@/lib/cn";
@@ -10,6 +12,7 @@ import { notifyError } from "@/lib/notify";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Button, { buttonClass } from "@/components/ui/Button";
 
 interface CourseOption {
@@ -167,18 +170,13 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
             <label htmlFor="courseId" className="text-sm font-semibold text-ink-700">
               Course <span className="text-danger">*</span>
             </label>
-            <select
+            <Select
               id="courseId"
               name="courseId"
               value={courseId}
+              error={Boolean(fieldErrors.courseId)}
+              icon={<Category fontSize="small" />}
               onChange={(e) => setCourseId(e.target.value)}
-              className={cn(
-                "w-full rounded-xl border bg-white px-4 py-3 text-[15px] outline-none transition focus:ring-2 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2216%22%20height=%2216%22%20fill=%22%2364748b%22%20viewBox=%220%200%2020%2020%22%3E%3Cpath%20d=%22M5.5%207.5%2010%2012l4.5-4.5%22%20stroke=%22%2364748b%22%20stroke-width=%221.5%22%20fill=%22none%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E')] bg-[right_1rem_center] bg-no-repeat pr-10",
-                fieldErrors.courseId
-                  ? "border-danger focus:border-danger focus:ring-danger/20"
-                  : "border-slate-300 focus:border-brand-600 focus:ring-brand-600/20",
-              )}
-              aria-invalid={fieldErrors.courseId ? true : undefined}
             >
               <option value="">Select a course…</option>
               {available.map((c) => (
@@ -186,7 +184,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
                   {c.title} — {c.category}
                 </option>
               ))}
-            </select>
+            </Select>
             {fieldErrors.courseId && <p className="text-sm text-danger">{fieldErrors.courseId}</p>}
           </div>
 
@@ -238,6 +236,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
               type="file"
               accept={ACCEPT}
               error={!!fieldErrors.resume}
+              icon={<AttachFile fontSize="small" />}
               onChange={(e) => setResume(e.target.files?.[0] ?? null)}
               className="py-2"
             />

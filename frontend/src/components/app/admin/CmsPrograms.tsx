@@ -7,6 +7,11 @@ import { formatDate, formatMoney } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Search from "@mui/icons-material/Search";
+import Title from "@mui/icons-material/Title";
+import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
+import Business from "@mui/icons-material/Business";
 import Checkbox from "@/components/ui/Checkbox";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -58,14 +63,16 @@ export default function CmsPrograms() {
         title="Programs"
         description="Sorted newest first. Search filters the loaded list."
         actions={
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search programs…"
-            aria-label="Search programs"
-            className="w-56 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-          />
+          <div className="w-56">
+            <Input
+              type="search"
+              value={q}
+              icon={<Search fontSize="small" />}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search programs…"
+              aria-label="Search programs"
+            />
+          </div>
         }
       >
         {items.error ? (
@@ -245,7 +252,7 @@ function ProgramEditor({
       <form id="program-form" onSubmit={submit} noValidate className="space-y-4">
         {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <Field label="Title" htmlFor="p-title" required>
-          <Input id="p-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} error={title.length > 0 && titleInvalid} />
+          <Input id="p-title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} error={title.length > 0 && titleInvalid} />
         </Field>
         <Field label="Summary" htmlFor="p-summary" required hint="2–600 characters. Shown in listings.">
           <textarea
@@ -274,23 +281,24 @@ function ProgramEditor({
               type="text"
               inputMode="decimal"
               value={price}
+              icon={<CurrencyRupee fontSize="small" />}
               onChange={(e) => setPrice(e.target.value)}
               error={price.length > 0 && !!priceInvalid}
               placeholder="e.g. 4999"
             />
           </Field>
           <Field label="Organization" htmlFor="p-org">
-            <select
+            <Select
               id="p-org"
               value={organizationId}
+              icon={<Business fontSize="small" />}
               onChange={(e) => setOrganizationId(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
             >
               <option value="">No organization</option>
               {organizations.map((o) => (
                 <option key={o.id} value={o.id}>{o.name}</option>
               ))}
-            </select>
+            </Select>
           </Field>
         </div>
         <Field label="Cover image" hint="Choose a URL-registered asset from the Media Library.">

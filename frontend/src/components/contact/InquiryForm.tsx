@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
+import MailOutlined from "@mui/icons-material/MailOutlined";
+import Phone from "@mui/icons-material/Phone";
+import Subject from "@mui/icons-material/Subject";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 import { api, ApiError } from "@/lib/api";
 
 type Fields = { name: string; email: string; phone: string; subject: string; body: string };
@@ -19,9 +24,6 @@ function validate(f: Fields): Partial<Record<keyof Fields, string>> {
   else if (f.body.trim().length > 5000) e.body = "Please keep your message under 5,000 characters.";
   return e;
 }
-
-const inputCls =
-  "w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-[15px] text-ink-900 placeholder:text-slate-400 focus-visible:border-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30 aria-[invalid=true]:border-red-400";
 
 export default function InquiryForm() {
   const [fields, setFields] = useState<Fields>(EMPTY);
@@ -92,14 +94,14 @@ export default function InquiryForm() {
           <label htmlFor="inq-name" className="mb-1.5 block text-sm font-semibold text-ink-700">
             Name
           </label>
-          <input
+          <Input
             id="inq-name"
             value={fields.name}
             onChange={set("name")}
-            aria-invalid={Boolean(errors.name)}
+            error={Boolean(errors.name)}
             aria-describedby={errors.name ? "inq-name-err" : undefined}
-            className={inputCls}
             autoComplete="name"
+            icon={<PersonOutlined fontSize="small" />}
           />
           {errors.name && (
             <p id="inq-name-err" role="alert" className="mt-1 text-sm text-red-600">
@@ -111,15 +113,15 @@ export default function InquiryForm() {
           <label htmlFor="inq-email" className="mb-1.5 block text-sm font-semibold text-ink-700">
             Email
           </label>
-          <input
+          <Input
             id="inq-email"
             type="email"
             value={fields.email}
             onChange={set("email")}
-            aria-invalid={Boolean(errors.email)}
+            error={Boolean(errors.email)}
             aria-describedby={errors.email ? "inq-email-err" : undefined}
-            className={inputCls}
             autoComplete="email"
+            icon={<MailOutlined fontSize="small" />}
           />
           {errors.email && (
             <p id="inq-email-err" role="alert" className="mt-1 text-sm text-red-600">
@@ -134,14 +136,14 @@ export default function InquiryForm() {
           <label htmlFor="inq-phone" className="mb-1.5 block text-sm font-semibold text-ink-700">
             Phone <span className="font-normal text-slate-400">(optional)</span>
           </label>
-          <input
+          <Input
             id="inq-phone"
             value={fields.phone}
             onChange={set("phone")}
-            aria-invalid={Boolean(errors.phone)}
+            error={Boolean(errors.phone)}
             aria-describedby={errors.phone ? "inq-phone-err" : undefined}
-            className={inputCls}
             autoComplete="tel"
+            icon={<Phone fontSize="small" />}
           />
           {errors.phone && (
             <p id="inq-phone-err" role="alert" className="mt-1 text-sm text-red-600">
@@ -153,13 +155,13 @@ export default function InquiryForm() {
           <label htmlFor="inq-subject" className="mb-1.5 block text-sm font-semibold text-ink-700">
             Subject <span className="font-normal text-slate-400">(optional)</span>
           </label>
-          <input
+          <Input
             id="inq-subject"
             value={fields.subject}
             onChange={set("subject")}
-            aria-invalid={Boolean(errors.subject)}
+            error={Boolean(errors.subject)}
             aria-describedby={errors.subject ? "inq-subject-err" : undefined}
-            className={inputCls}
+            icon={<Subject fontSize="small" />}
           />
           {errors.subject && (
             <p id="inq-subject-err" role="alert" className="mt-1 text-sm text-red-600">

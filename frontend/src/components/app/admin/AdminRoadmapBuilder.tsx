@@ -8,6 +8,10 @@ import { notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
+import Select from "@/components/ui/Select";
+import Title from "@mui/icons-material/Title";
+import MenuBook from "@mui/icons-material/MenuBook";
+import LinkIcon from "@mui/icons-material/Link";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, Panel, Skeleton, StatusPill, useAsync } from "./admin-ui";
@@ -383,17 +387,17 @@ function LessonCard({
           }}
           className="space-y-3"
         >
-          <Input aria-label="Lesson title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} required />
+          <Input aria-label="Lesson title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} required />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <select
+            <Select
               aria-label="Lesson type"
               value={type}
+              icon={<MenuBook fontSize="small" />}
               onChange={(e) => setType(e.target.value as "VIDEO" | "READING")}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
             >
               <option value="READING">READING</option>
               <option value="VIDEO">VIDEO</option>
-            </select>
+            </Select>
             <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
               <Checkbox checked={isPublished} onChange={setIsPublished} />
               Published
@@ -401,7 +405,7 @@ function LessonCard({
           </div>
           {type === "VIDEO" ? (
             <div>
-              <Input aria-label="Video URL" value={contentUrl} onChange={(e) => setContentUrl(e.target.value)} placeholder="https://…" error={urlInvalid} />
+              <Input aria-label="Video URL" value={contentUrl} icon={<LinkIcon fontSize="small" />} onChange={(e) => setContentUrl(e.target.value)} placeholder="https://…" error={urlInvalid} />
               {urlInvalid && <p className="mt-1 text-xs text-red-600">Enter a valid URL.</p>}
             </div>
           ) : (
@@ -478,7 +482,7 @@ function AddChapterForm({ courseId, onChanged }: { courseId: string; onChanged: 
       >
         <div className="min-w-[240px] flex-1">
           <label htmlFor="new-chapter" className="mb-1 block text-sm font-semibold text-ink-700">Chapter title</label>
-          <Input id="new-chapter" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} required />
+          <Input id="new-chapter" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} required />
         </div>
         <Button type="submit" size="sm" loading={busy} disabled={title.trim().length < 2}>Add chapter</Button>
         {error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}
@@ -515,7 +519,7 @@ function AddTopicForm({ chapterId, onChanged }: { chapterId: string; onChanged: 
     >
       <div className="min-w-[200px] flex-1">
         <label htmlFor={id} className="mb-1 block text-xs font-semibold text-ink-700">New topic</label>
-        <Input id={id} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Topic title" required />
+        <Input id={id} value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Topic title" required />
       </div>
       <Button type="submit" variant="secondary" size="sm" loading={busy} disabled={title.trim().length < 2}>Add topic</Button>
       {error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}
@@ -565,17 +569,17 @@ function AddLessonForm({ topicId, onChanged }: { topicId: string; onChanged: () 
     <details className="rounded-lg border border-dashed border-slate-300 bg-white p-3">
       <summary className="cursor-pointer text-sm font-semibold text-brand-700">Add lesson</summary>
       <form onSubmit={submit} className="mt-3 space-y-3" noValidate>
-        <Input aria-label="New lesson title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Lesson title" required />
+        <Input aria-label="New lesson title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Lesson title" required />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <select
+          <Select
             aria-label="Lesson type"
             value={type}
+            icon={<MenuBook fontSize="small" />}
             onChange={(e) => setType(e.target.value as "VIDEO" | "READING")}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
           >
             <option value="READING">READING</option>
             <option value="VIDEO">VIDEO</option>
-          </select>
+          </Select>
           <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
             <Checkbox checked={isPublished} onChange={setIsPublished} />
             Publish immediately
@@ -583,7 +587,7 @@ function AddLessonForm({ topicId, onChanged }: { topicId: string; onChanged: () 
         </div>
         {type === "VIDEO" ? (
           <div>
-            <Input aria-label="Video URL" value={contentUrl} onChange={(e) => setContentUrl(e.target.value)} placeholder="https://…" error={urlInvalid} />
+            <Input aria-label="Video URL" value={contentUrl} icon={<LinkIcon fontSize="small" />} onChange={(e) => setContentUrl(e.target.value)} placeholder="https://…" error={urlInvalid} />
             {urlInvalid && <p className="mt-1 text-xs text-red-600">Enter a valid URL.</p>}
           </div>
         ) : (

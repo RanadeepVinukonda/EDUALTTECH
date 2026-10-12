@@ -2,11 +2,21 @@
 
 import { useEffect, useState } from "react";
 import Edit from "@mui/icons-material/Edit";
+import School from "@mui/icons-material/School";
+import Category from "@mui/icons-material/Category";
+import Business from "@mui/icons-material/Business";
+import CalendarMonth from "@mui/icons-material/CalendarMonth";
+import Work from "@mui/icons-material/Work";
+import AccessTime from "@mui/icons-material/AccessTime";
+import Badge from "@mui/icons-material/Badge";
+import Speed from "@mui/icons-material/Speed";
+import MenuBook from "@mui/icons-material/MenuBook";
 import { apiPatch } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Spinner from "@/components/ui/Spinner";
 import type { Me } from "@/lib/app-types";
 
@@ -15,8 +25,6 @@ const SKILL_LEVELS = ["Beginner", "Intermediate", "Advanced"];
 const LEARNING_PACES = ["Relaxed", "Moderate", "Intensive"];
 const LEARNING_FORMATS = ["Live sessions", "Recorded content", "Practical projects", "Mixed"];
 
-const selectClass =
-  "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20";
 const textareaClass =
   "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20";
 
@@ -148,83 +156,83 @@ export default function LearningProfileCard() {
               <label htmlFor="lp-education" className="mb-1 block text-sm font-semibold text-ink-700">
                 Education level
               </label>
-              <select id="lp-education" value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)} className={selectClass}>
+              <Select id="lp-education" value={educationLevel} icon={<School fontSize="small" />} onChange={(e) => setEducationLevel(e.target.value)}>
                 <option value="">Prefer not to say</option>
                 {EDUCATION.map((e) => (
                   <option key={e} value={e}>
                     {e}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
               <label htmlFor="lp-field" className="mb-1 block text-sm font-semibold text-ink-700">
                 Field of study
               </label>
-              <Input id="lp-field" value={fieldOfStudy} maxLength={160} onChange={(e) => setFieldOfStudy(e.target.value)} />
+              <Input id="lp-field" value={fieldOfStudy} maxLength={160} icon={<Category fontSize="small" />} onChange={(e) => setFieldOfStudy(e.target.value)} />
             </div>
             <div>
               <label htmlFor="lp-institution" className="mb-1 block text-sm font-semibold text-ink-700">
                 Institution
               </label>
-              <Input id="lp-institution" value={institution} maxLength={160} onChange={(e) => setInstitution(e.target.value)} />
+              <Input id="lp-institution" value={institution} maxLength={160} icon={<Business fontSize="small" />} onChange={(e) => setInstitution(e.target.value)} />
             </div>
             <div>
               <label htmlFor="lp-year" className="mb-1 block text-sm font-semibold text-ink-700">
                 Graduation year
               </label>
-              <Input id="lp-year" type="number" inputMode="numeric" min={1950} max={2100} value={gradYear} onChange={(e) => setGradYear(e.target.value)} />
+              <Input id="lp-year" type="number" inputMode="numeric" min={1950} max={2100} value={gradYear} icon={<CalendarMonth fontSize="small" />} onChange={(e) => setGradYear(e.target.value)} />
             </div>
             <div>
               <label htmlFor="lp-role" className="mb-1 block text-sm font-semibold text-ink-700">
                 Target role
               </label>
-              <Input id="lp-role" value={targetRole} maxLength={160} onChange={(e) => setTargetRole(e.target.value)} placeholder="e.g. Front-end developer" />
+              <Input id="lp-role" value={targetRole} maxLength={160} icon={<Work fontSize="small" />} onChange={(e) => setTargetRole(e.target.value)} placeholder="e.g. Front-end developer" />
             </div>
             <div>
               <label htmlFor="lp-skill" className="mb-1 block text-sm font-semibold text-ink-700">
                 Current skill level
               </label>
-              <select id="lp-skill" value={skillLevel} onChange={(e) => setSkillLevel(e.target.value)} className={selectClass}>
+              <Select id="lp-skill" value={skillLevel} icon={<Badge fontSize="small" />} onChange={(e) => setSkillLevel(e.target.value)}>
                 <option value="">Prefer not to say</option>
                 {SKILL_LEVELS.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
               <label htmlFor="lp-pace" className="mb-1 block text-sm font-semibold text-ink-700">
                 Learning pace
               </label>
-              <select id="lp-pace" value={learningPace} onChange={(e) => setLearningPace(e.target.value)} className={selectClass}>
+              <Select id="lp-pace" value={learningPace} icon={<Speed fontSize="small" />} onChange={(e) => setLearningPace(e.target.value)}>
                 <option value="">Prefer not to say</option>
                 {LEARNING_PACES.map((p) => (
                   <option key={p} value={p}>
                     {p}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
               <label htmlFor="lp-hours" className="mb-1 block text-sm font-semibold text-ink-700">
                 Weekly study time (hours)
               </label>
-              <Input id="lp-hours" type="number" inputMode="numeric" min={1} max={60} value={weeklyHours} onChange={(e) => setWeeklyHours(e.target.value)} />
+              <Input id="lp-hours" type="number" inputMode="numeric" min={1} max={60} value={weeklyHours} icon={<AccessTime fontSize="small" />} onChange={(e) => setWeeklyHours(e.target.value)} />
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="lp-format" className="mb-1 block text-sm font-semibold text-ink-700">
                 Preferred learning format
               </label>
-              <select id="lp-format" value={learningFormat} onChange={(e) => setLearningFormat(e.target.value)} className={selectClass}>
+              <Select id="lp-format" value={learningFormat} icon={<MenuBook fontSize="small" />} onChange={(e) => setLearningFormat(e.target.value)}>
                 <option value="">No preference</option>
                 {LEARNING_FORMATS.map((f) => (
                   <option key={f} value={f}>
                     {f}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="lp-interests" className="mb-1 block text-sm font-semibold text-ink-700">

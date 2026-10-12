@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import MailOutlined from "@mui/icons-material/MailOutlined";
 import { apiPost, ApiError } from "@/lib/api";
 import { hasSession, safeNext } from "@/lib/auth";
 import { setSignupEmail } from "@/lib/signup-flow";
@@ -70,6 +71,7 @@ export default function SignupForm({ next }: { next?: string }) {
           placeholder="you@example.com"
           value={email}
           error={errors.email}
+          icon={<MailOutlined fontSize="small" />}
           onChange={(e) => setEmail(e.target.value)}
         />
         <Button type="submit" className="w-full" loading={pending}>

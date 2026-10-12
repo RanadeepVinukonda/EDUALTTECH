@@ -9,6 +9,9 @@ import { notifySuccess, notifyError } from "@/lib/notify";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import LinkIcon from "@mui/icons-material/Link";
+import Event from "@mui/icons-material/Event";
 import { AdminHeader, ConfirmDialog, Panel, Skeleton, StatusPill, statusTone, useAsync, userName } from "./admin-ui";
 
 type Decision = "UNDER_REVIEW" | "INTERVIEW_SCHEDULED" | "ACCEPTED" | "REJECTED";
@@ -196,21 +199,21 @@ export default function AdminApplicationReview({ id }: { id: string }) {
         {decision === "INTERVIEW_SCHEDULED" && (
           <div className="mt-3 space-y-2">
             <label htmlFor="iv-url" className="block text-sm font-semibold text-ink-900">Interview link (optional)</label>
-            <input
+            <Input
               id="iv-url"
               type="url"
               value={interviewUrl}
+              icon={<LinkIcon fontSize="small" />}
               onChange={(e) => setInterviewUrl(e.target.value)}
               placeholder="https://…"
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
             />
             <label htmlFor="iv-at" className="block text-sm font-semibold text-ink-900">Interview time (optional)</label>
-            <input
+            <Input
               id="iv-at"
               type="datetime-local"
               value={interviewAt}
+              icon={<Event fontSize="small" />}
               onChange={(e) => setInterviewAt(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
             />
           </div>
         )}

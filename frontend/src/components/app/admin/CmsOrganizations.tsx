@@ -7,6 +7,12 @@ import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Search from "@mui/icons-material/Search";
+import Business from "@mui/icons-material/Business";
+import Category from "@mui/icons-material/Category";
+import LinkIcon from "@mui/icons-material/Link";
+import MailOutlined from "@mui/icons-material/MailOutlined";
 import Checkbox from "@/components/ui/Checkbox";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -72,14 +78,16 @@ export default function CmsOrganizations() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect id="org-type" label="Type" value={type} onChange={setType} options={TYPE_FILTER} />
-            <input
-              type="search"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search…"
-              aria-label="Search organizations"
-              className="w-48 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-            />
+            <div className="w-48">
+              <Input
+                type="search"
+                value={q}
+                icon={<Search fontSize="small" />}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search…"
+                aria-label="Search organizations"
+              />
+            </div>
           </div>
         }
       >
@@ -274,19 +282,19 @@ function OrgEditor({ item, onClose, onSaved }: { item: OrganizationRow | null; o
         {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Name" htmlFor="o-name" required>
-            <Input id="o-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={160} error={name.length > 0 && nameInvalid} />
+            <Input id="o-name" value={name} icon={<Business fontSize="small" />} onChange={(e) => setName(e.target.value)} maxLength={160} error={name.length > 0 && nameInvalid} />
           </Field>
           <Field label="Type" htmlFor="o-type" required>
-            <select
+            <Select
               id="o-type"
               value={type}
+              icon={<Category fontSize="small" />}
               onChange={(e) => setType(e.target.value as OrganizationType)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
             >
               {TYPES.map((t) => (
                 <option key={t} value={t}>{TYPE_LABEL[t]}</option>
               ))}
-            </select>
+            </Select>
           </Field>
         </div>
         <Field label="Summary" htmlFor="o-summary" hint="Up to 600 characters.">
@@ -317,10 +325,10 @@ function OrgEditor({ item, onClose, onSaved }: { item: OrganizationRow | null; o
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Website URL" htmlFor="o-site" hint="Public — shown on the Partners page.">
-            <Input id="o-site" type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} error={websiteUrl.length > 0 && siteInvalid} placeholder="https://…" />
+            <Input id="o-site" type="url" value={websiteUrl} icon={<LinkIcon fontSize="small" />} onChange={(e) => setWebsiteUrl(e.target.value)} error={websiteUrl.length > 0 && siteInvalid} placeholder="https://…" />
           </Field>
           <Field label="Contact email" htmlFor="o-email" hint="Internal only; never shown publicly.">
-            <Input id="o-email" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} error={contactEmail.length > 0 && emailInvalid} />
+            <Input id="o-email" type="email" value={contactEmail} icon={<MailOutlined fontSize="small" />} onChange={(e) => setContactEmail(e.target.value)} error={contactEmail.length > 0 && emailInvalid} />
           </Field>
         </div>
         <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
