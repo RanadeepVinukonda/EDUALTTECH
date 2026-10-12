@@ -16,9 +16,9 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import { apiGet, NOTIFICATIONS_CHANGED_EVENT } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import Spinner from "@/components/ui/Spinner";
+import OfflineBanner from "@/components/ui/OfflineBanner";
 import { cn } from "@/lib/cn";
 import BrandLogo from "@/components/brand/BrandLogo";
-import type { DashboardData } from "@/lib/app-types";
 
 interface NavLink {
   href: string;
@@ -43,7 +43,6 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const pathname = usePathname() || "/dashboard";
 
   const isAdmin = user?.role === "ADMIN";
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [unread, setUnread] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -56,20 +55,6 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     }
     if (!user.onboardingDone) router.replace("/onboarding");
   }, [loading, user, pathname, router]);
-
-  // "Learn" opens the course the learner is currently in (falls back to the overview).
-  useEffect(() => {
-    if (!user || user.role === "ADMIN") return;
-    let alive = true;
-    apiGet<DashboardData>("/dashboard")
-      .then((d) => {
-        if (alive) setActiveSlug(d.learning?.[0]?.course?.slug ?? null);
-      })
-      .catch(() => undefined);
-    return () => {
-      alive = false;
-    };
-  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -113,12 +98,11 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   }
   if (!user || !user.onboardingDone) return null;
 
-  const learnHref = activeSlug ? `/dashboard/courses/${activeSlug}` : "/dashboard";
   const primary: NavLink[] = isAdmin
     ? []
     : [
-        { href: "/dashboard/my-learning", label: "Courses", Icon: MenuBook },
-        { href: learnHref, label: "Learn", Icon: PlayCircle, exact: learnHref === "/dashboard" },
+        { href: "/courses", label: "Courses", Icon: MenuBook },
+        { href: "/dashboard/my-learning", label: "Learn", Icon: PlayCircle },
         { href: "/dashboard/mentor", label: "Mentor", Icon: CoPresent },
       ];
   const secondary = isAdmin ? [] : SECONDARY;
@@ -208,7 +192,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                   <Link href="/dashboard/profile" role="menuitem" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-ink-700 hover:bg-slate-50">
                     <Person fontSize="small" aria-hidden /> Profile
                   </Link>
-                  <Link href="/dashboard/settings" role="menuitem" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-ink-700 hover:bg-slate-50">
+                  <Link href={isAdmin ? "/dashboard/admin/settings" : "/dashboard/settings"} role="menuitem" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-ink-700 hover:bg-slate-50">
                     <SettingsIcon fontSize="small" aria-hidden /> Settings
                   </Link>
                   <button
@@ -236,6 +220,8 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </nav>
         )}
       </header>
+
+      <OfflineBanner />
 
       <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">{children}</div>
     </div>

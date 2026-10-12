@@ -11,6 +11,8 @@ import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import CoverImage from "@/components/ui/CoverImage";
+import CourseCard from "@/components/landing/CourseCard";
+import type { CourseListItem } from "@/lib/types";
 import { buttonClass } from "@/components/ui/Button";
 
 function Stat({ label, value, href }: { label: string; value: number; href?: string }) {
@@ -65,12 +67,18 @@ function DashboardSkeleton() {
 export default function DashboardView() {
   const { user } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [discover, setDiscover] = useState<CourseListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
     try {
-      setData(await apiGet<DashboardData>("/dashboard"));
+      const [d, catalog] = await Promise.all([
+        apiGet<DashboardData>("/dashboard"),
+        apiGet<{ items: CourseListItem[] }>("/courses", { limit: 24, sort: "newest" }).catch(() => null),
+      ]);
+      setData(d);
+      setDiscover(catalog?.items ?? []);
     } catch (err) {
       setError(describeError(err, "Could not load your dashboard."));
     }
@@ -83,12 +91,53 @@ export default function DashboardView() {
   if (error) return <ErrorState message={error} onRetry={() => void load()} />;
   if (!data) return <DashboardSkeleton />;
 
+  const interests = new Set(data.learning.map((l) => l.course.category).filter(Boolean));
+  const shelf = (items: CourseListItem[]) => items.slice(0, 4);
+  const latest = shelf(discover ?? []);
+  const trending = shelf(
+    [...(discover ?? [])].sort((a, b) => (b.enrolledCount ?? 0) + (b.mentorNames?.length ?? 0) - ((a.enrolledCount ?? 0) + (a.mentorNames?.length ?? 0))),
+  );
+  const forYou = interests.size === 0
+    ? []
+    : shelf([...(discover ?? [])].filter((c) => c.category && interests.has(c.category)));
+
+  const DiscoverShelf = ({ title, items, hint }: { title: string; items: CourseListItem[]; hint?: string }) =>
+    items.length === 0 ? null : (
+      <div>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h3 className="font-display text-xl font-bold text-ink-900">{title}</h3>
+            {hint && <p className="mt-0.5 text-sm text-slate-500">{hint}</p>}
+          </div>
+          <Link href="/courses" className="text-sm font-semibold text-brand-700 hover:underline">
+            View all
+          </Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((c) => (
+            <CourseCard key={c.id} course={c} />
+          ))}
+        </div>
+      </div>
+    );
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <header>
         <h1 className="font-display text-3xl font-bold text-ink-900">Welcome back, {user?.firstName}</h1>
-        <p className="mt-1 text-[15px] text-slate-500">Here&apos;s what&apos;s happening in your learning.</p>
+        <p className="mt-1 text-[15px] text-slate-500">Discover something new and pick up where you left off.</p>
       </header>
+
+      {(latest.length > 0 || forYou.length > 0 || trending.length > 0) && (
+        <section aria-labelledby="discover-h" className="space-y-10">
+          <span id="discover-h" className="sr-only">
+            Discover courses
+          </span>
+          <DiscoverShelf title="Latest courses" hint="Fresh additions to the catalogue" items={latest} />
+          <DiscoverShelf title="For you" hint="Courses in the areas you are learning" items={forYou} />
+          <DiscoverShelf title="Trending" hint="Most popular with our mentors and learners" items={trending} />
+        </section>
+      )}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label="Courses you're learning" value={data.learning.length} href="/dashboard/my-learning" />
