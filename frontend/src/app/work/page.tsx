@@ -6,6 +6,7 @@ import type { WorkItem } from "@/lib/types";
 import SectionHeading from "@/components/landing/SectionHeading";
 import LinkButton from "@/components/ui/LinkButton";
 import WorkBrowser from "@/components/work/WorkBrowser";
+import DataUnavailable from "@/components/landing/DataUnavailable";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
 export default async function WorkPage() {
   const work = await publicFetch<{ items: WorkItem[] }>("/cms/public/work", { limit: 50 });
   const items = work?.items ?? [];
+  const failed = work === null;
 
   return (
     <div className="bg-white">
@@ -50,7 +52,9 @@ export default async function WorkPage() {
 
       <section className="py-16 sm:py-20">
         <div className={wrap}>
-          {items.length > 0 ? (
+          {failed ? (
+            <DataUnavailable label="our work" />
+          ) : items.length > 0 ? (
             <WorkBrowser items={items} />
           ) : (
             <div className="max-w-3xl rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 sm:p-12">

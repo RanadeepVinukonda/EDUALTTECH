@@ -10,6 +10,11 @@ import HowToReg from "@mui/icons-material/HowToReg";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import Webhook from "@mui/icons-material/Webhook";
 import Tune from "@mui/icons-material/Tune";
+import PeopleAlt from "@mui/icons-material/PeopleAlt";
+import Inbox from "@mui/icons-material/Inbox";
+import Article from "@mui/icons-material/Article";
+import History from "@mui/icons-material/History";
+import Web from "@mui/icons-material/Web";
 import { useAuth } from "@/components/app/AuthProvider";
 import AccessDenied from "@/components/ui/AccessDenied";
 import Spinner from "@/components/ui/Spinner";
@@ -37,11 +42,19 @@ const GROUPS: TabGroup[] = [
     ],
   },
   {
-    label: "Mentoring",
+    label: "People",
     items: [
+      { href: "/dashboard/admin/users", label: "Users", Icon: PeopleAlt, exact: false },
       { href: "/dashboard/admin/mentors", label: "Mentors", Icon: CoPresent, exact: false },
       { href: "/dashboard/admin/applications", label: "Applications", Icon: HowToReg, exact: false },
-      { href: "/dashboard/admin/cms/work", label: "CMS", Icon: MenuBook, exact: false },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { href: "/dashboard/admin/content", label: "Content", Icon: Article, exact: false },
+      { href: "/dashboard/admin/cms", label: "Website CMS", Icon: Web, exact: false },
+      { href: "/dashboard/admin/inbox", label: "Contact inbox", Icon: Inbox, exact: false },
     ],
   },
   {
@@ -53,7 +66,10 @@ const GROUPS: TabGroup[] = [
   },
   {
     label: "System",
-    items: [{ href: "/dashboard/admin/settings", label: "Settings", Icon: Tune, exact: false }],
+    items: [
+      { href: "/dashboard/admin/audit", label: "Audit log", Icon: History, exact: false },
+      { href: "/dashboard/admin/settings", label: "Settings", Icon: Tune, exact: false },
+    ],
   },
 ];
 

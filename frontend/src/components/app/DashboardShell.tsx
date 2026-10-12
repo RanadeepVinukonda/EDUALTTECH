@@ -8,6 +8,10 @@ import PlayCircle from "@mui/icons-material/PlayCircle";
 import CoPresent from "@mui/icons-material/CoPresent";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import Favorite from "@mui/icons-material/Favorite";
+import FolderOpen from "@mui/icons-material/FolderOpen";
+import ShowChart from "@mui/icons-material/ShowChart";
+import Forum from "@mui/icons-material/Forum";
+import VideoCall from "@mui/icons-material/VideoCall";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Person from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -16,7 +20,6 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import { apiGet, NOTIFICATIONS_CHANGED_EVENT } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import Spinner from "@/components/ui/Spinner";
-import OfflineBanner from "@/components/ui/OfflineBanner";
 import { cn } from "@/lib/cn";
 import BrandLogo from "@/components/brand/BrandLogo";
 
@@ -28,6 +31,8 @@ interface NavLink {
 }
 
 const SECONDARY: NavLink[] = [
+  { href: "/dashboard/messages", label: "Messages", Icon: Forum },
+  { href: "/dashboard/meetings", label: "Meetings", Icon: VideoCall },
   { href: "/dashboard/orders", label: "Orders", Icon: ReceiptLong },
   { href: "/dashboard/wishlist", label: "Wishlist", Icon: Favorite },
 ];
@@ -103,6 +108,8 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     : [
         { href: "/courses", label: "Courses", Icon: MenuBook },
         { href: "/dashboard/my-learning", label: "Learn", Icon: PlayCircle },
+        { href: "/dashboard/progress", label: "Progress", Icon: ShowChart },
+        { href: "/dashboard/resources", label: "Resources", Icon: FolderOpen },
         { href: "/dashboard/mentor", label: "Mentor", Icon: CoPresent },
       ];
   const secondary = isAdmin ? [] : SECONDARY;
@@ -220,8 +227,6 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </nav>
         )}
       </header>
-
-      <OfflineBanner />
 
       <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">{children}</div>
     </div>

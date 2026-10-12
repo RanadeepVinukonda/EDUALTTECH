@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { publicFetch } from "@/lib/server-api";
 import type { CourseListItem } from "@/lib/types";
@@ -7,13 +8,22 @@ import Offerings from "@/components/landing/Offerings";
 import Pathway from "@/components/landing/Pathway";
 import SectionHeading from "@/components/landing/SectionHeading";
 import CourseCard from "@/components/landing/CourseCard";
+import DataUnavailable from "@/components/landing/DataUnavailable";
 import LinkButton from "@/components/ui/LinkButton";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
+export const metadata: Metadata = {
+  title: "EduAltTech — Practical AI, entrepreneurship, and technology courses",
+  description:
+    "Learn practical AI, entrepreneurship, and technology skills through structured courses, roadmaps, and mentors — and see the software we build for schools.",
+  alternates: { canonical: "/" },
+};
+
 export default async function HomePage() {
   const courses = await publicFetch<{ items: CourseListItem[] }>("/courses", { limit: 3, sort: "newest" });
   const courseItems = courses?.items ?? [];
+  const coursesFailed = courses === null;
 
   return (
     <>
@@ -38,7 +48,11 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {courseItems.length > 0 ? (
+          {coursesFailed ? (
+            <div className="mt-12">
+              <DataUnavailable label="the course catalogue" />
+            </div>
+          ) : courseItems.length > 0 ? (
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {courseItems.map((c) => (
                 <CourseCard key={c.id} course={c} />

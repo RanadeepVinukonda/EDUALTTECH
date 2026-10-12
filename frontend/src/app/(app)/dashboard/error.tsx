@@ -13,5 +13,5 @@ export default function DashboardRouteError({
   useEffect(() => {
     console.error(error);
   }, [error]);
-  return <RouteError error={error} reset={reset} />;
+  return <RouteError error={error} reset={reset} homeHref="/dashboard" homeLabel="Back to dashboard" />;
 }

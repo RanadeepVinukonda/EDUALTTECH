@@ -5,7 +5,7 @@ import { requireAuth, requireRole } from "../../middlewares/auth.js";
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { audit } from "../../lib/audit.js";
-import { assertUploadable, uploadPublic } from "../../lib/storage.js";
+import { assertUploadable, uploadPublic, contentTypeFor } from "../../lib/storage.js";
 import { config } from "../../config/env.js";
 
 const router = Router();
@@ -106,7 +106,7 @@ admin.post("/media/upload", validate({ body: uploadBody }), async (req, res) => 
   if (bytes.length === 0) throw ApiError.badRequest("Uploaded file is empty");
   if (bytes.length > config.limits.maxUploadBytes) throw ApiError.badRequest("Image is too large");
   assertUploadable(input.name, bytes.length);
-  const url = await uploadPublic("cms", input.name, bytes, input.type);
+  const url = await uploadPublic("cms", input.name, bytes, contentTypeFor(input.name));
   const asset = await prisma.mediaAsset.create({
     data: { url, kind: input.kind, alt: input.alt ?? null, category: input.category ?? null },
   });

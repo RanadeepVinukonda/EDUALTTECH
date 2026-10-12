@@ -9,6 +9,7 @@ import { publicFetch } from "@/lib/server-api";
 import type { ProgramItem, WorkItem } from "@/lib/types";
 import SectionHeading from "@/components/landing/SectionHeading";
 import WorkCard from "@/components/landing/WorkCard";
+import DataUnavailable from "@/components/landing/DataUnavailable";
 import LinkButton from "@/components/ui/LinkButton";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
@@ -51,6 +52,7 @@ export default async function AboutPage() {
 
   const programItems = programs?.items ?? [];
   const workItems = work?.items ?? [];
+  const programsFailed = programs === null;
 
   return (
     <div className="bg-white">
@@ -177,7 +179,11 @@ export default async function AboutPage() {
             title="What we run"
             lead="Educational programs and initiatives we deliver with schools and learners."
           />
-          {programItems.length > 0 ? (
+          {programsFailed ? (
+            <div className="mt-12">
+              <DataUnavailable label="our programs" />
+            </div>
+          ) : programItems.length > 0 ? (
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {programItems.map((p) => (
                 <div key={p.id} className="rounded-2xl border border-slate-200 bg-white p-6">

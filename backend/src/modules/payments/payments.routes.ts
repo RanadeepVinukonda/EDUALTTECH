@@ -191,7 +191,7 @@ router.post("/webhook", async (req, res) => {
 
   const event = JSON.parse(rawBody.toString("utf8")) as {
     id: string; event: string;
-    payload?: { payment?: { entity?: { id?: string; order_id?: string; method?: string; error?: unknown } } };
+    payload?: { payment?: { entity?: { id?: string; order_id?: string; method?: string; amount?: number; error?: unknown } } };
   };
   if (!event?.id || !event.event) throw ApiError.badRequest("Malformed webhook payload");
 
@@ -207,6 +207,19 @@ router.post("/webhook", async (req, res) => {
   if (event.event === "payment.captured" && entity?.order_id && entity.id) {
     const order = await prisma.order.findUnique({ where: { razorpayOrderId: entity.order_id } });
     if (order) {
+      // Integrity guard: never fulfil for a captured amount that differs from the
+      // immutable order snapshot, even though the HMAC already passed.
+      if (typeof entity.amount === "number" && entity.amount !== order.amountPaise) {
+        audit(order.userId, "order.webhook_amount_mismatch", "order", order.id, {
+          expected: order.amountPaise,
+          received: entity.amount,
+        });
+        await prisma.webhookEvent.update({
+          where: { id: record.id },
+          data: { processed: true, processedAt: new Date() },
+        });
+        throw ApiError.badRequest("Captured amount does not match the order");
+      }
       const result = await fulfillPaidOrder(order.id, {
         razorpayPaymentId: entity.id,
         signature,

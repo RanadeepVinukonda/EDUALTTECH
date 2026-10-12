@@ -8,7 +8,6 @@ import Close from "@mui/icons-material/Close";
 import { cn } from "@/lib/cn";
 import { hasSession } from "@/lib/auth";
 import LinkButton from "@/components/ui/LinkButton";
-import OfflineBanner from "@/components/ui/OfflineBanner";
 import BrandLogo from "@/components/brand/BrandLogo";
 
 const NAV = [
@@ -144,7 +143,6 @@ export default function PublicHeader() {
           </div>
         </nav>
       </div>
-      <OfflineBanner />
     </header>
   );
 }

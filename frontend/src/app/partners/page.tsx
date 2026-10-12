@@ -7,6 +7,7 @@ import type { OrganizationItem } from "@/lib/types";
 import SectionHeading from "@/components/landing/SectionHeading";
 import CoverImage from "@/components/ui/CoverImage";
 import LinkButton from "@/components/ui/LinkButton";
+import DataUnavailable from "@/components/landing/DataUnavailable";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
 export default async function PartnersPage() {
   const orgs = await publicFetch<{ items: OrganizationItem[] }>("/cms/public/organizations");
   const items = orgs?.items ?? [];
+  const failed = orgs === null;
 
   const groups = Object.entries(
     items.reduce<Record<string, OrganizationItem[]>>((acc, o) => {
@@ -66,7 +68,9 @@ export default async function PartnersPage() {
 
       <section className="py-16 sm:py-20">
         <div className={wrap}>
-          {items.length > 0 ? (
+          {failed ? (
+            <DataUnavailable label="our partners" />
+          ) : items.length > 0 ? (
             <div className="space-y-12">
               {groups.map(([type, list]) => (
                 <div key={type}>

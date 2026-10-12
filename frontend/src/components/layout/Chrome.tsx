@@ -5,18 +5,31 @@ import PublicHeader from "./PublicHeader";
 import PublicFooter from "./PublicFooter";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 
-const APP_PREFIXES = ["/dashboard", "/onboarding", "/checkout", "/maintenance"];
+const BARE_PREFIXES = [
+  "/dashboard",
+  "/onboarding",
+  "/checkout",
+  "/maintenance",
+  "/login",
+  "/signup",
+  "/verify-email",
+  "/complete-registration",
+  "/forgot-password",
+  "/reset-password",
+  "/reactivate",
+  "/auth",
+];
 
 export default function Chrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";
-  const isApp = APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const isBare = BARE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   return (
     <>
       <OfflineBanner />
-      {!isApp && <PublicHeader />}
+      {!isBare && <PublicHeader />}
       {children}
-      {!isApp && <PublicFooter />}
+      {!isBare && <PublicFooter />}
     </>
   );
 }

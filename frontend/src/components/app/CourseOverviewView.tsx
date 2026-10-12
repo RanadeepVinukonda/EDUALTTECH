@@ -60,7 +60,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
       const d = await apiGet<CourseDetailResponse>(`/courses/${slug}`);
       setDetail(d);
       setProgress(d.myParticipation?.progressPct ?? 0);
-      if (d.myParticipation || d.access.isStaff) {
+      if (d.access.canRead) {
         const rm = await apiGet<Roadmap>(`/courses/${d.course.id}/roadmap`);
         setRoadmap(rm);
         setCompleted(new Set(rm.completedLessonIds));
@@ -153,7 +153,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
 
   const { course, access, myParticipation } = detail;
   const isLearner = myParticipation?.role === "LEARNER";
-  const enrolled = Boolean(myParticipation) || access.isStaff;
+  const enrolled = access.canRead;
 
   if (!enrolled) {
     return (
@@ -219,13 +219,17 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                     .find((c) => c.id === chapter.id)
                     ?.topics.map((topic) => (
                       <div key={topic.id} className="mt-3">
-                        <button
-                          type="button"
-                          onClick={() => void openTopic(topic.id)}
-                          className="text-left text-sm font-semibold text-ink-700 hover:text-brand-700"
-                        >
-                          {topic.title}
-                        </button>
+                        {isLearner ? (
+                          <button
+                            type="button"
+                            onClick={() => void openTopic(topic.id)}
+                            className="text-left text-sm font-semibold text-ink-700 hover:text-brand-700"
+                          >
+                            {topic.title}
+                          </button>
+                        ) : (
+                          <p className="text-sm font-semibold text-ink-700">{topic.title}</p>
+                        )}
                         <ul className="mt-1 space-y-1">
                           {topic.lessons.map((lesson) => {
                             const done = completed.has(lesson.id);

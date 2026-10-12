@@ -1,7 +1,7 @@
 import { Router, type Request } from "express";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
-import { uploadPrivate, removePrivate, signedUrl, assertUploadable } from "../../lib/storage.js";
+import { uploadPrivate, removePrivate, signedUrl, assertUploadable, contentTypeFor } from "../../lib/storage.js";
 import { requireAuth } from "../../middlewares/auth.js";
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
@@ -99,6 +99,15 @@ router.post(
       file?: { name: string; type: string; data: string } | null;
     }>(req);
 
+    if (input.topicId) {
+      const topic = await prisma.topic.findUnique({ where: { id: input.topicId }, select: { courseId: true } });
+      if (!topic) throw ApiError.badRequest("Topic not found");
+      if (input.courseId && topic.courseId !== input.courseId) {
+        throw ApiError.badRequest("Topic does not belong to the selected course");
+      }
+      if (!input.courseId) input.courseId = topic.courseId;
+    }
+
     if (input.courseId) {
       const access = await getCourseAccess(input.courseId, req.user!);
       if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required for course resources");
@@ -111,9 +120,9 @@ router.post(
     if (input.file) {
       const bytes = Buffer.from(input.file.data, "base64");
       assertUploadable(input.file.name, bytes.length);
-      storagePath = await uploadPrivate(input.courseId ? `courses/${input.courseId}` : "resources", input.file.name, bytes, input.file.type);
+      storagePath = await uploadPrivate(input.courseId ? `courses/${input.courseId}` : "resources", input.file.name, bytes, contentTypeFor(input.file.name));
       fileSizeBytes = bytes.length;
-      mimeType = input.file.type;
+      mimeType = contentTypeFor(input.file.name);
     }
 
     const resource = await prisma.resource.create({
@@ -168,10 +177,16 @@ router.patch("/:id", requireAuth, validate({
 });
 
 router.delete("/:id", requireAuth, async (req: Request<{ id: string }>, res) => {
-  const existing = await prisma.resource.findUnique({ where: { id: req.params.id }, select: { ownerId: true, storagePath: true } });
+  const existing = await prisma.resource.findUnique({ where: { id: req.params.id }, select: { ownerId: true, courseId: true, storagePath: true } });
   if (!existing) throw ApiError.notFound("Resource not found");
-  if (existing.ownerId !== req.user!.id && req.user!.role !== "ADMIN") {
-    throw ApiError.forbidden("Only the owner can delete this");
+  const isOwner = existing.ownerId === req.user!.id;
+  if (!isOwner && req.user!.role !== "ADMIN") {
+    if (existing.courseId) {
+      const access = await getCourseAccess(existing.courseId, req.user!);
+      if (!access.isStaff) throw ApiError.forbidden("Only the owner or course staff can delete this");
+    } else {
+      throw ApiError.forbidden("Only the owner can delete this");
+    }
   }
   await prisma.resource.delete({ where: { id: req.params.id } });
   if (existing.storagePath) await removePrivate(existing.storagePath).catch(() => undefined);

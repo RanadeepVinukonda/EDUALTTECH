@@ -5,6 +5,7 @@ import { publicFetch } from "@/lib/server-api";
 import SectionHeading from "@/components/landing/SectionHeading";
 import CoverImage from "@/components/ui/CoverImage";
 import LinkButton from "@/components/ui/LinkButton";
+import DataUnavailable from "@/components/landing/DataUnavailable";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -35,6 +36,7 @@ function initials(name: string) {
 export default async function TeamPage() {
   const team = await publicFetch<{ items: TeamMember[] }>("/cms/public/team");
   const items = team?.items ?? [];
+  const failed = team === null;
 
   return (
     <div className="bg-white">
@@ -66,7 +68,9 @@ export default async function TeamPage() {
 
       <section className="py-16 sm:py-20">
         <div className={wrap}>
-          {items.length > 0 ? (
+          {failed ? (
+            <DataUnavailable label="our team" />
+          ) : items.length > 0 ? (
             <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((m) => (
                 <li key={m.id} className="flex gap-4">

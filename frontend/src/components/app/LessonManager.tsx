@@ -149,7 +149,7 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
 
   async function createLesson(d: Draft) {
     try {
-      await apiPost(`/topics/${topic.id}/lessons`, payload(d));
+      await apiPost(`/courses/topics/${topic.id}/lessons`, payload(d));
       notifySuccess("Lesson created.");
       setAdding(false);
       onChanged();
@@ -161,7 +161,7 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
 
   async function saveLesson(id: string, d: Draft) {
     try {
-      await apiPatch(`/lessons/${id}`, payload(d));
+      await apiPatch(`/courses/lessons/${id}`, payload(d));
       notifySuccess("Lesson saved.");
       setEditingId(null);
       onChanged();
@@ -175,7 +175,7 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
     if (!confirm(`Delete lesson "${l.title}"? This cannot be undone.`)) return;
     setBusyId(l.id);
     try {
-      await apiDelete(`/lessons/${l.id}`);
+      await apiDelete(`/courses/lessons/${l.id}`);
       notifySuccess("Lesson deleted.");
       onChanged();
     } catch (e) {
@@ -192,7 +192,7 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
     [ids[index], ids[j]] = [ids[j], ids[index]];
     setBusyId(topic.lessons[index].id);
     try {
-      await apiPost(`/topics/${topic.id}/lessons/reorder`, { orderedIds: ids });
+      await apiPost(`/courses/topics/${topic.id}/lessons/reorder`, { orderedIds: ids });
       onChanged();
     } catch (e) {
       notifyError(e instanceof Error ? e.message : "Could not reorder lessons.");

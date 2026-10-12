@@ -6,7 +6,7 @@ import { getSupabase } from "./supabase";
 // the dev-only /backend proxy in development.
 const BASE =
   process.env.NEXT_PUBLIC_API_BASE ??
-  (process.env.NODE_ENV === "production" ? "https://edualttech.onrender.com" : "/backend");
+  (process.env.NODE_ENV === "production" ? "https://edualttech.onrender.com/api" : "/backend");
 
 const MAINT_KEY_COOKIE = "maint_key";
 

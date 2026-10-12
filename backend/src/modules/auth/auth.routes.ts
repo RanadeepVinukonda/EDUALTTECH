@@ -4,7 +4,7 @@ import { z } from "zod";
 import { config, isProd } from "../../config/env.js";
 import { prisma } from "../../lib/prisma.js";
 import { supabaseAdmin, getUserByToken } from "../../lib/supabase.js";
-import { uploadPublic } from "../../lib/storage.js";
+import { uploadPublic, contentTypeFor } from "../../lib/storage.js";
 import { sendEmail, layout } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
 import { requireAuth } from "../../middlewares/auth.js";
@@ -343,7 +343,7 @@ router.post(
     const meta = body<{ name: string; type: string; data: string }>(req);
     const bytes = Buffer.from(meta.data, "base64");
     if (bytes.length > config.limits.maxUploadBytes) throw ApiError.badRequest("Image is too large");
-    const url = await uploadPublic("avatars", meta.name, bytes, meta.type);
+    const url = await uploadPublic("avatars", meta.name, bytes, contentTypeFor(meta.name));
     const user = await prisma.user.update({ where: { id: req.user!.id }, data: { avatarUrl: url } });
     res.json({ success: true, data: { avatarUrl: user.avatarUrl } });
   },

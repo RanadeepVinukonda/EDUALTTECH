@@ -8,9 +8,13 @@ import Button, { buttonClass } from "@/components/ui/Button";
 export default function RouteError({
   error,
   reset,
+  homeHref = "/",
+  homeLabel = "Back to home",
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  homeHref?: string;
+  homeLabel?: string;
 }) {
   return (
     <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-20 text-center sm:px-6">
@@ -25,8 +29,8 @@ export default function RouteError({
         <Button size="sm" onClick={reset}>
           Try again
         </Button>
-        <Link href="/dashboard" className={buttonClass("secondary", "sm")}>
-          Back to dashboard
+        <Link href={homeHref} className={buttonClass("secondary", "sm")}>
+          {homeLabel}
         </Link>
       </div>
       {error.digest && <p className="mt-6 font-mono text-xs text-slate-400">Reference: {error.digest}</p>}

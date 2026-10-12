@@ -5,6 +5,33 @@ import { ApiError } from "../utils/ApiError.js";
 
 const EXT_OK = /\.(pdf|png|jpe?g|webp|gif|svg|docx?|pptx?|xlsx?|txt|zip|mp4|webm|csv)$/i;
 
+// Server-side extension → MIME map. The declared client content type is never
+// trusted; stored objects always get the type derived from the validated name.
+const EXT_MIME: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".ppt": "application/vnd.ms-powerpoint",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".txt": "text/plain; charset=utf-8",
+  ".csv": "text/csv; charset=utf-8",
+  ".zip": "application/zip",
+  ".mp4": "video/mp4",
+  ".webm": "video/webm",
+};
+
+export function contentTypeFor(name: string): string {
+  return EXT_MIME[fileExt(name)] ?? "application/octet-stream";
+}
+
 export function sanitizeFileName(name: string): string {
   const base = name.replace(/[/\\]/g, "_").replace(/[^\w.\- ]+/g, "").trim();
   return base.slice(-80) || "file";

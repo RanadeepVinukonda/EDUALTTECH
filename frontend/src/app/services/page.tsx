@@ -11,6 +11,7 @@ import type { ProgramItem, WorkItem } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
 import SectionHeading from "@/components/landing/SectionHeading";
 import WorkCard from "@/components/landing/WorkCard";
+import DataUnavailable from "@/components/landing/DataUnavailable";
 import CoverImage from "@/components/ui/CoverImage";
 import LinkButton from "@/components/ui/LinkButton";
 import InquiryForm from "@/components/contact/InquiryForm";
@@ -39,6 +40,7 @@ export default async function ServicesPage() {
 
   const programItems = programs?.items ?? [];
   const workItems = work?.items ?? [];
+  const programsFailed = programs === null;
 
   return (
     <div className="bg-white">
@@ -87,7 +89,11 @@ export default async function ServicesPage() {
             lead="Structured learning we run with schools and learners. Programs are published here as they are confirmed."
           />
 
-          {programItems.length > 0 ? (
+          {programsFailed ? (
+            <div className="mt-12">
+              <DataUnavailable label="our programs" />
+            </div>
+          ) : programItems.length > 0 ? (
             <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {programItems.map((p) => (
                 <li key={p.id} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white">

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
-import { uploadPrivate, signedUrl, assertUploadable } from "../../lib/storage.js";
+import { uploadPrivate, signedUrl, assertUploadable, contentTypeFor } from "../../lib/storage.js";
 import { sendEmail, layout } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
 import { requireAuth, requireRole, requireVerifiedMobile } from "../../middlewares/auth.js";
@@ -56,7 +56,7 @@ router.post(
 
     const bytes = Buffer.from(input.resume.data, "base64");
     assertUploadable(input.resume.name, bytes.length);
-    const resumePath = await uploadPrivate(`applications/${input.courseId}`, input.resume.name, bytes, input.resume.type);
+    const resumePath = await uploadPrivate(`applications/${input.courseId}`, input.resume.name, bytes, contentTypeFor(input.resume.name));
 
     const application = await prisma.mentorApplication.create({
       data: {
