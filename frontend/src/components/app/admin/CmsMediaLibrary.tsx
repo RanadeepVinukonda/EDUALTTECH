@@ -130,7 +130,7 @@ export default function CmsMediaLibrary() {
                     <Button size="sm" variant="ghost" onClick={() => copyUrl(a)}>
                       {copied === a.id ? "Copied" : "Copy URL"}
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setDeleting(a)}>Delete</Button>
+                    <Button size="sm" variant="danger" onClick={() => setDeleting(a)}>Delete</Button>
                   </div>
                 </div>
               </li>

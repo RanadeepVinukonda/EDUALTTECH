@@ -11,6 +11,7 @@ import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
+import Checkbox from "@/components/ui/Checkbox";
 import Button, { buttonClass } from "@/components/ui/Button";
 
 const ACCEPT = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.png,.jpg,.jpeg,.webp,.gif,.svg,.mp4,.webm";
@@ -351,7 +352,7 @@ export default function CourseResources({ slug }: { slug: string }) {
                             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
                           />
                           <label className="flex items-center gap-2 text-sm text-ink-700">
-                            <input type="checkbox" checked={editPublished} onChange={(e) => setEditPublished(e.target.checked)} />
+                            <Checkbox checked={editPublished} onChange={setEditPublished} />
                             Published
                           </label>
                           <div className="flex gap-2">

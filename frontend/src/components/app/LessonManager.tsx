@@ -6,6 +6,7 @@ import type { Roadmap, LessonRow, TopicRow, ChapterRow } from "@/lib/app-types";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Checkbox from "@/components/ui/Checkbox";
 
 type LessonType = "VIDEO" | "READING";
 
@@ -103,11 +104,7 @@ function LessonForm({
           </select>
         </label>
         <label className="flex items-center gap-2 text-sm text-ink-700">
-          <input
-            type="checkbox"
-            checked={draft.isPublished}
-            onChange={(e) => setDraft({ ...draft, isPublished: e.target.checked })}
-          />
+          <Checkbox checked={draft.isPublished} onChange={(v) => setDraft({ ...draft, isPublished: v })} />
           Published
         </label>
       </div>

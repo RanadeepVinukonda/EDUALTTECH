@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import MailOutlined from "@mui/icons-material/MailOutlined";
 import { apiPost, ApiError } from "@/lib/api";
 import { hasSession, safeNext, setSessionFromTokens, type AuthTokens } from "@/lib/auth";
 import Button from "@/components/ui/Button";
@@ -81,6 +82,7 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
           placeholder="you@example.com"
           value={email}
           error={errors.email}
+          icon={<MailOutlined fontSize="small" />}
           onChange={(e) => setEmail(e.target.value)}
         />
         <div>

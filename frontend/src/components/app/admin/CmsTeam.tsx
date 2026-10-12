@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Checkbox from "@/components/ui/Checkbox";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, ConfirmDialog, Panel, Skeleton, StatusPill, useAsync } from "./admin-ui";
@@ -118,7 +119,7 @@ export default function CmsTeam() {
                 <span className="hidden text-xs text-slate-400 sm:block">Updated {formatDate(m.updatedAt)}</span>
                 <div className="flex gap-2">
                   <Button size="sm" variant="secondary" onClick={() => setEditing(m)}>Edit</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setDeleting(m)}>Delete</Button>
+                  <Button size="sm" variant="danger" onClick={() => setDeleting(m)}>Delete</Button>
                 </div>
               </li>
             ))}
@@ -256,7 +257,7 @@ function TeamEditor({ item, onClose, onSaved }: { item: TeamMemberRow | null; on
           <MediaReference url={avatarUrl} alt={name} onPick={() => setPicker(true)} onClear={() => setAvatarUrl("")} />
         </Field>
         <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
-          <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
+          <Checkbox checked={isPublished} onChange={setIsPublished} />
           Published (visible on the public site)
         </label>
       </form>

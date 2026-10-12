@@ -7,6 +7,7 @@ import { apiPost, ApiError } from "@/lib/api";
 import { hasSession, safeNext } from "@/lib/auth";
 import { getSignupFlow, setSignupEmail, setVerifiedCode } from "@/lib/signup-flow";
 import Button from "@/components/ui/Button";
+import PinInput from "@/components/ui/PinInput";
 import { TextField } from "./Field";
 
 const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -74,8 +75,8 @@ export default function VerifyEmailForm({ emailFromQuery, next }: { emailFromQue
   async function verify(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (code.trim().length < 4) {
-      setErrors({ code: "Enter the code from your email." });
+    if (code.trim().length !== 6) {
+      setErrors({ code: "Enter the 6-digit code from your email." });
       return;
     }
     setErrors({});
@@ -140,17 +141,15 @@ export default function VerifyEmailForm({ emailFromQuery, next }: { emailFromQue
             </p>
           )}
           <form onSubmit={verify} className="space-y-4" noValidate>
-            <TextField
-              label="Verification code"
-              name="code"
-              autoComplete="one-time-code"
-              inputMode="numeric"
-              placeholder="Enter code"
-              value={code}
-              maxLength={8}
-              error={errors.code}
-              onChange={(e) => setCode(e.target.value)}
-            />
+            <div>
+              <p className="mb-1.5 block text-sm font-medium text-ink-900">6-digit code</p>
+              <PinInput length={6} value={code} onChange={setCode} autoFocus />
+              {errors.code && (
+                <p role="alert" className="mt-1.5 text-sm text-danger">
+                  {errors.code}
+                </p>
+              )}
+            </div>
             <Button type="submit" className="w-full" loading={pending}>
               Verify email
             </Button>

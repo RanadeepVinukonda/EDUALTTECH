@@ -7,6 +7,7 @@ import { formatDate, formatMoney } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Checkbox from "@/components/ui/Checkbox";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, ConfirmDialog, Panel, Skeleton, StatusPill, useAsync } from "./admin-ui";
@@ -104,7 +105,7 @@ export default function CmsPrograms() {
                     <td className="px-2 py-3 text-right">
                       <div className="flex justify-end gap-2">
                         <Button size="sm" variant="secondary" onClick={() => setEditing(p)}>Edit</Button>
-                        <Button size="sm" variant="ghost" onClick={() => setDeleting(p)}>Delete</Button>
+                        <Button size="sm" variant="danger" onClick={() => setDeleting(p)}>Delete</Button>
                       </div>
                     </td>
                   </tr>
@@ -296,7 +297,7 @@ function ProgramEditor({
           <MediaReference url={coverUrl} alt={title} onPick={() => setPicker(true)} onClear={() => setCoverUrl("")} />
         </Field>
         <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
-          <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
+          <Checkbox checked={isPublished} onChange={setIsPublished} />
           Published (visible on the public site)
         </label>
       </form>

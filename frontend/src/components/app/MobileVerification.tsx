@@ -6,6 +6,7 @@ import { useAuth } from "./AuthProvider";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import PinInput from "@/components/ui/PinInput";
 
 export default function MobileVerification() {
   const { user, refresh } = useAuth();
@@ -95,21 +96,9 @@ export default function MobileVerification() {
       </div>
 
       {sent && (
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="min-w-[160px] flex-1">
-            <label htmlFor="mv-code" className="mb-1 block text-sm font-semibold text-ink-700">
-              6-digit code
-            </label>
-            <Input
-              id="mv-code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              placeholder="\u2022\u2022\u2022\u2022\u2022\u2022"
-            />
-          </div>
+        <div className="space-y-3">
+          <p className="block text-sm font-semibold text-ink-700">6-digit code</p>
+          <PinInput length={6} value={code} onChange={setCode} autoFocus />
           <Button onClick={() => void verify()} loading={verifying}>
             Verify
           </Button>

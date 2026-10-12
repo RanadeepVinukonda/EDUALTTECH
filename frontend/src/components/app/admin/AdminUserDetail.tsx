@@ -10,6 +10,7 @@ import { useAuth } from "@/components/app/AuthProvider";
 import { notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Checkbox from "@/components/ui/Checkbox";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, Panel, Skeleton, StatusPill, useAsync, userName } from "./admin-ui";
@@ -241,13 +242,7 @@ function UserEditor({ user, expectedId, onSaved }: { user: AdminUserRow; expecte
               </p>
             </div>
             <label className="flex items-center gap-3 text-sm font-semibold text-ink-700">
-              <input
-                type="checkbox"
-                checked={isActive}
-                disabled={isSelf}
-                onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600/30"
-              />
+              <Checkbox checked={isActive} disabled={isSelf} onChange={setIsActive} />
               Account active
             </label>
             <div className="flex justify-end gap-2">

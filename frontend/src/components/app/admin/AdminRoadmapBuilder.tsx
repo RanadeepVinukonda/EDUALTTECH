@@ -7,6 +7,7 @@ import type { ChapterRow, LessonRow, Roadmap, TopicRow } from "@/lib/app-types";
 import { notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Checkbox from "@/components/ui/Checkbox";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, Panel, Skeleton, StatusPill, useAsync } from "./admin-ui";
@@ -280,7 +281,7 @@ function TopicCard({
             <Button variant="ghost" size="sm" disabled={busy || index === 0} onClick={() => reorder(-1)} aria-label={`Move ${topic.title} up`}>↑</Button>
             <Button variant="ghost" size="sm" disabled={busy || index === count - 1} onClick={() => reorder(1)} aria-label={`Move ${topic.title} down`}>↓</Button>
             <Button variant="ghost" size="sm" disabled={busy} onClick={() => setEditing(true)}>Edit</Button>
-            <Button variant="ghost" size="sm" disabled={busy} onClick={() => setConfirmDelete(true)}>Delete</Button>
+            <Button variant="danger" size="sm" disabled={busy} onClick={() => setConfirmDelete(true)}>Delete</Button>
           </div>
         </div>
       )}
@@ -394,7 +395,7 @@ function LessonCard({
               <option value="VIDEO">VIDEO</option>
             </select>
             <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
-              <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600/30" />
+              <Checkbox checked={isPublished} onChange={setIsPublished} />
               Published
             </label>
           </div>
@@ -431,7 +432,7 @@ function LessonCard({
             <Button variant="ghost" size="sm" disabled={busy || index === 0} onClick={() => reorder(-1)} aria-label={`Move ${lesson.title} up`}>↑</Button>
             <Button variant="ghost" size="sm" disabled={busy || index === count - 1} onClick={() => reorder(1)} aria-label={`Move ${lesson.title} down`}>↓</Button>
             <Button variant="ghost" size="sm" disabled={busy} onClick={() => setEditing(true)}>Edit</Button>
-            <Button variant="ghost" size="sm" disabled={busy} onClick={() => setConfirmDelete(true)}>Delete</Button>
+            <Button variant="danger" size="sm" disabled={busy} onClick={() => setConfirmDelete(true)}>Delete</Button>
           </div>
         </div>
       )}
@@ -576,7 +577,7 @@ function AddLessonForm({ topicId, onChanged }: { topicId: string; onChanged: () 
             <option value="VIDEO">VIDEO</option>
           </select>
           <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
-            <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600/30" />
+            <Checkbox checked={isPublished} onChange={setIsPublished} />
             Publish immediately
           </label>
         </div>

@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Lock from "@mui/icons-material/Lock";
 import Input from "@/components/ui/Input";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth";
 import { cn } from "@/lib/cn";
@@ -25,8 +26,14 @@ export function TextField({
   error,
   hint,
   className,
+  icon,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string; hint?: string }) {
+}: React.InputHTMLAttributes<HTMLInputElement> & {
+  label: string;
+  error?: string;
+  hint?: string;
+  icon?: React.ReactNode;
+}) {
   const autoId = useId();
   const id = props.id ?? autoId;
   const describedBy = error || hint ? `${id}-msg` : undefined;
@@ -35,7 +42,16 @@ export function TextField({
       <label htmlFor={id} className="block text-sm font-medium text-ink-900">
         {label}
       </label>
-      <Input id={id} error={Boolean(error)} aria-describedby={describedBy} className="mt-1.5" {...props} />
+      {icon ? (
+        <div className="relative mt-1.5">
+          <span className="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center text-slate-400">
+            {icon}
+          </span>
+          <Input id={id} error={Boolean(error)} aria-describedby={describedBy} className="pl-10" {...props} />
+        </div>
+      ) : (
+        <Input id={id} error={Boolean(error)} aria-describedby={describedBy} className="mt-1.5" {...props} />
+      )}
       <FieldMessage id={`${id}-msg`} error={error} hint={hint} />
     </div>
   );
@@ -72,6 +88,9 @@ export function PasswordField({
         {label}
       </label>
       <div className="relative mt-1.5">
+        <span className="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center text-slate-400">
+          <Lock fontSize="small" />
+        </span>
         <Input
           id={id}
           type={visible ? "text" : "password"}
@@ -79,7 +98,7 @@ export function PasswordField({
           error={Boolean(error)}
           autoComplete={autoComplete}
           aria-describedby={describedBy || undefined}
-          className="pr-12"
+          className="pl-10 pr-12"
           {...props}
         />
         <button
