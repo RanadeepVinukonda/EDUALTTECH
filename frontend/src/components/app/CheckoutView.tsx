@@ -13,7 +13,7 @@ import { notifyError, notifySuccess } from "@/lib/notify";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import Button, { buttonClass } from "@/components/ui/Button";
-import PayButton from "@/components/ui/PayButton";
+import EnrollButton from "@/components/ui/EnrollButton";
 import CoverImage from "@/components/ui/CoverImage";
 
 function idempotencyKey(courseId: string): string {
@@ -267,9 +267,9 @@ export default function CheckoutView({ slug }: { slug: string }) {
 
           <div className="flex flex-col gap-3">
             {isPaid ? (
-              <PayButton onClick={() => void pay(course.id, course.title)} loading={busy} disabled={needsMobile || needsMentor}>
+              <EnrollButton onClick={() => void pay(course.id, course.title)} loading={busy} disabled={needsMobile || needsMentor}>
                 Pay {formatPrice(course.pricePaise, course.currency)}
-              </PayButton>
+              </EnrollButton>
             ) : (
               <Button onClick={() => void payFree(course.id)} loading={busy} disabled={needsMentor}>
                 Enroll for free

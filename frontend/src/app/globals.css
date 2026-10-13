@@ -167,19 +167,17 @@ body {
   gap: 10px;
   padding: 12px 24px;
   font-size: 15px;
-  font-weight: 600;
   color: #fff;
-  background: var(--color-brand-600);
+  background: #1a1a1a;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .pay-btn:hover {
-  background: var(--color-brand-700);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-elev2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 .pay-btn:disabled {
@@ -189,54 +187,64 @@ body {
   box-shadow: none;
 }
 
-.pay-btn__icons {
-  position: relative;
-  width: 22px;
-  height: 22px;
+.pay-btn .btn-text {
+  font-weight: 600;
 }
 
-.pay-btn__icon {
+.pay-btn__icons {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.pay-btn__icons .pay-btn__icon {
   position: absolute;
   inset: 0;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
+  color: #22c55e;
   opacity: 0;
   visibility: hidden;
 }
 
-.pay-btn__icon--default {
+.pay-btn__icons > .pay-btn__icon--default {
   opacity: 1;
   visibility: visible;
 }
 
-.pay-btn:hover .pay-btn__icon--default {
+.pay-btn:hover .pay-btn__icons > .pay-btn__icon--default {
   opacity: 0;
   visibility: hidden;
 }
 
-.pay-btn:hover .pay-btn__icon {
+.pay-btn:hover .pay-btn__icons > .pay-btn__icon {
   animation: pay-icon-cycle 2.5s infinite;
 }
 
-.pay-btn:hover .pay-btn__icon--2 {
+.pay-btn:hover .pay-btn__icons > .pay-btn__icon--2 {
+  animation-delay: 0s;
+}
+
+.pay-btn:hover .pay-btn__icons > .pay-btn__icon--3 {
   animation-delay: 0.5s;
 }
 
-.pay-btn:hover .pay-btn__icon--3 {
+.pay-btn:hover .pay-btn__icons > .pay-btn__icon--4 {
   animation-delay: 1s;
 }
 
-.pay-btn:hover .pay-btn__icon--4 {
+.pay-btn:hover .pay-btn__icons > .pay-btn__icon--5 {
   animation-delay: 1.5s;
 }
 
-.pay-btn:active .pay-btn__icon {
+.pay-btn:active .pay-btn__icons > .pay-btn__icon {
   animation: none;
   opacity: 0;
   visibility: hidden;
+  transition: all 0.3s ease;
 }
 
-.pay-btn:active .pay-btn__icon--4 {
+.pay-btn:active .pay-btn__icons > .pay-btn__icon--5 {
   animation: pay-check 0.6s ease forwards;
   visibility: visible;
 }
