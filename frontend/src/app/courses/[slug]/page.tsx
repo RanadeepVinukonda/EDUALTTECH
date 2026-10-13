@@ -142,16 +142,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
             <div className="relative z-10 w-full p-6 text-white sm:p-7">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold text-brand-100 backdrop-blur">
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-300" />
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/80">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-px w-4 bg-white/40" />
                   {typeLabel}
                 </span>
-                {course.domain && (
-                  <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold text-brand-100 backdrop-blur">
-                    {course.domain}
-                  </span>
-                )}
+                {course.domain && <span className="text-white/60">{course.domain}</span>}
               </div>
               <h1 className="mt-3.5 max-w-[660px] font-display text-2xl font-extrabold tracking-tight sm:text-[27px]">
                 {course.title}

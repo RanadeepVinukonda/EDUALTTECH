@@ -81,8 +81,8 @@ export default function CourseCard({
         <div className="flex items-start justify-between gap-3">
           <h3 className="line-clamp-2 font-display text-base font-bold leading-snug text-ink-900">{title}</h3>
           {chip && (
-            <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-brand-100 bg-brand-50 px-2.5 py-[3px] text-[10.5px] font-bold text-brand-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
+            <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+              <span className="h-px w-4 bg-slate-300" />
               {chip}
             </span>
           )}
