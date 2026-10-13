@@ -16,6 +16,7 @@ import Insights from "@mui/icons-material/Insights";
 import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
 import School from "@mui/icons-material/School";
 import Image from "@mui/icons-material/Image";
+import Language from "@mui/icons-material/Language";
 import Close from "@mui/icons-material/Close";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -25,6 +26,8 @@ import AdminRoadmapBuilder from "./AdminRoadmapBuilder";
 import AdminParticipants from "./AdminParticipants";
 
 const MAX_PAISE = 10_000_000;
+
+const FEATURE_HINTS = ["e.g. 8 chapters", "e.g. 42 lessons", "e.g. Beginner friendly", "e.g. Certificate included"];
 
 type CourseWorkspaceTab = "details" | "roadmap" | "participants";
 
@@ -40,6 +43,8 @@ interface EditorCourse {
   description: string;
   type: "EDUCATION" | "ALTERNATIVE_EDUCATION";
   category: string;
+  domain: string;
+  features: string[];
   level: string | null;
   tags: string[];
   pricePaise: number;
@@ -115,6 +120,8 @@ function EditWorkspace({ id, initialTab }: { id: string; initialTab: CourseWorks
     description: c.description,
     category: c.category,
     type: c.type ?? "EDUCATION",
+    domain: c.domain,
+    features: c.features ?? [],
     level: c.level,
     tags: c.tags ?? [],
     pricePaise: c.pricePaise,
@@ -176,6 +183,8 @@ function NewCourseEditor() {
     description: "",
     type: "EDUCATION",
     category: "",
+    domain: "",
+    features: [],
     level: null,
     tags: [],
     pricePaise: 0,
@@ -200,6 +209,11 @@ function CourseForm({
   const [description, setDescription] = useState(initial.description);
   const [type, setType] = useState<EditorCourse["type"]>(initial.type);
   const [category, setCategory] = useState(initial.category);
+  const [domain, setDomain] = useState(initial.domain);
+  const [features, setFeatures] = useState<string[]>(() => {
+    const f = initial.features ?? [];
+    return [f[0] ?? "", f[1] ?? "", f[2] ?? "", f[3] ?? ""];
+  });
   const [level, setLevel] = useState(initial.level ?? "");
   const [tags, setTags] = useState<string[]>(initial.tags);
   const [tagDraft, setTagDraft] = useState("");
@@ -215,6 +229,8 @@ function CourseForm({
     description !== initial.description ||
     type !== initial.type ||
     category !== initial.category ||
+    domain !== initial.domain ||
+    JSON.stringify(features) !== JSON.stringify(normalizeFeatures(initial.features)) ||
     level !== (initial.level ?? "") ||
     JSON.stringify(tags) !== JSON.stringify(initial.tags) ||
     priceRupees !== (initial.pricePaise ? String(initial.pricePaise / 100) : "") ||
@@ -223,11 +239,16 @@ function CourseForm({
   const pricePaise = parsePrice(priceRupees);
   const priceInvalid = pricePaise === null;
   const urlInvalid = thumbnailUrl.trim().length > 0 && !isUrl(thumbnailUrl.trim());
+  const thumbMissing = thumbnailUrl.trim().length === 0;
+  const featureList = features.map((f) => f.trim()).filter(Boolean);
   const formValid =
     title.trim().length >= 3 &&
     description.trim().length >= 10 &&
+    domain.trim().length >= 2 &&
+    featureList.length >= 1 &&
     !priceInvalid &&
-    !urlInvalid;
+    !urlInvalid &&
+    !thumbMissing;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -241,6 +262,8 @@ function CourseForm({
       description: description.trim(),
       type,
       category: category.trim() || "General",
+      domain: domain.trim(),
+      features: featureList,
       level: level || null,
       tags: withDraftTag(tags, tagDraft),
       pricePaise: pricePaise as number,
@@ -325,13 +348,20 @@ function CourseForm({
                 />
                 <p className="mt-1 text-xs text-slate-500">10–8000 characters.</p>
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="c-type" className="mb-1 block text-sm font-semibold text-ink-700">Type</label>
                   <Select id="c-type" value={type} icon={<School fontSize="small" />} onChange={(e) => setType(e.target.value as EditorCourse["type"])}>
                     <option value="EDUCATION">Education</option>
                     <option value="ALTERNATIVE_EDUCATION">Alternative education</option>
                   </Select>
+                </div>
+                <div>
+                  <label htmlFor="c-domain" className="mb-1 block text-sm font-semibold text-ink-700">
+                    Domain <span className="text-danger">*</span>
+                  </label>
+                  <Input id="c-domain" value={domain} icon={<Language fontSize="small" />} onChange={(e) => setDomain(e.target.value)} maxLength={60} required error={domain.length > 0 && domain.trim().length < 2} placeholder="Web Development, AI, Design…" />
+                  <p className="mt-1 text-xs text-slate-500">Shown as the chip on the course card. Required.</p>
                 </div>
                 <div>
                   <label htmlFor="c-category" className="mb-1 block text-sm font-semibold text-ink-700">Category</label>
@@ -383,6 +413,23 @@ function CourseForm({
                 />
                 <p className="mt-1 text-xs text-slate-500">Topic tags like “2D Graphics”, “Game Dev”. Up to 20.</p>
               </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-ink-700">
+                  Features <span className="text-danger">*</span>
+                </label>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {features.map((f, i) => (
+                    <Input
+                      key={i}
+                      value={f}
+                      onChange={(e) => setFeatures((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))}
+                      maxLength={40}
+                      placeholder={FEATURE_HINTS[i]}
+                    />
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-slate-500">Up to 4 highlights shown on the card. At least one is required.</p>
+              </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="c-price" className="mb-1 block text-sm font-semibold text-ink-700">Price (₹)</label>
@@ -402,7 +449,9 @@ function CourseForm({
                   </p>
                 </div>
                 <div>
-                  <label htmlFor="c-thumb" className="mb-1 block text-sm font-semibold text-ink-700">Thumbnail</label>
+                  <label htmlFor="c-thumb" className="mb-1 block text-sm font-semibold text-ink-700">
+                    Thumbnail <span className="text-danger">*</span>
+                  </label>
                   <div className="mt-1 space-y-3">
                     <MediaReference
                       url={thumbnailUrl}
@@ -425,7 +474,8 @@ function CourseForm({
                         className="mt-2"
                       />
                     </details>
-                    {urlInvalid && <p className="text-xs text-danger">Enter a valid URL or leave blank.</p>}
+                    {urlInvalid && <p className="text-xs text-danger">Enter a valid image URL.</p>}
+                    {!urlInvalid && thumbMissing && <p className="text-xs text-danger">A thumbnail is required.</p>}
                   </div>
                   <MediaPicker
                     open={picking}
@@ -542,6 +592,11 @@ function withDraftTag(tags: string[], draft: string): string[] {
   const t = draft.trim();
   if (!t || tags.some((x) => x.toLowerCase() === t.toLowerCase())) return tags;
   return [...tags, t.slice(0, 30)];
+}
+
+function normalizeFeatures(f?: string[] | null): string[] {
+  const a = f ?? [];
+  return [a[0] ?? "", a[1] ?? "", a[2] ?? "", a[3] ?? ""];
 }
 
 function parsePrice(input: string): number | null {

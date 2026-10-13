@@ -48,6 +48,8 @@ export interface LearningCourse {
   title: string;
   thumbnailUrl: string | null;
   category: string;
+  domain: string;
+  features: string[];
 }
 
 export interface LearningRow {
@@ -144,6 +146,8 @@ export interface CourseOverview {
   description: string;
   category: string;
   type: "EDUCATION" | "ALTERNATIVE_EDUCATION";
+  domain: string;
+  features: string[];
   gradeLevel: string | null;
   level: string | null;
   tags: string[];
@@ -198,6 +202,8 @@ export interface WishlistItem {  id: string;
     title: string;
     description: string;
     category: string;
+    domain: string;
+    features: string[];
     pricePaise: number;
     currency: string;
     thumbnailUrl: string | null;

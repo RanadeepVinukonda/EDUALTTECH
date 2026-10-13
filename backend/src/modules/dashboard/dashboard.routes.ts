@@ -14,7 +14,7 @@ router.get("/", requireAuth, async (req, res) => {
       where: { userId, role: "LEARNER", status: "ACTIVE" },
       orderBy: { updatedAt: "desc" },
       include: {
-        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true } },
+        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, features: true } },
       },
     }),
     prisma.courseParticipant.findMany({
@@ -23,7 +23,7 @@ router.get("/", requireAuth, async (req, res) => {
       include: {
         course: {
           select: {
-            id: true, slug: true, title: true, thumbnailUrl: true, category: true, status: true,
+            id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, features: true, status: true,
             _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE", mentorUserId: userId } } } },
           },
         },

@@ -169,10 +169,12 @@ model Course {
   description String
   type        CourseType   @default(EDUCATION)
   category    String       @default("General")
+  domain      String       @default("General") // course domain shown on the card chip (e.g. "Web Development")
   gradeLevel  String?
   thumbnailUrl String?
   level       String? // difficulty: Beginner | Intermediate | Advanced
   tags        String[] @default([]) // free-form topic tags (e.g. "2D Graphics", "Game Dev")
+  features    String[] @default([]) // up to 4 card highlights (e.g. "8 chapters", "Certificate")
   pricePaise  Int          @default(0) // 0 = free; backend is always authoritative
   currency    String       @default("INR")
   status      CourseStatus @default(DRAFT)

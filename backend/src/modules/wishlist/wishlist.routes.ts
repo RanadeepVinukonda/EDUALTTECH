@@ -11,7 +11,7 @@ router.get("/", requireAuth, async (req: Request<{ courseId: string }>, res) => 
     orderBy: { createdAt: "desc" },
     include: {
       course: {
-        select: { id: true, slug: true, title: true, description: true, category: true, pricePaise: true, currency: true, thumbnailUrl: true, status: true },
+        select: { id: true, slug: true, title: true, description: true, category: true, domain: true, features: true, pricePaise: true, currency: true, thumbnailUrl: true, status: true },
       },
     },
   });

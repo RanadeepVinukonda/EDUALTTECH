@@ -51,6 +51,7 @@ router.get("/", optionalAuth, validate({ query: z.object({
       where, orderBy, skip: (page - 1) * limit, take: limit,
       select: {
         id: true, slug: true, title: true, description: true, category: true, type: true,
+        domain: true, features: true,
         gradeLevel: true, pricePaise: true, currency: true, thumbnailUrl: true,
         createdAt: true,
         createdBy: { select: { firstName: true, lastName: true, avatarUrl: true } },
@@ -91,7 +92,7 @@ router.get("/mine", requireAuth, async (req, res) => {
       where: { userId, role: "LEARNER" },
       orderBy: { enrolledAt: "desc" },
       include: {
-        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true, type: true, status: true, pricePaise: true, currency: true } },
+        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, features: true, type: true, status: true, pricePaise: true, currency: true } },
       },
     }),
     prisma.courseParticipant.findMany({
@@ -100,7 +101,7 @@ router.get("/mine", requireAuth, async (req, res) => {
       include: {
         course: {
           select: {
-            id: true, slug: true, title: true, thumbnailUrl: true, category: true, type: true, status: true,
+            id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, features: true, type: true, status: true,
             _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE" } } } },
           },
         },
@@ -284,9 +285,11 @@ const courseBody = z.object({
   description: z.string().trim().min(10).max(8000),
   type: z.enum(["EDUCATION", "ALTERNATIVE_EDUCATION"]).default("EDUCATION"),
   category: z.string().trim().max(60).default("General"),
+  domain: z.string().trim().min(1).max(60),
   gradeLevel: z.string().trim().max(40).nullable().optional(),
   level: z.enum(["Beginner", "Intermediate", "Advanced"]).nullable().optional(),
   tags: z.array(z.string().trim().min(1).max(30)).max(20).optional(),
+  features: z.array(z.string().trim().min(1).max(40)).max(4),
   pricePaise: z.number().int().min(0).max(10_000_000).default(0),
   thumbnailUrl: z.string().url().nullable().optional(),
   roadmapTitle: z.string().trim().max(160).nullable().optional(),

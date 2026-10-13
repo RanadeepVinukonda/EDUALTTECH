@@ -1127,72 +1127,85 @@ body {
   border: none;
   font-weight: 600;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 2px;
+  color: #fff;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.164);
   cursor: pointer;
   transition-duration: 0.3s;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
-}
-
-.hv-btn__icon {
-  width: 12px;
-  transition-duration: 0.3s;
-}
-
-.hv-btn__icon path {
-  fill: white;
+  padding: 0;
 }
 
 .hv-btn:hover:not(:disabled),
-.hv-btn:focus-visible:not(:disabled),
-.hv-btn:active:not(:disabled) {
-  width: 140px;
-  border-radius: 50px;
-  transition-duration: 0.3s;
-  background-color: rgb(255, 69, 69);
-  align-items: center;
-}
-
-.hv-btn:hover:not(:disabled) .hv-btn__icon,
-.hv-btn:focus-visible:not(:disabled) .hv-btn__icon,
-.hv-btn:active:not(:disabled) .hv-btn__icon {
-  width: 25px;
-  transform: translateY(14px);
-  transition-duration: 0.3s;
-}
-
-.hv-btn--view:hover:not(:disabled),
-.hv-btn--view:focus-visible:not(:disabled),
-.hv-btn--view:active:not(:disabled) {
-  background-color: #024059;
-}
-
-.hv-btn::before {
-  position: absolute;
-  top: -20px;
-  content: attr(data-label);
-  color: white;
-  transition-duration: 0.3s;
-  font-size: 2px;
-  opacity: 0;
-  white-space: nowrap;
-}
-
-.hv-btn:hover:not(:disabled)::before,
-.hv-btn:focus-visible:not(:disabled)::before,
-.hv-btn:active:not(:disabled)::before {
-  font-size: 13px;
-  opacity: 1;
-  transform: translateY(30px);
+.hv-btn:focus-visible:not(:disabled) {
+  gap: 0;
   transition-duration: 0.3s;
 }
 
 .hv-btn:disabled {
   cursor: default;
   opacity: 0.5;
+}
+
+/* delete — bin lid rotates open, turns red */
+.bin-icon {
+  width: 12px;
+  transition-duration: 0.3s;
+}
+.bin-top {
+  transform-origin: bottom right;
+}
+.hv-btn--delete:hover:not(:disabled) .bin-top,
+.hv-btn--delete:focus-visible:not(:disabled) .bin-top {
+  transition-duration: 0.5s;
+  transform: rotate(160deg);
+}
+.hv-btn--delete:hover:not(:disabled),
+.hv-btn--delete:focus-visible:not(:disabled) {
+  background-color: rgb(255, 69, 69);
+}
+
+/* view — eye opens, turns brand navy */
+.hv-btn .eye-closed,
+.hv-btn .eye-open {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 24px;
+  height: 24px;
+  transition-duration: 0.28s;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hv-btn .eye-closed {
+  opacity: 1;
+}
+.hv-btn .eye-open {
+  opacity: 0;
+  transform: scaleY(0);
+}
+.hv-btn--view:hover:not(:disabled) .eye-open,
+.hv-btn--view:focus-visible:not(:disabled) .eye-open,
+.group:hover .hv-btn--view .eye-open,
+.group:focus-within .hv-btn--view .eye-open {
+  opacity: 1;
+  transform: scaleY(1);
+}
+.hv-btn--view:hover:not(:disabled) .eye-closed,
+.hv-btn--view:focus-visible:not(:disabled) .eye-closed,
+.group:hover .hv-btn--view .eye-closed,
+.group:focus-within .hv-btn--view .eye-closed {
+  opacity: 0;
+}
+.hv-btn--view:hover:not(:disabled),
+.hv-btn--view:focus-visible:not(:disabled),
+.group:hover .hv-btn--view,
+.group:focus-within .hv-btn--view {
+  background-color: #024059;
 }
 
 .chapter-chevron {

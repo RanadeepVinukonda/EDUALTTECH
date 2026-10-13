@@ -7,6 +7,8 @@ export interface CourseListItem {
   description: string;
   category: string;
   type: CourseType;
+  domain: string;
+  features: string[];
   gradeLevel: string | null;
   pricePaise: number;
   currency: string;
@@ -43,6 +45,8 @@ export interface CourseDetail {
   description: string;
   category: string;
   type: CourseType;
+  domain: string;
+  features: string[];
   gradeLevel: string | null;
   level: string | null;
   tags: string[];
