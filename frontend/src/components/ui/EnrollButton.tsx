@@ -1,17 +1,39 @@
 "use client";
 
+import { useState } from "react";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
+
+/** Duration (ms) of the tx-card animation before the click callback fires. */
+const ANIM_MS = 1300;
 
 export default function EnrollButton({
   children,
   loading,
   disabled,
   className,
+  onClick,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean }) {
+  const [paying, setPaying] = useState(false);
+
+  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    if (paying || loading || disabled) return;
+    setPaying(true);
+    window.setTimeout(() => {
+      setPaying(false);
+      onClick?.(e);
+    }, ANIM_MS);
+  }
+
   return (
-    <button className={cn("tx-card", className)} disabled={disabled || loading} {...props}>
+    <button
+      className={cn("tx-card", paying && "is-paying", className)}
+      disabled={disabled || loading}
+      onClick={handleClick}
+      aria-busy={paying}
+      {...props}
+    >
       <span className="tx-left" aria-hidden>
         <span className="tx-card-inner">
           <span className="tx-line" />

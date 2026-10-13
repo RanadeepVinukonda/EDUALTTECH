@@ -488,16 +488,12 @@ body {
   cursor: pointer;
 }
 
-.tx-card:hover,
-.tx-card:focus-visible,
-.tx-card:active {
+.tx-card.is-paying {
   transform: scale(1.03);
   width: 220px;
 }
 
-.tx-card:hover .tx-left,
-.tx-card:focus-visible .tx-left,
-.tx-card:active .tx-left {
+.tx-card.is-paying .tx-left {
   width: 100%;
 }
 
@@ -525,10 +521,6 @@ body {
   justify-content: space-between;
   white-space: nowrap;
   transition: 0.3s;
-}
-
-.tx-right:hover {
-  background-color: #f9f7f9;
 }
 
 .tx-arrow {
@@ -577,15 +569,11 @@ body {
   margin: 10px 0 0 -30px;
 }
 
-.tx-card:hover .tx-card-inner,
-.tx-card:focus-visible .tx-card-inner,
-.tx-card:active .tx-card-inner {
+.tx-card.is-paying .tx-card-inner {
   animation: tx-slide-top 1.2s cubic-bezier(0.645, 0.045, 0.355, 1) both;
 }
 
-.tx-card:hover .tx-post,
-.tx-card:focus-visible .tx-post,
-.tx-card:active .tx-post {
+.tx-card.is-paying .tx-post {
   animation: tx-slide-post 1s cubic-bezier(0.165, 0.84, 0.44, 1) both;
 }
 
@@ -699,9 +687,7 @@ body {
   text-align: center;
 }
 
-.tx-card:hover .tx-dollar,
-.tx-card:focus-visible .tx-dollar,
-.tx-card:active .tx-dollar {
+.tx-card.is-paying .tx-dollar {
   animation: tx-fade-in-fwd 0.3s 1s backwards;
 }
 
@@ -723,7 +709,7 @@ body {
     transform-origin: center;
   }
 
-  .tx-card:hover {
+  .tx-card.is-paying {
     transform: scale(0.74);
   }
 
