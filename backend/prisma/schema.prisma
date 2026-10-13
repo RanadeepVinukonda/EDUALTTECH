@@ -258,6 +258,7 @@ model Lesson {
   type        LessonType @default(READING)
   contentUrl  String?
   textContent String?
+  videoPath   String? // private bucket key for a mentor-uploaded lesson video
   isPublished Boolean    @default(true)
   order       Int
   createdById String
@@ -367,6 +368,7 @@ model LiveMeeting {
   scheduledAt DateTime
   durationMin Int      @default(60)
   meetingUrl  String
+  recordingPath String? // private bucket key for a past session's recording
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())

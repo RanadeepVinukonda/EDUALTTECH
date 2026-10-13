@@ -280,6 +280,62 @@ router.get("/:slug/learners", requireAuth, async (req, res) => {
 
 // ── Create (admin) ─────────────────────────────────────────────────
 
+// ── Analytics (mentor/staff: per-learner progress + activity) ──────
+
+router.get("/:slug/analytics", requireAuth, async (req, res) => {
+  const course = await prisma.course.findFirst({
+    where: { OR: [{ id: req.params.slug }, { slug: req.params.slug }] },
+    select: { id: true, title: true },
+  });
+  if (!course) throw ApiError.notFound("Course not found");
+
+  const access = await getCourseAccess(course.id, req.user!);
+  if (!access.isStaff) throw ApiError.forbidden("Only course staff can view analytics");
+
+  const [participants, totalLessons] = await Promise.all([
+    prisma.courseParticipant.findMany({
+      where: { courseId: course.id, role: "LEARNER", status: "ACTIVE" },
+      orderBy: { enrolledAt: "desc" },
+      select: {
+        id: true, status: true, progressPct: true, enrolledAt: true,
+        user: { select: { id: true, firstName: true, lastName: true, avatarUrl: true, email: true } },
+      },
+    }),
+    prisma.lesson.count({ where: { courseId: course.id, isPublished: true } }),
+  ]);
+
+  const ids = participants.map((p) => p.id);
+  const grouped = ids.length
+    ? await prisma.lessonProgress.groupBy({
+        by: ["participantId"],
+        where: { participantId: { in: ids } },
+        _count: { _all: true },
+        _max: { completedAt: true },
+      })
+    : [];
+  const stats = new Map(grouped.map((g) => [g.participantId, g]));
+
+  res.json({
+    success: true,
+    data: {
+      totalLessons,
+      learners: participants.map((p) => {
+        const s = stats.get(p.id);
+        return {
+          id: p.id,
+          user: p.user,
+          status: p.status,
+          progressPct: p.progressPct,
+          lessonsCompleted: s?._count._all ?? 0,
+          totalLessons,
+          lastActiveAt: s?._max.completedAt ?? p.enrolledAt,
+          enrolledAt: p.enrolledAt,
+        };
+      }),
+    },
+  });
+});
+
 const courseBody = z.object({
   title: z.string().trim().min(3).max(160),
   description: z.string().trim().min(10).max(8000),

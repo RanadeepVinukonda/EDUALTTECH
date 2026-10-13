@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { requireAuth } from "../../middlewares/auth.js";
@@ -6,6 +7,11 @@ import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { audit } from "../../lib/audit.js";
 import { getCourseAccess, assertCourseOwner } from "../../lib/course-access.js";
+import { signedUrl, removePrivate, sanitizeFileName, fileExt, contentTypeFor } from "../../lib/storage.js";
+import { supabaseAdmin } from "../../lib/supabase.js";
+import { config } from "../../config/env.js";
+import { sendEmail, layout } from "../../lib/email.js";
+import { logger } from "../../utils/logger.js";
 
 const router = Router();
 
@@ -27,14 +33,24 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res) => {
         select: {
           id: true, title: true, summary: true, order: true,
           lessons: {
-            where: access.isStaff ? {} : { isPublished: true },
+            // Learners see every lesson; locked (unpublished) ones render with a
+            // lock and open only once the mentor unlocks them.
             orderBy: { order: "asc" },
-            select: { id: true, title: true, type: true, contentUrl: true, textContent: true, order: true, isPublished: true, createdAt: true },
+            select: { id: true, title: true, type: true, contentUrl: true, textContent: true, videoPath: true, order: true, isPublished: true, createdAt: true },
           },
         },
       },
     },
   });
+
+  // Never expose the raw private storage key — surface a boolean flag instead.
+  const safeChapters = chapters.map((ch) => ({
+    ...ch,
+    topics: ch.topics.map((t) => ({
+      ...t,
+      lessons: t.lessons.map(({ videoPath, ...l }) => ({ ...l, hasVideo: Boolean(videoPath) })),
+    })),
+  }));
 
   let completedLessonIds: string[] = [];
   if (access.isLearner) {
@@ -51,7 +67,7 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res) => {
     }
   }
 
-  res.json({ success: true, data: { chapters, completedLessonIds } });
+  res.json({ success: true, data: { chapters: safeChapters, completedLessonIds } });
 });
 
 // ── Chapters (course owner: admin/creator) ─────────────────────────
@@ -154,9 +170,49 @@ const lessonBody = z.object({
 });
 
 async function lessonContext(lessonId: string) {
-  const lesson = await prisma.lesson.findUnique({ where: { id: lessonId }, select: { id: true, courseId: true, topicId: true, title: true } });
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    select: { id: true, courseId: true, topicId: true, title: true, contentUrl: true, textContent: true, videoPath: true, isPublished: true },
+  });
   if (!lesson) throw ApiError.notFound("Lesson not found");
   return lesson;
+}
+
+async function notifyLessonUnlocked(courseId: string, lessonTitle: string) {
+  const [learners, course] = await Promise.all([
+    prisma.courseParticipant.findMany({
+      where: { courseId, role: "LEARNER", status: "ACTIVE" },
+      select: { user: { select: { id: true, email: true, firstName: true } } },
+    }),
+    prisma.course.findUnique({ where: { id: courseId }, select: { title: true, slug: true } }),
+  ]);
+  if (learners.length === 0) return;
+
+  await prisma.notification.createMany({
+    data: learners.map((l) => ({
+      recipientId: l.user.id,
+      title: "New lesson unlocked",
+      body: lessonTitle,
+      courseId,
+    })),
+  });
+
+  // Best-effort email — delivery must never break the unlock transaction.
+  const url = `${config.appBaseUrl}/dashboard/courses/${course?.slug ?? ""}`;
+  await Promise.allSettled(
+    learners.map((l) =>
+      sendEmail({
+        to: l.user.email,
+        subject: `New lesson unlocked: ${lessonTitle}`,
+        html: layout(
+          "A new lesson is ready",
+          `Hi ${l.user.firstName}, <strong>${lessonTitle}</strong>${course ? ` in ${course.title}` : ""} is now unlocked. Jump back in and keep going.`,
+          "Open course",
+          url,
+        ),
+      }).catch((err) => logger.warn("lesson unlock email failed", { err: String(err) })),
+    ),
+  );
 }
 
 router.post("/topics/:topicId/lessons", requireAuth, validate({ body: lessonBody }), async (req, res) => {
@@ -188,8 +244,73 @@ router.patch("/lessons/:id", requireAuth, validate({ body: lessonBody.partial().
   const lesson = await lessonContext(req.params.id);
   const access = await getCourseAccess(lesson.courseId, req.user!);
   if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required");
-  const updated = await prisma.lesson.update({ where: { id: lesson.id }, data: body<Record<string, unknown>>(req) as never });
-  res.json({ success: true, data: { lesson: updated } });
+  const input = body<Record<string, unknown> & { isPublished?: boolean }>(req);
+
+  // A lesson can only be unlocked (published) once it actually has content.
+  if (input.isPublished === true) {
+    const contentUrl = input.contentUrl !== undefined ? input.contentUrl : lesson.contentUrl;
+    const textContent = input.textContent !== undefined ? input.textContent : lesson.textContent;
+    const hasContent = Boolean(lesson.videoPath) || Boolean(contentUrl) || Boolean(typeof textContent === "string" && textContent.trim());
+    if (!hasContent) {
+      throw ApiError.badRequest("Add a video, a live-class link, or lesson content before unlocking this lesson.");
+    }
+  }
+
+  const updated = await prisma.lesson.update({ where: { id: lesson.id }, data: input as never });
+
+  if (input.isPublished === true && !lesson.isPublished) {
+    await notifyLessonUnlocked(lesson.courseId, lesson.title);
+    audit(req.user!.id, "lesson.unlocked", "lesson", lesson.id, { topicId: lesson.topicId });
+  }
+  res.json({ success: true, data: { lesson: { ...updated, hasVideo: Boolean(updated.videoPath), videoPath: undefined } } });
+});
+
+// ── Lesson video (mentor upload → private bucket → signed playback URL) ──
+
+const VIDEO_EXTS = new Set([".mp4", ".webm"]);
+
+router.post("/lessons/:id/video/sign", requireAuth, validate({ body: z.object({ name: z.string().min(1).max(200) }) }), async (req, res) => {
+  const lesson = await lessonContext(req.params.id);
+  const access = await getCourseAccess(lesson.courseId, req.user!);
+  if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required");
+  const { name } = body<{ name: string }>(req);
+  const ext = fileExt(name);
+  if (!VIDEO_EXTS.has(ext)) throw ApiError.badRequest("Video must be an .mp4 or .webm file");
+
+  const path = `lessons/${lesson.id}/${randomUUID()}${ext}`;
+  const { data, error } = await supabaseAdmin()
+    .storage.from(config.supabase.privateBucket)
+    .createSignedUploadUrl(path);
+  if (error || !data) throw ApiError.badRequest("Could not start the upload");
+  res.json({ success: true, data: { bucket: config.supabase.privateBucket, path, token: data.token } });
+});
+
+router.post("/lessons/:id/video", requireAuth, validate({ body: z.object({ path: z.string().min(1).max(300) }) }), async (req, res) => {
+  const lesson = await lessonContext(req.params.id);
+  const access = await getCourseAccess(lesson.courseId, req.user!);
+  if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required");
+  const { path } = body<{ path: string }>(req);
+  if (!path.startsWith(`lessons/${lesson.id}/`)) throw ApiError.badRequest("Invalid upload path");
+
+  if (lesson.videoPath && lesson.videoPath !== path) await removePrivate(lesson.videoPath).catch(() => undefined);
+  const updated = await prisma.lesson.update({
+    where: { id: lesson.id },
+    data: { videoPath: path, type: "VIDEO" },
+  });
+  audit(req.user!.id, "lesson.video.uploaded", "lesson", lesson.id, { topicId: lesson.topicId });
+  res.json({ success: true, data: { lesson: { ...updated, hasVideo: true, videoPath: undefined } } });
+});
+
+router.get("/lessons/:id/video", requireAuth, async (req, res) => {
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: req.params.id },
+    select: { id: true, courseId: true, videoPath: true, isPublished: true },
+  });
+  if (!lesson || !lesson.videoPath) throw ApiError.notFound("No video for this lesson");
+  const access = await getCourseAccess(lesson.courseId, req.user!);
+  if (!access.canRead || (!lesson.isPublished && !access.isStaff)) throw ApiError.forbidden("This lesson is locked");
+  const url = await signedUrl(lesson.videoPath, 3600);
+  res.json({ success: true, data: { url } });
 });
 
 router.delete("/lessons/:id", requireAuth, async (req, res) => {
