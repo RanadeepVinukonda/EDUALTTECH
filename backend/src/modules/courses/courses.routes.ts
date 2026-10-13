@@ -282,6 +282,8 @@ const courseBody = z.object({
   description: z.string().trim().min(10).max(8000),
   category: z.string().trim().max(60).default("General"),
   gradeLevel: z.string().trim().max(40).nullable().optional(),
+  level: z.enum(["Beginner", "Intermediate", "Advanced"]).nullable().optional(),
+  tags: z.array(z.string().trim().min(1).max(30)).max(20).optional(),
   pricePaise: z.number().int().min(0).max(10_000_000).default(0),
   thumbnailUrl: z.string().url().nullable().optional(),
   roadmapTitle: z.string().trim().max(160).nullable().optional(),

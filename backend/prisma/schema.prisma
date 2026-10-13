@@ -165,6 +165,8 @@ model Course {
   category    String       @default("General")
   gradeLevel  String?
   thumbnailUrl String?
+  level       String? // difficulty: Beginner | Intermediate | Advanced
+  tags        String[] @default([]) // free-form topic tags (e.g. "2D Graphics", "Game Dev")
   pricePaise  Int          @default(0) // 0 = free; backend is always authoritative
   currency    String       @default("INR")
   status      CourseStatus @default(DRAFT)

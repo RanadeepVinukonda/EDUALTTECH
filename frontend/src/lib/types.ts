@@ -40,6 +40,8 @@ export interface CourseDetail {
   description: string;
   category: string;
   gradeLevel: string | null;
+  level: string | null;
+  tags: string[];
   pricePaise: number;
   currency: string;
   thumbnailUrl: string | null;

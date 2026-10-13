@@ -133,10 +133,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               </h1>
               <p className="mt-4 text-lg leading-relaxed text-ink-600">{course.description}</p>
               <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-                {course.gradeLevel && (
+                {course.level && (
                   <div>
-                    <dt className="text-slate-500">Grade level</dt>
-                    <dd className="font-semibold text-ink-900">{course.gradeLevel}</dd>
+                    <dt className="text-slate-500">Level</dt>
+                    <dd className="font-semibold text-ink-900">{course.level}</dd>
                   </div>
                 )}
                 {lessonsTotal > 0 && (
@@ -146,6 +146,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                   </div>
                 )}
               </dl>
+              {course.tags.length > 0 && (
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {course.tags.map((t) => (
+                    <li key={t} className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="overflow-hidden rounded-3xl border border-slate-200 shadow-elev2">

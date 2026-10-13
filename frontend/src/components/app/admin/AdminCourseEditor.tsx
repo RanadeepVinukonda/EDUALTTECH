@@ -9,11 +9,13 @@ import { notifySuccess } from "@/lib/notify";
 import { formatMoney } from "@/lib/format";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Title from "@mui/icons-material/Title";
 import Category from "@mui/icons-material/Category";
-import School from "@mui/icons-material/School";
+import Insights from "@mui/icons-material/Insights";
 import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
 import Image from "@mui/icons-material/Image";
+import Close from "@mui/icons-material/Close";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync } from "./admin-ui";
@@ -36,7 +38,8 @@ interface EditorCourse {
   title: string;
   description: string;
   category: string;
-  gradeLevel: string | null;
+  level: string | null;
+  tags: string[];
   pricePaise: number;
   currency: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
@@ -109,7 +112,8 @@ function EditWorkspace({ id, initialTab }: { id: string; initialTab: CourseWorks
     title: c.title,
     description: c.description,
     category: c.category,
-    gradeLevel: c.gradeLevel,
+    level: c.level,
+    tags: c.tags ?? [],
     pricePaise: c.pricePaise,
     currency: c.currency,
     status: c.status as EditorCourse["status"],
@@ -168,7 +172,8 @@ function NewCourseEditor() {
     title: "",
     description: "",
     category: "",
-    gradeLevel: null,
+    level: null,
+    tags: [],
     pricePaise: 0,
     currency: "INR",
     status: "DRAFT",
@@ -190,7 +195,9 @@ function CourseForm({
   const [title, setTitle] = useState(initial.title);
   const [description, setDescription] = useState(initial.description);
   const [category, setCategory] = useState(initial.category);
-  const [gradeLevel, setGradeLevel] = useState(initial.gradeLevel ?? "");
+  const [level, setLevel] = useState(initial.level ?? "");
+  const [tags, setTags] = useState<string[]>(initial.tags);
+  const [tagDraft, setTagDraft] = useState("");
   const [priceRupees, setPriceRupees] = useState(initial.pricePaise ? String(initial.pricePaise / 100) : "");
   const [thumbnailUrl, setThumbnailUrl] = useState(initial.thumbnailUrl ?? "");
   const [saving, setSaving] = useState(false);
@@ -202,7 +209,8 @@ function CourseForm({
     title !== initial.title ||
     description !== initial.description ||
     category !== initial.category ||
-    gradeLevel !== (initial.gradeLevel ?? "") ||
+    level !== (initial.level ?? "") ||
+    JSON.stringify(tags) !== JSON.stringify(initial.tags) ||
     priceRupees !== (initial.pricePaise ? String(initial.pricePaise / 100) : "") ||
     thumbnailUrl !== (initial.thumbnailUrl ?? "");
 
@@ -226,7 +234,8 @@ function CourseForm({
       title: title.trim(),
       description: description.trim(),
       category: category.trim() || "General",
-      gradeLevel: gradeLevel.trim() || null,
+      level: level || null,
+      tags: withDraftTag(tags, tagDraft),
       pricePaise: pricePaise as number,
       thumbnailUrl: thumbnailUrl.trim() || null,
     };
@@ -247,6 +256,18 @@ function CourseForm({
     } finally {
       setSaving(false);
     }
+  }
+
+  function commitTag(raw: string) {
+    const t = raw.trim();
+    if (!t) {
+      setTagDraft("");
+      return;
+    }
+    setTags((prev) =>
+      prev.length >= 20 || prev.some((x) => x.toLowerCase() === t.toLowerCase()) ? prev : [...prev, t.slice(0, 30)],
+    );
+    setTagDraft("");
   }
 
   return (
@@ -300,12 +321,53 @@ function CourseForm({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="c-category" className="mb-1 block text-sm font-semibold text-ink-700">Category</label>
-                  <Input id="c-category" value={category} icon={<Category fontSize="small" />} onChange={(e) => setCategory(e.target.value)} maxLength={60} placeholder="General" />
+                  <Input id="c-category" value={category} icon={<Category fontSize="small" />} onChange={(e) => setCategory(e.target.value)} maxLength={60} placeholder="Programming, Design, Music…" />
                 </div>
                 <div>
-                  <label htmlFor="c-grade" className="mb-1 block text-sm font-semibold text-ink-700">Grade level</label>
-                  <Input id="c-grade" value={gradeLevel} icon={<School fontSize="small" />} onChange={(e) => setGradeLevel(e.target.value)} maxLength={40} placeholder="Optional" />
+                  <label htmlFor="c-level" className="mb-1 block text-sm font-semibold text-ink-700">Level</label>
+                  <Select id="c-level" value={level} icon={<Insights fontSize="small" />} onChange={(e) => setLevel(e.target.value)}>
+                    <option value="">Optional</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                  </Select>
                 </div>
+              </div>
+              <div>
+                <label htmlFor="c-tags" className="mb-1 block text-sm font-semibold text-ink-700">Tags</label>
+                {tags.length > 0 && (
+                  <ul className="mb-2 flex flex-wrap gap-2">
+                    {tags.map((t) => (
+                      <li key={t} className="inline-flex items-center gap-1 rounded-full bg-brand-50 py-1 pl-3 pr-1.5 text-xs font-semibold text-brand-700">
+                        {t}
+                        <button
+                          type="button"
+                          aria-label={`Remove ${t}`}
+                          onClick={() => setTags((prev) => prev.filter((x) => x !== t))}
+                          className="flex h-4 w-4 items-center justify-center rounded-full hover:bg-brand-100"
+                        >
+                          <Close style={{ fontSize: 14 }} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <Input
+                  id="c-tags"
+                  value={tagDraft}
+                  onChange={(e) => setTagDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === ",") {
+                      e.preventDefault();
+                      commitTag(tagDraft);
+                    } else if (e.key === "Backspace" && tagDraft === "" && tags.length > 0) {
+                      setTags((prev) => prev.slice(0, -1));
+                    }
+                  }}
+                  maxLength={32}
+                  placeholder="e.g. 2D Graphics, Game Dev — press Enter"
+                />
+                <p className="mt-1 text-xs text-slate-500">Topic tags like “2D Graphics”, “Game Dev”. Up to 20.</p>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
@@ -460,6 +522,12 @@ function EditHeader({ course, onSaved }: { course: EditorCourse; onSaved?: () =>
       )}
     </Panel>
   );
+}
+
+function withDraftTag(tags: string[], draft: string): string[] {
+  const t = draft.trim();
+  if (!t || tags.some((x) => x.toLowerCase() === t.toLowerCase())) return tags;
+  return [...tags, t.slice(0, 30)];
 }
 
 function parsePrice(input: string): number | null {
