@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import CheckCircle from "@mui/icons-material/CheckCircle";
+import School from "@mui/icons-material/School";
 import { apiGet } from "@/lib/api";
 import type { Application, ApplicationStatus } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
@@ -20,25 +21,33 @@ const STATUS_OPTIONS = [
   { value: "REJECTED", label: "Rejected" },
 ];
 
+const TYPE_OPTIONS = [
+  { value: "", label: "All course types" },
+  { value: "EDUCATION", label: "Education" },
+  { value: "ALTERNATIVE_EDUCATION", label: "Alternative education" },
+];
+
 export default function AdminApplications() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
   const [status, setStatus] = useState(params.get("status") ?? "");
+  const [courseType, setCourseType] = useState(params.get("courseType") ?? "");
   const [page, setPage] = useState(Number(params.get("page") ?? "1") || 1);
 
   // Keep the URL in sync so returning from a detail view restores filters.
   useEffect(() => {
     const next = new URLSearchParams();
     if (status) next.set("status", status);
+    if (courseType) next.set("courseType", courseType);
     if (page > 1) next.set("page", String(page));
     const qs = next.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [status, page, pathname, router]);
+  }, [status, courseType, page, pathname, router]);
 
   const apps = useAsync(
-    () => apiGet<{ applications: Application[]; total: number; page: number; limit: number; hasMore: boolean }>("/applications", { status: status || undefined, page, limit: 20 }),
-    [status, page],
+    () => apiGet<{ applications: Application[]; total: number; page: number; limit: number; hasMore: boolean }>("/applications", { status: status || undefined, courseType: courseType || undefined, page, limit: 20 }),
+    [status, courseType, page],
   );
 
   return (
@@ -52,17 +61,30 @@ export default function AdminApplications() {
         title="Queue"
         description="Filter and review applications."
         actions={
-          <FilterSelect
-            id="app-status"
-            label="Status"
-            value={status}
-            onChange={(v) => {
-              setStatus(v);
-              setPage(1);
-            }}
-            options={STATUS_OPTIONS}
-            icon={<CheckCircle fontSize="inherit" />}
-          />
+          <>
+            <FilterSelect
+              id="app-type"
+              label="Course type"
+              value={courseType}
+              onChange={(v) => {
+                setCourseType(v);
+                setPage(1);
+              }}
+              options={TYPE_OPTIONS}
+              icon={<School fontSize="inherit" />}
+            />
+            <FilterSelect
+              id="app-status"
+              label="Status"
+              value={status}
+              onChange={(v) => {
+                setStatus(v);
+                setPage(1);
+              }}
+              options={STATUS_OPTIONS}
+              icon={<CheckCircle fontSize="inherit" />}
+            />
+          </>
         }
       >
         {apps.error ? (
@@ -85,7 +107,7 @@ export default function AdminApplications() {
                     <span className="min-w-0">
                       <span className="block font-semibold text-ink-900">{userName(a.user)}</span>
                       <span className="block truncate text-sm text-slate-500">
-                        {a.user?.email ?? "no email"} · {a.course.title}
+                        {a.user?.email ?? "no email"} · {a.course.type === "ALTERNATIVE_EDUCATION" ? "Alternative education" : "Education"} · {a.course.title}
                       </span>
                     </span>
                     <span className="flex items-center gap-3">

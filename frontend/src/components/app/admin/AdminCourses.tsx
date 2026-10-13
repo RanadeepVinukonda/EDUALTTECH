@@ -14,11 +14,18 @@ import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Search from "@mui/icons-material/Search";
+import School from "@mui/icons-material/School";
 import Flag from "@mui/icons-material/Flag";
 import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync, useDebouncedValue } from "./admin-ui";
 
 const LIMIT = 20;
 type Status = "" | "DRAFT" | "PUBLISHED" | "ARCHIVED";
+type TypeFilter = "" | "EDUCATION" | "ALTERNATIVE_EDUCATION";
+
+const COURSE_TYPES: Record<"EDUCATION" | "ALTERNATIVE_EDUCATION", string> = {
+  EDUCATION: "Education",
+  ALTERNATIVE_EDUCATION: "Alternative education",
+};
 
 interface CoursesResponse {
   courses: AdminCourseSummary[];
@@ -44,25 +51,27 @@ function courseError(err: unknown, fallback: string): string {
 export default function AdminCourses() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<Status>("");
+  const [type, setType] = useState<TypeFilter>("");
   const [page, setPage] = useState(1);
   const debouncedQuery = useDebouncedValue(query, 300);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedQuery, status]);
+  }, [debouncedQuery, status, type]);
 
   const { data, error, loading, reload } = useAsync(
     () =>
       apiGet<CoursesResponse>("/admin/courses", {
         ...(debouncedQuery.trim() ? { q: debouncedQuery.trim() } : {}),
         ...(status ? { status } : {}),
+        ...(type ? { type } : {}),
         page,
         limit: LIMIT,
       }),
-    [debouncedQuery, status, page],
+    [debouncedQuery, status, type, page],
   );
 
-  const filtersActive = query.trim().length > 0 || status !== "";
+  const filtersActive = query.trim().length > 0 || status !== "" || type !== "";
 
   return (
     <div className="space-y-6">
@@ -97,8 +106,22 @@ export default function AdminCourses() {
               <option value="ARCHIVED">ARCHIVED</option>
             </Select>
           </div>
+          <div>
+            <label htmlFor="course-type" className="mb-1 block text-sm font-semibold text-ink-700">Type</label>
+            <Select
+              id="course-type"
+              value={type}
+              icon={<School fontSize="small" />}
+              className="w-auto"
+              onChange={(e) => setType(e.target.value as TypeFilter)}
+            >
+              <option value="">All types</option>
+              <option value="EDUCATION">Education</option>
+              <option value="ALTERNATIVE_EDUCATION">Alternative education</option>
+            </Select>
+          </div>
           {filtersActive && (
-            <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setStatus(""); }}>
+            <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setStatus(""); setType(""); }}>
               Clear filters
             </Button>
           )}
@@ -203,7 +226,7 @@ function CourseRow({ course, onChanged }: { course: AdminCourseSummary; onChange
             <StatusPill tone={statusTone(course.status)}>{course.status.toLowerCase()}</StatusPill>
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            {course.category} · {course.pricePaise > 0 ? formatMoney(course.pricePaise, course.currency) : "Free"} ·{" "}
+            {COURSE_TYPES[course.type] ?? course.type} · {course.category} · {course.pricePaise > 0 ? formatMoney(course.pricePaise, course.currency) : "Free"} ·{" "}
             {course._count.participants} learner{course._count.participants === 1 ? "" : "s"} · {course._count.chapters} chapter
             {course._count.chapters === 1 ? "" : "s"}
             {course.createdBy ? ` · by ${course.createdBy.firstName} ${course.createdBy.lastName}` : ""} ·{" "}

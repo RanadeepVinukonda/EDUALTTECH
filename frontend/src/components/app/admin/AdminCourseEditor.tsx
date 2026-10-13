@@ -14,6 +14,7 @@ import Title from "@mui/icons-material/Title";
 import Category from "@mui/icons-material/Category";
 import Insights from "@mui/icons-material/Insights";
 import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
+import School from "@mui/icons-material/School";
 import Image from "@mui/icons-material/Image";
 import Close from "@mui/icons-material/Close";
 import ErrorState from "@/components/ui/ErrorState";
@@ -37,6 +38,7 @@ interface EditorCourse {
   id: string;
   title: string;
   description: string;
+  type: "EDUCATION" | "ALTERNATIVE_EDUCATION";
   category: string;
   level: string | null;
   tags: string[];
@@ -112,6 +114,7 @@ function EditWorkspace({ id, initialTab }: { id: string; initialTab: CourseWorks
     title: c.title,
     description: c.description,
     category: c.category,
+    type: c.type ?? "EDUCATION",
     level: c.level,
     tags: c.tags ?? [],
     pricePaise: c.pricePaise,
@@ -171,6 +174,7 @@ function NewCourseEditor() {
     id: "",
     title: "",
     description: "",
+    type: "EDUCATION",
     category: "",
     level: null,
     tags: [],
@@ -194,6 +198,7 @@ function CourseForm({
   const router = useRouter();
   const [title, setTitle] = useState(initial.title);
   const [description, setDescription] = useState(initial.description);
+  const [type, setType] = useState<EditorCourse["type"]>(initial.type);
   const [category, setCategory] = useState(initial.category);
   const [level, setLevel] = useState(initial.level ?? "");
   const [tags, setTags] = useState<string[]>(initial.tags);
@@ -208,6 +213,7 @@ function CourseForm({
   const dirty =
     title !== initial.title ||
     description !== initial.description ||
+    type !== initial.type ||
     category !== initial.category ||
     level !== (initial.level ?? "") ||
     JSON.stringify(tags) !== JSON.stringify(initial.tags) ||
@@ -233,6 +239,7 @@ function CourseForm({
     const payload = {
       title: title.trim(),
       description: description.trim(),
+      type,
       category: category.trim() || "General",
       level: level || null,
       tags: withDraftTag(tags, tagDraft),
@@ -318,7 +325,14 @@ function CourseForm({
                 />
                 <p className="mt-1 text-xs text-slate-500">10–8000 characters.</p>
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="c-type" className="mb-1 block text-sm font-semibold text-ink-700">Type</label>
+                  <Select id="c-type" value={type} icon={<School fontSize="small" />} onChange={(e) => setType(e.target.value as EditorCourse["type"])}>
+                    <option value="EDUCATION">Education</option>
+                    <option value="ALTERNATIVE_EDUCATION">Alternative education</option>
+                  </Select>
+                </div>
                 <div>
                   <label htmlFor="c-category" className="mb-1 block text-sm font-semibold text-ink-700">Category</label>
                   <Input id="c-category" value={category} icon={<Category fontSize="small" />} onChange={(e) => setCategory(e.target.value)} maxLength={60} placeholder="Programming, Design, Music…" />

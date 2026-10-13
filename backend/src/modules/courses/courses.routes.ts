@@ -24,18 +24,20 @@ const PUBLIC_READ: CourseAccess = {
 router.get("/", optionalAuth, validate({ query: z.object({
   q: z.string().trim().max(120).optional(),
   category: z.string().trim().max(60).optional(),
+  type: z.enum(["EDUCATION", "ALTERNATIVE_EDUCATION"]).optional(),
   sort: z.enum(["newest", "price_asc", "price_desc"]).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(12),
 }) }), async (req, res) => {
-  const { q, category, sort, page, limit } = req.query as unknown as {
-    q?: string; category?: string; sort?: string; page: number; limit: number;
+  const { q, category, type, sort, page, limit } = req.query as unknown as {
+    q?: string; category?: string; type?: string; sort?: string; page: number; limit: number;
   };
 
   const where = {
     status: "PUBLISHED" as const,
     ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" as const } }, { description: { contains: q, mode: "insensitive" as const } }] } : {}),
     ...(category ? { category } : {}),
+    ...(type ? { type: type as never } : {}),
   };
 
   const orderBy =
@@ -48,7 +50,7 @@ router.get("/", optionalAuth, validate({ query: z.object({
     prisma.course.findMany({
       where, orderBy, skip: (page - 1) * limit, take: limit,
       select: {
-        id: true, slug: true, title: true, description: true, category: true,
+        id: true, slug: true, title: true, description: true, category: true, type: true,
         gradeLevel: true, pricePaise: true, currency: true, thumbnailUrl: true,
         createdAt: true,
         createdBy: { select: { firstName: true, lastName: true, avatarUrl: true } },
@@ -89,7 +91,7 @@ router.get("/mine", requireAuth, async (req, res) => {
       where: { userId, role: "LEARNER" },
       orderBy: { enrolledAt: "desc" },
       include: {
-        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true, status: true, pricePaise: true, currency: true } },
+        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true, type: true, status: true, pricePaise: true, currency: true } },
       },
     }),
     prisma.courseParticipant.findMany({
@@ -98,7 +100,7 @@ router.get("/mine", requireAuth, async (req, res) => {
       include: {
         course: {
           select: {
-            id: true, slug: true, title: true, thumbnailUrl: true, category: true, status: true,
+            id: true, slug: true, title: true, thumbnailUrl: true, category: true, type: true, status: true,
             _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE" } } } },
           },
         },
@@ -280,6 +282,7 @@ router.get("/:slug/learners", requireAuth, async (req, res) => {
 const courseBody = z.object({
   title: z.string().trim().min(3).max(160),
   description: z.string().trim().min(10).max(8000),
+  type: z.enum(["EDUCATION", "ALTERNATIVE_EDUCATION"]).default("EDUCATION"),
   category: z.string().trim().max(60).default("General"),
   gradeLevel: z.string().trim().max(40).nullable().optional(),
   level: z.enum(["Beginner", "Intermediate", "Advanced"]).nullable().optional(),

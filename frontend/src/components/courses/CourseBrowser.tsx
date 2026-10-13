@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Search from "@mui/icons-material/Search";
 import Close from "@mui/icons-material/Close";
 import Category from "@mui/icons-material/Category";
+import School from "@mui/icons-material/School";
 import Sort from "@mui/icons-material/Sort";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
@@ -52,10 +53,11 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
 
   const q = searchParams.get("q")?.trim() ?? "";
   const category = searchParams.get("category") ?? "";
+  const type = searchParams.get("type") === "ALTERNATIVE_EDUCATION" ? "ALTERNATIVE_EDUCATION" : searchParams.get("type") === "EDUCATION" ? "EDUCATION" : "";
   const rawSort = searchParams.get("sort") ?? "";
   const sort = (SORTS.some((s) => s.value === rawSort) ? rawSort : "newest") as string;
   const page = Math.max(1, Number.parseInt(searchParams.get("page") ?? "1", 10) || 1);
-  const hasFilters = Boolean(q || category || sort !== "newest" || page > 1);
+  const hasFilters = Boolean(q || category || type || sort !== "newest" || page > 1);
 
   const [term, setTerm] = useState(q);
   const [categories, setCategories] = useState<string[]>([]);
@@ -107,7 +109,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
       method: "GET",
       auth: false,
       signal: ctrl.signal,
-      query: { q: q || undefined, category: category || undefined, sort, page, limit: LIMIT },
+      query: { q: q || undefined, category: category || undefined, type: type || undefined, sort, page, limit: LIMIT },
     })
       .then((d) => {
         setItems(d.items);
@@ -125,7 +127,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
         if (!ctrl.signal.aborted) setLoading(false);
       });
     return () => ctrl.abort();
-  }, [q, category, sort, page, nonce]);
+  }, [q, category, type, sort, page, nonce]);
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
   const showNoResults = !loading && !error && total === 0 && hasFilters;
@@ -163,6 +165,22 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
               </button>
             )}
           </div>
+        </div>
+
+        <div className="lg:w-52">
+          <label htmlFor="course-type" className="mb-1.5 block text-sm font-semibold text-ink-700">
+            Type
+          </label>
+          <Select
+            id="course-type"
+            value={type}
+            icon={<School fontSize="small" />}
+            onChange={(e) => replaceParams({ type: e.target.value || undefined, page: undefined })}
+          >
+            <option value="">All types</option>
+            <option value="EDUCATION">Education</option>
+            <option value="ALTERNATIVE_EDUCATION">Alternative education</option>
+          </Select>
         </div>
 
         {categories.length > 0 && (

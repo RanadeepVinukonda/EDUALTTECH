@@ -1,9 +1,12 @@
+export type CourseType = "EDUCATION" | "ALTERNATIVE_EDUCATION";
+
 export interface CourseListItem {
   id: string;
   slug: string;
   title: string;
   description: string;
   category: string;
+  type: CourseType;
   gradeLevel: string | null;
   pricePaise: number;
   currency: string;
@@ -39,6 +42,7 @@ export interface CourseDetail {
   title: string;
   description: string;
   category: string;
+  type: CourseType;
   gradeLevel: string | null;
   level: string | null;
   tags: string[];

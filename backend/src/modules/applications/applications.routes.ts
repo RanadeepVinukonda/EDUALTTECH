@@ -13,7 +13,7 @@ const router = Router();
 
 const includeFull = {
   user: { select: { id: true, firstName: true, lastName: true, email: true, avatarUrl: true, mobile: true } },
-  course: { select: { id: true, slug: true, title: true, category: true, status: true, thumbnailUrl: true } },
+  course: { select: { id: true, slug: true, title: true, category: true, type: true, status: true, thumbnailUrl: true } },
 } as const;
 
 const fileMeta = z.object({
@@ -98,13 +98,18 @@ router.get("/:id", requireAuth, async (req, res) => {
 router.get("/", requireAuth, requireRole("ADMIN"), validate({ query: z.object({
   status: z.enum(["SUBMITTED", "UNDER_REVIEW", "INTERVIEW_SCHEDULED", "ACCEPTED", "REJECTED"]).optional(),
   courseId: z.string().optional(),
+  courseType: z.enum(["EDUCATION", "ALTERNATIVE_EDUCATION"]).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 }) }), async (req, res) => {
-  const { status, courseId, page, limit } = req.query as unknown as {
-    status?: string; courseId?: string; page: number; limit: number;
+  const { status, courseId, courseType, page, limit } = req.query as unknown as {
+    status?: string; courseId?: string; courseType?: string; page: number; limit: number;
   };
-  const where = { ...(status ? { status: status as never } : {}), ...(courseId ? { courseId } : {}) };
+  const where = {
+    ...(status ? { status: status as never } : {}),
+    ...(courseId ? { courseId } : {}),
+    ...(courseType ? { course: { type: courseType as never } } : {}),
+  };
 
   const [total, applications] = await Promise.all([
     prisma.mentorApplication.count({ where }),

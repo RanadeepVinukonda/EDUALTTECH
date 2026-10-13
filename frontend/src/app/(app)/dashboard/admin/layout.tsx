@@ -9,13 +9,10 @@ import MenuBook from "@mui/icons-material/MenuBook";
 import CoPresent from "@mui/icons-material/CoPresent";
 import HowToReg from "@mui/icons-material/HowToReg";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
-import Webhook from "@mui/icons-material/Webhook";
 import Tune from "@mui/icons-material/Tune";
 import PeopleAlt from "@mui/icons-material/PeopleAlt";
-import Inbox from "@mui/icons-material/Inbox";
-import Article from "@mui/icons-material/Article";
-import History from "@mui/icons-material/History";
 import Web from "@mui/icons-material/Web";
+import History from "@mui/icons-material/History";
 import { useAuth } from "@/components/app/AuthProvider";
 import Spinner from "@/components/ui/Spinner";
 import { cn } from "@/lib/cn";
@@ -50,18 +47,15 @@ const GROUPS: TabGroup[] = [
     ],
   },
   {
-    label: "Content",
+    label: "CMS",
     items: [
-      { href: "/dashboard/admin/content", label: "Content", Icon: Article, exact: false },
       { href: "/dashboard/admin/cms", label: "Website CMS", Icon: Web, exact: false },
-      { href: "/dashboard/admin/inbox", label: "Contact inbox", Icon: Inbox, exact: false },
     ],
   },
   {
     label: "Sales",
     items: [
       { href: "/dashboard/admin/orders", label: "Orders", Icon: ReceiptLong, exact: false },
-      { href: "/dashboard/admin/payments", label: "Webhooks", Icon: Webhook, exact: false },
     ],
   },
   {

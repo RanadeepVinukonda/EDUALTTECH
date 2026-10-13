@@ -157,11 +157,17 @@ model VerificationCode {
 // Courses — admin owns lifecycle, structure, pricing
 // ────────────────────────────────────────────────────────────────────
 
+enum CourseType {
+  EDUCATION
+  ALTERNATIVE_EDUCATION
+}
+
 model Course {
   id          String       @id @default(cuid())
   slug        String       @unique
   title       String
   description String
+  type        CourseType   @default(EDUCATION)
   category    String       @default("General")
   gradeLevel  String?
   thumbnailUrl String?
@@ -195,6 +201,7 @@ model Course {
 
   @@index([status, createdAt])
   @@index([category])
+  @@index([type])
   @@index([createdById])
 }
 

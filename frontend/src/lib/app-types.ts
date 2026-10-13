@@ -143,6 +143,7 @@ export interface CourseOverview {
   title: string;
   description: string;
   category: string;
+  type: "EDUCATION" | "ALTERNATIVE_EDUCATION";
   gradeLevel: string | null;
   level: string | null;
   tags: string[];
@@ -248,6 +249,7 @@ export interface ApplicationCourse {
   slug: string;
   title: string;
   category: string;
+  type: "EDUCATION" | "ALTERNATIVE_EDUCATION";
   status: string;
   thumbnailUrl: string | null;
 }
@@ -364,6 +366,7 @@ export interface AdminCourseSummary {
   slug: string;
   title: string;
   category: string;
+  type: "EDUCATION" | "ALTERNATIVE_EDUCATION";
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   pricePaise: number;
   currency: string;
@@ -399,7 +402,7 @@ export interface AdminApplicationRow {
   status: ApplicationStatus;
   createdAt: string;
   user: { id: string; firstName: string; lastName: string; email: string } | null;
-  course: { id: string; slug: string; title: string; category: string; status: string };
+  course: { id: string; slug: string; title: string; category: string; type: "EDUCATION" | "ALTERNATIVE_EDUCATION"; status: string };
 }
 
 export interface NotificationItem {
