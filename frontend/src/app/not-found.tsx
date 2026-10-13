@@ -1,5 +1,5 @@
-import LinkButton from "@/components/ui/LinkButton";
 import NotFoundFace from "@/components/ui/NotFoundFace";
+import NotFoundActions from "@/components/ui/NotFoundActions";
 
 export default function NotFound() {
   return (
@@ -11,10 +11,7 @@ export default function NotFound() {
         The course or page you are looking for may have been removed, unpublished, or never existed.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <LinkButton href="/courses">Browse courses</LinkButton>
-        <LinkButton href="/" variant="secondary">
-          Go home
-        </LinkButton>
+        <NotFoundActions />
       </div>
     </div>
   );
