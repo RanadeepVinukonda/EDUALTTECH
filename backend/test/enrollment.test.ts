@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe("fulfillPaidOrder — payment/enrollment integrity", () => {
   it("enrolls exactly once and records the payment on first fulfilment", async () => {
-    mockPrisma.order.findUnique.mockResolvedValue({ id: "o1", userId: "u1", courseId: "c1" });
+    mockPrisma.order.findUnique.mockResolvedValue({ id: "o1", userId: "u1", courseId: "c1", mentorUserId: "m1" });
     const tx = {
       order: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
       payment: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn().mockResolvedValue({}) },
@@ -32,7 +32,7 @@ describe("fulfillPaidOrder — payment/enrollment integrity", () => {
     const result = await fulfillPaidOrder("o1", { razorpayPaymentId: "pay1", signature: "sig" });
 
     expect(result.alreadyPaid).toBe(false);
-    expect(mockEnrollLearner).toHaveBeenCalledExactlyOnceWith(tx, "c1", "u1");
+    expect(mockEnrollLearner).toHaveBeenCalledExactlyOnceWith(tx, "c1", "u1", "m1");
     expect(tx.payment.create).toHaveBeenCalledOnce();
     expect(mockAudit).toHaveBeenCalled();
   });

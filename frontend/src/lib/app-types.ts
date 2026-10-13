@@ -156,7 +156,7 @@ export interface CourseOverview {
     order: number;
     topics: { id: string; title: string; order: number; _count: { lessons: number } }[];
   }[];
-  mentors: { user: MentorMini & { bio: string | null }; capacity: number | null }[];
+  mentors: { user: MentorMini & { bio: string | null }; capacity: number | null; free: number }[];
   enrolledCount: number;
   upcomingMeetings: { id: string; title: string; scheduledAt: string; durationMin: number; meetingUrl: string }[];
   isStaff: boolean;

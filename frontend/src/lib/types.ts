@@ -30,6 +30,7 @@ export interface CourseChapter {
 export interface CourseMentor {
   user: { id: string; firstName: string; lastName: string; avatarUrl: string | null; bio: string | null };
   capacity: number | null;
+  free: number;
 }
 
 export interface CourseDetail {

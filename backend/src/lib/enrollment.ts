@@ -19,7 +19,7 @@ export interface PaymentRecord {
 export async function fulfillPaidOrder(orderId: string, payment: PaymentRecord): Promise<{ alreadyPaid: boolean }> {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    select: { id: true, userId: true, courseId: true },
+    select: { id: true, userId: true, courseId: true, mentorUserId: true },
   });
   if (!order) throw ApiError.notFound("Order not found");
 
@@ -48,7 +48,7 @@ export async function fulfillPaidOrder(orderId: string, payment: PaymentRecord):
 
     if (claimed.count === 0) return { alreadyPaid: true };
 
-    await enrollLearner(tx, order.courseId, order.userId);
+    await enrollLearner(tx, order.courseId, order.userId, order.mentorUserId);
     return { alreadyPaid: false };
   });
 
@@ -57,7 +57,11 @@ export async function fulfillPaidOrder(orderId: string, payment: PaymentRecord):
 }
 
 /** Free course enrollment (no order). Throws when already enrolled. */
-export async function enrollFree(courseId: string, userId: string): Promise<{ participantId: string; mentorUserId: string | null }> {
+export async function enrollFree(
+  courseId: string,
+  userId: string,
+  preferredMentorUserId?: string | null,
+): Promise<{ participantId: string; mentorUserId: string | null }> {
   const result = await prisma.$transaction(async (tx) => {
     const existing = await tx.courseParticipant.findUnique({
       where: { courseId_userId: { courseId, userId } },
@@ -65,7 +69,7 @@ export async function enrollFree(courseId: string, userId: string): Promise<{ pa
     });
     if (existing) throw ApiError.conflict("You are already enrolled in this course", "ALREADY_ENROLLED");
 
-    const participantId = await enrollLearner(tx, courseId, userId);
+    const participantId = await enrollLearner(tx, courseId, userId, preferredMentorUserId);
     const row = await tx.courseParticipant.findUnique({ where: { id: participantId }, select: { mentorUserId: true } });
     return { participantId, mentorUserId: row?.mentorUserId ?? null };
   });

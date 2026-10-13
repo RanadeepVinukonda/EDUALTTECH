@@ -30,13 +30,18 @@ router.post(
   validate({
     body: z.object({
       courseId: z.string().min(1),
+      mentorUserId: z.string().min(1).optional(),
       idempotencyKey: z.string().min(8).max(120).optional(),
     }),
   }),
   async (req, res) => {
     if (!razorpayConfigured()) throw ApiError.badRequest("Payments are not configured yet");
 
-    const { courseId, idempotencyKey } = body<{ courseId: string; idempotencyKey?: string }>(req);
+    const { courseId, mentorUserId: chosenMentor, idempotencyKey } = body<{
+      courseId: string;
+      mentorUserId?: string;
+      idempotencyKey?: string;
+    }>(req);
     const userId = req.user!.id;
 
     const course = await prisma.course.findUnique({ where: { id: courseId } });
@@ -48,6 +53,17 @@ router.post(
       select: { id: true },
     });
     if (enrolled) throw ApiError.conflict("You are already enrolled in this course", "ALREADY_ENROLLED");
+
+    // Learner-picked mentor is honoured only if it is a real ACTIVE mentor on
+    // this course; final seat check happens at fulfilment (may fall back).
+    let mentorUserId: string | null = null;
+    if (chosenMentor) {
+      const m = await prisma.courseParticipant.findUnique({
+        where: { courseId_userId: { courseId, userId: chosenMentor } },
+        select: { role: true, status: true },
+      });
+      if (m && m.role === "MENTOR" && m.status === "ACTIVE") mentorUserId = chosenMentor;
+    }
 
     // Same checkout resumed (page refresh / double click) → return the same
     // order. The key is namespaced per user so one account can never resume or
@@ -72,6 +88,7 @@ router.post(
       data: {
         userId,
         courseId,
+        mentorUserId,
         amountPaise: course.pricePaise, // immutable snapshot
         currency: course.currency,
         idempotencyKey: orderKey,

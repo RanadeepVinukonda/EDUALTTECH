@@ -7,6 +7,7 @@ import { ApiError } from "../../utils/ApiError.js";
 import { audit } from "../../lib/audit.js";
 import { getCourseAccess, assertCourseOwner, assertCourseParticipant, type CourseAccess } from "../../lib/course-access.js";
 import { enrollFree } from "../../lib/enrollment.js";
+import { mentorCapacityDefault } from "../../lib/settings.js";
 
 const router = Router();
 
@@ -193,13 +194,29 @@ router.get("/:slug", optionalAuth, async (req, res) => {
   // anonymous/public visitors or signed-in non-participants browsing the page.
   const canSeeMeetingLinks = access.isStaff || access.isLearner;
 
+  // Free seats per mentor, so a learner can pick a mentor with room at checkout.
+  const capDefault = await mentorCapacityDefault();
+  const mentorIds = participants.map((m) => m.user.id);
+  const assigned = mentorIds.length
+    ? await prisma.courseParticipant.groupBy({
+        by: ["mentorUserId"],
+        where: { courseId: course.id, role: "LEARNER", status: "ACTIVE", mentorUserId: { in: mentorIds } },
+        _count: { _all: true },
+      })
+    : [];
+  const assignedMap = new Map(assigned.map((a) => [a.mentorUserId, a._count._all]));
+
   res.json({
     success: true,
     data: {
       course: {
         ...rest,
         chapters: course.chapters,
-        mentors: participants.map((m) => ({ user: m.user, capacity: m.capacity })),
+        mentors: participants.map((m) => ({
+          user: m.user,
+          capacity: m.capacity,
+          free: Math.max(0, (m.capacity ?? capDefault) - (assignedMap.get(m.user.id) ?? 0)),
+        })),
         enrolledCount: _count.participants,
         upcomingMeetings: meetings.map((m) => (canSeeMeetingLinks ? m : { ...m, meetingUrl: "" })),
         isStaff,
@@ -346,13 +363,16 @@ router.delete("/:id", requireAuth, async (req, res) => {
 
 // ── Enroll (free courses; paid goes through /api/payments) ─────────
 
-router.post("/:id/enroll", requireAuth, async (req, res) => {
+router.post("/:id/enroll", requireAuth, validate({ body: z.object({
+  mentorUserId: z.string().min(1).optional(),
+}) }), async (req, res) => {
+  const { mentorUserId } = body<{ mentorUserId?: string }>(req);
   const course = await prisma.course.findUnique({ where: { id: req.params.id } });
   if (!course || course.status !== "PUBLISHED") throw ApiError.notFound("Course not found");
   if (course.pricePaise > 0) {
     throw ApiError.badRequest("This course is paid — complete checkout first", "PAYMENT_REQUIRED");
   }
-  const result = await enrollFree(course.id, req.user!.id);
+  const result = await enrollFree(course.id, req.user!.id, mentorUserId ?? null);
   res.status(201).json({ success: true, data: result });
 });
 

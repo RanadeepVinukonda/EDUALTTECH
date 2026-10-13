@@ -475,6 +475,8 @@ model Order {
   amountPaise     Int // snapshot of Course.pricePaise at purchase time — immutable
   currency        String      @default("INR")
   status          OrderStatus @default(CREATED)
+  mentorUserId    String? // learner-chosen mentor at checkout; seat re-checked at fulfilment
+
   idempotencyKey  String?     @unique
   razorpayOrderId String      @unique
   receiptUrl      String?

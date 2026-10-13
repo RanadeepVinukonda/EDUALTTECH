@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import CheckCircle from "@mui/icons-material/CheckCircle";
 import { apiGet, apiPost, ApiError } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import { loadRazorpay, createRazorpay } from "@/lib/razorpay";
@@ -33,6 +34,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
   const [needsMobile, setNeedsMobile] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
   const [deepError, setDeepError] = useState<string | null>(null);
+  const [mentorUserId, setMentorUserId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -73,7 +75,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
     setBusy(true);
     setDeepError(null);
     try {
-      await apiPost(`/courses/${courseId}/enroll`);
+      await apiPost(`/courses/${courseId}/enroll`, mentorUserId ? { mentorUserId } : {});
       notifySuccess("You're enrolled. Welcome aboard.");
       router.push(`/dashboard/courses/${slug}/roadmap`);
     } catch (err) {
@@ -88,6 +90,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
     try {
       const payload = await apiPost<CheckoutPayload>("/payments/orders", {
         courseId,
+        mentorUserId: mentorUserId ?? undefined,
         idempotencyKey: idempotencyKey(courseId),
       });
 
@@ -134,6 +137,8 @@ export default function CheckoutView({ slug }: { slug: string }) {
 
   const { course } = detail;
   const isPaid = course.pricePaise > 0;
+  const mentors = course.mentors ?? [];
+  const needsMentor = mentors.some((m) => m.free > 0) && !mentorUserId;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 sm:px-6">
@@ -191,6 +196,59 @@ export default function CheckoutView({ slug }: { slug: string }) {
             </p>
           </section>
 
+          <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
+            <h2 className="font-display text-lg font-bold text-ink-900">Choose your mentor</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Your mentor guides you, answers questions, and reviews your work. You can pick one now.
+            </p>
+
+            {mentors.length === 0 ? (
+              <p className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-ink-600">
+                No mentors are listed yet — we&apos;ll assign one to you after enrollment.
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-3">
+                {mentors.map((m) => {
+                  const full = m.free <= 0;
+                  const selected = mentorUserId === m.user.id;
+                  return (
+                    <li key={m.user.id}>
+                      <button
+                        type="button"
+                        disabled={full}
+                        aria-pressed={selected}
+                        onClick={() => setMentorUserId(m.user.id)}
+                        className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
+                          selected
+                            ? "border-brand-500 bg-brand-50 ring-1 ring-brand-500"
+                            : "border-slate-200 hover:border-brand-300"
+                        } ${full ? "cursor-not-allowed opacity-50" : ""}`}
+                      >
+                        <span className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-100">
+                          <CoverImage
+                            src={m.user.avatarUrl}
+                            alt=""
+                            fallback={`${m.user.firstName[0] ?? ""}${m.user.lastName[0] ?? ""}`}
+                          />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-semibold text-ink-900">
+                            {m.user.firstName} {m.user.lastName}
+                          </span>
+                          {m.user.bio && <span className="mt-0.5 block truncate text-xs text-slate-500">{m.user.bio}</span>}
+                          <span className={`mt-1 block text-xs font-semibold ${full ? "text-slate-400" : "text-brand-700"}`}>
+                            {full ? "Full" : `${m.free} seat${m.free === 1 ? "" : "s"} left`}
+                          </span>
+                        </span>
+                        {selected && <CheckCircle className="shrink-0 text-brand-600" fontSize="small" />}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
           {needsMobile && (
             <section role="alert" className="rounded-[20px] border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
               <p className="font-semibold">Verify your mobile number to continue.</p>
@@ -209,13 +267,16 @@ export default function CheckoutView({ slug }: { slug: string }) {
 
           <div className="flex flex-col gap-3">
             {isPaid ? (
-              <PayButton onClick={() => void pay(course.id, course.title)} loading={busy} disabled={needsMobile}>
+              <PayButton onClick={() => void pay(course.id, course.title)} loading={busy} disabled={needsMobile || needsMentor}>
                 Pay {formatPrice(course.pricePaise, course.currency)}
               </PayButton>
             ) : (
-              <Button onClick={() => void payFree(course.id)} loading={busy}>
+              <Button onClick={() => void payFree(course.id)} loading={busy} disabled={needsMentor}>
                 Enroll for free
               </Button>
+            )}
+            {needsMentor && (
+              <p className="text-center text-xs font-medium text-amber-700">Select a mentor above to continue.</p>
             )}
             <Link href={`/courses/${course.slug}`} className={buttonClass("ghost", "sm")}>
               Cancel
