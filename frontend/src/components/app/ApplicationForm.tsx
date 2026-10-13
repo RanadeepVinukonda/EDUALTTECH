@@ -119,7 +119,8 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
         resume: { name: resume.name, type: resume.type, data },
       });
       submitted.current = true;
-      router.push(`/dashboard/mentor/applications/${application.id}`);
+      const slug = available.find((c) => c.id === courseId)?.slug;
+      router.push(slug ? `/courses/${slug}` : `/dashboard/mentor/applications/${application.id}`);
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.code === "MOBILE_VERIFICATION_REQUIRED") {

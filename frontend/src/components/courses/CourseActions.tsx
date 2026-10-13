@@ -119,7 +119,7 @@ export default function CourseActions({
             Loading…
           </Button>
         ) : isLearner ? (
-          <LinkButton href="/dashboard" className="w-full">
+          <LinkButton href={`/dashboard/courses/${slug}`} className="w-full">
             <CheckCircle fontSize="small" />
             Continue learning
           </LinkButton>
@@ -128,10 +128,56 @@ export default function CourseActions({
             <p className="rounded-xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-800">
               You mentor this course.
             </p>
-            <LinkButton href="/dashboard" variant="secondary" className="w-full">
-              Go to your dashboard
+            <LinkButton href={`/dashboard/mentor/courses/${slug}`} variant="secondary" className="w-full">
+              Open teaching workspace
             </LinkButton>
           </>
+        ) : application && application.status !== "REJECTED" ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-amber-700">
+              Mentor application
+            </p>
+            <p className="mt-1.5 text-sm font-bold text-ink-900">
+              {application.status === "INTERVIEW_SCHEDULED"
+                ? "Interview scheduled"
+                : application.status === "ACCEPTED"
+                  ? "Accepted"
+                  : APP_STATUS[application.status] ?? application.status}
+            </p>
+
+            {application.status === "INTERVIEW_SCHEDULED" ? (
+              <div className="mt-2.5 space-y-2">
+                {application.interviewAt && (
+                  <p className="text-sm text-ink-600">
+                    {new Date(application.interviewAt).toLocaleString(undefined, {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                )}
+                {application.interviewAt && (
+                  <Countdown
+                    to={application.interviewAt}
+                    className="inline-block rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-brand-700"
+                  />
+                )}
+                {application.interviewUrl && (
+                  <a
+                    href={application.interviewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+                  >
+                    Join interview
+                  </a>
+                )}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-ink-600">
+                Your application is under review. Enrolment opens here once it&apos;s cleared — we&apos;ll notify you.
+              </p>
+            )}
+          </div>
         ) : !authed ? (
           <LinkButton href={loginHref} className="w-full">
             <Lock fontSize="small" />
@@ -147,9 +193,9 @@ export default function CourseActions({
           </EnrollButton>
         )}
 
-        {ready && authed && !isLearner && !isMentor && !application && (
+        {ready && authed && !isLearner && !isMentor && (!application || application.status === "REJECTED") && (
           <LinkButton href={`/dashboard/mentor/apply?course=${encodeURIComponent(slug)}`} variant="secondary" className="w-full">
-            Apply to mentor
+            {application?.status === "REJECTED" ? "Re-apply to mentor" : "Apply to mentor"}
           </LinkButton>
         )}
 
@@ -167,60 +213,6 @@ export default function CourseActions({
           {wishlist ? "In your wishlist" : "Add to wishlist"}
         </button>
       </div>
-
-      {application && (
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-            Mentor application
-          </p>
-          <p className="mt-1.5 text-sm font-bold text-ink-900">
-            {application.status === "INTERVIEW_SCHEDULED"
-              ? "Interview scheduled"
-              : application.status === "ACCEPTED"
-                ? "Accepted"
-                : APP_STATUS[application.status] ?? application.status}
-          </p>
-
-          {application.status === "INTERVIEW_SCHEDULED" && (
-            <div className="mt-2.5 space-y-2">
-              {application.interviewAt && (
-                <p className="text-sm text-ink-600">
-                  {new Date(application.interviewAt).toLocaleString(undefined, {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </p>
-              )}
-              {application.interviewAt && (
-                <Countdown
-                  to={application.interviewAt}
-                  className="inline-block rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700"
-                />
-              )}
-              {application.interviewUrl && (
-                <a
-                  href={application.interviewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
-                >
-                  Join interview
-                </a>
-              )}
-            </div>
-          )}
-
-          {application.status === "REJECTED" && application.reviewNote && (
-            <p className="mt-2 text-sm text-ink-600">{application.reviewNote}</p>
-          )}
-
-          {application.status !== "INTERVIEW_SCHEDULED" && application.status !== "REJECTED" && (
-            <p className="mt-2 text-sm text-ink-600">
-              Mentoring is granted per course after review.
-            </p>
-          )}
-        </div>
-      )}
 
       {error && (
         <p role="alert" className="mt-4 text-sm font-medium text-red-600">

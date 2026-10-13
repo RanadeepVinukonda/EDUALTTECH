@@ -11,7 +11,6 @@ import { formatDate, formatCountdown } from "@/lib/format";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import CoverImage from "@/components/ui/CoverImage";
 import CourseCard from "@/components/landing/CourseCard";
 import type { CourseListItem } from "@/lib/types";
 import { buttonClass } from "@/components/ui/Button";
@@ -192,23 +191,15 @@ export default function DashboardView() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {data.learning.slice(0, 4).map((row) => (
-              <Link
+              <CourseCard
                 key={row.id}
+                course={row.course}
                 href={`/dashboard/courses/${row.course.slug}`}
-                className="group flex gap-4 rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1 transition hover:border-brand-300"
-              >
-                <CoverImage src={row.course.thumbnailUrl} alt="" fallback={row.course.title} className="h-20 w-28 shrink-0 rounded-xl" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-display font-bold text-ink-900 group-hover:text-brand-700">{row.course.title}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{row.course.category}</p>
-                  <div className="mt-3">
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                      <div className="h-full rounded-full bg-brand-600" style={{ width: `${row.progressPct}%` }} />
-                    </div>
-                    <p className="mt-1 text-xs text-slate-500">{row.progressPct}% complete</p>
-                  </div>
-                </div>
-              </Link>
+                priceLabel="Enrolled"
+                progressPct={row.progressPct}
+                mentor={row.mentor ? `${row.mentor.firstName} ${row.mentor.lastName}` : undefined}
+                viewLabel={row.progressPct > 0 ? "Continue" : "Start learning"}
+              />
             ))}
           </div>
         )}
