@@ -20,7 +20,7 @@ export default function IconActionButton({ icon, label, className, ...props }: I
   return (
     <button
       type="button"
-      className={cn("hv-btn", className)}
+      className={cn("hv-btn", `hv-btn--${icon}`, className)}
       aria-label={label}
       data-label={label}
       {...props}

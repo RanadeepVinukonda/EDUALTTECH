@@ -1130,7 +1130,14 @@ body {
 .hv-btn:focus-visible:not(:disabled) .hv-btn__icon,
 .hv-btn:active:not(:disabled) .hv-btn__icon {
   width: 25px;
+  transform: translateY(14px);
   transition-duration: 0.3s;
+}
+
+.hv-btn--view:hover:not(:disabled),
+.hv-btn--view:focus-visible:not(:disabled),
+.hv-btn--view:active:not(:disabled) {
+  background-color: #024059;
 }
 
 .hv-btn::before {
