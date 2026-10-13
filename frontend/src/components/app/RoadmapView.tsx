@@ -8,6 +8,7 @@ import CheckCircle from "@mui/icons-material/CheckCircle";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import Insights from "@mui/icons-material/Insights";
+import Lock from "@mui/icons-material/Lock";
 import { useCourseRoadmap } from "./useCourseRoadmap";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
@@ -39,7 +40,7 @@ export default function RoadmapView({ slug }: { slug: string }) {
   const { detail, roadmap, completed, loading, error, code, reload } = useCourseRoadmap(slug);
 
   const flat = useMemo(() => (roadmap?.chapters ?? []).flatMap((c) => c.topics.flatMap((t) => t.lessons)), [roadmap]);
-  const nextLesson = useMemo(() => flat.find((l) => !completed.has(l.id)) ?? null, [flat, completed]);
+  const nextLesson = useMemo(() => flat.find((l) => l.isPublished && !completed.has(l.id)) ?? null, [flat, completed]);
   const totalLessons = flat.length;
   const doneCount = flat.filter((l) => completed.has(l.id)).length;
   const percent = totalLessons > 0 ? Math.round((doneCount / totalLessons) * 100) : 0;
@@ -224,8 +225,8 @@ export default function RoadmapView({ slug }: { slug: string }) {
                               ) : (
                                 <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 opacity-70">
                                   {row}
-                                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                                    Draft
+                                  <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                                    <Lock fontSize="inherit" aria-hidden /> Locked
                                   </span>
                                 </div>
                               )}

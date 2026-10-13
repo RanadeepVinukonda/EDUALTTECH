@@ -78,6 +78,7 @@ export interface MeetingRow {
   scheduledAt: string;
   durationMin: number;
   meetingUrl: string;
+  hasRecording?: boolean;
   courseId: string;
   course: { id: string; slug: string; title: string };
   createdBy?: { firstName: string; lastName: string; avatarUrl: string | null };
@@ -116,6 +117,7 @@ export interface LessonRow {
   type: "VIDEO" | "READING";
   contentUrl: string | null;
   textContent: string | null;
+  hasVideo?: boolean;
   order: number;
   isPublished: boolean;
   createdAt: string;
@@ -137,6 +139,22 @@ export interface ChapterRow {
 export interface Roadmap {
   chapters: ChapterRow[];
   completedLessonIds: string[];
+}
+
+export interface CourseAnalyticsLearner {
+  id: string;
+  user: { id: string; firstName: string; lastName: string; avatarUrl: string | null; email: string };
+  status: string;
+  progressPct: number;
+  lessonsCompleted: number;
+  totalLessons: number;
+  lastActiveAt: string;
+  enrolledAt: string;
+}
+
+export interface CourseAnalytics {
+  totalLessons: number;
+  learners: CourseAnalyticsLearner[];
 }
 
 export interface CourseOverview {

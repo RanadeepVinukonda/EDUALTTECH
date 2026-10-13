@@ -12,10 +12,11 @@ import LessonManager from "./LessonManager";
 import MeetingManager from "./MeetingManager";
 import LearnerRoster from "./LearnerRoster";
 import CourseResources from "./CourseResources";
+import CourseAnalyticsView from "./CourseAnalytics";
 import ChatView from "./ChatView";
 import { buttonClass } from "@/components/ui/Button";
 
-type Tab = "overview" | "learners" | "curriculum" | "meetings" | "resources" | "messages";
+type Tab = "overview" | "learners" | "analytics" | "curriculum" | "meetings" | "resources" | "messages";
 
 export default function TeachingWorkspace({ slug }: { slug: string }) {
   const { detail, roadmap, loading, error, reload } = useCourseRoadmap(slug);
@@ -45,6 +46,7 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
     { id: "learners", label: "Learners" },
+    { id: "analytics", label: "Analytics" },
     { id: "curriculum", label: "Curriculum" },
     { id: "meetings", label: "Meetings" },
     { id: "resources", label: "Resources" },
@@ -116,6 +118,8 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
       )}
 
       {tab === "learners" && <LearnerRoster slug={course.slug} />}
+
+      {tab === "analytics" && <CourseAnalyticsView slug={course.slug} />}
 
       {tab === "curriculum" && (
         roadmap

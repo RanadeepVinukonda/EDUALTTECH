@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { apiPost } from "@/lib/api";
+import { fetchPrivateUrl } from "@/lib/upload";
 import { describeError } from "@/lib/errors";
 import { useCourseRoadmap } from "./useCourseRoadmap";
 import { notifyError, notifySuccess } from "@/lib/notify";
@@ -10,6 +11,7 @@ import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import AccessDenied from "@/components/ui/AccessDenied";
 import Button, { buttonClass } from "@/components/ui/Button";
+import Lock from "@mui/icons-material/Lock";
 import type { LessonRow, TopicRow, ChapterRow } from "@/lib/app-types";
 
 interface Entry {
@@ -59,6 +61,25 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
   const prev = index > 0 ? flat[index - 1] : null;
   const next = index >= 0 && index < flat.length - 1 ? flat[index + 1] : null;
 
+  const lockedLesson = entry?.lesson ?? null;
+  const locked = Boolean(lockedLesson && !lockedLesson.isPublished && detail && !detail.access.isStaff);
+  const wantVideo = Boolean(lockedLesson && lockedLesson.type === "VIDEO" && lockedLesson.hasVideo && !locked);
+
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  useEffect(() => {
+    setVideoUrl(null);
+    if (!lockedLesson || !wantVideo) return;
+    let alive = true;
+    fetchPrivateUrl(`/courses/lessons/${lockedLesson.id}/video`)
+      .then((u) => {
+        if (alive) setVideoUrl(u);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [lockedLesson, wantVideo]);
+
   if (loading) return <LessonSkeleton />;
   if (error) {
     if (code === "FORBIDDEN" || code === "UNAUTHORIZED") {
@@ -97,6 +118,28 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
   const isLearner = detail.myParticipation?.role === "LEARNER";
   const done = completed.has(lesson.id);
 
+  if (!lesson.isPublished && !detail.access.isStaff) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <Link href={`/dashboard/courses/${slug}/roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
+          ← Back to roadmap
+        </Link>
+        <div className="grid place-items-center rounded-[20px] border border-slate-200 bg-white p-10 text-center shadow-elev1">
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-500">
+            <Lock aria-hidden />
+          </span>
+          <h1 className="mt-4 font-display text-xl font-bold text-ink-900">This lesson is locked</h1>
+          <p className="mt-1 max-w-md text-sm text-slate-500">
+            Your mentor unlocks each lesson once its video or live class is ready. Check back soon.
+          </p>
+          <Link href={`/dashboard/courses/${slug}/roadmap`} className={buttonClass("secondary", "sm", "mt-4")}>
+            Back to roadmap
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   async function markComplete() {
     if (marking || done) return;
     setMarking(true);
@@ -129,7 +172,13 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
 
       <article className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
         {lesson.type === "VIDEO" ? (
-          lesson.contentUrl ? (
+          lesson.hasVideo ? (
+            videoUrl ? (
+              <video controls className="w-full rounded-xl bg-black" src={videoUrl} />
+            ) : (
+              <p className="text-sm text-slate-500">Loading video…</p>
+            )
+          ) : lesson.contentUrl ? (
             <div className="space-y-3">
               <a href={lesson.contentUrl} target="_blank" rel="noreferrer" className={buttonClass("primary", "sm")}>
                 Open video lesson

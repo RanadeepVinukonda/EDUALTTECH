@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
+import { uploadPrivateFile, fetchPrivateUrl } from "@/lib/upload";
 import type { MeetingRow, Roadmap } from "@/lib/app-types";
-import { formatDate, formatCountdown } from "@/lib/format";
+import { formatDate } from "@/lib/format";
+import { describeError } from "@/lib/errors";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import { cn } from "@/lib/cn";
 import Spinner from "@/components/ui/Spinner";
@@ -12,11 +14,15 @@ import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Button, { buttonClass } from "@/components/ui/Button";
+import Dropzone from "@/components/ui/Dropzone";
+import FlipClock from "@/components/ui/FlipClock";
 import Title from "@mui/icons-material/Title";
 import Event from "@mui/icons-material/Event";
 import AccessTime from "@mui/icons-material/AccessTime";
 import MenuBook from "@mui/icons-material/MenuBook";
 import LinkIcon from "@mui/icons-material/Link";
+import NotificationsActive from "@mui/icons-material/NotificationsActive";
+import Movie from "@mui/icons-material/Movie";
 
 type Scope = "upcoming" | "past" | "all";
 
@@ -27,6 +33,90 @@ function isValidUrl(v: string): boolean {
   } catch {
     return false;
   }
+}
+
+function RecordingPlayer({ meetingId }: { meetingId: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function open() {
+    setBusy(true);
+    setErr(null);
+    try {
+      setUrl(await fetchPrivateUrl(`/meetings/${meetingId}/recording`));
+    } catch (e) {
+      setErr(describeError(e, "Could not load the recording."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (url) return <video controls className="w-full max-w-xl rounded-xl bg-black" src={url} />;
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <Button size="sm" variant="secondary" loading={busy} onClick={() => void open()}>
+        <Movie fontSize="small" aria-hidden /> Watch recording
+      </Button>
+      {err && <span className="text-xs text-danger">{err}</span>}
+    </div>
+  );
+}
+
+function RecordingUploader({ meetingId, hasRecording, onDone }: { meetingId: string; hasRecording: boolean; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function upload() {
+    if (!file) return;
+    setBusy(true);
+    try {
+      await uploadPrivateFile(`/meetings/${meetingId}/recording/sign`, `/meetings/${meetingId}/recording`, file);
+      notifySuccess("Recording uploaded.");
+      setOpen(false);
+      setFile(null);
+      onDone();
+    } catch (e) {
+      notifyError(describeError(e, "Could not upload the recording."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <button type="button" className={buttonClass("ghost", "sm")} onClick={() => setOpen(true)}>
+        {hasRecording ? "Replace recording" : "Add recording"}
+      </button>
+    );
+  }
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <Dropzone
+        accept=".mp4,.webm,video/mp4,video/webm"
+        hint="MP4 or WebM · uploads directly to storage"
+        file={file}
+        onFile={setFile}
+        ariaLabel="Upload meeting recording"
+      />
+      <div className="flex gap-2">
+        <Button size="sm" loading={busy} disabled={!file || busy} onClick={() => void upload()}>
+          Upload
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => {
+            setOpen(false);
+            setFile(null);
+          }}
+        >
+          Cancel
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 export default function MeetingManager({ courseId, readOnly = false }: { courseId: string; readOnly?: boolean }) {
@@ -128,6 +218,15 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
       await load();
     } catch (e) {
       notifyError(e instanceof Error ? e.message : "Could not cancel the meeting.");
+    }
+  }
+
+  async function remind(m: MeetingRow) {
+    try {
+      await apiPost(`/meetings/${m.id}/remind`);
+      notifySuccess("Reminder emailed to enrolled learners.");
+    } catch (e) {
+      notifyError(describeError(e, "Could not send the reminder."));
     }
   }
 
@@ -243,37 +342,47 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
             {meetings.map((m) => {
               const start = new Date(m.scheduledAt).getTime();
               const end = start + m.durationMin * 60_000;
+              const upcoming = start > now;
+              const live = !upcoming && end >= now;
               return (
-                <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
-                  <div className="min-w-0">
-                    <p className="font-semibold text-ink-900">{m.title}</p>
-                    <p className="mt-0.5 text-sm text-slate-500">
-                      {formatDate(m.scheduledAt)} · {m.durationMin} min
-                      {m.topic?.title ? ` · ${m.topic.title}` : ""}
-                    </p>
-                    {start > now ? (
-                      <p className="mt-0.5 text-sm font-semibold text-brand-600">
-                        Starts in {formatCountdown(start - now)}
+                <li key={m.id} className="flex flex-col gap-3 p-4 sm:p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-ink-900">{m.title}</p>
+                      <p className="mt-0.5 text-sm text-slate-500">
+                        {formatDate(m.scheduledAt)} · {m.durationMin} min
+                        {m.topic?.title ? ` · ${m.topic.title}` : ""}
                       </p>
-                    ) : end >= now ? (
-                      <p className="mt-0.5 text-sm font-semibold text-green-700">Live now</p>
-                    ) : null}
+                      {live && <p className="mt-0.5 text-sm font-semibold text-green-700">Live now</p>}
+                      {m.hasRecording && !readOnly && (
+                        <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-slate-500">
+                          <Movie fontSize="inherit" aria-hidden /> Recording uploaded
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a href={m.meetingUrl} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary", "sm")}>
+                        Join link
+                      </a>
+                      {!readOnly && upcoming && (
+                        <button type="button" className={buttonClass("ghost", "sm")} onClick={() => void remind(m)}>
+                          <NotificationsActive fontSize="small" aria-hidden /> Email reminder
+                        </button>
+                      )}
+                      {!readOnly && <RecordingUploader meetingId={m.id} hasRecording={Boolean(m.hasRecording)} onDone={() => void load()} />}
+                      {!readOnly && (
+                        <button type="button" className={buttonClass("danger", "sm")} onClick={() => void remove(m)}>
+                          Cancel
+                        </button>
+                      )}
+                      {readOnly && m.hasRecording && <RecordingPlayer meetingId={m.id} />}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={m.meetingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={buttonClass("secondary", "sm")}
-                    >
-                      Join link
-                    </a>
-                    {!readOnly && (
-                      <button type="button" className={buttonClass("danger", "sm")} onClick={() => void remove(m)}>
-                        Cancel
-                      </button>
-                    )}
-                  </div>
+                  {upcoming && (
+                    <div className="rounded-xl bg-ink-900/95 p-3">
+                      <FlipClock to={m.scheduledAt} label="Starts in" />
+                    </div>
+                  )}
                 </li>
               );
             })}

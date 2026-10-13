@@ -2,15 +2,21 @@
 
 import { useState } from "react";
 import { apiPost, apiPatch, apiDelete } from "@/lib/api";
+import { uploadPrivateFile } from "@/lib/upload";
+import { describeError } from "@/lib/errors";
 import type { Roadmap, LessonRow, TopicRow, ChapterRow } from "@/lib/app-types";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
 import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
+import Dropzone from "@/components/ui/Dropzone";
 import Title from "@mui/icons-material/Title";
 import LinkIcon from "@mui/icons-material/Link";
 import Category from "@mui/icons-material/Category";
+import Lock from "@mui/icons-material/Lock";
+import LockOpen from "@mui/icons-material/LockOpen";
+import Movie from "@mui/icons-material/Movie";
 import Select from "@/components/ui/Select";
 
 type LessonType = "VIDEO" | "READING";
@@ -44,9 +50,10 @@ function draftFrom(l: LessonRow): Draft {
   };
 }
 
-function validate(d: Draft): string | null {
+function validate(d: Draft, hasVideo: boolean): string | null {
   if (d.title.trim().length < 2) return "Title needs at least 2 characters.";
-  if (d.type === "VIDEO" && !isValidUrl(d.contentUrl.trim())) return "Video lessons require a valid URL.";
+  if (d.type === "VIDEO" && !hasVideo && !isValidUrl(d.contentUrl.trim()))
+    return "Video lessons require an uploaded video file or a valid URL.";
   return null;
 }
 
@@ -65,11 +72,13 @@ function LessonForm({
   submitLabel,
   onSubmit,
   onCancel,
+  hasVideo = false,
 }: {
   initial: Draft;
   submitLabel: string;
   onSubmit: (d: Draft) => Promise<void>;
   onCancel: () => void;
+  hasVideo?: boolean;
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
   const [err, setErr] = useState<string | null>(null);
@@ -77,7 +86,7 @@ function LessonForm({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const v = validate(draft);
+    const v = validate(draft, hasVideo);
     setErr(v);
     if (v || busy) return;
     setBusy(true);
@@ -113,18 +122,23 @@ function LessonForm({
         </label>
         <label className="flex items-center gap-2 text-sm text-ink-700">
           <Checkbox checked={draft.isPublished} onChange={(v) => setDraft({ ...draft, isPublished: v })} />
-          Published
+          Unlock for learners
         </label>
       </div>
       {draft.type === "VIDEO" ? (
-        <Input
-          type="url"
-          value={draft.contentUrl}
-          icon={<LinkIcon fontSize="small" />}
-          onChange={(e) => setDraft({ ...draft, contentUrl: e.target.value })}
-          placeholder="https://… (video URL)"
-          aria-label="Video URL"
-        />
+        <div className="flex flex-col gap-1.5">
+          <Input
+            type="url"
+            value={draft.contentUrl}
+            icon={<LinkIcon fontSize="small" />}
+            onChange={(e) => setDraft({ ...draft, contentUrl: e.target.value })}
+            placeholder="https://… (video URL)"
+            aria-label="Video URL"
+          />
+          <p className="text-xs text-slate-500">
+            {hasVideo ? "A video file is uploaded. You can also paste a URL." : "Or upload an .mp4 / .webm file from the lesson row."}
+          </p>
+        </div>
       ) : (
         <textarea
           value={draft.textContent}
@@ -152,6 +166,8 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [videoFor, setVideoFor] = useState<string | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
 
   async function createLesson(d: Draft) {
     try {
@@ -174,6 +190,35 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
     } catch (e) {
       notifyError(e instanceof Error ? e.message : "Could not save the lesson.");
       throw e;
+    }
+  }
+
+  async function toggleUnlock(l: LessonRow) {
+    setBusyId(l.id);
+    try {
+      await apiPatch(`/courses/lessons/${l.id}`, { isPublished: !l.isPublished });
+      notifySuccess(l.isPublished ? "Lesson locked." : "Lesson unlocked — learners notified.");
+      onChanged();
+    } catch (e) {
+      notifyError(describeError(e, "Could not update the lesson."));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function uploadVideo(l: LessonRow) {
+    if (!videoFile) return;
+    setBusyId(l.id);
+    try {
+      await uploadPrivateFile(`/courses/lessons/${l.id}/video/sign`, `/courses/lessons/${l.id}/video`, videoFile);
+      notifySuccess("Video uploaded.");
+      setVideoFor(null);
+      setVideoFile(null);
+      onChanged();
+    } catch (e) {
+      notifyError(describeError(e, "Could not upload the video."));
+    } finally {
+      setBusyId(null);
     }
   }
 
@@ -230,48 +275,117 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
               <LessonForm
                 initial={draftFrom(l)}
                 submitLabel="Save"
+                hasVideo={l.hasVideo}
                 onSubmit={(d) => saveLesson(l.id, d)}
                 onCancel={() => setEditingId(null)}
               />
             ) : (
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-ink-900">
-                    {i + 1}. {l.title}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {l.type === "VIDEO" ? "Video" : "Reading"} ·{" "}
-                    {l.isPublished ? <span className="text-emerald-700">Published</span> : <span className="text-amber-700">Draft</span>}
-                  </p>
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink-900">
+                      {i + 1}. {l.title}
+                    </p>
+                    <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+                      <span>{l.type === "VIDEO" ? "Video" : "Reading"}</span>
+                      <span aria-hidden className="text-slate-300">·</span>
+                      {l.isPublished ? (
+                        <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                          <LockOpen fontSize="inherit" aria-hidden /> Unlocked
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
+                          <Lock fontSize="inherit" aria-hidden /> Locked
+                        </span>
+                      )}
+                      {l.type === "VIDEO" && l.hasVideo && (
+                        <span className="inline-flex items-center gap-1 font-medium text-slate-500">
+                          <Movie fontSize="inherit" aria-hidden /> Video uploaded
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1">
+                    {l.type === "VIDEO" && (
+                      <button
+                        type="button"
+                        className={buttonClass("ghost", "sm")}
+                        onClick={() => {
+                          setVideoFor(videoFor === l.id ? null : l.id);
+                          setVideoFile(null);
+                        }}
+                        disabled={busyId === l.id}
+                      >
+                        {l.hasVideo ? "Replace video" : "Upload video"}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className={buttonClass(l.isPublished ? "ghost" : "primary", "sm")}
+                      onClick={() => void toggleUnlock(l)}
+                      disabled={busyId === l.id || (!l.isPublished && !(l.hasVideo || l.contentUrl || (l.textContent ?? "").trim()))}
+                      title={
+                        !l.isPublished && !(l.hasVideo || l.contentUrl || (l.textContent ?? "").trim())
+                          ? "Add a video, link, or content before unlocking"
+                          : undefined
+                      }
+                    >
+                      {l.isPublished ? "Lock" : "Complete & unlock"}
+                    </button>
+                    <button
+                      type="button"
+                      className={buttonClass("ghost", "sm")}
+                      onClick={() => void move(i, -1)}
+                      disabled={i === 0 || busyId === l.id}
+                      aria-label="Move lesson up"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      className={buttonClass("ghost", "sm")}
+                      onClick={() => void move(i, 1)}
+                      disabled={i === topic.lessons.length - 1 || busyId === l.id}
+                      aria-label="Move lesson down"
+                    >
+                      ↓
+                    </button>
+                    <button type="button" className={buttonClass("ghost", "sm")} onClick={() => setEditingId(l.id)}>
+                      Edit
+                    </button>
+                    <DeleteButton
+                      onClick={() => void removeLesson(l)}
+                      disabled={busyId === l.id}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    className={buttonClass("ghost", "sm")}
-                    onClick={() => void move(i, -1)}
-                    disabled={i === 0 || busyId === l.id}
-                    aria-label="Move lesson up"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    type="button"
-                    className={buttonClass("ghost", "sm")}
-                    onClick={() => void move(i, 1)}
-                    disabled={i === topic.lessons.length - 1 || busyId === l.id}
-                    aria-label="Move lesson down"
-                  >
-                    ↓
-                  </button>
-                  <button type="button" className={buttonClass("ghost", "sm")} onClick={() => setEditingId(l.id)}>
-                    Edit
-                  </button>
-                  <DeleteButton
-                    onClick={() => void removeLesson(l)}
-                    disabled={busyId === l.id}
-                  />
-                </div>
-              </div>
+                {videoFor === l.id && (
+                  <div className="mt-3 flex flex-col gap-2">
+                    <Dropzone
+                      accept=".mp4,.webm,video/mp4,video/webm"
+                      hint="MP4 or WebM · uploads directly to storage"
+                      file={videoFile}
+                      onFile={setVideoFile}
+                      ariaLabel={`Upload video for ${l.title}`}
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" loading={busyId === l.id} disabled={!videoFile || busyId === l.id} onClick={() => void uploadVideo(l)}>
+                        Upload
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setVideoFor(null);
+                          setVideoFile(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </li>
         ))}

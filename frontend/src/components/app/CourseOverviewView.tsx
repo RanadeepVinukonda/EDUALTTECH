@@ -10,6 +10,8 @@ import { notifyError, notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
+import Lock from "@mui/icons-material/Lock";
+import PlayCircle from "@mui/icons-material/PlayCircle";
 
 function CourseSkeleton() {
   return (
@@ -82,7 +84,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
     [roadmap],
   );
   const nextLesson = useMemo(
-    () => lessons.find((l) => !completed.has(l.id)) ?? lessons[0] ?? null,
+    () => lessons.find((l) => l.isPublished && !completed.has(l.id)) ?? lessons.find((l) => l.isPublished) ?? lessons[0] ?? null,
     [lessons, completed],
   );
 
@@ -92,8 +94,9 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
     if (resumeTopicId) {
       for (const chapter of roadmap.chapters) {
         const topic = chapter.topics.find((t) => t.id === resumeTopicId);
-        if (topic && topic.lessons.length > 0) {
-          setSelected(topic.lessons[0]);
+        const open = topic?.lessons.find((l) => l.isPublished) ?? topic?.lessons[0];
+        if (open) {
+          setSelected(open);
           return;
         }
       }
@@ -234,6 +237,20 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                           {topic.lessons.map((lesson) => {
                             const done = completed.has(lesson.id);
                             const active = selected?.id === lesson.id;
+                            const locked = !lesson.isPublished && !access.isStaff;
+                            if (locked) {
+                              return (
+                                <li key={lesson.id}>
+                                  <div className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-400">
+                                    <Lock fontSize="inherit" aria-hidden className="shrink-0" />
+                                    <span className="truncate">{lesson.title}</span>
+                                    <span className="ml-auto shrink-0 text-[10px] font-semibold uppercase tracking-wide">
+                                      Locked
+                                    </span>
+                                  </div>
+                                </li>
+                              );
+                            }
                             return (
                               <li key={lesson.id}>
                                 <button
@@ -281,22 +298,37 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
               <h2 className="mt-1 font-display text-xl font-bold text-ink-900">{selected.title}</h2>
 
               <div className="mt-4">
-                {selected.type === "VIDEO" && selected.contentUrl ? (
-                  <a href={selected.contentUrl} target="_blank" rel="noreferrer" className={buttonClass("secondary", "sm")}>
-                    Open video lesson
-                  </a>
+                {!selected.isPublished && !access.isStaff ? (
+                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
+                    This lesson is locked. Your mentor unlocks it once its video or live class is ready.
+                  </div>
+                ) : selected.type === "VIDEO" ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    {selected.hasVideo && (
+                      <Link
+                        href={`/dashboard/courses/${course.slug}/lessons/${selected.id}`}
+                        className={buttonClass("primary", "sm")}
+                      >
+                        <PlayCircle fontSize="small" aria-hidden /> Watch video lesson
+                      </Link>
+                    )}
+                    {selected.contentUrl && (
+                      <a href={selected.contentUrl} target="_blank" rel="noreferrer" className={buttonClass("secondary", "sm")}>
+                        Open video lesson
+                      </a>
+                    )}
+                    {!selected.hasVideo && !selected.contentUrl && (
+                      <p className="text-sm text-slate-500">No video has been added to this lesson yet.</p>
+                    )}
+                  </div>
                 ) : selected.textContent ? (
                   <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink-700">{selected.textContent}</div>
-                ) : selected.contentUrl ? (
-                  <a href={selected.contentUrl} target="_blank" rel="noreferrer" className={buttonClass("secondary", "sm")}>
-                    Open resource
-                  </a>
                 ) : (
                   <p className="text-sm text-slate-500">No content has been added to this lesson yet.</p>
                 )}
               </div>
 
-              {isLearner && (
+              {isLearner && selected.isPublished && (
                 <div className="mt-6">
                   {completed.has(selected.id) ? (
                     <p className="text-sm font-semibold text-green-700">Completed</p>
