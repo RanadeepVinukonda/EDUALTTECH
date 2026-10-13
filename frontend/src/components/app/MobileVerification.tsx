@@ -7,6 +7,7 @@ import { notifyError, notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import PinInput from "@/components/ui/PinInput";
+import VerifyCard from "@/components/ui/VerifyCard";
 
 export default function MobileVerification() {
   const { user, refresh } = useAuth();
@@ -69,7 +70,7 @@ export default function MobileVerification() {
   }
 
   return (
-    <div className="space-y-4">
+    <VerifyCard>
       {user?.mobile && !sent && (
         <p className="text-sm text-slate-500">
           Current: {user.mobile} — not verified. Verify to unlock purchases and mentor applications.
@@ -110,6 +111,6 @@ export default function MobileVerification() {
           Dev mode — use code <strong>{devCode}</strong>.
         </p>
       )}
-    </div>
+    </VerifyCard>
   );
 }

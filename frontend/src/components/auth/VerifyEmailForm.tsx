@@ -9,6 +9,7 @@ import { hasSession, safeNext } from "@/lib/auth";
 import { getSignupFlow, setSignupEmail, setVerifiedCode } from "@/lib/signup-flow";
 import Button from "@/components/ui/Button";
 import PinInput from "@/components/ui/PinInput";
+import VerifyCard from "@/components/ui/VerifyCard";
 import { TextField } from "./Field";
 
 const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -107,7 +108,7 @@ export default function VerifyEmailForm({ emailFromQuery, next }: { emailFromQue
   }
 
   return (
-    <div className="space-y-6">
+    <VerifyCard>
       <p className="text-sm leading-relaxed text-ink-600">
         Email verification is required. We sent a code to{" "}
         <span className="font-semibold text-ink-900" title={email}>
@@ -193,7 +194,7 @@ export default function VerifyEmailForm({ emailFromQuery, next }: { emailFromQue
           Sign in
         </Link>
       </p>
-    </div>
+    </VerifyCard>
   );
 }
 

@@ -6,6 +6,7 @@ import { apiDelete, apiGet } from "@/lib/api";
 import type { WishlistItem } from "@/lib/app-types";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import { buttonClass } from "@/components/ui/Button";
+import IconActionButton from "@/components/ui/IconActionButton";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -86,15 +87,13 @@ export default function WishlistView() {
                 unavailable={!available}
                 viewLabel="View"
                 actions={
-                  <button
-                    type="button"
+                  <IconActionButton
+                    icon="delete"
+                    label={busy ? "Removing" : "Remove"}
                     onClick={() => void remove(item.courseId)}
                     disabled={busy}
                     aria-label={`Remove ${item.course.title} from wishlist`}
-                    className={buttonClass("danger", "sm")}
-                  >
-                    {busy ? "Removing…" : "Remove"}
-                  </button>
+                  />
                 }
               />
             </li>

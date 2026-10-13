@@ -9,7 +9,7 @@ import Lock from "@mui/icons-material/Lock";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import Button from "@/components/ui/Button";
 import LinkButton from "@/components/ui/LinkButton";
-import PayButton from "@/components/ui/PayButton";
+import EnrollButton from "@/components/ui/EnrollButton";
 import { api, ApiError } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
 import { formatPrice } from "@/lib/format";
@@ -136,13 +136,13 @@ export default function CourseActions({
             Sign in to enrol
           </LinkButton>
         ) : isPaid ? (
-          <PayButton onClick={() => router.push(`/checkout?course=${encodeURIComponent(slug)}`)}>
+          <EnrollButton onClick={() => router.push(`/checkout?course=${encodeURIComponent(slug)}`)}>
             Continue to checkout
-          </PayButton>
+          </EnrollButton>
         ) : (
-          <PayButton onClick={() => void enrolFree()} loading={enrolling}>
+          <EnrollButton onClick={() => void enrolFree()} loading={enrolling}>
             Enrol for free
-          </PayButton>
+          </EnrollButton>
         )}
 
         {ready && authed && !isLearner && !isMentor && !application && (

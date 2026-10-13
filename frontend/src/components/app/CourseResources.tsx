@@ -14,6 +14,7 @@ import Dropzone from "@/components/ui/Dropzone";
 import Select from "@/components/ui/Select";
 import Checkbox from "@/components/ui/Checkbox";
 import Button, { buttonClass } from "@/components/ui/Button";
+import { DeleteButton } from "@/components/ui/IconActionButton";
 import Category from "@mui/icons-material/Category";
 import MenuBook from "@mui/icons-material/MenuBook";
 
@@ -382,14 +383,10 @@ export default function CourseResources({ slug }: { slug: string }) {
                                 <button type="button" className={buttonClass("ghost", "sm")} onClick={() => startEdit(r)}>
                                   Edit
                                 </button>
-                                <button
-                                  type="button"
-                                  className={buttonClass("danger", "sm")}
+                                <DeleteButton
                                   onClick={() => void remove(r)}
                                   disabled={rowBusy === r.id}
-                                >
-                                  Delete
-                                </button>
+                                />
                               </>
                             )}
                           </div>

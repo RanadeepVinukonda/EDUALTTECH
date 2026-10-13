@@ -13,7 +13,8 @@ import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import Dropzone from "@/components/ui/Dropzone";
 import Select from "@/components/ui/Select";
-import Button, { buttonClass } from "@/components/ui/Button";
+import { buttonClass } from "@/components/ui/Button";
+import SubmitApplicationButton from "@/components/ui/SubmitApplicationButton";
 import { useAuth } from "./AuthProvider";
 import MobileVerification from "./MobileVerification";
 
@@ -277,9 +278,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
           )}
 
           <div className="flex items-center gap-3">
-            <Button type="submit" loading={busy}>
-              Submit application
-            </Button>
+            <SubmitApplicationButton loading={busy}>Submit application</SubmitApplicationButton>
             <Link href="/dashboard/mentor" className={buttonClass("ghost", "md")}>
               Cancel
             </Link>

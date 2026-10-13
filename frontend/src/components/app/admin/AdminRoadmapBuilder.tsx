@@ -6,6 +6,7 @@ import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import type { ChapterRow, LessonRow, Roadmap, TopicRow } from "@/lib/app-types";
 import { notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
+import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
 import Select from "@/components/ui/Select";
@@ -184,7 +185,7 @@ function ChapterCard({
             <Button variant="ghost" size="sm" disabled={busy || index === 0} onClick={() => reorder(-1)} aria-label={`Move ${chapter.title} up`}>Move up</Button>
             <Button variant="ghost" size="sm" disabled={busy || index === count - 1} onClick={() => reorder(1)} aria-label={`Move ${chapter.title} down`}>Move down</Button>
             <Button variant="secondary" size="sm" disabled={busy} onClick={() => setEditing(true)}>Edit</Button>
-            <Button variant="danger" size="sm" disabled={busy} onClick={() => setConfirmDelete(true)}>Delete</Button>
+            <DeleteButton disabled={busy} onClick={() => setConfirmDelete(true)} />
           </div>
         </div>
       )}
@@ -285,7 +286,7 @@ function TopicCard({
             <Button variant="ghost" size="sm" disabled={busy || index === 0} onClick={() => reorder(-1)} aria-label={`Move ${topic.title} up`}>↑</Button>
             <Button variant="ghost" size="sm" disabled={busy || index === count - 1} onClick={() => reorder(1)} aria-label={`Move ${topic.title} down`}>↓</Button>
             <Button variant="ghost" size="sm" disabled={busy} onClick={() => setEditing(true)}>Edit</Button>
-            <Button variant="danger" size="sm" disabled={busy} onClick={() => setConfirmDelete(true)}>Delete</Button>
+            <DeleteButton disabled={busy} onClick={() => setConfirmDelete(true)} />
           </div>
         </div>
       )}
@@ -436,7 +437,7 @@ function LessonCard({
             <Button variant="ghost" size="sm" disabled={busy || index === 0} onClick={() => reorder(-1)} aria-label={`Move ${lesson.title} up`}>↑</Button>
             <Button variant="ghost" size="sm" disabled={busy || index === count - 1} onClick={() => reorder(1)} aria-label={`Move ${lesson.title} down`}>↓</Button>
             <Button variant="ghost" size="sm" disabled={busy} onClick={() => setEditing(true)}>Edit</Button>
-            <Button variant="danger" size="sm" disabled={busy} onClick={() => setConfirmDelete(true)}>Delete</Button>
+            <DeleteButton disabled={busy} onClick={() => setConfirmDelete(true)} />
           </div>
         </div>
       )}

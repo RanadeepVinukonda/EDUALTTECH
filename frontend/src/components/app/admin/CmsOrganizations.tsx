@@ -6,6 +6,7 @@ import type { OrganizationRow, OrganizationType } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
+import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Search from "@mui/icons-material/Search";
@@ -149,7 +150,7 @@ export default function CmsOrganizations() {
                     <td className="px-2 py-3 text-right">
                       <div className="flex justify-end gap-2">
                         <Button size="sm" variant="secondary" onClick={() => setEditing(o)}>Edit</Button>
-                        <Button size="sm" variant="danger" onClick={() => setDeleting(o)}>Delete</Button>
+                        <DeleteButton onClick={() => setDeleting(o)} />
                       </div>
                     </td>
                   </tr>

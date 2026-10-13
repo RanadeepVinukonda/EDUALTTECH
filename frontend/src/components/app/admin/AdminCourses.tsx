@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ApiError, apiGet, apiPatch } from "@/lib/api";
 import type { AdminCourseSummary } from "@/lib/app-types";
 import { formatDate, formatMoney } from "@/lib/format";
 import { notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
+import { ViewButton } from "@/components/ui/IconActionButton";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
@@ -157,6 +159,7 @@ export default function AdminCourses() {
 }
 
 function CourseRow({ course, onChanged }: { course: AdminCourseSummary; onChanged: () => void }) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<null | { status: "PUBLISHED" | "DRAFT" | "ARCHIVED"; label: string; detail: string }>(null);
@@ -213,9 +216,10 @@ function CourseRow({ course, onChanged }: { course: AdminCourseSummary; onChange
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link href={`/dashboard/admin/courses/${course.id}`} className={buttonClass("secondary", "sm")}>
-            Manage
-          </Link>
+          <ViewButton
+            onClick={() => router.push(`/dashboard/admin/courses/${course.id}`)}
+            aria-label={`View course: ${course.title}`}
+          />
           {actions.map((a) =>
             a.confirm ? (
               <Button key={a.label} variant="ghost" size="sm" disabled={busy} onClick={() => setConfirm({ status: a.next, label: a.label, detail: a.confirm!.detail })}>

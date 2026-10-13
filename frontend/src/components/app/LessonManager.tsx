@@ -5,6 +5,7 @@ import { apiPost, apiPatch, apiDelete } from "@/lib/api";
 import type { Roadmap, LessonRow, TopicRow, ChapterRow } from "@/lib/app-types";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
+import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
 import Title from "@mui/icons-material/Title";
@@ -265,14 +266,10 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
                   <button type="button" className={buttonClass("ghost", "sm")} onClick={() => setEditingId(l.id)}>
                     Edit
                   </button>
-                  <button
-                    type="button"
-                    className={buttonClass("danger", "sm")}
+                  <DeleteButton
                     onClick={() => void removeLesson(l)}
                     disabled={busyId === l.id}
-                  >
-                    Delete
-                  </button>
+                  />
                 </div>
               </div>
             )}

@@ -6,6 +6,7 @@ import type { MediaAssetRow } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
+import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Search from "@mui/icons-material/Search";
@@ -139,7 +140,7 @@ export default function CmsMediaLibrary() {
                     <Button size="sm" variant="ghost" onClick={() => copyUrl(a)}>
                       {copied === a.id ? "Copied" : "Copy URL"}
                     </Button>
-                    <Button size="sm" variant="danger" onClick={() => setDeleting(a)}>Delete</Button>
+                    <DeleteButton onClick={() => setDeleting(a)} />
                   </div>
                 </div>
               </li>

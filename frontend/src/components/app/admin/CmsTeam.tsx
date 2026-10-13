@@ -6,6 +6,7 @@ import type { TeamMemberRow } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import Button from "@/components/ui/Button";
+import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
 import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import Badge from "@mui/icons-material/Badge";
@@ -121,7 +122,7 @@ export default function CmsTeam() {
                 <span className="hidden text-xs text-slate-400 sm:block">Updated {formatDate(m.updatedAt)}</span>
                 <div className="flex gap-2">
                   <Button size="sm" variant="secondary" onClick={() => setEditing(m)}>Edit</Button>
-                  <Button size="sm" variant="danger" onClick={() => setDeleting(m)}>Delete</Button>
+                  <DeleteButton onClick={() => setDeleting(m)} />
                 </div>
               </li>
             ))}

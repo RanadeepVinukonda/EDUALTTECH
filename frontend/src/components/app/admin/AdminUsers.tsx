@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ApiError, apiGet } from "@/lib/api";
 import type { AdminUserRow, Role } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import Button from "@/components/ui/Button";
+import { ViewButton } from "@/components/ui/IconActionButton";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
@@ -35,6 +36,7 @@ function listError(err: unknown): string {
 }
 
 export default function AdminUsers() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [role, setRole] = useState<"" | Role>("");
   const [page, setPage] = useState(1);
@@ -174,12 +176,10 @@ export default function AdminUsers() {
                       <td className="py-3 pr-4 text-slate-600">{u._count.participations}</td>
                       <td className="py-3 pr-4 text-slate-600">{formatDate(u.createdAt, { dateStyle: "medium" })}</td>
                       <td className="py-3 text-right">
-                        <Link
-                          href={`/dashboard/admin/users/${u.id}?email=${encodeURIComponent(u.email)}`}
-                          className="text-sm font-semibold text-brand-700 hover:underline"
-                        >
-                          Manage
-                        </Link>
+                        <ViewButton
+                          onClick={() => router.push(`/dashboard/admin/users/${u.id}?email=${encodeURIComponent(u.email)}`)}
+                          aria-label={`View user: ${userName(u)}`}
+                        />
                       </td>
                     </tr>
                   ))}
@@ -200,12 +200,10 @@ export default function AdminUsers() {
                         <span className="text-xs text-slate-500">{u._count.participations} enrolments</span>
                       </div>
                     </div>
-                    <Link
-                      href={`/dashboard/admin/users/${u.id}?email=${encodeURIComponent(u.email)}`}
-                      className="shrink-0 text-sm font-semibold text-brand-700 hover:underline"
-                    >
-                      Manage
-                    </Link>
+                    <ViewButton
+                      onClick={() => router.push(`/dashboard/admin/users/${u.id}?email=${encodeURIComponent(u.email)}`)}
+                      aria-label={`View user: ${userName(u)}`}
+                    />
                   </div>
                 </li>
               ))}

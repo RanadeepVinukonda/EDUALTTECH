@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { apiGet } from "@/lib/api";
 import type { Application, MyCourses, MentoringRow } from "@/lib/app-types";
 import { APPLICATION_STATUS_META } from "@/lib/mentor";
@@ -11,8 +12,10 @@ import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import CoverImage from "@/components/ui/CoverImage";
 import { buttonClass } from "@/components/ui/Button";
+import { ViewButton } from "@/components/ui/IconActionButton";
 
 export default function MentorDashboardView() {
+  const router = useRouter();
   const [courses, setCourses] = useState<MentoringRow[] | null>(null);
   const [apps, setApps] = useState<Application[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -130,12 +133,10 @@ export default function MentorDashboardView() {
                       <span className={meta.tone}>{meta.label}</span>
                     </p>
                   </div>
-                  <Link
-                    href={`/dashboard/mentor/applications/${a.id}`}
-                    className={buttonClass("ghost", "sm")}
-                  >
-                    View application
-                  </Link>
+                  <ViewButton
+                    onClick={() => router.push(`/dashboard/mentor/applications/${a.id}`)}
+                    aria-label={`View application: ${a.course.title}`}
+                  />
                 </li>
               );
             })}

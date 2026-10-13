@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/format";
 import { useAuth } from "@/components/app/AuthProvider";
 import { notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
+import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Checkbox from "@/components/ui/Checkbox";
@@ -287,9 +288,7 @@ function UserEditor({ user, expectedId, onSaved }: { user: AdminUserRow; expecte
               </div>
             </div>
           ) : (
-            <Button variant="danger" size="sm" className="mt-3" onClick={() => setConfirmRemove(true)}>
-              Deactivate / remove account
-            </Button>
+            <DeleteButton className="mt-3" onClick={() => setConfirmRemove(true)} />
           )}
         </Panel>
       </div>
