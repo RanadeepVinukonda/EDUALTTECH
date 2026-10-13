@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
@@ -26,37 +27,52 @@ const ICONS = [
   },
 ] as const;
 
-function payIcon(kind: string, index: number) {
-  const icon = ICONS.find((i) => i.kind === kind)!;
-  return (
-    <svg
-      key={kind}
-      viewBox="0 0 24 24"
-      className={cn("pay-btn__icon", index === 0 ? "pay-btn__icon--default" : `pay-btn__icon--${index + 1}`)}
-      aria-hidden
-    >
-      <path d={icon.d} fill="currentColor" />
-    </svg>
-  );
-}
+/** Duration (ms) of the full click animation before the callback fires. */
+const ANIM_MS = 3000;
 
 export default function PayButton({
   children,
   loading,
   disabled,
   className,
+  onClick,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean }) {
+  const [paying, setPaying] = useState(false);
+
+  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    if (paying || loading || disabled) return;
+    setPaying(true);
+    window.setTimeout(() => {
+      setPaying(false);
+      onClick?.(e);
+    }, ANIM_MS);
+  }
+
   return (
-    <button className={cn("pay-btn", className)} disabled={disabled || loading} {...props}>
+    <button
+      className={cn("pay-btn", paying && "is-paying", className)}
+      disabled={disabled || loading}
+      onClick={handleClick}
+      aria-busy={paying}
+      {...props}
+    >
       <span className="btn-text">{children}</span>
-      {loading ? (
-        <span aria-hidden className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-      ) : (
-        <span className="pay-btn__icons" aria-hidden>
-          {ICONS.map((icon, i) => payIcon(icon.kind, i))}
-        </span>
-      )}
+      <span className="pay-btn__icons" aria-hidden>
+        {loading ? (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        ) : (
+          ICONS.map(({ kind }, i) => (
+            <svg
+              key={kind}
+              viewBox="0 0 24 24"
+              className={cn("pay-btn__icon", i === 0 ? "pay-btn__icon--default" : `pay-btn__icon--${i + 1}`)}
+            >
+              <path d={ICONS[i].d} fill="currentColor" />
+            </svg>
+          ))
+        )}
+      </span>
     </button>
   );
 }

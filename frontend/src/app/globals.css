@@ -212,41 +212,29 @@ body {
   visibility: visible;
 }
 
-.pay-btn:hover .pay-btn__icons > .pay-btn__icon--default {
+.pay-btn.is-paying .pay-btn__icons > .pay-btn__icon--default {
   opacity: 0;
   visibility: hidden;
 }
 
-.pay-btn:hover .pay-btn__icons > .pay-btn__icon {
-  animation: pay-icon-cycle 2.5s infinite;
+.pay-btn.is-paying .pay-btn__icons > .pay-btn__icon {
+  animation: pay-icon-cycle 2.5s;
 }
 
-.pay-btn:hover .pay-btn__icons > .pay-btn__icon--2 {
+.pay-btn.is-paying .pay-btn__icons > .pay-btn__icon--2 {
   animation-delay: 0s;
 }
 
-.pay-btn:hover .pay-btn__icons > .pay-btn__icon--3 {
+.pay-btn.is-paying .pay-btn__icons > .pay-btn__icon--3 {
   animation-delay: 0.5s;
 }
 
-.pay-btn:hover .pay-btn__icons > .pay-btn__icon--4 {
+.pay-btn.is-paying .pay-btn__icons > .pay-btn__icon--4 {
   animation-delay: 1s;
 }
 
-.pay-btn:hover .pay-btn__icons > .pay-btn__icon--5 {
-  animation-delay: 1.5s;
-}
-
-.pay-btn:active .pay-btn__icons > .pay-btn__icon {
-  animation: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-}
-
-.pay-btn:active .pay-btn__icons > .pay-btn__icon--5 {
-  animation: pay-check 0.6s ease forwards;
-  visibility: visible;
+.pay-btn.is-paying .pay-btn__icons > .pay-btn__icon--5 {
+  animation: pay-check 0.6s ease 2.4s forwards;
 }
 
 @keyframes pay-icon-cycle {
