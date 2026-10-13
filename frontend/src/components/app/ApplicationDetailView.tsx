@@ -5,18 +5,24 @@ import Link from "next/link";
 import { apiGet, ApiError } from "@/lib/api";
 import type { Application } from "@/lib/app-types";
 import { APPLICATION_STATUS_META } from "@/lib/mentor";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatCountdown } from "@/lib/format";
 import { notifyError } from "@/lib/notify";
+import { buttonClass } from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import { buttonClass } from "@/components/ui/Button";
 
 export default function ApplicationDetailView({ id }: { id: string }) {
   const [application, setApplication] = useState<Application | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const load = useCallback(async () => {
     setError(null);
@@ -36,11 +42,15 @@ export default function ApplicationDetailView({ id }: { id: string }) {
 
   async function downloadResume() {
     if (downloading) return;
+    // Open synchronously (user gesture) then point it at the signed URL once fetched.
+    const tab = window.open("", "_blank");
     setDownloading(true);
     try {
       const { url } = await apiGet<{ url: string }>(`/applications/${id}/resume`);
-      window.open(url, "_blank", "noopener,noreferrer");
+      if (tab) tab.location.href = url;
+      else window.open(url, "_blank", "noopener,noreferrer");
     } catch (e) {
+      tab?.close();
       notifyError(e instanceof Error ? e.message : "Could not open the resume.");
     } finally {
       setDownloading(false);
@@ -63,6 +73,16 @@ export default function ApplicationDetailView({ id }: { id: string }) {
   if (!application) return <Spinner label="Loading application…" />;
 
   const meta = APPLICATION_STATUS_META[application.status];
+
+  const interviewStart = application.interviewAt ? new Date(application.interviewAt).getTime() : 0;
+  // ponytail: no stored interview duration — treat the first 60 minutes as live.
+  const interviewStatus = !interviewStart
+    ? null
+    : now < interviewStart
+      ? `Starts in ${formatCountdown(interviewStart - now)}`
+      : now < interviewStart + 60 * 60_000
+        ? "Live now"
+        : "Ended";
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
@@ -91,15 +111,30 @@ export default function ApplicationDetailView({ id }: { id: string }) {
           {application.interviewAt && (
             <p className="mt-2 text-indigo-800">Scheduled for {formatDate(application.interviewAt)}</p>
           )}
-          {application.interviewUrl && (
-            <a
-              href={application.interviewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 inline-block font-semibold text-indigo-700 underline"
-            >
-              Join interview link
-            </a>
+          {(application.interviewUrl || interviewStatus) && (
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              {application.interviewUrl && (
+                <a
+                  href={application.interviewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={buttonClass("primary", "sm")}
+                >
+                  Join interview
+                </a>
+              )}
+              {interviewStatus && (
+                <span
+                  className={
+                    interviewStatus === "Live now"
+                      ? "font-semibold text-green-700"
+                      : "font-semibold text-indigo-700"
+                  }
+                >
+                  {interviewStatus}
+                </span>
+              )}
+            </div>
           )}
         </section>
       )}

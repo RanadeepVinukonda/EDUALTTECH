@@ -14,6 +14,8 @@ import ErrorState from "@/components/ui/ErrorState";
 import Dropzone from "@/components/ui/Dropzone";
 import Select from "@/components/ui/Select";
 import Button, { buttonClass } from "@/components/ui/Button";
+import { useAuth } from "./AuthProvider";
+import MobileVerification from "./MobileVerification";
 
 interface CourseOption {
   id: string;
@@ -54,6 +56,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
   const [needsMobile, setNeedsMobile] = useState(false);
   const [busy, setBusy] = useState(false);
   const submitted = useRef(false);
+  const { user } = useAuth();
 
   const load = useCallback(async () => {
     setLoadError(null);
@@ -139,6 +142,30 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
 
   if (loadError) return <ErrorState message={loadError} onRetry={() => void load()} />;
   if (!courses || !apps) return <Spinner label="Loading application form…" />;
+
+  if (user && !user.mobileVerifiedAt) {
+    return (
+      <div className="flex max-w-2xl flex-col gap-6">
+        <header>
+          <h1 className="font-display text-2xl font-extrabold text-ink-900">Apply to mentor</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Choose a course and tell us about your expertise. Submission does not grant teaching
+            access — a reviewer assesses every application.
+          </p>
+        </header>
+        <div className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
+          <p className="font-semibold text-amber-900">Verify your mobile number to continue</p>
+          <p className="mt-1 text-sm text-amber-800">
+            We ask for a verified mobile number before you can apply to mentor. The application form
+            unlocks automatically as soon as your number is verified.
+          </p>
+        </div>
+        <div className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-elev1">
+          <MobileVerification />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">

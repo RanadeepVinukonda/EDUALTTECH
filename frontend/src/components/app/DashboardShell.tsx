@@ -34,7 +34,7 @@ const ACCOUNT: NavLink[] = [
 ];
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, isSigningOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname() || "/dashboard";
 
@@ -46,11 +46,12 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   useEffect(() => {
     if (loading) return;
     if (!user) {
+      if (isSigningOut()) return;
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }
     if (!user.onboardingDone) router.replace("/onboarding");
-  }, [loading, user, pathname, router]);
+  }, [loading, user, pathname, router, isSigningOut]);
 
   useEffect(() => {
     if (!user) return;

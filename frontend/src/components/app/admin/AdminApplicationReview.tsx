@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiGet, apiPost, ApiError } from "@/lib/api";
 import type { Application, ApplicationStatus } from "@/lib/app-types";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatCountdown } from "@/lib/format";
 import { notifySuccess, notifyError } from "@/lib/notify";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import CoverImage from "@/components/ui/CoverImage";
-import Button from "@/components/ui/Button";
+import Button, { buttonClass } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import LinkIcon from "@mui/icons-material/Link";
 import Event from "@mui/icons-material/Event";
@@ -50,6 +50,12 @@ export default function AdminApplicationReview({ id }: { id: string }) {
   const [interviewAt, setInterviewAt] = useState("");
   const [busy, setBusy] = useState(false);
   const [resumeBusy, setResumeBusy] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const application = current ?? app.data?.application ?? null;
 
@@ -81,11 +87,15 @@ export default function AdminApplicationReview({ id }: { id: string }) {
 
   async function openResume() {
     if (!application) return;
+    // Open the tab synchronously so the browser treats it as user-initiated (signed URL is fetched async).
+    const tab = window.open("", "_blank");
     setResumeBusy(true);
     try {
       const { url } = await apiGet<{ url: string }>(`/applications/${application.id}/resume`);
-      window.open(url, "_blank", "noopener,noreferrer");
+      if (tab) tab.location.href = url;
+      else window.open(url, "_blank", "noopener,noreferrer");
     } catch (e) {
+      tab?.close();
       notifyError(e instanceof ApiError ? e.message : "Could not open the resume");
     } finally {
       setResumeBusy(false);
@@ -97,6 +107,16 @@ export default function AdminApplicationReview({ id }: { id: string }) {
   if (!application) return <EmptyState title="Application not found" description="This application may have been removed." />;
 
   const next = TRANSITIONS[application.status];
+
+  const interviewStart = application.interviewAt ? new Date(application.interviewAt).getTime() : 0;
+  // ponytail: interviews have no stored duration — assume a 60-minute window for the "live" state.
+  const interviewStatus = !interviewStart
+    ? null
+    : now < interviewStart
+      ? `Starts in ${formatCountdown(interviewStart - now)}`
+      : now < interviewStart + 60 * 60_000
+        ? "Live now"
+        : "Ended";
 
   return (
     <div className="space-y-6">
@@ -158,18 +178,38 @@ export default function AdminApplicationReview({ id }: { id: string }) {
         <Panel title="Review history">
           <dl className="grid gap-4 sm:grid-cols-2">
             {application.interviewAt && <Field label="Interview at" value={formatDate(application.interviewAt)} />}
-            {application.interviewUrl && (
+            {application.reviewedAt && <Field label="Reviewed at" value={formatDate(application.reviewedAt)} />}
+            {application.reviewNote && <Field label="Note" value={application.reviewNote} />}
+            {(application.interviewUrl || application.interviewAt) && (
               <Field
-                label="Interview link"
+                label="Interview"
                 value={
-                  <a href={application.interviewUrl} target="_blank" rel="noopener noreferrer" className="break-all text-brand-700 hover:underline">
-                    {application.interviewUrl}
-                  </a>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {application.interviewUrl && (
+                      <a
+                        href={application.interviewUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={buttonClass("primary", "sm")}
+                      >
+                        Join interview
+                      </a>
+                    )}
+                    {interviewStatus && (
+                      <span
+                        className={
+                          interviewStatus === "Live now"
+                            ? "text-sm font-semibold text-green-700"
+                            : "text-sm font-semibold text-brand-700"
+                        }
+                      >
+                        {interviewStatus}
+                      </span>
+                    )}
+                  </div>
                 }
               />
             )}
-            {application.reviewedAt && <Field label="Reviewed at" value={formatDate(application.reviewedAt)} />}
-            {application.reviewNote && <Field label="Note" value={application.reviewNote} />}
           </dl>
         </Panel>
       )}

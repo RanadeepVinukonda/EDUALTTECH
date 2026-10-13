@@ -219,14 +219,25 @@ router.post(
       },
     });
 
+    const whenInterview = interviewAt ?? application.interviewAt ?? null;
+    const joinLink = interviewUrl ?? application.interviewUrl ?? null;
+    const viewLink = `${config.appBaseUrl}/dashboard/mentor/applications/${application.id}`;
+    const interviewEmail = action === "INTERVIEW_SCHEDULED";
+
     await sendEmail({
       to: application.user.email,
-      subject: `Your EduAltTech mentor application — ${action.replace("_", " ").toLowerCase()}`,
+      subject: interviewEmail
+        ? `Interview scheduled — ${application.course.title}`
+        : `Your EduAltTech mentor application — ${action.replace("_", " ").toLowerCase()}`,
       html: layout(
-        "Application update",
-        `Your mentor application for <strong>${application.course.title}</strong> is now <strong>${action.replace("_", " ").toLowerCase()}</strong>.`,
-        "View your applications",
-        `${config.appBaseUrl}/dashboard/applications`,
+        interviewEmail ? "Interview scheduled" : "Application update",
+        interviewEmail
+          ? `Your mentor interview for <strong>${application.course.title}</strong> is scheduled${
+              whenInterview ? ` for <strong>${new Date(whenInterview).toLocaleString("en-IN")}</strong>` : ""
+            }. Join on time using the button below — your interview window opens at the scheduled time.`
+          : `Your mentor application for <strong>${application.course.title}</strong> is now <strong>${action.replace("_", " ").toLowerCase()}</strong>.`,
+        interviewEmail ? (joinLink ? "Join interview" : "View your application") : "View your applications",
+        interviewEmail ? joinLink ?? viewLink : viewLink,
       ),
     }).catch(() => false);
 

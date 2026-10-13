@@ -12,6 +12,7 @@ interface AuthValue {
   loading: boolean;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
+  isSigningOut: () => boolean;
 }
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -22,6 +23,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const router = useRouter();
   const pathname = usePathname();
   const handlingExpiry = useRef(false);
+  const signingOut = useRef(false);
 
   const load = useCallback(async () => {
     const { data } = await getSupabase().auth.getSession();
@@ -32,6 +34,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
     try {
       const { user: me } = await apiGet<{ user: Me }>("/auth/me");
+      signingOut.current = false;
       setUser(me);
     } catch {
       setUser(null);
@@ -72,11 +75,16 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   }, [router, pathname]);
 
   const signOut = useCallback(async () => {
+    signingOut.current = true;
     await getSupabase().auth.signOut();
     setUser(null);
   }, []);
 
-  return <AuthContext.Provider value={{ user, loading, refresh: load, signOut }}>{children}</AuthContext.Provider>;
+  const isSigningOut = useCallback(() => signingOut.current, []);
+
+  return (
+    <AuthContext.Provider value={{ user, loading, refresh: load, signOut, isSigningOut }}>{children}</AuthContext.Provider>
+  );
 }
 
 export function useAuth(): AuthValue {
