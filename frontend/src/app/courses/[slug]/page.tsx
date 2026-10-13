@@ -4,13 +4,13 @@ import Link from "next/link";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import CheckCircle from "@mui/icons-material/CheckCircle";
-import Groups from "@mui/icons-material/Groups";
 import WorkspacePremium from "@mui/icons-material/WorkspacePremium";
 import { publicFetchStrict } from "@/lib/server-api";
 import { siteUrl } from "@/lib/site";
 import type { CourseDetailResponse } from "@/lib/types";
 import CoverImage from "@/components/ui/CoverImage";
 import LinkButton from "@/components/ui/LinkButton";
+import TapLoader from "@/components/ui/TapLoader";
 import CourseActions from "@/components/courses/CourseActions";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
@@ -134,14 +134,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
       <div className={`${wrap} grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14`}>
         <div className="min-w-0">
           {/* Hero — translucent thumbnail with title + tags on it */}
-          <div className="relative flex min-h-[240px] items-end overflow-hidden rounded-[20px] shadow-elev2">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-700 to-[#024059]" />
+          <div className="relative flex min-h-[240px] items-end overflow-hidden rounded-[20px] bg-slate-900 shadow-elev2">
             {course.thumbnailUrl && (
-              <div className="absolute inset-0 opacity-40">
+              <div className="absolute inset-0">
                 <CoverImage src={course.thumbnailUrl} alt="" fallback="" />
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-b from-[rgba(2,33,46,0.10)] to-[rgba(2,33,46,0.82)]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
             <div className="relative z-10 w-full p-6 text-white sm:p-7">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold text-brand-100 backdrop-blur">
@@ -298,10 +297,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 })}
               </ul>
             ) : (
-              <p className="mt-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-ink-600">
-                <Groups fontSize="small" className="mr-2 align-text-bottom text-slate-400" />
-                Mentors for this course are being assigned.
-              </p>
+              <div className="mt-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+                <div className="mx-auto w-fit pl-20">
+                  <TapLoader />
+                </div>
+                <p className="mt-5 font-display text-base font-bold text-ink-900">Waiting for a mentor</p>
+                <p className="mx-auto mt-1 max-w-md text-sm text-ink-600">
+                  No mentor is assigned to this course yet. Check back soon — you can still apply to mentor below.
+                </p>
+              </div>
             )}
           </section>
         </div>
