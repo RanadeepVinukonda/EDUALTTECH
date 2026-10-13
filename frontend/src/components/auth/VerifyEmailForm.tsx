@@ -153,7 +153,7 @@ export default function VerifyEmailForm({ emailFromQuery, next }: { emailFromQue
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full" loading={pending}>
+            <Button type="submit" variant="secondary" className="w-full btn-neo" loading={pending}>
               Verify email
             </Button>
           </form>

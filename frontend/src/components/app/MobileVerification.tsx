@@ -100,7 +100,7 @@ export default function MobileVerification() {
         <div className="space-y-3">
           <p className="block text-sm font-semibold text-ink-700">6-digit code</p>
           <PinInput length={6} value={code} onChange={setCode} autoFocus />
-          <Button onClick={() => void verify()} loading={verifying}>
+          <Button onClick={() => void verify()} variant="secondary" className="w-full btn-neo" loading={verifying}>
             Verify
           </Button>
         </div>

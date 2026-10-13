@@ -82,7 +82,7 @@ export default function PinInput({
               fillFrom(i, text);
             }
           }}
-          className="h-12 w-11 rounded-xl border border-slate-300 bg-white text-center text-lg font-semibold text-ink-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 disabled:opacity-50"
+          className="pin-input"
         />
       ))}
     </div>
