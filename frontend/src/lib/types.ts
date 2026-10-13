@@ -67,7 +67,13 @@ export interface CourseDetailResponse {
   course: CourseDetail;
   myParticipation: { id: string; role: "LEARNER" | "MENTOR"; status: string; progressPct: number } | null;
   myWishlist: boolean;
-  myApplication: { id: string; status: string } | null;
+  myApplication: {
+    id: string;
+    status: string;
+    interviewUrl: string | null;
+    interviewAt: string | null;
+    reviewNote: string | null;
+  } | null;
 }
 
 export interface WorkItem {

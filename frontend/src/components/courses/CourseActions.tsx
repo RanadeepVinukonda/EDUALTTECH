@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 import LinkButton from "@/components/ui/LinkButton";
 import EnrollButton from "@/components/ui/EnrollButton";
 import PayButton from "@/components/ui/PayButton";
+import Countdown from "@/components/ui/Countdown";
 import { api, ApiError } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
 import { formatPrice } from "@/lib/format";
@@ -168,10 +169,57 @@ export default function CourseActions({
       </div>
 
       {application && (
-        <p className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-sm text-ink-600">
-          Your mentor application is <span className="font-semibold text-ink-900">{APP_STATUS[application.status] ?? application.status}</span>.
-          Mentoring is granted per course after review.
-        </p>
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Mentor application
+          </p>
+          <p className="mt-1.5 text-sm font-bold text-ink-900">
+            {application.status === "INTERVIEW_SCHEDULED"
+              ? "Interview scheduled"
+              : application.status === "ACCEPTED"
+                ? "Accepted"
+                : APP_STATUS[application.status] ?? application.status}
+          </p>
+
+          {application.status === "INTERVIEW_SCHEDULED" && (
+            <div className="mt-2.5 space-y-2">
+              {application.interviewAt && (
+                <p className="text-sm text-ink-600">
+                  {new Date(application.interviewAt).toLocaleString(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </p>
+              )}
+              {application.interviewAt && (
+                <Countdown
+                  to={application.interviewAt}
+                  className="inline-block rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700"
+                />
+              )}
+              {application.interviewUrl && (
+                <a
+                  href={application.interviewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+                >
+                  Join interview
+                </a>
+              )}
+            </div>
+          )}
+
+          {application.status === "REJECTED" && application.reviewNote && (
+            <p className="mt-2 text-sm text-ink-600">{application.reviewNote}</p>
+          )}
+
+          {application.status !== "INTERVIEW_SCHEDULED" && application.status !== "REJECTED" && (
+            <p className="mt-2 text-sm text-ink-600">
+              Mentoring is granted per course after review.
+            </p>
+          )}
+        </div>
       )}
 
       {error && (

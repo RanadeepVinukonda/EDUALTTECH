@@ -187,7 +187,7 @@ router.get("/:slug", optionalAuth, async (req, res) => {
     ? await prisma.mentorApplication.findFirst({
         where: { courseId: course.id, userId: req.user.id },
         orderBy: { createdAt: "desc" },
-        select: { id: true, status: true },
+        select: { id: true, status: true, interviewUrl: true, interviewAt: true, reviewNote: true },
       })
     : null;
 
