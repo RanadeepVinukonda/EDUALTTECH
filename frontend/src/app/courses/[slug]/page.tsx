@@ -82,6 +82,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   const typeLabel = TYPE_LABEL[course.type] ?? "Course";
 
   const base = await siteUrl();
+  // ponytail: one lesson ≈ one hour; drop courseWorkload if real durations land in the data.
+  const workload = lessonsTotal > 0 ? `PT${lessonsTotal}H` : undefined;
   const courseJsonLd = {
     "@context": "https://schema.org",
     "@type": "Course",
@@ -89,7 +91,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     description: course.description,
     url: `${base}/courses/${course.slug}`,
     ...(course.thumbnailUrl ? { image: course.thumbnailUrl } : {}),
-    provider: { "@type": "EducationalOrganization", name: "EduAltTech", sameAs: base },
+    provider: { "@type": "EducationalOrganization", "@id": `${base}/#organization`, name: "EduAltTech" },
     inLanguage: "en-IN",
     offers: {
       "@type": "Offer",
@@ -99,11 +101,26 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
       availability: "https://schema.org/InStock",
       url: `${base}/courses/${course.slug}`,
     },
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: "online",
+      ...(workload ? { courseWorkload: workload } : {}),
+    },
+  };
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: "Courses", item: `${base}/courses` },
+      { "@type": "ListItem", position: 3, name: course.title, item: `${base}/courses/${course.slug}` },
+    ],
   };
 
   return (
     <div className="bg-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <div className={`${wrap} pt-6`}>
         <nav aria-label="Breadcrumb">

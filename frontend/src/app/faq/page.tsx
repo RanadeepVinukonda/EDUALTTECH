@@ -131,9 +131,33 @@ const items: FaqItem[] = [
   },
 ];
 
+// ponytail: FAQPage needs plain text; keep in sync with `items` above.
+const FAQ_SCHEMA: Array<{ q: string; a: string }> = [
+  { q: "How do I create an account?", a: "Register with your email address. We send a one-time code to that email, and you enter it to confirm the address before finishing your account details." },
+  { q: "Why am I asked to verify my email?", a: "Verifying your email confirms the address belongs to you and keeps your account secure. Until it is verified, you cannot complete sign-in." },
+  { q: "Do I need an account to browse courses?", a: "No. You can browse the course catalogue, view course details, and read about us without signing in. You will be asked to sign in when you want to enrol or save a course." },
+  { q: "Are all courses paid?", a: "No. Some courses are free and you can join them directly. Paid courses require payment, and access is granted once the payment is verified and your enrolment succeeds." },
+  { q: "How do I enrol in a course?", a: "Open a course and use the enrolment action. Free courses are joined immediately; paid courses take you to checkout. You can also save courses to your wishlist to return to them later." },
+  { q: "How do I become a mentor?", a: "Mentorship is per course. From a course you are interested in teaching, you can apply to mentor it. Applications are reviewed by our team, and teaching access is granted only after approval. You cannot be both a learner and a mentor in the same course." },
+  { q: "Can I get a refund?", a: "Refunds are reviewed case by case. Requesting a refund does not automatically complete one — only an approved refund returns money. See our Refund & Cancellation Policy." },
+  { q: "How is my information used?", a: "We use your information to run your account, courses, and mentorship features, and to respond to your enquiries. We do not sell your personal information. Read our Privacy Policy." },
+  { q: "How do I reach you?", a: "Use our contact page or email info@edualttech.com. We will respond by email." },
+];
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_SCHEMA.map(({ q, a }) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: a },
+  })),
+};
+
 export default function FaqPage() {
   return (
     <div className="bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <section className="border-b border-slate-200 bg-slate-50">
         <div className={`${wrap} py-10 sm:py-14`}>
           <nav aria-label="Breadcrumb" className="mb-6">
