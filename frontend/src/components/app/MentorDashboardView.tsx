@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiGet } from "@/lib/api";
 import type { Application, MyCourses, MentoringRow } from "@/lib/app-types";
@@ -10,8 +9,8 @@ import { formatDate } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import CoverImage from "@/components/ui/CoverImage";
-import { buttonClass } from "@/components/ui/Button";
+import CourseCard from "@/components/landing/CourseCard";
+import { meetingLabel } from "@/components/landing/CourseCardLive";
 import { ViewButton } from "@/components/ui/IconActionButton";
 
 export default function MentorDashboardView() {
@@ -64,41 +63,23 @@ export default function MentorDashboardView() {
             />
           </div>
         ) : (
-          <ul className="mt-3 grid gap-4 sm:grid-cols-2">
+          <div className="mt-3 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((c) => (
-              <li key={c.id} className="flex h-full flex-col rounded-[20px] border border-slate-200 bg-white p-4">
-                <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
-                  <CoverImage
-                    src={c.course.thumbnailUrl ?? null}
-                    alt=""
-                    fallback={c.course.title}
-                    className="h-16 w-24 shrink-0 rounded-xl"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-display text-lg font-bold leading-tight text-ink-900">
-                      {c.course.title}
-                    </p>
-                    {c.course.status !== "PUBLISHED" && (
-                      <span className="mt-2 inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
-                        {c.course.status.toLowerCase()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <p className="mt-3 inline-flex w-fit items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                  {c.course._count?.participants ?? 0} learner{c.course._count?.participants === 1 ? "" : "s"}
-                </p>
-                <div className="mt-auto pt-4">
-                  <Link
-                    href={`/dashboard/mentor/courses/${c.course.slug}`}
-                    className={buttonClass("secondary", "sm")}
-                  >
-                    Open workspace
-                  </Link>
-                </div>
-              </li>
+              <CourseCard
+                key={c.id}
+                course={c.course}
+                href={`/dashboard/mentor/courses/${c.course.slug}`}
+                badge={c.course.status !== "PUBLISHED" ? c.course.status.toLowerCase() : undefined}
+                priceLabel="Mentoring"
+                viewLabel="Open teaching workspace"
+                stats={[
+                  { label: "Students", value: String(c.course._count?.participants ?? 0) },
+                  { label: "Lessons live", value: `${c.lessonsPublished ?? 0}/${c.lessonsTotal ?? 0}` },
+                  { label: "Next meeting", value: c.nextMeetingAt ? meetingLabel(c.nextMeetingAt) : "Not scheduled" },
+                ]}
+              />
             ))}
-          </ul>
+          </div>
         )}
       </section>
 

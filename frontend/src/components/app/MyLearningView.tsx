@@ -83,7 +83,7 @@ export default function MyLearningView() {
             }
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {data.learning.map((row) => (
               <CourseCard
                 key={row.id}
@@ -101,7 +101,7 @@ export default function MyLearningView() {
       ) : data.mentoring.length === 0 ? (
         <EmptyState title="You're not mentoring any course" description="Once you're accepted as a mentor, your courses appear here." />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {data.mentoring.map((row) => (
             <CourseCard
               key={row.id}
