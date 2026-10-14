@@ -126,7 +126,7 @@ router.get("/", requireAuth, requireRole("ADMIN"), validate({ query: z.object({
 const TRANSITIONS: Record<string, string[]> = {
   SUBMITTED: ["UNDER_REVIEW", "INTERVIEW_SCHEDULED", "REJECTED"],
   UNDER_REVIEW: ["INTERVIEW_SCHEDULED", "ACCEPTED", "REJECTED"],
-  INTERVIEW_SCHEDULED: ["ACCEPTED", "REJECTED"],
+  INTERVIEW_SCHEDULED: ["INTERVIEW_SCHEDULED", "ACCEPTED", "REJECTED"],
   ACCEPTED: [],
   REJECTED: [],
 };
@@ -159,6 +159,9 @@ router.post(
     if (!allowed.includes(action)) {
       throw ApiError.badRequest(`Cannot move from ${application.status} to ${action}`, "INVALID_TRANSITION");
     }
+
+    // Re-scheduling an already-scheduled interview: same flow, edited time/link.
+    const isReschedule = action === "INTERVIEW_SCHEDULED" && application.status === "INTERVIEW_SCHEDULED";
 
     let mentorParticipantId: string | null = null;
     if (action === "ACCEPTED") {
@@ -212,13 +215,13 @@ router.post(
         recipientId: application.userId,
         title:
           action === "ACCEPTED" ? "You're hired as a mentor!" :
-          action === "REJECTED" ? "Mentor application update" :
+          action === "INTERVIEW_SCHEDULED" ? (isReschedule ? "Interview rescheduled" : "Interview scheduled") :
           "Mentor application update",
         body:
           action === "ACCEPTED"
             ? `Congratulations — you are now a mentor for ${application.course.title}.`
             : action === "INTERVIEW_SCHEDULED"
-              ? `Your interview for ${application.course.title} has been scheduled${interviewAt ? ` for ${new Date(interviewAt).toLocaleString()}` : ""}.`
+              ? `Your interview for ${application.course.title} has been ${isReschedule ? "rescheduled" : "scheduled"}${interviewAt ? ` for ${new Date(interviewAt).toLocaleString()}` : ""}.`
               : `Your application for ${application.course.title} moved to ${action.replace("_", " ").toLowerCase()}.`,
         courseId: application.courseId,
       },
@@ -232,12 +235,12 @@ router.post(
     await sendEmail({
       to: application.user.email,
       subject: interviewEmail
-        ? `Interview scheduled — ${application.course.title}`
+        ? `Interview ${isReschedule ? "rescheduled" : "scheduled"} — ${application.course.title}`
         : `Your EduAltTech mentor application — ${action.replace("_", " ").toLowerCase()}`,
       html: layout(
-        interviewEmail ? "Interview scheduled" : "Application update",
+        interviewEmail ? `Interview ${isReschedule ? "rescheduled" : "scheduled"}` : "Application update",
         interviewEmail
-          ? `Your mentor interview for <strong>${application.course.title}</strong> is scheduled${
+          ? `Your mentor interview for <strong>${application.course.title}</strong> is ${isReschedule ? "rescheduled" : "scheduled"}${
               whenInterview ? ` for <strong>${new Date(whenInterview).toLocaleString("en-IN")}</strong>` : ""
             }. Join on time using the button below — your interview window opens at the scheduled time.`
           : `Your mentor application for <strong>${application.course.title}</strong> is now <strong>${action.replace("_", " ").toLowerCase()}</strong>.`,

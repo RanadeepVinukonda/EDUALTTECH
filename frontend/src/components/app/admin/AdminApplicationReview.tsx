@@ -22,7 +22,7 @@ type Decision = "UNDER_REVIEW" | "INTERVIEW_SCHEDULED" | "ACCEPTED" | "REJECTED"
 const TRANSITIONS: Record<ApplicationStatus, Decision[]> = {
   SUBMITTED: ["UNDER_REVIEW", "INTERVIEW_SCHEDULED", "REJECTED"],
   UNDER_REVIEW: ["INTERVIEW_SCHEDULED", "ACCEPTED", "REJECTED"],
-  INTERVIEW_SCHEDULED: ["ACCEPTED", "REJECTED"],
+  INTERVIEW_SCHEDULED: ["INTERVIEW_SCHEDULED", "ACCEPTED", "REJECTED"],
   ACCEPTED: [],
   REJECTED: [],
 };
@@ -33,6 +33,12 @@ const LABEL: Record<Decision, string> = {
   ACCEPTED: "Accept as mentor",
   REJECTED: "Reject application",
 };
+
+// Same action, different wording once an interview already exists.
+function labelFor(action: Decision, status: ApplicationStatus): string {
+  if (action === "INTERVIEW_SCHEDULED" && status === "INTERVIEW_SCHEDULED") return "Reschedule interview";
+  return LABEL[action];
+}
 
 const CONSEQUENCE: Record<Decision, string> = {
   UNDER_REVIEW: "Marks the application as being reviewed. No teaching access is granted.",
@@ -237,7 +243,7 @@ export default function AdminApplicationReview({ id }: { id: string }) {
                     setDecision(action);
                   }}
                 >
-                  {LABEL[action]}
+                  {labelFor(action, application.status)}
                 </Button>
               ))}
             </div>
@@ -247,8 +253,8 @@ export default function AdminApplicationReview({ id }: { id: string }) {
 
       <ConfirmDialog
         open={decision !== null}
-        title={decision ? LABEL[decision] : ""}
-        confirmLabel={decision ? LABEL[decision] : "Confirm"}
+        title={decision ? labelFor(decision, application.status) : ""}
+        confirmLabel={decision ? labelFor(decision, application.status) : "Confirm"}
         tone={decision === "REJECTED" ? "danger" : "primary"}
         busy={busy}
         onClose={() => !busy && setDecision(null)}
