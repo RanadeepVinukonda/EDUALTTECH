@@ -10,6 +10,7 @@ import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import CourseCard from "@/components/landing/CourseCard";
+import { meetingLabel } from "@/components/landing/CourseCardLive";
 
 type Tab = "learning" | "mentoring";
 
@@ -105,10 +106,18 @@ export default function MyLearningView() {
             <CourseCard
               key={row.id}
               course={row.course}
-              href={`/dashboard/courses/${row.course.slug}`}
+              href={`/dashboard/mentor/courses/${row.course.slug}`}
               badge={statusLabel(row.course.status)}
               priceLabel="Mentoring"
-              viewLabel="Open course"
+              viewLabel="Open teaching workspace"
+              stats={[
+                { label: "Students", value: String(row.course._count?.participants ?? 0) },
+                { label: "Lessons live", value: `${row.lessonsPublished ?? 0}/${row.lessonsTotal ?? 0}` },
+                {
+                  label: "Next meeting",
+                  value: row.nextMeetingAt ? meetingLabel(row.nextMeetingAt) : "Not scheduled",
+                },
+              ]}
             />
           ))}
         </div>

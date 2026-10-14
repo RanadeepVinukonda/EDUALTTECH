@@ -5,11 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { apiGet, SESSION_EXPIRED_EVENT } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
 import { safeNext } from "@/lib/auth";
-import type { Me } from "@/lib/app-types";
+import type { Me, Membership, MyCourses } from "@/lib/app-types";
 
 interface AuthValue {
   user: Me | null;
   loading: boolean;
+  memberships: Map<string, Membership>;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
   isSigningOut: () => boolean;
@@ -17,8 +18,35 @@ interface AuthValue {
 
 const AuthContext = createContext<AuthValue | null>(null);
 
+function buildMemberships(mine: MyCourses): Map<string, Membership> {
+  const map = new Map<string, Membership>();
+  for (const row of mine.learning) {
+    map.set(row.course.slug, {
+      role: "LEARNER",
+      progressPct: row.progressPct,
+      mentor: row.mentor ? `${row.mentor.firstName} ${row.mentor.lastName}` : undefined,
+      students: 0,
+      lessonsPublished: 0,
+      lessonsTotal: 0,
+      nextMeetingAt: null,
+    });
+  }
+  for (const row of mine.mentoring) {
+    map.set(row.course.slug, {
+      role: "MENTOR",
+      progressPct: 0,
+      students: row.course._count?.participants ?? 0,
+      lessonsPublished: row.lessonsPublished ?? 0,
+      lessonsTotal: row.lessonsTotal ?? 0,
+      nextMeetingAt: row.nextMeetingAt ?? null,
+    });
+  }
+  return map;
+}
+
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Me | null>(null);
+  const [memberships, setMemberships] = useState<Map<string, Membership>>(() => new Map());
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
@@ -29,6 +57,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     const { data } = await getSupabase().auth.getSession();
     if (!data.session) {
       setUser(null);
+      setMemberships(new Map());
       setLoading(false);
       return;
     }
@@ -36,8 +65,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       const { user: me } = await apiGet<{ user: Me }>("/auth/me");
       signingOut.current = false;
       setUser(me);
+      try {
+        setMemberships(buildMemberships(await apiGet<MyCourses>("/courses/mine")));
+      } catch {
+        setMemberships(new Map());
+      }
     } catch {
       setUser(null);
+      setMemberships(new Map());
     } finally {
       setLoading(false);
     }
@@ -59,6 +94,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       try {
         await getSupabase().auth.signOut();
         setUser(null);
+        setMemberships(new Map());
         const here = pathname || "/dashboard";
         if (!here.startsWith("/login")) {
           router.replace(`/login?next=${encodeURIComponent(safeNext(here))}&expired=1`);
@@ -78,12 +114,15 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     signingOut.current = true;
     await getSupabase().auth.signOut();
     setUser(null);
+    setMemberships(new Map());
   }, []);
 
   const isSigningOut = useCallback(() => signingOut.current, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, refresh: load, signOut, isSigningOut }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, loading, memberships, refresh: load, signOut, isSigningOut }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 

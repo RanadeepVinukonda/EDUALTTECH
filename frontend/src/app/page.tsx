@@ -9,7 +9,7 @@ import Offerings from "@/components/landing/Offerings";
 import PhotoBand from "@/components/landing/PhotoBand";
 import Pathway from "@/components/landing/Pathway";
 import SectionHeading from "@/components/landing/SectionHeading";
-import CourseCard from "@/components/landing/CourseCard";
+import CourseCardLive from "@/components/landing/CourseCardLive";
 import DataUnavailable from "@/components/landing/DataUnavailable";
 import LinkButton from "@/components/ui/LinkButton";
 
@@ -58,7 +58,7 @@ export default async function HomePage() {
           ) : courseItems.length > 0 ? (
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {courseItems.map((c) => (
-                <CourseCard key={c.id} course={c} />
+                <CourseCardLive key={c.id} course={c} />
               ))}
             </div>
           ) : (

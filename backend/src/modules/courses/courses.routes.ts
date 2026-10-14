@@ -102,7 +102,7 @@ router.get("/mine", requireAuth, async (req, res) => {
         course: {
           select: {
             id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, features: true, type: true, status: true,
-            _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE" } } } },
+            _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE" } }, lessons: true } },
           },
         },
       },
@@ -119,11 +119,39 @@ router.get("/mine", requireAuth, async (req, res) => {
       });
   const mentorMap = new Map(mentors.map((m) => [m.id, m]));
 
+  // Mentor-card stats: published lesson count + next upcoming meeting per course.
+  const mentoringIds = mentoring.map((m) => m.courseId);
+  const now = new Date();
+  const [publishedLessons, nextMeetings] = await Promise.all([
+    mentoringIds.length === 0
+      ? []
+      : prisma.lesson.groupBy({
+          by: ["courseId"],
+          where: { courseId: { in: mentoringIds }, isPublished: true },
+          _count: { _all: true },
+        }),
+    mentoringIds.length === 0
+      ? []
+      : prisma.liveMeeting.findMany({
+          where: { courseId: { in: mentoringIds }, scheduledAt: { gte: now } },
+          orderBy: { scheduledAt: "asc" },
+          select: { courseId: true, scheduledAt: true },
+        }),
+  ]);
+  const publishedMap = new Map(publishedLessons.map((r) => [r.courseId, r._count._all]));
+  const nextMeetingMap = new Map<string, Date>();
+  for (const m of nextMeetings) if (!nextMeetingMap.has(m.courseId)) nextMeetingMap.set(m.courseId, m.scheduledAt);
+
   res.json({
     success: true,
     data: {
       learning: learning.map((l) => ({ ...l, mentor: l.mentorUserId ? (mentorMap.get(l.mentorUserId) ?? null) : null })),
-      mentoring,
+      mentoring: mentoring.map((m) => ({
+        ...m,
+        lessonsPublished: publishedMap.get(m.courseId) ?? 0,
+        lessonsTotal: m.course._count?.lessons ?? 0,
+        nextMeetingAt: nextMeetingMap.get(m.courseId)?.toISOString() ?? null,
+      })),
     },
   });
 });

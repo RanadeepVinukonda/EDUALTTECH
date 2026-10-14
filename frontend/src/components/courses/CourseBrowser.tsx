@@ -11,7 +11,7 @@ import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { api, ApiError } from "@/lib/api";
 import type { CourseListItem } from "@/lib/types";
-import CourseCard from "@/components/landing/CourseCard";
+import CourseCardLive from "@/components/landing/CourseCardLive";
 import Select from "@/components/ui/Select";
 import { cn } from "@/lib/cn";
 
@@ -279,7 +279,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((c) => (
-              <CourseCard key={c.id} course={c} />
+              <CourseCardLive key={c.id} course={c} />
             ))}
           </div>
         )}

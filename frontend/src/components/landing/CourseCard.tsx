@@ -30,6 +30,7 @@ export default function CourseCard({
   badge,
   progressPct,
   mentor,
+  stats,
   actions,
   viewLabel = "View course",
   unavailable = false,
@@ -41,6 +42,7 @@ export default function CourseCard({
   badge?: React.ReactNode;
   progressPct?: number;
   mentor?: string;
+  stats?: { label: string; value: string }[];
   actions?: React.ReactNode;
   viewLabel?: string;
   unavailable?: boolean;
@@ -103,6 +105,15 @@ export default function CourseCard({
               <span className="absolute right-0 top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-slate-500" />
             </div>
           </div>
+        ) : stats && stats.length > 0 ? (
+          <dl className="grid grid-cols-2 gap-x-3 gap-y-3">
+            {stats.map((s) => (
+              <div key={s.label} className="min-w-0">
+                <dt className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">{s.label}</dt>
+                <dd className="mt-0.5 truncate text-[13px] font-bold text-ink-900">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
         ) : featureList.length > 0 ? (
           <div className="grid grid-cols-2 gap-x-3 gap-y-3">
             {featureList.map((f, i) => (

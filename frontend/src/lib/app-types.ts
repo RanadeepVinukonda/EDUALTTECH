@@ -69,7 +69,10 @@ export interface MentoringRow {
   courseId: string;
   role: string;
   status: string;
-  course: LearningCourse & { status: string; _count?: { participants: number } };
+  lessonsPublished?: number;
+  lessonsTotal?: number;
+  nextMeetingAt?: string | null;
+  course: LearningCourse & { status: string; _count?: { participants: number; lessons?: number } };
 }
 
 export interface MeetingRow {
@@ -109,6 +112,17 @@ export interface MyLearningRow extends LearningRow {
 export interface MyCourses {
   learning: MyLearningRow[];
   mentoring: MentoringRow[];
+}
+
+/** Compact per-course membership that makes public cards state-aware. Keyed by course slug. */
+export interface Membership {
+  role: "LEARNER" | "MENTOR";
+  progressPct: number;
+  mentor?: string;
+  students: number;
+  lessonsPublished: number;
+  lessonsTotal: number;
+  nextMeetingAt: string | null;
 }
 
 export interface LessonRow {

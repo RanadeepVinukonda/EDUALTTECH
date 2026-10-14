@@ -9,7 +9,6 @@ import Lock from "@mui/icons-material/Lock";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import Button from "@/components/ui/Button";
 import LinkButton from "@/components/ui/LinkButton";
-import EnrollButton from "@/components/ui/EnrollButton";
 import PayButton from "@/components/ui/PayButton";
 import FlipClock from "@/components/ui/FlipClock";
 import { api, ApiError } from "@/lib/api";
@@ -183,9 +182,9 @@ export default function CourseActions({
             Pay now
           </PayButton>
         ) : (
-          <EnrollButton onClick={() => void enrolFree()} loading={enrolling}>
+          <PayButton loading={enrolling} onClick={() => void enrolFree()}>
             Enrol for free
-          </EnrollButton>
+          </PayButton>
         )}
 
         {ready && authed && !isLearner && !isMentor && (!application || application.status === "REJECTED") && (
