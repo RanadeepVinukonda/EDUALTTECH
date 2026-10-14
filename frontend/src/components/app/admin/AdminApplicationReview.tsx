@@ -34,6 +34,13 @@ const LABEL: Record<Decision, string> = {
   REJECTED: "Reject application",
 };
 
+// datetime-local wants a local "YYYY-MM-DDTHH:MM"; interviewAt is a UTC ISO string.
+function toLocalInput(iso: string): string {
+  const d = new Date(iso);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 // Same action, different wording once an interview already exists.
 function labelFor(action: Decision, status: ApplicationStatus): string {
   if (action === "INTERVIEW_SCHEDULED" && status === "INTERVIEW_SCHEDULED") return "Reschedule interview";
@@ -239,7 +246,7 @@ export default function AdminApplicationReview({ id }: { id: string }) {
                   onClick={() => {
                     setNote(application.reviewNote ?? "");
                     setInterviewUrl(application.interviewUrl ?? "");
-                    setInterviewAt(application.interviewAt ? application.interviewAt.slice(0, 16) : "");
+                    setInterviewAt(application.interviewAt ? toLocalInput(application.interviewAt) : "");
                     setDecision(action);
                   }}
                 >
