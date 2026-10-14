@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useCourseRoadmap } from "./useCourseRoadmap";
+import { apiGet } from "@/lib/api";
+import type { ChatPeer } from "@/lib/app-types";
 import { cn } from "@/lib/cn";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
@@ -13,6 +16,15 @@ import { buttonClass } from "@/components/ui/Button";
 
 export default function TeachingWorkspace({ slug }: { slug: string }) {
   const { detail, roadmap, loading, error, reload } = useCourseRoadmap(slug);
+  const [roster, setRoster] = useState<ChatPeer[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    apiGet<{ learners: { user: ChatPeer }[] }>(`/courses/${slug}/learners`)
+      .then((d) => { if (alive) setRoster(d.learners.map((l) => l.user)); })
+      .catch(() => { if (alive) setRoster([]); });
+    return () => { alive = false; };
+  }, [slug]);
 
   if (loading) return <Spinner label="Loading workspace…" />;
   if (error) return <ErrorState message={error} onRetry={() => void reload()} />;
@@ -75,7 +87,7 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
         >
           <h2 className="font-display text-lg font-bold text-ink-900">Messages</h2>
           <div className="rounded-2xl border border-slate-200 bg-white p-3">
-            <ChatView courseId={course.id} title={course.title} compact />
+            <ChatView courseId={course.id} title={course.title} compact roster={roster ?? undefined} />
           </div>
         </aside>
       </div>

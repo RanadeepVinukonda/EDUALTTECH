@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
-import type { ChatMessage, Conversation } from "@/lib/app-types";
+import type { ChatMessage, ChatPeer, Conversation } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import { initials } from "@/lib/name";
 import { cn } from "@/lib/cn";
@@ -17,11 +17,12 @@ function peerOf(c: Conversation, meId: string) {
   return c.learnerUserId === meId ? c.mentor : c.learner;
 }
 
-export default function ChatView({ courseId, title, compact = false }: { courseId?: string; title?: string; compact?: boolean } = {}) {
+export default function ChatView({ courseId, title, compact = false, roster }: { courseId?: string; title?: string; compact?: boolean; roster?: ChatPeer[] } = {}) {
   const { user } = useAuth();
   const [convs, setConvs] = useState<Conversation[] | null>(null);
   const [convError, setConvError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [rosterBusy, setRosterBusy] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -122,6 +123,30 @@ export default function ChatView({ courseId, title, compact = false }: { courseI
     }
   }
 
+  // Mentor side: jump into a learner's thread, creating it on first contact.
+  async function openWith(peer: ChatPeer) {
+    if (rosterBusy) return;
+    const existing = visible?.find((c) => c.learnerUserId === peer.id);
+    if (existing) {
+      setSelectedId(existing.id);
+      return;
+    }
+    if (!courseId) return;
+    setRosterBusy(peer.id);
+    try {
+      const { conversation } = await apiPost<{ conversation: Conversation }>("/chat/conversations", {
+        courseId,
+        learnerUserId: peer.id,
+      });
+      await loadConversations();
+      setSelectedId(conversation.id);
+    } catch (e) {
+      setConvError(e instanceof Error ? e.message : "Could not start the conversation.");
+    } finally {
+      setRosterBusy(null);
+    }
+  }
+
   if (convError) return <ErrorState message={convError} onRetry={() => void loadConversations()} />;
   if (!visible || !user) return <Spinner label="Loading messages…" />;
 
@@ -135,13 +160,49 @@ export default function ChatView({ courseId, title, compact = false }: { courseI
         </h1>
       )}
 
+      {roster && roster.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Learners</p>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {roster.map((p) => {
+              const active = visible.some((c) => c.learnerUserId === p.id && c.id === selectedId);
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => void openWith(p)}
+                  disabled={rosterBusy === p.id}
+                  title={`Message ${p.firstName} ${p.lastName}`.trim()}
+                  className={cn(
+                    "flex w-16 shrink-0 flex-col items-center gap-1 rounded-xl p-1.5 text-center transition disabled:opacity-50",
+                    active ? "bg-brand-50" : "hover:bg-slate-50",
+                  )}
+                >
+                  {p.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
+                  ) : (
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
+                      {initials(p.firstName, p.lastName)}
+                    </span>
+                  )}
+                  <span className="line-clamp-1 w-full text-[11px] font-medium text-ink-700">{p.firstName}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {visible.length === 0 ? (
         <EmptyState
           title="No conversations yet"
           description={
-            courseId
-              ? "Messages with your mentor (or learners) in this course appear here."
-              : "Conversations with your mentors or learners appear here."
+            roster && roster.length > 0
+              ? "Pick a learner above to start messaging them."
+              : courseId
+                ? "Messages with your mentor (or learners) in this course appear here."
+                : "Conversations with your mentors or learners appear here."
           }
         />
       ) : (

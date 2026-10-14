@@ -6,7 +6,6 @@ import { uploadPrivateFile } from "@/lib/upload";
 import { describeError } from "@/lib/errors";
 import type { Roadmap, LessonRow, TopicRow, ChapterRow, MeetingRow, ResourceRow } from "@/lib/app-types";
 import { notifyError, notifySuccess } from "@/lib/notify";
-import { cn } from "@/lib/cn";
 import Button, { buttonClass } from "@/components/ui/Button";
 import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
@@ -17,7 +16,6 @@ import Add from "@mui/icons-material/Add";
 import Title from "@mui/icons-material/Title";
 import LinkIcon from "@mui/icons-material/Link";
 import Category from "@mui/icons-material/Category";
-import Videocam from "@mui/icons-material/Videocam";
 import MenuBook from "@mui/icons-material/MenuBook";
 import Event from "@mui/icons-material/Event";
 import Movie from "@mui/icons-material/Movie";
@@ -331,20 +329,6 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
     }
   }
 
-  async function setType(next: "READING" | "VIDEO") {
-    if (next === lesson.type) return;
-    setBusy(true);
-    try {
-      await apiPatch(`/courses/lessons/${lesson.id}`, { type: next });
-      notifySuccess(next === "VIDEO" ? "Set as video lesson." : "Set as reading lesson.");
-      ctx.onChanged();
-    } catch (e) {
-      notifyError(describeError(e, "Could not change the lesson type."));
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function move(dir: -1 | 1) {
     const j = index + dir;
     if (j < 0 || j >= siblings.length) return;
@@ -388,15 +372,10 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
                 {index + 1}. {lesson.title}
               </button>
               <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
-                <span className="inline-flex items-center gap-1">
-                  {lesson.type === "VIDEO" ? <Videocam fontSize="inherit" aria-hidden /> : <Article fontSize="inherit" aria-hidden />}
-                  {lesson.type === "VIDEO" ? "Video" : "Reading"}
-                </span>
-                {lesson.hasVideo && <span className="inline-flex items-center gap-1 text-slate-500"><Movie fontSize="inherit" aria-hidden /> uploaded</span>}
-                {lesson.type === "READING" && Boolean((lesson.textContent ?? "").trim()) && (
+                {Boolean((lesson.textContent ?? "").trim()) && (
                   <span className="inline-flex items-center gap-1 text-slate-500"><Article fontSize="inherit" aria-hidden /> text set</span>
                 )}
-                {resCount > 0 && <span aria-hidden>·</span>}
+                {lesson.hasVideo && <span className="inline-flex items-center gap-1 text-slate-500"><Movie fontSize="inherit" aria-hidden /> uploaded</span>}
                 {resCount > 0 && <span className="inline-flex items-center gap-1"><MenuBook fontSize="inherit" aria-hidden /> {resCount} {resCount === 1 ? "resource" : "resources"}</span>}
                 {lesson.isPublished
                   ? <><span aria-hidden>·</span><span className="font-semibold text-emerald-700">Completed</span></>
@@ -414,27 +393,6 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
           </span>
         )}
 
-        <div className="inline-flex overflow-hidden rounded-lg border border-slate-200" role="group" aria-label="Lesson type">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void setType("READING")}
-            aria-pressed={lesson.type === "READING"}
-            className={cn("px-2.5 py-1.5 text-xs font-semibold transition", lesson.type === "READING" ? "bg-brand-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50")}
-          >
-            Reading
-          </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void setType("VIDEO")}
-            aria-pressed={lesson.type === "VIDEO"}
-            className={cn("px-2.5 py-1.5 text-xs font-semibold transition", lesson.type === "VIDEO" ? "bg-brand-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50")}
-          >
-            Video
-          </button>
-        </div>
-
         <div className="relative flex items-center gap-1">
           <button
             type="button"
@@ -447,16 +405,12 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
           </button>
           {menuOpen && (
             <div className="absolute right-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-              {(lesson.type === "VIDEO"
-                ? [
-                    { kind: "meeting" as Panel, label: "Schedule meeting", icon: <Event fontSize="small" /> },
-                    { kind: "recording" as Panel, label: "Recording (link/file)", icon: <Movie fontSize="small" /> },
-                  ]
-                : [
-                    { kind: "text" as Panel, label: "Lesson text", icon: <Article fontSize="small" /> },
-                    { kind: "resource" as Panel, label: "Add resource", icon: <MenuBook fontSize="small" /> },
-                  ]
-              ).map((opt) => (
+              {[
+                { kind: "text" as Panel, label: "Lesson text", icon: <Article fontSize="small" /> },
+                { kind: "resource" as Panel, label: "Add resource", icon: <MenuBook fontSize="small" /> },
+                { kind: "meeting" as Panel, label: "Schedule meeting", icon: <Event fontSize="small" /> },
+                { kind: "recording" as Panel, label: "Recording (link/file)", icon: <Movie fontSize="small" /> },
+              ].map((opt) => (
                 <button
                   key={opt.kind}
                   type="button"
@@ -535,9 +489,9 @@ export default function LessonWorkbench({
     <div className="flex flex-col gap-6">
       {!isOwner && (
         <p role="note" className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-          You choose whether each lesson is a <strong>Reading</strong> or a <strong>Video</strong>. For a reading,
-          add lesson <strong>text</strong> or <strong>resources</strong>; for a video, schedule a <strong>meeting</strong> or
-          attach a <strong>recording</strong>. Tick the checkbox to mark a lesson complete and unlock it for learners.
+          For each lesson add whatever it needs: <strong>lesson text</strong>, <strong>resources</strong>,
+          a <strong>meeting</strong>, or a <strong>recording</strong>. Tick the checkbox to mark a lesson
+          complete and unlock it for learners.
         </p>
       )}
 

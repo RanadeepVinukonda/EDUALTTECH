@@ -4,11 +4,14 @@ import { prisma } from "../../lib/prisma.js";
 import { requireAuth } from "../../middlewares/auth.js";
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
+import { getCourseAccess } from "../../lib/course-access.js";
+import type { Role } from "@prisma/client";
 
 const router = Router();
 
-// Conversation access: only the learner or mentor on the thread — never an admin.
-async function memberConversation(conversationId: string, userId: string) {
+// Conversation access: a member of the thread, or course staff (a mentor of the
+// course can message any of its learners) — never an unrelated user or plain admin.
+async function memberConversation(conversationId: string, user: { id: string; role: Role }) {
   const conversation = await prisma.conversation.findUnique({
     where: { id: conversationId },
     include: {
@@ -18,11 +21,47 @@ async function memberConversation(conversationId: string, userId: string) {
     },
   });
   if (!conversation) throw ApiError.notFound("Conversation not found");
-  if (conversation.learnerUserId !== userId && conversation.mentorUserId !== userId) {
-    throw ApiError.forbidden("Not a member of this conversation");
+  const isMember = conversation.learnerUserId === user.id || conversation.mentorUserId === user.id;
+  if (!isMember) {
+    const access = await getCourseAccess(conversation.courseId, user);
+    if (!access.isStaff) throw ApiError.forbidden("Not a member of this conversation");
   }
   return conversation;
 }
+
+// Find-or-create the thread between the calling mentor and a learner in a course.
+router.post(
+  "/conversations",
+  requireAuth,
+  validate({ body: z.object({ courseId: z.string().min(1), learnerUserId: z.string().min(1) }) }),
+  async (req, res) => {
+    const { courseId, learnerUserId } = body<{ courseId: string; learnerUserId: string }>(req);
+
+    const access = await getCourseAccess(courseId, req.user!);
+    if (!access.isStaff) throw ApiError.forbidden("Only course staff can message learners");
+
+    const participant = await prisma.courseParticipant.findUnique({
+      where: { courseId_userId: { courseId, userId: learnerUserId } },
+      select: { role: true, status: true, mentorUserId: true },
+    });
+    if (!participant || participant.role !== "LEARNER" || participant.status !== "ACTIVE") {
+      throw ApiError.badRequest("That learner is not active in this course");
+    }
+
+    const conversation = await prisma.conversation.upsert({
+      where: { courseId_learnerUserId: { courseId, learnerUserId } },
+      update: {},
+      create: { courseId, learnerUserId, mentorUserId: participant.mentorUserId ?? req.user!.id },
+      include: {
+        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true } },
+        learner: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+        mentor: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+      },
+    });
+
+    res.status(201).json({ success: true, data: { conversation: { ...conversation, lastMessage: null, unreadCount: 0 } } });
+  },
+);
 
 router.get("/conversations", requireAuth, async (req, res) => {
   const userId = req.user!.id;
@@ -58,7 +97,7 @@ router.get("/conversations/:id/messages", requireAuth, validate({ query: z.objec
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
 }) }), async (req, res) => {
-  const conversation = await memberConversation(req.params.id, req.user!.id);
+  const conversation = await memberConversation(req.params.id, req.user!);
   const { cursor, limit } = req.query as unknown as { cursor?: string; limit: number };
 
   const messages = await prisma.conversationMessage.findMany({
@@ -85,7 +124,7 @@ router.post(
   requireAuth,
   validate({ body: z.object({ body: z.string().trim().min(1).max(4000) }) }),
   async (req, res) => {
-    const conversation = await memberConversation(req.params.id, req.user!.id);
+    const conversation = await memberConversation(req.params.id, req.user!);
     const { body: text } = body<{ body: string }>(req);
 
     const message = await prisma.conversationMessage.create({
