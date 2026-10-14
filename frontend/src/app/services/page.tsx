@@ -9,7 +9,7 @@ import Search from "@mui/icons-material/Search";
 import Handshake from "@mui/icons-material/Handshake";
 import SectionHeading from "@/components/landing/SectionHeading";
 import LinkButton from "@/components/ui/LinkButton";
-import CoverImage from "@/components/ui/CoverImage";
+import ProgramReveal from "@/components/landing/ProgramReveal";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -176,20 +176,7 @@ export default function ServicesPage() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
             {SCHOOL_PROGRAMS.map((s) => (
               <div key={s.name} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                <div className="group relative flex h-56 items-center justify-center overflow-hidden border-b border-slate-100 bg-slate-50 p-6">
-                  <CoverImage
-                    src={s.logo}
-                    alt={s.name}
-                    fallback={s.name}
-                    className="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-0"
-                  />
-                  <CoverImage
-                    src={s.photo}
-                    alt={`${s.name} program`}
-                    fallback={s.name}
-                    className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  />
-                </div>
+                <ProgramReveal logo={s.logo} photo={s.photo} name={s.name} />
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="font-display text-xl font-bold text-ink-900">{s.name}</h3>
                   <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-brand-700">{s.focus}</p>
