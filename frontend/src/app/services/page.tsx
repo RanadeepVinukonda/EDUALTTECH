@@ -7,11 +7,9 @@ import AutoStories from "@mui/icons-material/AutoStories";
 import Extension from "@mui/icons-material/Extension";
 import Search from "@mui/icons-material/Search";
 import Handshake from "@mui/icons-material/Handshake";
-import { publicFetch } from "@/lib/server-api";
-import type { WorkItem } from "@/lib/types";
 import SectionHeading from "@/components/landing/SectionHeading";
-import WorkCard from "@/components/landing/WorkCard";
 import LinkButton from "@/components/ui/LinkButton";
+import CoverImage from "@/components/ui/CoverImage";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -29,10 +27,22 @@ const ENGAGEMENT = [
   { icon: ChevronRight, step: "Proceed", body: "Follow the process that fits — enrolment, application, or a conversation." },
 ];
 
-export default async function ServicesPage() {
-  const work = await publicFetch<{ items: WorkItem[] }>("/cms/public/work", { limit: 3 });
-  const workItems = work?.items ?? [];
+const SCHOOL_PROGRAMS = [
+  {
+    name: "New Era",
+    logo: "/media/logos/new_era.jpg",
+    focus: "AI classes & game development",
+    body: "We run hands-on AI classes and game development sessions with students at New Era — practical, project-based learning from the classroom.",
+  },
+  {
+    name: "Sharada Vidhyalaya",
+    logo: "/media/logos/sharada_vidhyalaya.jpeg",
+    focus: "Idea & product development",
+    body: "At Sharada Vidhyalaya we guide students through idea and product development — turning a problem in their world into something they build and test.",
+  },
+];
 
+export default function ServicesPage() {
   return (
     <div className="bg-white">
       {/* Intro */}
@@ -153,6 +163,31 @@ export default async function ServicesPage() {
         </div>
       </section>
 
+      {/* Programs run in schools */}
+      <section id="in-schools" className="scroll-mt-24 bg-slate-50 py-16 sm:py-20">
+        <div className={wrap}>
+          <SectionHeading
+            eyebrow="In schools"
+            title="Programs we run with schools"
+            lead="Alongside our course catalogue, we go into schools and run hands-on programs with students — on real subjects, with real outcomes."
+          />
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            {SCHOOL_PROGRAMS.map((s) => (
+              <div key={s.name} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                <div className="flex h-40 items-center justify-center border-b border-slate-100 bg-slate-50 p-6">
+                  <CoverImage src={s.logo} alt={s.name} fallback={s.name} className="h-full w-full object-contain" />
+                </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <h3 className="font-display text-xl font-bold text-ink-900">{s.name}</h3>
+                  <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-brand-700">{s.focus}</p>
+                  <p className="mt-3 leading-relaxed text-ink-600">{s.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* How engagement works */}
       <section id="process" className="scroll-mt-24 bg-slate-50 py-16 sm:py-20">
         <div className={wrap}>
@@ -175,36 +210,6 @@ export default async function ServicesPage() {
               </li>
             ))}
           </ol>
-        </div>
-      </section>
-
-      {/* Relevant work */}
-      <section id="work" className="scroll-mt-24 py-16 sm:py-20">
-        <div className={wrap}>
-          <SectionHeading
-            eyebrow="Relevant work"
-            title="A few things we have built"
-            lead="A limited selection of published projects. See the Our Work page for the full picture."
-          />
-          {workItems.length > 0 ? (
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {workItems.map((w) => (
-                <WorkCard key={w.id} item={w} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-slate-50 p-8">
-              <p className="text-lg leading-relaxed text-ink-700">
-                We publish projects once they are confirmed and cleared for public view. Reach out to hear
-                about recent work relevant to your school.
-              </p>
-              <div className="mt-6">
-                <LinkButton href="/contact" variant="secondary">
-                  Ask about our work
-                </LinkButton>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 

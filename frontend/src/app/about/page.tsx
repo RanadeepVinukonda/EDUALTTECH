@@ -6,10 +6,9 @@ import Build from "@mui/icons-material/Build";
 import Storefront from "@mui/icons-material/Storefront";
 import Flag from "@mui/icons-material/Flag";
 import { publicFetch } from "@/lib/server-api";
-import type { ProgramItem, WorkItem } from "@/lib/types";
+import type { WorkItem } from "@/lib/types";
 import SectionHeading from "@/components/landing/SectionHeading";
 import WorkCard from "@/components/landing/WorkCard";
-import DataUnavailable from "@/components/landing/DataUnavailable";
 import LinkButton from "@/components/ui/LinkButton";
 import CoverImage from "@/components/ui/CoverImage";
 import { initialsFromName } from "@/lib/name";
@@ -48,14 +47,8 @@ const APPROACH = [
 ];
 
 export default async function AboutPage() {
-  const [programs, work] = await Promise.all([
-    publicFetch<{ items: ProgramItem[] }>("/cms/public/programs"),
-    publicFetch<{ items: WorkItem[] }>("/cms/public/work", { limit: 3 }),
-  ]);
-
-  const programItems = programs?.items ?? [];
+  const work = await publicFetch<{ items: WorkItem[] }>("/cms/public/work", { limit: 3 });
   const workItems = work?.items ?? [];
-  const programsFailed = programs === null;
 
   return (
     <div className="bg-white">
@@ -207,45 +200,6 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* Programs and community */}
-      <section className="bg-slate-50 py-16 sm:py-20">
-        <div className={wrap}>
-          <SectionHeading
-            eyebrow="Programs and community"
-            title="What we run"
-            lead="Educational programs and initiatives we deliver with schools and learners."
-          />
-          {programsFailed ? (
-            <div className="mt-12">
-              <DataUnavailable label="our programs" />
-            </div>
-          ) : programItems.length > 0 ? (
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {programItems.map((p) => (
-                <div key={p.id} className="rounded-2xl border border-slate-200 bg-white p-6">
-                  <h3 className="font-display text-lg font-bold text-ink-900">{p.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-600">{p.summary}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-white p-8">
-              <p className="text-lg leading-relaxed text-ink-700">
-                Our programs connect a technical skill to a real outcome. Details of current and upcoming
-                programs are published as they are confirmed.
-              </p>
-              <Link
-                href="/services"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-800"
-              >
-                Explore services and programs
-                <ChevronRight fontSize="small" />
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* Team */}
       <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
         <div className={wrap}>
@@ -269,28 +223,6 @@ export default async function AboutPage() {
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-
-      {/* Setsuzoku */}
-      <section className="py-16 sm:py-20">
-        <div className={wrap}>
-          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-ink-900 p-8 text-slate-200 sm:p-12">
-            <div className="grid gap-8 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-12">
-              <div className="flex h-20 w-56 items-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/media/brand/logo.png" alt="EduAltTech" width={432} height={436} className="h-10 w-auto brightness-0 invert" />
-              </div>
-              <div className="max-w-2xl">
-                <h2 className="font-display text-2xl font-bold text-white">Part of Setsuzoku</h2>
-                <p className="mt-4 leading-relaxed text-slate-300">
-                  EduAltTech is a product under Setsuzoku. Where our educational courses and our work with
-                  schools meet, they share one goal: helping people turn practical skills into something
-                  useful.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
