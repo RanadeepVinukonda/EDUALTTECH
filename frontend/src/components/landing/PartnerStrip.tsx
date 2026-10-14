@@ -17,10 +17,12 @@ export default function PartnerStrip({
   className,
   divider = true,
   scroll = false,
+  showAll = true,
 }: {
   className?: string;
   divider?: boolean;
   scroll?: boolean;
+  showAll?: boolean;
 }) {
   return (
     <section
@@ -74,11 +76,13 @@ export default function PartnerStrip({
           </ul>
         )}
 
-        <p className="mt-6 text-center text-sm text-slate-500">
-          <Link href="/partners" className="font-semibold text-brand-700 hover:text-brand-800">
-            See all partners &amp; organizations
-          </Link>
-        </p>
+        {showAll && (
+          <p className="mt-6 text-center text-sm text-slate-500">
+            <Link href="/partners" className="font-semibold text-brand-700 hover:text-brand-800">
+              See all partners &amp; organizations
+            </Link>
+          </p>
+        )}
       </div>
     </section>
   );

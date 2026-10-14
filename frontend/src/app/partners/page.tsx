@@ -67,7 +67,7 @@ export default async function PartnersPage() {
         </div>
       </section>
 
-      <PartnerStrip divider={false} />
+      <PartnerStrip divider={false} showAll={false} />
 
       <section className="py-16 sm:py-20">
         <div className={wrap}>
