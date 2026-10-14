@@ -3,12 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import CheckCircle from "@mui/icons-material/CheckCircle";
 import WorkspacePremium from "@mui/icons-material/WorkspacePremium";
 import { publicFetchStrict } from "@/lib/server-api";
 import { siteUrl } from "@/lib/site";
 import type { CourseDetailResponse } from "@/lib/types";
 import CoverImage from "@/components/ui/CoverImage";
+import FeatureIcon from "@/components/ui/FeatureIcon";
 import LinkButton from "@/components/ui/LinkButton";
 import TapLoader from "@/components/ui/TapLoader";
 import CourseActions from "@/components/courses/CourseActions";
@@ -199,9 +199,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 What you&apos;ll get
               </h2>
               <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-                {course.features.map((f) => (
+                {course.features.map((f, i) => (
                   <li key={f} className="flex items-center gap-2.5 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-ink-700">
-                    <CheckCircle fontSize="small" className="shrink-0 text-brand-600" />
+                    <FeatureIcon index={i} className="shrink-0 text-brand-600" />
                     {f}
                   </li>
                 ))}
@@ -239,6 +239,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                               className="shrink-0 text-ink-500 transition-transform group-open:rotate-180"
                             />
                           </summary>
+                          {ch.summary && (
+                            <p className="border-t border-slate-100 px-4 py-3 text-sm whitespace-pre-line text-ink-600">
+                              {ch.summary}
+                            </p>
+                          )}
                           {ch.topics.length > 0 ? (
                             <div className="border-t border-slate-100">
                               {ch.topics.map((t) => (

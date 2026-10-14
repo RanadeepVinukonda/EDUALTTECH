@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CoverImage from "@/components/ui/CoverImage";
+import FeatureIcon from "@/components/ui/FeatureIcon";
 import { EyeIcon } from "@/components/ui/IconActionButton";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -104,12 +105,10 @@ export default function CourseCard({
           </div>
         ) : featureList.length > 0 ? (
           <div className="grid grid-cols-2 gap-x-3 gap-y-3">
-            {featureList.map((f) => (
+            {featureList.map((f, i) => (
               <div key={f} className="flex items-center gap-2">
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden>
-                    <path d="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z" />
-                  </svg>
+                  <FeatureIcon index={i} />
                 </span>
                 <span className="text-xs font-semibold text-ink-700">{f}</span>
               </div>
