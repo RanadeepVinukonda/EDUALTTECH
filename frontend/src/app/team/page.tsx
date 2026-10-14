@@ -1,23 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import { publicFetch } from "@/lib/server-api";
 import SectionHeading from "@/components/landing/SectionHeading";
 import CoverImage from "@/components/ui/CoverImage";
 import LinkButton from "@/components/ui/LinkButton";
-import DataUnavailable from "@/components/landing/DataUnavailable";
 import { initialsFromName } from "@/lib/name";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
 interface TeamMember {
-  id: string;
   name: string;
   title: string;
-  bio: string | null;
-  avatarUrl: string | null;
-  order: number;
+  image: string | null;
 }
+
+// ponytail: static roster. Move back to CMS (/cms/public/team) if it needs editing.
+const TEAM: TeamMember[] = [
+  { name: "Srinivas", title: "Project Coordinator", image: "/media/team/srinivas.jpeg" },
+  { name: "Varun", title: "Full Stack Developer", image: null },
+  { name: "Satish", title: "Full Stack Developer", image: null },
+  { name: "Harshitha", title: "Frontend Developer", image: null },
+  { name: "Avinash", title: "Marketing and Graphic Designer", image: null },
+  { name: "Srujan", title: "Client Relations", image: null },
+  { name: "Ranadeep", title: "Full Stack Developer, Client Relations", image: "/media/team/ranadeep.jpg" },
+  { name: "Hemanth", title: "Full Stack Developer", image: "/media/newTeam/Hemanth.jpeg" },
+  { name: "Chandhini", title: "Project Coordinator, AI Development", image: null },
+  { name: "Priya", title: "Graphic Designer", image: null },
+  { name: "Gani", title: "Digital Marketing", image: null },
+  { name: "Gnana", title: "Frontend Developer", image: "/media/newTeam/Gnana.jpeg" },
+];
 
 export const metadata: Metadata = {
   title: "Team",
@@ -25,11 +36,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/team" },
 };
 
-export default async function TeamPage() {
-  const team = await publicFetch<{ items: TeamMember[] }>("/cms/public/team");
-  const items = team?.items ?? [];
-  const failed = team === null;
-
+export default function TeamPage() {
   return (
     <div className="bg-white">
       <section className="border-b border-slate-200 bg-slate-50">
@@ -60,38 +67,19 @@ export default async function TeamPage() {
 
       <section className="py-16 sm:py-20">
         <div className={wrap}>
-          {failed ? (
-            <DataUnavailable label="our team" />
-          ) : items.length > 0 ? (
-            <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((m) => (
-                <li key={m.id} className="flex gap-4">
-                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
-                    <CoverImage src={m.avatarUrl} alt={`Portrait of ${m.name}`} fallback={initialsFromName(m.name)} />
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="font-display text-lg font-bold text-ink-900">{m.name}</h2>
-                    <p className="text-sm font-medium text-brand-700">{m.title}</p>
-                    {m.bio && <p className="mt-2 text-sm leading-relaxed text-ink-600">{m.bio}</p>}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="max-w-3xl rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 sm:p-12">
-              <h2 className="font-display text-xl font-bold text-ink-900">Team profiles are being published</h2>
-              <p className="mt-3 leading-relaxed text-ink-600">
-                We publish team members only with their approval. In the meantime, learn more about what we do
-                and who we work with.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <LinkButton href="/about">About EduAltTech</LinkButton>
-                <LinkButton href="/contact" variant="secondary">
-                  Contact us
-                </LinkButton>
-              </div>
-            </div>
-          )}
+          <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {TEAM.map((m) => (
+              <li key={m.name} className="flex gap-4">
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                  <CoverImage src={m.image} alt={`Portrait of ${m.name}`} fallback={initialsFromName(m.name)} />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="font-display text-lg font-bold text-ink-900">{m.name}</h2>
+                  <p className="text-sm font-medium text-brand-700">{m.title}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
