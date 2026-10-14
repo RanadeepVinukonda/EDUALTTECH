@@ -31,12 +31,14 @@ const SCHOOL_PROGRAMS = [
   {
     name: "New Era",
     logo: "/media/logos/new_era.jpg",
+    photo: "/media/programs/new-era-program.jpeg",
     focus: "AI classes & game development",
     body: "We run hands-on AI classes and game development sessions with students at New Era — practical, project-based learning from the classroom.",
   },
   {
     name: "Sharada Vidhyalaya",
     logo: "/media/logos/sharada_vidhyalaya.jpeg",
+    photo: "/media/programs/sharada-vidhyalaya-program.jpeg",
     focus: "Idea & product development",
     body: "At Sharada Vidhyalaya we guide students through idea and product development — turning a problem in their world into something they build and test.",
   },
@@ -168,14 +170,25 @@ export default function ServicesPage() {
         <div className={wrap}>
           <SectionHeading
             eyebrow="In schools"
-            title="Programs we run with schools"
+            title="Programs"
             lead="Alongside our course catalogue, we go into schools and run hands-on programs with students — on real subjects, with real outcomes."
           />
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
             {SCHOOL_PROGRAMS.map((s) => (
               <div key={s.name} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                <div className="flex h-40 items-center justify-center border-b border-slate-100 bg-slate-50 p-6">
-                  <CoverImage src={s.logo} alt={s.name} fallback={s.name} className="h-full w-full object-contain" />
+                <div className="group relative flex h-56 items-center justify-center overflow-hidden border-b border-slate-100 bg-slate-50 p-6">
+                  <CoverImage
+                    src={s.logo}
+                    alt={s.name}
+                    fallback={s.name}
+                    className="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-0"
+                  />
+                  <CoverImage
+                    src={s.photo}
+                    alt={`${s.name} program`}
+                    fallback={s.name}
+                    className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  />
                 </div>
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="font-display text-xl font-bold text-ink-900">{s.name}</h3>
@@ -210,33 +223,6 @@ export default function ServicesPage() {
               </li>
             ))}
           </ol>
-        </div>
-      </section>
-
-      {/* Audience CTAs */}
-      <section className="bg-ink-900 py-16 text-slate-200 sm:py-20">
-        <div className={wrap}>
-          <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">Choose your next step</h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { title: "Learners", body: "Discover courses and tuition built around practical skill.", href: "/courses", cta: "Explore courses" },
-              { title: "Skilled people seeking work", body: "Turn your skills into paid teaching. Apply for a course.", href: "/mentor", cta: "Teach with us" },
-              { title: "Schools & organizations", body: "Tell us your requirement and start a conversation.", href: "/contact", cta: "Contact us" },
-              { title: "Program participants", body: "Open the published program that fits you.", href: "/courses", cta: "View programs" },
-            ].map((c) => (
-              <div key={c.title} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <h3 className="font-display text-lg font-bold text-white">{c.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-300">{c.body}</p>
-                <Link
-                  href={c.href}
-                  className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-500 hover:text-white"
-                >
-                  {c.cta}
-                  <ChevronRight fontSize="small" />
-                </Link>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
     </div>
