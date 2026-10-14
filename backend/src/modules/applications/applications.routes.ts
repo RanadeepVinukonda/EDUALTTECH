@@ -5,6 +5,7 @@ import { config } from "../../config/env.js";
 import { uploadPrivate, signedUrl, assertUploadable, contentTypeFor } from "../../lib/storage.js";
 import { sendEmail, layout } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
+import { formatDateTime } from "../../lib/time.js";
 import { requireAuth, requireRole, requireVerifiedMobile } from "../../middlewares/auth.js";
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
@@ -221,7 +222,7 @@ router.post(
           action === "ACCEPTED"
             ? `Congratulations — you are now a mentor for ${application.course.title}.`
             : action === "INTERVIEW_SCHEDULED"
-              ? `Your interview for ${application.course.title} has been ${isReschedule ? "rescheduled" : "scheduled"}${interviewAt ? ` for ${new Date(interviewAt).toLocaleString()}` : ""}.`
+              ? `Your interview for ${application.course.title} has been ${isReschedule ? "rescheduled" : "scheduled"}${interviewAt ? ` for ${formatDateTime(interviewAt)}` : ""}.`
               : `Your application for ${application.course.title} moved to ${action.replace("_", " ").toLowerCase()}.`,
         courseId: application.courseId,
       },
@@ -241,7 +242,7 @@ router.post(
         interviewEmail ? `Interview ${isReschedule ? "rescheduled" : "scheduled"}` : "Application update",
         interviewEmail
           ? `Your mentor interview for <strong>${application.course.title}</strong> is ${isReschedule ? "rescheduled" : "scheduled"}${
-              whenInterview ? ` for <strong>${new Date(whenInterview).toLocaleString("en-IN")}</strong>` : ""
+              whenInterview ? ` for <strong>${formatDateTime(whenInterview)}</strong>` : ""
             }. Join on time using the button below — your interview window opens at the scheduled time.`
           : `Your mentor application for <strong>${application.course.title}</strong> is now <strong>${action.replace("_", " ").toLowerCase()}</strong>.`,
         interviewEmail ? (joinLink ? "Join interview" : "View your application") : "View your applications",

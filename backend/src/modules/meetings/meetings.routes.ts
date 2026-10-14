@@ -11,6 +11,7 @@ import { signedUrl, removePrivate, fileExt } from "../../lib/storage.js";
 import { supabaseAdmin } from "../../lib/supabase.js";
 import { config } from "../../config/env.js";
 import { sendEmail, layout } from "../../lib/email.js";
+import { formatDateTime } from "../../lib/time.js";
 import { logger } from "../../utils/logger.js";
 
 const router = Router();
@@ -96,7 +97,7 @@ router.post("/courses/:courseId/meetings", requireAuth, validate({ body: meeting
       data: learners.map((l) => ({
         recipientId: l.userId,
         title: "New live session scheduled",
-        body: `${meeting.title} — ${new Date(meeting.scheduledAt).toLocaleString()}`,
+        body: `${meeting.title} — ${formatDateTime(meeting.scheduledAt)}`,
         courseId: meeting.courseId,
       })),
     });
@@ -108,7 +109,7 @@ router.post("/courses/:courseId/meetings", requireAuth, validate({ body: meeting
       meeting.courseId,
       `New live session: ${meeting.title}`,
       "A live session is scheduled",
-      `<strong>${meeting.title}</strong> in ${course.title} is scheduled for ${new Date(meeting.scheduledAt).toLocaleString()}.`,
+      `<strong>${meeting.title}</strong> in ${course.title} is scheduled for ${formatDateTime(meeting.scheduledAt)}.`,
       `${config.appBaseUrl}/dashboard/courses/${course.slug}/meetings`,
     );
   }
@@ -150,7 +151,7 @@ router.post("/meetings/:id/remind", requireAuth, async (req, res) => {
     meeting.courseId,
     `Reminder: ${meeting.title}`,
     "Your live session is coming up",
-    `<strong>${meeting.title}</strong>${course ? ` in ${course.title}` : ""} starts at ${new Date(meeting.scheduledAt).toLocaleString()}.`,
+    `<strong>${meeting.title}</strong>${course ? ` in ${course.title}` : ""} starts at ${formatDateTime(meeting.scheduledAt)}.`,
     `${config.appBaseUrl}/dashboard/courses/${course?.slug ?? ""}/meetings`,
   );
   audit(req.user!.id, "meeting.reminder.sent", "liveMeeting", meeting.id, { courseId: meeting.courseId });
