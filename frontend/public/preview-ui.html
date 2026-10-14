@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UI preview — EduAltTech</title>
+<style>
+  :root {
+    --brand-50:#f0fff5; --brand-100:#d7f5e1; --brand-200:#b0e8c5; --brand-300:#82d5a0;
+    --brand-400:#4fbc75; --brand-500:#27a354; --brand-600:#038c3e; --brand-700:#026b2f;
+    --brand-800:#034f25; --brand-900:#023a1c;
+    --ink-900:#024059; --ink-800:#0a4d65; --ink-700:#2a5567; --ink-600:#5b6f79;
+    --ink-500:#7d8f97; --ink-100:#e3eef4;
+    --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0; --slate-300:#cbd5e1;
+    --danger:#dc2626;
+    --shadow-1:0 1px 2px rgba(2,21,38,.06);
+    --shadow-2:0 12px 32px rgba(2,21,38,.12);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; background:#f4f6f8; color:var(--ink-900); -webkit-font-smoothing:antialiased; }
+  .shell { max-width:1100px; margin:0 auto; padding:32px 20px 96px; }
+  h1.screen-title { font-weight:800; font-size:22px; margin:64px 0 4px; letter-spacing:-.02em; }
+  .screen-note { color:var(--ink-500); font-size:13px; margin-bottom:18px; }
+  h1.screen-title:first-child { margin-top:0; }
+  .bar { height:3px; width:44px; background:var(--brand-600); border-radius:99px; margin-bottom:14px; }
+
+  .wrap { max-width:1152px; margin:0 auto; padding:0 24px; }
+
+  /* ============ COURSE CARD ============ */
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:24px; }
+  .course-card {
+    position:relative; display:flex; flex-direction:column; overflow:hidden;
+    background:#fff; border:1px solid var(--slate-200); border-radius:16px; box-shadow:var(--shadow-1);
+  }
+
+  .cc-thumb { position:relative; aspect-ratio:16/9; overflow:hidden; background:var(--slate-100); }
+  .cc-thumb .img { position:absolute; inset:0; background:linear-gradient(135deg,#0d6b3f,#024059 75%); }
+  .cc-thumb .img2 { background:linear-gradient(135deg,#024059,#0a2a38 75%); }
+  .cc-badge {
+    position:absolute; right:12px; top:12px; background:rgba(2,64,89,.82); color:#fff;
+    border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600; backdrop-filter:blur(4px);
+  }
+  .cc-badge.free { background:rgba(3,140,62,.92); }
+
+  .cc-body { display:flex; flex-direction:column; gap:14px; padding:18px; }
+  .cc-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .cc-title { font-size:16px; font-weight:700; line-height:1.3; letter-spacing:-.01em; color:var(--ink-900); }
+  .cc-domain {
+    flex-shrink:0; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+    background:var(--brand-50); color:var(--brand-700); border:1px solid var(--brand-100);
+    border-radius:999px; padding:3px 9px; font-size:10.5px; font-weight:700;
+  }
+  .cc-domain .dot { width:5px; height:5px; border-radius:99px; background:var(--brand-500); }
+  .cc-desc { font-size:13px; line-height:1.5; color:var(--ink-600); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+  .cc-features { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .cc-feature { display:flex; align-items:center; gap:8px; }
+  .cc-feature .ic { width:28px; height:28px; flex-shrink:0; display:grid; place-items:center; border-radius:8px; background:var(--brand-50); color:var(--brand-700); }
+  .cc-feature .ic svg { width:16px; height:16px; fill:currentColor; }
+  .cc-feature span { font-size:12px; font-weight:600; color:var(--ink-700); }
+
+  /* Material 3 linear progress */
+  .cc-progress { display:flex; flex-direction:column; gap:8px; }
+  .cc-progress .prow { display:flex; align-items:center; justify-content:space-between; font-size:11.5px; font-weight:600; color:var(--ink-500); }
+  .cc-progress .prow .pct { font-variant-numeric:tabular-nums; font-weight:800; color:var(--brand-700); }
+  .cc-track { position:relative; height:4px; border-radius:999px; background:#e3eef4; overflow:visible; }
+  .cc-track .fill { position:absolute; left:0; top:0; bottom:0; border-radius:999px; background:var(--brand-600); }
+  .cc-track .stop { position:absolute; right:0; top:50%; transform:translateY(-50%); width:4px; height:4px; border-radius:99px; background:var(--ink-500); }
+
+  .cc-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; border-top:1px solid var(--slate-100); }
+  .cc-price { font-size:18px; font-weight:800; letter-spacing:-.01em; color:var(--ink-900); }
+  .cc-price.free { color:var(--brand-700); }
+  .cc-price .per { display:block; font-size:10.5px; font-weight:600; color:var(--ink-500); margin-top:2px; }
+  /* Action buttons (IconActionButton → .hv-btn--delete / .hv-btn--view) */
+  .hv-btn {
+    width:50px; height:50px; border-radius:50%; background-color:rgb(20,20,20); border:none; font-weight:600;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    box-shadow:0 0 20px rgba(0,0,0,.164); cursor:pointer; transition-duration:.3s; overflow:hidden;
+    position:relative; flex-shrink:0; padding:0;
+  }
+  .hv-btn:hover:not(:disabled), .hv-btn:focus-visible:not(:disabled) { gap:0; transition-duration:.3s; }
+  .hv-btn:disabled { opacity:.5; cursor:default; }
+  .bin-icon { width:12px; transition-duration:.3s; }
+
+  /* delete — bin lid rotates open, red */
+  .bin-top { transform-origin:bottom right; }
+  .hv-btn--delete:hover:not(:disabled) .bin-top, .hv-btn--delete:focus-visible:not(:disabled) .bin-top { transition-duration:.5s; transform:rotate(160deg); }
+  .hv-btn--delete:hover:not(:disabled), .hv-btn--delete:focus-visible:not(:disabled) { background-color:rgb(255,69,69); }
+
+  /* view — eye opens, navy */
+  .eye-closed, .eye-open { position:absolute; inset:0; margin:auto; width:24px; height:24px; transition-duration:.28s; transition-timing-function:cubic-bezier(.2,.8,.2,1); }
+  .eye-closed { opacity:1; }
+  .eye-open { opacity:0; transform:scaleY(0); }
+  .hv-btn--view:hover:not(:disabled) .eye-open, .hv-btn--view:focus-visible:not(:disabled) .eye-open { opacity:1; transform:scaleY(1); }
+  .hv-btn--view:hover:not(:disabled) .eye-closed, .hv-btn--view:focus-visible:not(:disabled) .eye-closed { opacity:0; }
+  .hv-btn--view:hover:not(:disabled), .hv-btn--view:focus-visible:not(:disabled) { background-color:#024059; }
+  .btn-demo { display:flex; gap:34px; }
+  .btn-demo-item { display:flex; flex-direction:column; align-items:center; gap:10px; font-size:12px; color:var(--ink-500); font-weight:600; }
+
+  /* ============ COURSE VIEW PAGE ============ */
+  .cv-hero { position:relative; overflow:hidden; border-radius:20px; min-height:240px; display:flex; align-items:flex-end; box-shadow:var(--shadow-2); }
+  .cv-hero .bg { position:absolute; inset:0; background:linear-gradient(135deg,#0d6b3f,#024059 75%); }
+  .cv-hero .bg::after { content:""; position:absolute; inset:0; background-image:linear-gradient(to right,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.06) 1px,transparent 1px); background-size:26px 26px; }
+  .cv-hero .overlay { position:absolute; inset:0; background:linear-gradient(180deg,rgba(2,33,46,.10),rgba(2,33,46,.82)); }
+  .cv-hero .inner { position:relative; z-index:2; padding:26px 28px; color:#fff; }
+  .cv-chip { display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.10); color:var(--brand-200); border-radius:999px; padding:4px 11px; font-size:11px; font-weight:700; backdrop-filter:blur(4px); }
+  .cv-chip .dot { width:6px; height:6px; border-radius:99px; background:var(--brand-300); }
+  .cv-hero h2 { margin-top:14px; font-size:27px; font-weight:800; letter-spacing:-.02em; max-width:660px; }
+  .cv-hero .meta { display:flex; gap:18px; margin-top:12px; font-size:12.5px; color:var(--brand-100); font-weight:600; }
+
+  .cv-section { margin-top:24px; }
+  .cv-section h3 { font-size:17px; font-weight:800; letter-spacing:-.01em; color:var(--ink-900); }
+  .cv-section .sub { color:var(--ink-500); font-size:12.5px; margin-top:2px; }
+  .cv-desc { margin-top:10px; color:var(--ink-700); font-size:14px; line-height:1.65; }
+
+  .curr { margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+  .curr-item { border:1px solid var(--slate-200); border-radius:14px; background:#fff; box-shadow:var(--shadow-1); overflow:hidden; }
+  .curr-item summary { display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; list-style:none; }
+  .curr-item summary::-webkit-details-marker { display:none; }
+  .curr-item .n { width:30px; height:30px; border-radius:8px; background:var(--brand-50); color:var(--brand-700); display:grid; place-items:center; font-weight:800; font-size:13px; flex-shrink:0; }
+  .curr-item h4 { font-size:14.5px; font-weight:700; color:var(--ink-900); }
+  .curr-item .less { margin-left:auto; font-size:12px; color:var(--ink-500); }
+  .curr-item .chev { color:var(--ink-500); transition:transform .2s; }
+  .curr-item[open] .chev { transform:rotate(180deg); }
+  .curr-lessons a { display:flex; align-items:center; gap:10px; padding:9px 16px; font-size:13.5px; color:var(--ink-700); text-decoration:none; border-top:1px solid var(--slate-100); }
+  .curr-lessons a:hover { background:var(--brand-50); }
+  .curr-lessons .tag { margin-left:auto; font-size:11px; color:var(--ink-500); }
+
+  .mentors { margin-top:14px; display:flex; flex-direction:column; gap:12px; }
+  .mentor-card { display:flex; gap:14px; border:1px solid var(--slate-200); border-radius:16px; background:#fff; box-shadow:var(--shadow-1); padding:16px; }
+  .mentor-card .av { width:52px; height:52px; border-radius:14px; background:var(--brand-100); color:var(--brand-700); display:grid; place-items:center; font-weight:800; font-size:18px; flex-shrink:0; }
+  .mentor-card h4 { font-size:15px; font-weight:800; color:var(--ink-900); }
+  .mentor-card .qual { font-size:12.5px; color:var(--ink-600); margin-top:3px; line-height:1.5; }
+  .mentor-card .tags { display:flex; gap:8px; margin-top:9px; flex-wrap:wrap; }
+  .mentor-card .tag { font-size:11px; font-weight:600; color:var(--ink-700); background:var(--slate-100); border-radius:999px; padding:3px 10px; }
+  .seats { margin-left:auto; text-align:right; flex-shrink:0; }
+  .seats .num { font-size:21px; font-weight:800; color:var(--brand-700); line-height:1; }
+  .seats .lbl { font-size:11px; color:var(--ink-500); margin-top:3px; }
+  .seats .bar { width:74px; height:5px; border-radius:99px; background:var(--slate-100); margin-top:9px; overflow:hidden; }
+  .seats .bar i { display:block; height:100%; background:var(--brand-500); }
+
+  .cv-rail-note { margin-top:12px; color:var(--ink-500); font-size:11.5px; line-height:1.5; }
+  .wish-btn { display:inline-flex; width:100%; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:10px; font-size:14px; font-weight:600; border:1px solid var(--slate-300); color:var(--ink-700); background:#fff; text-decoration:none; }
+  .wish-btn:hover { background:var(--slate-50); }
+
+  /* ============ PAY BUTTON (design 1) ============ */
+  .pay-btn {
+    position:relative; display:inline-flex; width:100%; align-items:center; justify-content:center; gap:10px;
+    padding:13px 24px; font-size:15px; color:#fff; background:#1a1a1a; border:none; border-radius:8px;
+    cursor:pointer; transition:transform .3s ease, box-shadow .3s ease; text-decoration:none;
+  }
+  .pay-btn:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.4); }
+  .pay-btn .btn-text { font-weight:600; }
+  .pay-btn .icons { position:relative; width:24px; height:24px; }
+  .pay-btn .icons svg { position:absolute; inset:0; width:24px; height:24px; color:#22c55e; opacity:0; visibility:hidden; }
+  .pay-btn .icons svg.one { opacity:1; visibility:visible; }
+  .pay-btn.is-paying .icons svg.one { opacity:0; visibility:hidden; }
+  .pay-btn.is-paying .icons svg.two { animation:push 2.5s; animation-delay:0s; }
+  .pay-btn.is-paying .icons svg.three { animation:push 2.5s; animation-delay:.5s; }
+  .pay-btn.is-paying .icons svg.four { animation:push 2.5s; animation-delay:1s; }
+  .pay-btn.is-paying .icons svg.five { animation:push 2.5s; animation-delay:1.5s; }
+  @keyframes push { 0%{opacity:0; transform:translateY(10px) scale(.5);} 5%,15%{opacity:1; visibility:visible; transform:translateY(0) scale(1);} 20%,100%{opacity:0; transform:translateY(-10px) scale(.5);} }
+
+  /* ============ ENROLL PANEL ============ */
+  .panel { background:#fff; border:1px solid var(--slate-200); border-radius:16px; padding:20px; box-shadow:var(--shadow-1); }
+  .panel .price { font-size:26px; font-weight:800; letter-spacing:-.02em; }
+  .panel .price-sub { color:var(--ink-500); font-size:12.5px; }
+  .panel .stack { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+  .btn-soft {
+    display:inline-flex; width:100%; align-items:center; justify-content:center; gap:8px; text-decoration:none;
+    padding:12px 16px; border-radius:10px; font-size:14px; font-weight:600; border:1px solid var(--slate-300); color:var(--ink-700); background:#fff;
+  }
+  .btn-primary { background:var(--brand-600); color:#fff; border:none; }
+  .btn-primary:hover { background:var(--brand-700); }
+
+  /* status chip cards */
+  .state-card { display:flex; gap:12px; align-items:flex-start; border-radius:12px; padding:12px 14px; font-size:13px; line-height:1.45; }
+  .state-card .ic { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; font-weight:800; font-size:15px; flex-shrink:0; }
+  .state-card b { display:block; font-weight:700; }
+  .st-submitted  { background:#eef4ff; color:#1d4ed8; } .st-submitted .ic { background:#dbeafe; }
+  .st-review     { background:#fffbeb; color:#b45309; } .st-review .ic { background:#fef3c7; }
+  .st-interview  { background:#eef2ff; color:#4338ca; } .st-interview .ic { background:#e0e7ff; }
+  .st-accepted   { background:#ecfdf5; color:#047857; } .st-accepted .ic { background:#d1fae5; }
+  .st-rejected   { background:#fef2f2; color:#b91c1c; } .st-rejected .ic { background:#fee2e2; }
+
+  .cols { display:grid; grid-template-columns:1fr 340px; gap:32px; align-items:start; }
+
+  /* ============ LEARNER PORTAL / ROADMAP ============ */
+  .tabs { display:flex; gap:2px; border-bottom:1px solid var(--slate-200); margin-bottom:20px; overflow-x:auto; }
+  .tabs a { padding:10px 16px; font-size:13.5px; font-weight:600; color:var(--ink-500); text-decoration:none; border-bottom:2px solid transparent; white-space:nowrap; }
+  .tabs a.on { color:var(--brand-700); border-bottom-color:var(--brand-600); }
+  .tabs a.on2 { color:var(--ink-900); border-bottom-color:var(--ink-900); }
+  .course-hero { position:relative; overflow:hidden; border-radius:22px; background:var(--ink-900); color:#fff; padding:26px 28px; box-shadow:var(--shadow-2); }
+  .course-hero:before { content:""; position:absolute; right:-80px; top:-120px; width:300px; height:300px; border-radius:50%; border:1px solid rgba(255,255,255,.1); }
+  .course-hero .chip { display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:var(--brand-200); border-radius:999px; padding:4px 10px; font-size:11px; font-weight:700; }
+  .course-hero h2 { margin-top:14px; font-size:26px; font-weight:800; letter-spacing:-.02em; }
+  .course-hero p { margin-top:8px; color:var(--ink-100); font-size:14px; line-height:1.55; max-width:600px; }
+  .course-hero .stats { display:flex; gap:18px; margin-top:16px; font-size:12px; color:var(--brand-100); font-weight:600; }
+
+  .progress-panel { display:flex; align-items:center; gap:16px; background:#fff; border:1px solid var(--slate-200); border-radius:16px; padding:16px 18px; box-shadow:var(--shadow-1); }
+  .ring { position:relative; width:64px; height:64px; flex-shrink:0; }
+  .ring svg { transform:rotate(-90deg); }
+  .ring .val { position:absolute; inset:0; display:grid; place-items:center; font-size:14px; font-weight:800; }
+  .progress-panel .row1 { display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; }
+  .progress-panel .row2 { margin-top:8px; color:var(--ink-500); font-size:12px; }
+  .pp-btn { margin-left:auto; }
+
+  .timeline { list-style:none; margin-top:18px; position:relative; }
+  .tl-node { position:relative; padding:0 0 14px 52px; }
+  .tl-node .rail { position:absolute; left:21px; top:40px; bottom:0; width:2px; background:var(--slate-200); }
+  .tl-node:last-child .rail { display:none; }
+  .tl-node .num { position:absolute; left:0; top:8px; width:42px; height:42px; border-radius:99px; display:grid; place-items:center; font-weight:800; font-size:14px; color:#fff; background:var(--brand-600); border:3px solid #fff; box-shadow:var(--shadow-1); }
+  .tl-node.done .num { background:#10b981; }
+  .tl-card { background:#fff; border:1px solid var(--slate-200); border-radius:14px; overflow:hidden; box-shadow:var(--shadow-1); }
+  .tl-card summary { display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; list-style:none; }
+  .tl-card summary::-webkit-details-marker { display:none; }
+  .tl-card summary h3 { font-size:15px; font-weight:700; }
+  .tl-card summary .sub { font-size:12px; color:var(--ink-500); }
+  .tl-card summary .chev { margin-left:auto; color:var(--ink-700); transition:transform .2s; }
+  .tl-card[open] summary .chev { transform:rotate(180deg); }
+  .tl-lessons a {
+    display:flex; align-items:center; gap:10px; padding:9px 16px; text-decoration:none; color:var(--ink-800);
+    border-top:1px solid var(--slate-100); font-size:14px; transition:background .15s;
+  }
+  .tl-lessons a:hover { background:var(--brand-50); }
+  .tl-lessons .n { font-family:ui-monospace,monospace; font-size:11px; color:var(--ink-500); width:34px; flex-shrink:0; }
+  .tl-lessons .ty { margin-left:auto; font-size:11px; color:var(--ink-500); }
+  .ok { width:18px; height:18px; border-radius:99px; display:grid; place-items:center; font-size:11px; font-weight:800; flex-shrink:0; }
+  .ok.no { border:1.5px solid var(--slate-300); }
+  .ok.yes { background:var(--brand-600); color:#fff; }
+  .lesson-mini-row { padding:14px 16px; border-top:1px solid var(--slate-100); display:flex; align-items:center; gap:12px; }
+
+  /* ============ MENTOR WORKSPACE ============ */
+  .m-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .m-stat { background:#fff; border:1px solid var(--slate-200); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow-1); }
+  .m-stat .v { font-size:20px; font-weight:800; }
+  .m-stat .l { font-size:12px; color:var(--ink-500); margin-top:2px; }
+  .roster-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--slate-100); }
+  .roster-row:last-child { border-bottom:none; }
+
+  @media (max-width:900px) { .cols { grid-template-columns:1fr; } .m-stats { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ 1. COURSE CARD ============ -->
+  <h1 class="screen-title">Course card — new layout</h1>
+  <p class="screen-note">Thumbnail → title + domain → four course features → price with view icon. Regular card style, app theme.</p>
+  <div class="bar"></div>
+  <div class="card-grid">
+    <!-- enrolled learner card -->
+    <article class="course-card">
+      <div class="cc-thumb">
+        <div class="img"></div>
+        <span class="cc-badge">Learning</span>
+      </div>
+      <div class="cc-body">
+        <div class="cc-head">
+          <h3 class="cc-title">AI for Educators: Build &amp; Deploy in the Classroom</h3>
+          <span class="cc-domain"><span class="dot"></span>Education</span>
+        </div>
+        <p class="cc-desc">Hands-on course covering effective prompts, safety, and classroom workflows with AI tools.</p>
+        <div class="cc-progress">
+          <div class="prow"><span>Progress</span><span class="pct">62%</span></div>
+          <div class="cc-track"><span class="fill" style="width:62%"></span><span class="stop"></span></div>
+        </div>
+        <div class="cc-foot">
+          <span class="cc-price free">Enrolled</span>
+          <button type="button" class="hv-btn hv-btn--view" aria-label="Continue"><svg class="eye-closed" viewBox="0 0 24 24"><path d="M2 12H22" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><svg class="eye-open" viewBox="0 0 24 24"><path d="M12 5.5C7.3 5.5 3.2 8.4 1.5 12c1.7 3.6 5.8 6.5 10.5 6.5s8.8-2.9 10.5-6.5C20.8 8.4 16.7 5.5 12 5.5Z" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="#fff"/></svg></button>
+        </div>
+      </div>
+    </article>
+    <!-- paid course card -->
+    <article class="course-card">
+      <div class="cc-thumb">
+        <div class="img2"></div>
+      </div>
+      <div class="cc-body">
+        <div class="cc-head">
+          <h3 class="cc-title">Self-Directed Learning Systems</h3>
+          <span class="cc-domain"><span class="dot"></span>Alt. Education</span>
+        </div>
+        <p class="cc-desc">Design flexible learning environments for unschooling and micro-school models.</p>
+        <div class="cc-features">
+          <div class="cc-feature"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4,4H20V6H4V4M4,9H20V11H4V9M4,14H20V16H4V14M4,19H14V21H4V19Z"/></svg></span><span>6 chapters</span></div>
+          <div class="cc-feature"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M10,8L16,12L10,16V8Z"/></svg></span><span>28 lessons</span></div>
+          <div class="cc-feature"><span class="ic"><svg viewBox="0 0 24 24"><path d="M16,6L18.29,8.29L13.41,13.17L9.41,9.17L2,16.59L3.41,18L9.41,12L13.41,16L19.71,9.71L22,12V6H16Z"/></svg></span><span>Intermediate</span></div>
+          <div class="cc-feature"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12,15.39L8.24,17.66L9.23,13.38L5.91,10.5L10.29,10.13L12,6.09L13.71,10.13L18.09,10.5L14.77,13.38L15.76,17.66M22,9.24L14.81,8.63L12,2L9.19,8.63L2,9.24L7.45,13.97L5.82,21L12,17.27L18.18,21L16.54,13.97L22,9.24Z"/></svg></span><span>Certificate</span></div>
+        </div>
+        <div class="cc-foot">
+          <span class="cc-price">₹2,999<span class="per">One-time</span></span>
+          <button type="button" class="hv-btn hv-btn--view" aria-label="View"><svg class="eye-closed" viewBox="0 0 24 24"><path d="M2 12H22" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><svg class="eye-open" viewBox="0 0 24 24"><path d="M12 5.5C7.3 5.5 3.2 8.4 1.5 12c1.7 3.6 5.8 6.5 10.5 6.5s8.8-2.9 10.5-6.5C20.8 8.4 16.7 5.5 12 5.5Z" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="#fff"/></svg></button>
+        </div>
+      </div>
+    </article>
+    <!-- free course card -->
+    <article class="course-card">
+      <div class="cc-thumb">
+        <div class="img"></div>
+        <span class="cc-badge free">Free</span>
+      </div>
+      <div class="cc-body">
+        <div class="cc-head">
+          <h3 class="cc-title">Digital Literacy for Teachers</h3>
+          <span class="cc-domain"><span class="dot"></span>Education</span>
+        </div>
+        <p class="cc-desc">Core productivity and safety skills for the modern classroom.</p>
+        <div class="cc-features">
+          <div class="cc-feature"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4,4H20V6H4V4M4,9H20V11H4V9M4,14H20V16H4V14M4,19H14V21H4V19Z"/></svg></span><span>4 chapters</span></div>
+          <div class="cc-feature"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M10,8L16,12L10,16V8Z"/></svg></span><span>19 lessons</span></div>
+          <div class="cc-feature"><span class="ic"><svg viewBox="0 0 24 24"><path d="M16,6L18.29,8.29L13.41,13.17L9.41,9.17L2,16.59L3.41,18L9.41,12L13.41,16L19.71,9.71L22,12V6H16Z"/></svg></span><span>All levels</span></div>
+          <div class="cc-feature"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12,15.39L8.24,17.66L9.23,13.38L5.91,10.5L10.29,10.13L12,6.09L13.71,10.13L18.09,10.5L14.77,13.38L15.76,17.66M22,9.24L14.81,8.63L12,2L9.19,8.63L2,9.24L7.45,13.97L5.82,21L12,17.27L18.18,21L16.54,13.97L22,9.24Z"/></svg></span><span>Certificate</span></div>
+        </div>
+        <div class="cc-foot">
+          <span class="cc-price free">Free<span class="per">Open access</span></span>
+          <button type="button" class="hv-btn hv-btn--view" aria-label="View"><svg class="eye-closed" viewBox="0 0 24 24"><path d="M2 12H22" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><svg class="eye-open" viewBox="0 0 24 24"><path d="M12 5.5C7.3 5.5 3.2 8.4 1.5 12c1.7 3.6 5.8 6.5 10.5 6.5s8.8-2.9 10.5-6.5C20.8 8.4 16.7 5.5 12 5.5Z" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="#fff"/></svg></button>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ============ 1b. COURSE VIEW PAGE ============ -->
+  <h1 class="screen-title">Course view page — /courses/&lt;slug&gt;</h1>
+  <p class="screen-note">Hero thumbnail with semi-transparent overlay (title + domain on it) → description → curriculum → mentors (seats left + qualification). Right rail: enrol, wishlist, apply to mentor.</p>
+  <div class="bar"></div>
+
+  <div class="cols" style="grid-template-columns:1fr 340px;">
+    <!-- left: content -->
+    <div>
+      <div class="cv-hero">
+        <div class="bg"></div>
+        <div class="overlay"></div>
+        <div class="inner">
+          <span class="cv-chip"><span class="dot"></span>Education</span>
+          <h2>AI for Educators: Build &amp; Deploy in the Classroom</h2>
+          <div class="meta"><span>8 chapters</span><span>42 lessons</span><span>Beginner</span></div>
+        </div>
+      </div>
+
+      <div class="cv-section">
+        <h3>About this course</h3>
+        <p class="cv-desc">Hands-on course covering effective prompts, AI safety, and practical classroom workflows. Learn to build and deploy AI tools responsibly, with ready-to-use lesson plans and assessment ideas you can take straight into your classroom.</p>
+      </div>
+
+      <div class="cv-section">
+        <h3>Curriculum</h3>
+        <p class="sub">8 chapters · 42 lessons</p>
+        <div class="curr">
+          <details class="curr-item" open>
+            <summary><span class="n">1</span><h4>Getting started with AI</h4><span class="less">5 lessons</span><span class="chev">▾</span></summary>
+            <div class="curr-lessons">
+              <a href="#">Prompting 101<span class="tag">Video</span></a>
+              <a href="#">How LLMs work<span class="tag">Reading</span></a>
+              <a href="#">Setting up your toolkit<span class="tag">Video</span></a>
+            </div>
+          </details>
+          <details class="curr-item">
+            <summary><span class="n">2</span><h4>Building classroom workflows</h4><span class="less">6 lessons</span><span class="chev">▾</span></summary>
+            <div class="curr-lessons">
+              <a href="#">Lesson planning with AI<span class="tag">Video</span></a>
+              <a href="#">Assessment &amp; feedback<span class="tag">Reading</span></a>
+            </div>
+          </details>
+          <details class="curr-item">
+            <summary><span class="n">3</span><h4>Safety, ethics &amp; data privacy</h4><span class="less">5 lessons</span><span class="chev">▾</span></summary>
+            <div class="curr-lessons">
+              <a href="#">Bias and fairness<span class="tag">Video</span></a>
+              <a href="#">Student data protection<span class="tag">Reading</span></a>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="cv-section">
+        <h3>Mentors</h3>
+        <div class="mentors">
+          <div class="mentor-card">
+            <div class="av">RA</div>
+            <div style="min-width:0;">
+              <h4>Ravi Anand</h4>
+              <p class="qual">M.Ed. · 12 yrs teaching · AI curriculum lead</p>
+              <div class="tags"><span class="tag">AI tools</span><span class="tag">Pedagogy</span></div>
+            </div>
+            <div class="seats">
+              <div class="num">7</div>
+              <div class="lbl">seats left</div>
+              <div class="bar"><i style="width:65%"></i></div>
+            </div>
+          </div>
+          <div class="mentor-card">
+            <div class="av">SM</div>
+            <div style="min-width:0;">
+              <h4>Sneha Menon</h4>
+              <p class="qual">B.Tech, CSE · Google Certified Educator · 8 yrs</p>
+              <div class="tags"><span class="tag">EdTech</span><span class="tag">Assessment</span></div>
+            </div>
+            <div class="seats">
+              <div class="num">3</div>
+              <div class="lbl">seats left</div>
+              <div class="bar"><i style="width:25%"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- right: action rail -->
+    <aside style="position:sticky; top:20px;">
+      <div class="panel">
+        <p class="price">₹2,999</p>
+        <p class="price-sub">One-time payment · lifetime access</p>
+        <div class="stack">
+          <button class="pay-btn" type="button">
+            <span class="btn-text">Enrol now</span>
+            <span class="icons">
+              <svg class="one" viewBox="0 0 24 24"><path d="M21,18V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5V6H12C10.89,6 10,6.9 10,8V16A2,2 0 0,0 12,18M12,16H22V8H12M16,13.5A1.5,1.5 0 0,1 14.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,12A1.5,1.5 0 0,1 16,13.5Z" fill="currentColor"/></svg>
+              <svg class="two" viewBox="0 0 24 24"><path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18C2,19.11 2.89,20 4,20H20C21.11,20 22,19.11 22,18V6C22,4.89 21.11,4 20,4Z" fill="currentColor"/></svg>
+              <svg class="three" viewBox="0 0 24 24"><path d="M2,17H22V21H2V17M6.25,7H9V6H6V3H18V6H15V7H17.75L19,17H5L6.25,7M9,10H15V8H9V10M9,13H15V11H9V13Z" fill="currentColor"/></svg>
+              <svg class="four" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" fill="currentColor"/></svg>
+              <svg class="five" viewBox="0 0 24 24"><path d="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z" fill="currentColor"/></svg>
+            </span>
+          </button>
+          <a class="wish-btn" href="#"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/></svg>Add to wishlist</a>
+          <a class="wish-btn" href="#">Apply to mentor</a>
+        </div>
+        <p class="cv-rail-note">Seats limited — 10 of 15 filled for the next cohort. Learning content unlocks after confirmed enrolment.</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- action buttons -->
+  <h1 class="screen-title">Action buttons</h1>
+  <p class="screen-note">Delete — bin lid rotates open, turns red. View — eye opens, turns brand navy. Hover / focus each.</p>
+  <div class="bar"></div>
+  <div class="btn-demo">
+    <div class="btn-demo-item">
+      <button type="button" class="hv-btn hv-btn--delete" aria-label="Delete">
+        <svg class="bin-icon bin-top" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 69 14"><g clip-path="url(#binTopClip)"><path fill="#fff" d="M20.8232 2.62734L19.9948 4.21304C19.8224 4.54309 19.4808 4.75 19.1085 4.75H4.92857C2.20246 4.75 0 6.87266 0 9.5C0 12.1273 2.20246 14.25 4.92857 14.25H64.0714C66.7975 14.25 69 12.1273 69 9.5C69 6.87266 66.7975 4.75 64.0714 4.75H49.8915C49.5192 4.75 49.1776 4.54309 49.0052 4.21305L48.1768 2.62734C47.3451 1.00938 45.6355 0 43.7719 0H25.2281C23.3645 0 21.6549 1.00938 20.8232 2.62734ZM64.0023 20.0648C64.0397 19.4882 63.5822 19 63.0044 19H5.99556C5.4178 19 4.96025 19.4882 4.99766 20.0648L8.19375 69.3203C8.44018 73.0758 11.6746 76 15.5712 76H53.4288C57.3254 76 60.5598 73.0758 60.8062 69.3203L64.0023 20.0648Z"/></g><defs><clipPath id="binTopClip"><rect fill="white" height="14" width="69"/></clipPath></defs></svg>
+        <svg class="bin-icon bin-bottom" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 69 57"><g clip-path="url(#binBotClip)"><path fill="#fff" d="M20.8232 -16.3727L19.9948 -14.787C19.8224 -14.4569 19.4808 -14.25 19.1085 -14.25H4.92857C2.20246 -14.25 0 -12.1273 0 -9.5C0 -6.8727 2.20246 -4.75 4.92857 -4.75H64.0714C66.7975 -4.75 69 -6.8727 69 -9.5C69 -12.1273 66.7975 -14.25 64.0714 -14.25H49.8915C49.5192 -14.25 49.1776 -14.4569 49.0052 -14.787L48.1768 -16.3727C47.3451 -17.9906 45.6355 -19 43.7719 -19H25.2281C23.3645 -19 21.6549 -17.9906 20.8232 -16.3727ZM64.0023 1.0648C64.0397 0.4882 63.5822 0 63.0044 0H5.99556C5.4178 0 4.96025 0.4882 4.99766 1.0648L8.19375 50.3203C8.44018 54.0758 11.6746 57 15.5712 57H53.4288C57.3254 57 60.5598 54.0758 60.8062 50.3203L64.0023 1.0648Z"/></g><defs><clipPath id="binBotClip"><rect fill="white" height="57" width="69"/></clipPath></defs></svg>
+      </button>
+      <span>Delete</span>
+    </div>
+    <div class="btn-demo-item">
+      <button type="button" class="hv-btn hv-btn--view" aria-label="View"><svg class="eye-closed" viewBox="0 0 24 24"><path d="M2 12H22" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><svg class="eye-open" viewBox="0 0 24 24"><path d="M12 5.5C7.3 5.5 3.2 8.4 1.5 12c1.7 3.6 5.8 6.5 10.5 6.5s8.8-2.9 10.5-6.5C20.8 8.4 16.7 5.5 12 5.5Z" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="#fff"/></svg></button>
+      <span>View</span>
+    </div>
+  </div>
+
+  <!-- ============ 2. ENROLL PANEL + STATES ============ -->
+  <h1 class="screen-title">Course page enrol panel — states</h1>
+  <p class="screen-note">Animated "Pay now" (design 1). Mentor application pending → status card, no enrol button, no re-apply. Learner/Mentor → portal CTA.</p>
+  <div class="bar"></div>
+
+  <div class="cols">
+    <div>
+      <div class="panel" style="max-width:400px;">
+        <p class="price">₹2,999</p>
+        <p class="price-sub">One-time payment · Pay via Razorpay</p>
+        <div class="stack">
+          <button class="pay-btn" type="button" id="demo-pay">
+            <span class="btn-text">Pay now</span>
+            <span class="icons">
+              <svg class="one" viewBox="0 0 24 24"><path d="M21,18V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5V6H12C10.89,6 10,6.9 10,8V16A2,2 0 0,0 12,18M12,16H22V8H12M16,13.5A1.5,1.5 0 0,1 14.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,12A1.5,1.5 0 0,1 16,13.5Z" fill="currentColor"/></svg>
+              <svg class="two" viewBox="0 0 24 24"><path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18C2,19.11 2.89,20 4,20H20C21.11,20 22,19.11 22,18V6C22,4.89 21.11,4 20,4Z" fill="currentColor"/></svg>
+              <svg class="three" viewBox="0 0 24 24"><path d="M2,17H22V21H2V17M6.25,7H9V6H6V3H18V6H15V7H17.75L19,17H5L6.25,7M9,10H15V8H9V10M9,13H15V11H9V13Z" fill="currentColor"/></svg>
+              <svg class="four" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" fill="currentColor"/></svg>
+              <svg class="five" viewBox="0 0 24 24"><path d="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z" fill="currentColor"/></svg>
+            </span>
+          </button>
+          <a class="btn-soft" href="#">Add to wishlist</a>
+        </div>
+        <p style="margin-top:12px; color:var(--ink-500); font-size:11.5px;">Learning content unlocks only after confirmed enrolment.</p>
+      </div>
+
+      <div class="panel" style="max-width:400px; margin-top:14px;">
+        <p class="price free">Free</p>
+        <p class="price-sub">No payment required</p>
+        <div class="stack">
+          <a class="btn-soft" href="#">Enrol for free</a>
+          <a class="btn-soft" href="#">Apply to mentor</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="max-width:400px;">
+      <p class="price">Application status</p>
+      <p class="price-sub" style="margin-top:4px;">What the user sees on /courses/[slug] — no enrol button, no re-apply.</p>
+
+      <div class="stack">
+        <div class="state-card st-submitted" style="margin-top:8px;">
+          <span class="ic">⏳</span>
+          <div><b>Submitted</b>Your application is in the review queue. Nothing else is needed from you right now.</div>
+        </div>
+        <div class="state-card st-review">
+          <span class="ic">🔎</span>
+          <div><b>Under review</b>A reviewer is assessing your application.</div>
+        </div>
+        <div class="state-card st-interview">
+          <span class="ic">📅</span>
+          <div><b>Interview scheduled</b>Check the interview details in your mentor area and attend at the scheduled time.</div>
+        </div>
+        <div class="state-card st-accepted">
+          <span class="ic">✓</span>
+          <div><b>Accepted</b>You've been accepted as a mentor. Your teaching workspace is ready below. <a href="#" style="color:var(--brand-700);">Open workspace →</a></div>
+        </div>
+        <div class="state-card st-rejected">
+          <span class="ic">✕</span>
+          <div><b>Not accepted</b>This application wasn't accepted. You can apply for a different course.</div>
+        </div>
+        <p style="font-size:11.5px; color:var(--ink-500);">All states: enrol + "apply to mentor" buttons hidden until an application no longer exists. "Track application →" opens /dashboard/mentor.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 3. LEARNER PORTAL ============ -->
+  <h1 class="screen-title">Learner portal — course overview (inside /dashboard/courses/&lt;slug&gt;)</h1>
+  <p class="screen-note">Hero with resume CTA, progress ring, topic tree refined. Entering a course anywhere routes here.</p>
+  <div class="bar"></div>
+
+  <div class="tabs">
+    <a class="on" href="#">Overview</a><a href="#">Roadmap</a><a href="#">Meetings</a><a href="#">Resources</a><a href="#">Messages</a>
+  </div>
+
+  <div class="course-hero">
+    <span class="chip"><span class="cc-pill" style="position:static; padding:0; background:none; box-shadow:none; color:var(--brand-200);"><span class="dot" style="filter:brightness(1.5)"></span>Education</span></span>
+    <h2>AI for Educators: Build &amp; Deploy in the Classroom</h2>
+    <p>Hands-on course covering effective prompts, safety, and classroom workflows with AI tools, built by practising teacher-mentors.</p>
+    <div class="stats"><span>8 chapters</span><span>42 lessons</span><span>24 learners</span></div>
+  </div>
+
+  <div class="progress-panel" style="margin-top:16px;">
+    <div class="ring">
+      <svg width="64" height="64"><circle cx="32" cy="32" r="27" fill="none" stroke="#e2e8f0" stroke-width="6"/><circle cx="32" cy="32" r="27" fill="none" stroke="#038c3e" stroke-width="6" stroke-linecap="round" stroke-dasharray="169.6" stroke-dashoffset="64.4"/></svg>
+      <span class="val">62%</span>
+    </div>
+    <div style="min-width:0;">
+      <div class="row1"><span>Keep going</span><span style="color:var(--brand-700)">26 of 42 lessons done</span></div>
+      <div class="row2">Next up · Prompting 101 — your last position is saved.</div>
+    </div>
+    <a class="btn-primary pp-btn" href="#" style="padding:11px 18px; border-radius:10px; text-decoration:none;">Continue learning →</a>
+  </div>
+
+  <div class="cols" style="grid-template-columns:360px 1fr; margin-top:20px;">
+    <aside>
+      <div class="lesson-mini-row" style="border:1px solid var(--slate-200); border-radius:14px; background:#fff; box-shadow:var(--shadow-1); font-size:14px;">
+        <span class="ok yes">✓</span><b>Prompting 101</b><span class="ty" style="color:var(--ink-500); font-size:11px;">Video</span>
+      </div>
+      <div class="lesson-mini-row" style="margin-top:8px; font-size:14px;">
+        <span class="ok yes">✓</span>Prompt design for classrooms<span class="ty" style="color:var(--ink-500); font-size:11px;">Reading</span>
+      </div>
+      <div class="lesson-mini-row" style="font-size:14px; color:var(--ink-600);">
+        <span class="ok no"></span>Safety &amp; data privacy<span class="ty" style="color:var(--ink-500); font-size:11px;">Video</span>
+      </div>
+    </aside>
+    <div class="panel">
+      <p style="font-size:12px; font-weight:700; color:var(--ink-500); text-transform:uppercase; letter-spacing:.04em;">Video lesson</p>
+      <h3 style="margin-top:8px; font-size:20px; font-weight:800;">Prompting 101</h3>
+      <p style="margin-top:12px; color:var(--ink-600); font-size:14px; line-height:1.6;">
+        A reusable frame for writing classroom prompts: context → role → task → format. We apply it to lesson planning, rubrics, and parent emails — then revise together.
+      </p>
+      <button class="btn-primary" style="margin-top:18px; padding:11px 20px; border:none;">Mark as complete</button>
+    </div>
+  </div>
+
+  <!-- ============ 4. ROADMAP ============ -->
+  <h1 class="screen-title">Roadmap — improved</h1>
+  <p class="screen-note">Cleaner timeline, per-chapter progress chips, richer lesson rows (type + state), keep Continue CTA.</p>
+  <div class="bar"></div>
+
+  <div class="tabs">
+    <a href="#">Overview</a><a class="on2" href="#">Roadmap</a><a href="#">Meetings</a><a href="#">Resources</a><a href="#">Messages</a>
+  </div>
+
+  <ol class="timeline">
+    <li class="tl-node done" style="padding-top:2px;">
+      <span class="rail"></span><span class="num">✓</span>
+      <details class="tl-card" open>
+        <summary>
+          <div><h3>Getting Started</h3><div class="sub">5 lessons · 5/5 completed</div></div>
+          <span style="font-size:11px; color:var(--ink-500); margin-left:8px;">100%</span><span class="chev">▾</span>
+        </summary>
+        <div class="tl-lessons">
+          <a href="#"><span class="ok yes">✓</span><span class="n">1.1</span>Welcome &amp; setup<span class="ty">Video</span></a>
+          <a href="#"><span class="ok yes">✓</span><span class="n">1.2</span>Your first prompt<span class="ty">Reading</span></a>
+          <a href="#"><span class="ok yes">✓</span><span class="n">1.3</span>Prompting 101<span class="ty">Video</span></a>
+        </div>
+      </details>
+    </li>
+    <li class="tl-node">
+      <span class="rail"></span><span class="num">2</span>
+      <details class="tl-card" open>
+        <summary>
+          <div><h3>Classroom Workflows</h3><div class="sub">8 lessons · 2/8 completed</div></div>
+          <span style="font-size:11px; color:var(--ink-500); margin-left:8px;">25%</span><span class="chev">▾</span>
+        </summary>
+        <div class="tl-lessons">
+          <a href="#" style="background:var(--brand-50); border-left:2px solid var(--brand-600); box-shadow:0 0 0 9px var(--brand-50);">
+            <span class="ok yes">✓</span><span class="n">2.1</span>Lesson planning<span class="ty">Video</span><span style="margin-left:auto; font-size:11px; font-weight:700; color:var(--brand-700); padding-left:10px;">Next ▸</span>
+          </a>
+          <a href="#"><span class="ok no"></span><span class="n">2.2</span>Rubrics &amp; feedback<span class="ty">Reading</span></a>
+          <a href="#"><span class="ok no"></span><span class="n">2.3</span>Parent emails<span class="ty">Reading</span></a>
+        </div>
+      </details>
+    </li>
+    <li class="tl-node">
+      <span class="num">3</span>
+      <details class="tl-card">
+        <summary>
+          <div><h3>Capstone</h3><div class="sub">3 lessons · locked until chapter 2 complete</div></div>
+          <span class="chev">▾</span>
+        </summary>
+      </details>
+    </li>
+  </ol>
+
+  <div style="display:flex; gap:12px; align-items:center; justify-content:space-between; background:var(--brand-50); border:1px solid var(--brand-200); border-radius:16px; padding:18px; margin-top:18px;">
+    <div>
+      <b style="display:block; font-size:15px;">Keep building your skills.</b>
+      <span style="color:var(--ink-600); font-size:13px;">Next up: Lesson planning</span>
+    </div>
+    <a class="btn-primary" href="#" style="padding:11px 18px; border-radius:10px; text-decoration:none;">Continue learning →</a>
+  </div>
+
+  <!-- ============ 5. MENTOR WORKSPACE ============ -->
+  <h1 class="screen-title">Mentor workspace — /dashboard/mentor/courses/&lt;slug&gt;</h1>
+  <p class="screen-note">Assigned mentors land here when they open the course anywhere. Stat strip, roster, curriculum/meetings/resources/messages.</p>
+  <div class="bar"></div>
+
+  <div class="tabs">
+    <a class="on" href="#">Overview</a><a href="#">Learners</a><a href="#">Curriculum</a><a href="#">Meetings</a><a href="#">Resources</a><a href="#">Messages</a>
+  </div>
+
+  <header style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px;">
+    <div>
+      <p style="font-size:11px; font-weight:700; color:var(--ink-500); text-transform:uppercase; letter-spacing:.05em;">Education · Mentor workspace</p>
+      <h2 style="font-size:24px; font-weight:800; letter-spacing:-.02em;">AI for Educators</h2>
+    </div>
+    <span style="background:var(--brand-50); color:var(--brand-700); font-size:12px; font-weight:700; border-radius:999px; padding:6px 12px;">You mentor this course</span>
+  </header>
+
+  <div class="m-stats">
+    <div class="m-stat"><div class="v">24</div><div class="l">Learners</div></div>
+    <div class="m-stat"><div class="v">42</div><div class="l">Lessons</div></div>
+    <div class="m-stat"><div class="v">3</div><div class="l">Live sessions</div></div>
+    <div class="m-stat"><div class="v">18</div><div class="l">Unreviewed submissions</div></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
+    <div class="panel">
+      <b style="font-size:15px;">Learners</b>
+      <a style="margin-left:6px; font-size:12px; color:var(--brand-700); float:right; text-decoration:none;" href="#">View all →</a>
+      <div class="roster-row"><span class="cc-av" style="width:28px; height:28px; font-size:12px;">AR</span><div style="flex:1;"><b style="font-size:13.5px;">Aisha Rahman</b><div style="font-size:11.5px; color:var(--ink-500);">62% · last active today</div></div></div>
+      <div class="roster-row"><span class="cc-av" style="width:28px; height:28px; font-size:12px; background:var(--brand-100);">SK</span><div style="flex:1;"><b style="font-size:13.5px;">Sanjay Kumar</b><div style="font-size:11.5px; color:var(--ink-500);">31% · last active yesterday</div></div></div>
+      <div class="roster-row"><span class="cc-av" style="width:28px; height:28px; font-size:12px;">ML</span><div style="flex:1;"><b style="font-size:13.5px;">Meera Lakshmi</b><div style="font-size:11.5px; color:var(--ink-500);">Unreviewed · 1 submission</div></div><span style="background:var(--brand-600); color:#fff; font-size:10px; font-weight:800; border-radius:99px; padding:3px 8px;">! 1</span></div>
+    </div>
+    <div class="panel">
+      <b style="font-size:15px;">Upcoming sessions</b>
+      <div class="roster-row"><div style="flex:1;"><b style="font-size:13.5px;">Live Q&amp;A — Prompting</b><div style="font-size:11.5px; color:var(--ink-500);">Tomorrow · 6:00 PM · 45 min</div></div><span style="font-size:11px; font-weight:700; color:var(--brand-700);">In 1 day</span></div>
+      <div class="roster-row"><div style="flex:1;"><b style="font-size:13.5px;">Rubric clinic</b><div style="font-size:11.5px; color:var(--ink-500);">Thu · 6:00 PM · 45 min</div></div><span style="font-size:11px; font-weight:700; color:var(--brand-700);">In 3 days</span></div>
+    </div>
+  </div>
+
+  <!-- ============ 6. CHECKOUT (design 2) ============ -->
+  <h1 class="screen-title">Checkout — tx-card "New Transaction" (design 2)</h1>
+  <p class="screen-note">Used once a mentor is selected. Hover / press animates card → slip → ₹.</p>
+  <div class="bar"></div>
+
+  <div class="panel" style="max-width:520px;">
+    <b style="font-size:16px;">Checkout</b>
+    <div style="display:flex; gap:14px; align-items:center; margin-top:14px;">
+      <div style="width:64px; height:64px; border-radius:14px; background:linear-gradient(135deg,#0d6b3f,#024059); flex-shrink:0;"></div>
+      <div>
+        <b style="font-size:14.5px;">AI for Educators: Build &amp; Deploy in the Classroom</b>
+        <div style="font-size:12px; color:var(--ink-500); margin-top:2px;">Education · Mentor · Ravi Anand</div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; border-top:1px solid var(--slate-100); margin-top:14px; padding-top:12px; font-size:13px;">
+      <span style="color:var(--ink-600);">Total payable</span><b style="font-size:15px; font-weight:800;">₹2,999</b>
+    </div>
+    <!-- tx-card -->
+    <div class="tx-card" id="tx" onclick="var b=this;if(b.classList.contains('go'))return;b.classList.add('go');setTimeout(function(){b.classList.remove('go');alert('→ redirect to payment portal')},1300)" role="button" tabindex="0" style="margin-top:16px; cursor:pointer;">
+      <span class="tx-left" aria-hidden>
+        <span class="tx-card-inner"><span class="tx-line"></span><span class="tx-buttons"></span></span>
+        <span class="tx-post"><span class="tx-post-line"></span><span class="tx-screen"><span class="tx-dollar">₹</span></span><span class="tx-numbers"></span><span class="tx-numbers-line2"></span></span>
+      </span>
+      <span class="tx-right"><span class="tx-new">Pay ₹2,999</span><svg viewBox="0 0 451.846 451.847" class="tx-arrow" style="width:20px; height:20px;"><path fill="#cfcfcf" d="M345.441 248.292L151.154 442.573c-12.359 12.365-32.397 12.365-44.75 0-12.354-12.354-12.354-32.391 0-44.744L278.318 225.92 106.409 54.017c-12.354-12.359-12.354-32.394 0-44.748 12.354-12.359 32.391-12.359 44.75 0l194.287 194.284c6.177 6.18 9.262 14.271 9.262 22.366 0 8.099-3.091 16.196-9.267 22.373z"/></svg></span>
+    </div>
+    <p style="margin-top:10px; font-size:11.5px; color:var(--ink-500);">Click the button above to preview the card → slip → amount animation. Paid securely by Razorpay.</p>
+  </div>
+</div>
+
+<style>
+  /* —— inline tx-card styles (matches app globals.css) —— */
+  .tx-card { background:#fff; display:flex; width:460px; max-width:100%; height:120px; position:relative; border-radius:6px; transition:.3s ease-in-out; overflow:hidden; }
+  .tx-card.go { transform:scale(1.03); width:220px; }
+  .tx-card.go .tx-left { width:100%; }
+  .tx-left { background:#5de2a3; width:130px; height:120px; border-radius:4px; position:relative; display:flex; justify-content:center; align-items:center; cursor:pointer; transition:.3s; flex-shrink:0; overflow:hidden; }
+  .tx-right { width:calc(100% - 130px); display:flex; align-items:center; overflow:hidden; cursor:pointer; justify-content:space-between; white-space:nowrap; transition:.3s; }
+  .tx-right:hover { background:#f9f7f9; }
+  .tx-new { font-size:19px; font-weight:700; margin-left:20px; }
+  .tx-card-inner { width:70px; height:46px; background:#c7ffbc; border-radius:6px; position:absolute; display:flex; z-index:10; flex-direction:column; align-items:center; box-shadow:9px 9px 9px -2px rgba(77,200,143,.72); }
+  .tx-line { width:65px; height:13px; background:#80ea69; border-radius:2px; margin-top:7px; }
+  .tx-buttons { width:8px; height:8px; background:#379e1f; box-shadow:0 -10px 0 0 #26850e, 0 10px 0 0 #56be3e; border-radius:50%; margin-top:10px; transform:rotate(90deg); }
+  .tx-card.go .tx-card-inner { animation:tx-slide-top 1.2s cubic-bezier(.645,.045,.355,1) both; }
+  .tx-post { width:63px; height:75px; background:#dddde0; position:absolute; z-index:11; bottom:10px; top:120px; border-radius:6px; overflow:hidden; }
+  .tx-post-line { width:47px; height:9px; background:#545354; position:absolute; border-radius:0 0 3px 3px; right:8px; top:8px; }
+  .tx-post-line:before { content:""; position:absolute; width:47px; height:9px; background:#757375; top:-8px; }
+  .tx-screen { width:47px; height:23px; background:#fff; position:absolute; top:22px; right:8px; border-radius:3px; }
+  .tx-numbers { width:12px; height:12px; background:#838183; box-shadow:0 -18px 0 0 #838183, 0 18px 0 0 #838183; border-radius:2px; position:absolute; transform:rotate(90deg); left:25px; top:52px; }
+  .tx-numbers-line2 { width:12px; height:12px; background:#aaa9ab; box-shadow:0 -18px 0 0 #aaa9ab, 0 18px 0 0 #aaa9ab; border-radius:2px; position:absolute; transform:rotate(90deg); left:25px; top:68px; }
+  .tx-card.go .tx-post { animation:tx-slide-post 1s cubic-bezier(.165,.84,.44,1) both; }
+  .tx-dollar { position:absolute; font-size:16px; width:100%; left:0; top:0; color:#4b953b; text-align:center; }
+  .tx-card.go .tx-dollar { animation:tx-fade-in-fwd .3s 1s backwards; }
+  @keyframes tx-slide-top { 0%{transform:translateY(0)} 50%{transform:translateY(-70px) rotate(90deg)} 60%{transform:translateY(-70px) rotate(90deg)} 100%{transform:translateY(-8px) rotate(90deg)} }
+  @keyframes tx-slide-post { 50%{transform:translateY(0)} 100%{transform:translateY(-70px)} }
+  @keyframes tx-fade-in-fwd { 0%{opacity:0; transform:translateY(-5px)} 100%{opacity:1; transform:translateY(0)} }
+</style>
+<script>
+  (function () {
+    document.querySelectorAll(".pay-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (btn.classList.contains("is-paying")) return;
+        btn.classList.add("is-paying");
+        setTimeout(function () {
+          btn.classList.remove("is-paying");
+          alert("→ redirect to payment portal");
+        }, 3000);
+      });
+    });
+  })();
+</script>
+</body>
+</html>
