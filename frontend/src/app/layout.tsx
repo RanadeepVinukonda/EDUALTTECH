@@ -8,7 +8,7 @@ import "./globals.css";
 
 const SITE_NAME = "EduAltTech";
 const SITE_DESCRIPTION =
-  "EduAltTech — courses, mentors, and structured roadmaps for ambitious learners. Learn in-demand skills with real mentors. A product by Setsuzoku.";
+  "Edu Alt Tech (EduAltTech) — courses, mentors, and structured roadmaps for ambitious learners. Learn in-demand skills with real mentors. A product by Setsuzoku.";
 
 export const viewport: Viewport = {
   themeColor: "#038c3e",

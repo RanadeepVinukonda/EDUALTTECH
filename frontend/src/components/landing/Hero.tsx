@@ -9,7 +9,7 @@ export default function Hero() {
             Education beyond the syllabus
           </p>
           <h1 className="mt-5 font-display text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]">
-            An education company that also puts skilled people to work
+            Edu Alt Tech — an education company that also puts skilled people to work
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-600">
             EduAltTech teaches students through structured courses, alternate learning, and tuition —

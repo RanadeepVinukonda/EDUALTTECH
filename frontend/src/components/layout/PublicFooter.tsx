@@ -68,7 +68,7 @@ export default function PublicFooter() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} EduAltTech. A product by Setsuzoku.</p>
+          <p>© {new Date().getFullYear()} EduAltTech (Edu Alt Tech). A product by Setsuzoku.</p>
           <nav aria-label="Legal" className="flex flex-wrap gap-x-4 gap-y-2">
             {LEGAL_LINKS.map((l) => (
               <Link key={l.href} href={l.href} className="transition hover:text-white">
