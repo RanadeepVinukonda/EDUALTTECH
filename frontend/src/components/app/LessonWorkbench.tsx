@@ -377,9 +377,12 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
                 )}
                 {lesson.hasVideo && <span className="inline-flex items-center gap-1 text-slate-500"><Movie fontSize="inherit" aria-hidden /> uploaded</span>}
                 {resCount > 0 && <span className="inline-flex items-center gap-1"><MenuBook fontSize="inherit" aria-hidden /> {resCount} {resCount === 1 ? "resource" : "resources"}</span>}
-                {lesson.isPublished
-                  ? <><span aria-hidden>·</span><span className="font-semibold text-emerald-700">Completed</span></>
-                  : <><span aria-hidden>·</span><span className="font-semibold text-amber-700">Not completed</span></>}
+                {lesson.isPublished && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span className="font-semibold text-emerald-700">Completed</span>
+                  </>
+                )}
               </p>
             </>
           )}
