@@ -5,6 +5,7 @@ import OpenInNew from "@mui/icons-material/OpenInNew";
 import { publicFetch } from "@/lib/server-api";
 import type { OrganizationItem } from "@/lib/types";
 import SectionHeading from "@/components/landing/SectionHeading";
+import PartnerStrip from "@/components/landing/PartnerStrip";
 import CoverImage from "@/components/ui/CoverImage";
 import LinkButton from "@/components/ui/LinkButton";
 import DataUnavailable from "@/components/landing/DataUnavailable";
@@ -65,6 +66,8 @@ export default async function PartnersPage() {
           />
         </div>
       </section>
+
+      <PartnerStrip divider={false} />
 
       <section className="py-16 sm:py-20">
         <div className={wrap}>

@@ -77,8 +77,8 @@ export default async function AboutPage() {
           <SectionHeading
             as="h1"
             eyebrow="About EduAltTech"
-            title="Practical learning, and the technology to support it"
-            lead="EduAltTech does two connected things. We help learners develop practical skills in AI, entrepreneurship, and technology beyond the regular curriculum — and we build useful software for the schools that teach them."
+            title="Practical learning, and work for the people who teach it"
+            lead="EduAltTech does two connected things. We help students learn practical skills in AI, entrepreneurship, and technology — through courses, alternate education, and tuition — and we employ skilled people who were out of work as the mentors who teach them. We also build useful software for the schools that run our programs."
           />
         </div>
       </section>
@@ -106,6 +106,39 @@ export default async function AboutPage() {
                 that actually helps.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Learning and livelihood */}
+      <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
+        <div className={wrap}>
+          <SectionHeading
+            eyebrow="Education and employment"
+            title="Learning and livelihood, together"
+            lead="Three commitments sit behind everything we run. They are practical, and each one has to be real to count."
+          />
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {[
+              {
+                title: "Education and alternate education",
+                body: "Students get structured courses and, where the standard path does not fit, alternate learning routes to the same practical outcomes.",
+              },
+              {
+                title: "Tuition facilities",
+                body: "Guided tuition and coaching alongside our courses — subject support, doubt sessions, and hands-on practice, in person and online.",
+              },
+              {
+                title: "Employment for skilled people",
+                body: "We recruit skilled people who are out of work, train them as mentors and tutors, and employ them to teach. This is paid work, not volunteering.",
+              },
+            ].map((c, i) => (
+              <div key={c.title} className="rounded-2xl border border-slate-200 bg-white p-8">
+                <span className="font-mono text-sm text-slate-400">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="mt-3 font-display text-xl font-bold text-ink-900">{c.title}</h3>
+                <p className="mt-3 leading-relaxed text-ink-600">{c.body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

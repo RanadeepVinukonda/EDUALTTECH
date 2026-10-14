@@ -4,7 +4,9 @@ import ArrowForward from "@mui/icons-material/ArrowForward";
 import { publicFetch } from "@/lib/server-api";
 import type { CourseListItem } from "@/lib/types";
 import Hero from "@/components/landing/Hero";
+import PartnerStrip from "@/components/landing/PartnerStrip";
 import Offerings from "@/components/landing/Offerings";
+import PhotoBand from "@/components/landing/PhotoBand";
 import Pathway from "@/components/landing/Pathway";
 import SectionHeading from "@/components/landing/SectionHeading";
 import CourseCard from "@/components/landing/CourseCard";
@@ -16,7 +18,7 @@ const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 export const metadata: Metadata = {
   title: "EduAltTech — Practical AI, entrepreneurship, and technology courses",
   description:
-    "Learn practical AI, entrepreneurship, and technology skills through structured courses, roadmaps, and mentors — and see the software we build for schools.",
+    "Learn practical AI, entrepreneurship, and technology skills through structured courses, alternate learning, and tuition — taught by skilled mentors we employ, and the software we build for schools.",
   alternates: { canonical: "/" },
 };
 
@@ -28,7 +30,9 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
+      <PartnerStrip />
       <Offerings />
+      <PhotoBand />
 
       {/* Course discovery preview */}
       <section className="bg-white py-16 sm:py-20">
@@ -81,21 +85,21 @@ export default async function HomePage() {
       <section className="bg-brand-700 py-16 sm:py-20">
         <div className={`${wrap} text-center`}>
           <h2 className="mx-auto max-w-2xl font-display text-3xl font-bold text-white sm:text-4xl">
-            Bring practical technology learning to your learners
+            Learn with us, or teach and earn with us
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-brand-50">
-            Whether you are a student ready to build, or a school looking for a technology partner,
-            there is a clear next step.
+            Whether you are a student ready to build, a skilled person looking for work, or a school
+            after a technology partner, there is a clear next step.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <LinkButton href="/courses" variant="secondary" size="lg">
               Explore courses
             </LinkButton>
             <Link
-              href="/contact"
+              href="/mentor"
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             >
-              Contact us
+              Teach with us
             </Link>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { buttonClass } from "@/components/ui/Button";
 export const metadata = {
   title: "Become a Mentor",
   description:
-    "Teach on EduAltTech. Learn what mentors do, how applications are reviewed, and how to apply.",
+    "Turn your skills into paid teaching. Learn what mentors do, how applications are reviewed, and how to apply.",
 };
 
 const steps = [
@@ -24,14 +24,14 @@ const responsibilities = [
 export default function MentorPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-14 sm:px-6 lg:px-8">
-      <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">Teach on EduAltTech</p>
+      <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">Teach and earn with EduAltTech</p>
       <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl">
-        Become a mentor
+        Turn your skills into paid teaching
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-slate-600">
-        Mentors author lessons and run live sessions for the courses they are assigned. If you
-        have subject expertise and want to teach, apply for a specific course and our team will
-        review your application.
+        If you have real skill but no steady work, teaching here is a paid role — not volunteering.
+        Mentors author lessons and run live sessions for the courses they are assigned. Apply for a
+        specific course and our team will review your application.
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link href="/dashboard/mentor/apply" className={buttonClass("primary", "lg")}>

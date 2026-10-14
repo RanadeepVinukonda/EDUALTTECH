@@ -8,13 +8,13 @@ export default function Pathway() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Get involved"
-          title="Learn as a student, or teach as a mentor"
-          lead="Two clear paths. Mentoring is granted per course after review — never as a global account role."
+          title="Learn as a student, or earn as a mentor"
+          lead="Two clear paths. Mentoring is a paid role granted per course after review — never as a global account role."
         />
 
         <div className="mt-12 grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8">
-            <h3 className="font-display text-2xl font-bold text-ink-900">Join a course</h3>
+            <h3 className="font-display text-2xl font-bold text-ink-900">Learn as a student</h3>
             <ol className="mt-6 space-y-4">
               {[
                 "Create an account and verify your email.",
@@ -39,10 +39,11 @@ export default function Pathway() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-ink-900 p-8 text-slate-200">
-            <h3 className="font-display text-2xl font-bold text-white">Become a mentor</h3>
+            <h3 className="font-display text-2xl font-bold text-white">Teach and earn with us</h3>
             <p className="mt-4 leading-relaxed text-slate-300">
-              Practitioners who want to teach apply for a specific course. Our team reviews each
-              application — accepted mentors join that course only.
+              If you have real skill but no steady work, teaching here is a paid role. Apply for a
+              specific course; our team reviews each application, and accepted mentors are employed to
+              teach that course only.
             </p>
             <ul className="mt-6 space-y-3 text-slate-300">
               <li className="flex items-start gap-3">
@@ -55,7 +56,7 @@ export default function Pathway() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />
-                Accepted mentors get authoring and session tools for their course.
+                Accepted mentors get paid authoring and session tools for their course.
               </li>
             </ul>
             <div className="mt-8">

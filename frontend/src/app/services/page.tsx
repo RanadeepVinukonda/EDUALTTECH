@@ -3,6 +3,7 @@ import Link from "next/link";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import School from "@mui/icons-material/School";
 import Groups from "@mui/icons-material/Groups";
+import AutoStories from "@mui/icons-material/AutoStories";
 import Extension from "@mui/icons-material/Extension";
 import Search from "@mui/icons-material/Search";
 import Handshake from "@mui/icons-material/Handshake";
@@ -21,7 +22,7 @@ const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 export const metadata: Metadata = {
   title: "Services & Programs",
   description:
-    "EduAltTech offers practical educational programs and digital solutions for schools — structured learning with mentors, and technology built with schools.",
+    "EduAltTech offers structured courses, alternate education, and tuition for students — plus paid mentoring roles for skilled people, and digital solutions built with schools.",
   alternates: { canonical: "/services" },
 };
 
@@ -65,8 +66,8 @@ export default async function ServicesPage() {
           <SectionHeading
             as="h1"
             eyebrow="Services & Programs"
-            title="Practical education and technology solutions"
-            lead="EduAltTech offers two kinds of engagement: structured educational programs for learners, and digital solutions built with schools. Find the one that fits you below."
+            title="Education, tuition, employment, and technology"
+            lead="EduAltTech runs structured courses, alternate education, and tuition for students; employs skilled people as paid mentors; and builds digital solutions with schools. Find the fit for you below."
           />
           <div className="mt-8 flex flex-wrap gap-3">
             <LinkButton href="#programs" variant="secondary">
@@ -144,18 +145,19 @@ export default async function ServicesPage() {
         <div className={wrap}>
           <SectionHeading
             eyebrow="Learning and mentorship"
-            title="Two separate paths"
-            lead="Learning and teaching are deliberately distinct. Joining as a learner never grants teaching access."
+            title="Education for students, paid work for mentors"
+            lead="Learning and teaching are deliberately distinct. Joining as a learner never grants teaching access — and mentoring is a paid role, not a favour."
           />
-          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-white p-8">
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
                 <School />
               </span>
-              <h3 className="mt-4 font-display text-xl font-bold text-ink-900">Join as a learner</h3>
+              <h3 className="mt-4 font-display text-xl font-bold text-ink-900">Education &amp; alternate education</h3>
               <p className="mt-2 leading-relaxed text-ink-600">
                 Browse the catalogue, open a course, and enrol — free or paid. Learners work through the
-                course roadmap at their own pace with mentors on hand.
+                course roadmap at their own pace, with alternate routes where the standard syllabus does
+                not fit.
               </p>
               <div className="mt-6">
                 <LinkButton href="/courses">Explore courses</LinkButton>
@@ -163,17 +165,32 @@ export default async function ServicesPage() {
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-8">
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-                <Groups />
+                <AutoStories />
               </span>
-              <h3 className="mt-4 font-display text-xl font-bold text-ink-900">Apply to mentor</h3>
+              <h3 className="mt-4 font-display text-xl font-bold text-ink-900">Tuition facilities</h3>
               <p className="mt-2 leading-relaxed text-ink-600">
-                Experienced practitioners apply to mentor a <span className="font-semibold">specific course</span>.
-                Applications are reviewed, and mentoring is granted per course only after approval — never as a
-                global account role.
+                Guided tuition and coaching that runs alongside our courses — subject support, doubt
+                sessions, and hands-on practice, in person and online.
               </p>
               <div className="mt-6">
-                <LinkButton href="/courses" variant="secondary">
-                  Browse courses to mentor
+                <LinkButton href="#enquiry" variant="secondary">
+                  Enquire about tuition
+                </LinkButton>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-8">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                <Groups />
+              </span>
+              <h3 className="mt-4 font-display text-xl font-bold text-ink-900">Employment for skilled people</h3>
+              <p className="mt-2 leading-relaxed text-ink-600">
+                Skilled but out of work? Apply to mentor a{" "}
+                <span className="font-semibold">specific course</span>. Accepted applicants are employed to
+                teach it — access is granted per course after review, never as a global account role.
+              </p>
+              <div className="mt-6">
+                <LinkButton href="/mentor" variant="secondary">
+                  Apply to mentor
                 </LinkButton>
               </div>
             </div>
@@ -269,8 +286,8 @@ export default async function ServicesPage() {
           <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">Choose your next step</h2>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { title: "Learners", body: "Discover courses built around practical skill.", href: "/courses", cta: "Explore courses" },
-              { title: "Prospective mentors", body: "Browse courses and apply for a specific one.", href: "/courses", cta: "Browse courses" },
+              { title: "Learners", body: "Discover courses and tuition built around practical skill.", href: "/courses", cta: "Explore courses" },
+              { title: "Skilled people seeking work", body: "Turn your skills into paid teaching. Apply for a course.", href: "/mentor", cta: "Teach with us" },
               { title: "Schools & organizations", body: "Tell us your requirement and start a conversation.", href: "#enquiry", cta: "Contact us" },
               { title: "Program participants", body: "Open the published program that fits you.", href: "#programs", cta: "View programs" },
             ].map((c) => (
