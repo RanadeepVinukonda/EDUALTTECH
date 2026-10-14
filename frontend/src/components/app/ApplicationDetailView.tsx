@@ -8,6 +8,7 @@ import { APPLICATION_STATUS_META } from "@/lib/mentor";
 import { formatDate, formatCountdown } from "@/lib/format";
 import { notifyError } from "@/lib/notify";
 import { buttonClass } from "@/components/ui/Button";
+import FlipClock from "@/components/ui/FlipClock";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -123,16 +124,20 @@ export default function ApplicationDetailView({ id }: { id: string }) {
                   Join interview
                 </a>
               )}
-              {interviewStatus && (
-                <span
-                  className={
-                    interviewStatus === "Live now"
-                      ? "font-semibold text-green-700"
-                      : "font-semibold text-indigo-700"
-                  }
-                >
-                  {interviewStatus}
-                </span>
+              {interviewStart > now && application.interviewAt ? (
+                <FlipClock to={application.interviewAt} label="Starts in" />
+              ) : (
+                interviewStatus && (
+                  <span
+                    className={
+                      interviewStatus === "Live now"
+                        ? "font-semibold text-green-700"
+                        : "font-semibold text-indigo-700"
+                    }
+                  >
+                    {interviewStatus}
+                  </span>
+                )
               )}
             </div>
           )}

@@ -15,7 +15,6 @@ const TABS: Tab[] = [
   { id: "roadmap", label: "Roadmap", segment: "/roadmap" },
   { id: "meetings", label: "Meetings", segment: "/meetings" },
   { id: "resources", label: "Resources", segment: "/resources" },
-  { id: "messages", label: "Messages", segment: "/messages" },
 ];
 
 export default function CourseTabs({ slug }: { slug: string }) {

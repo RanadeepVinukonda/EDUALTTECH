@@ -10,6 +10,7 @@ import { notifyError, notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
+import ChatView from "./ChatView";
 import Lock from "@mui/icons-material/Lock";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 
@@ -209,7 +210,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
         {!isLearner && <p className="mt-3 text-sm font-semibold text-ink-700">Mentor / staff view — read only.</p>}
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,380px)]">
         <nav aria-label="Course roadmap" className="order-2 lg:order-1">
           <ol className="space-y-4">
             {course.chapters
@@ -346,6 +347,15 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
             </div>
           )}
         </section>
+
+        {isLearner && (
+          <aside aria-label="Course messages" className="order-3 lg:col-span-2 xl:col-span-1">
+            <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1 xl:sticky xl:top-6">
+              <h2 className="mb-3 font-display font-bold text-ink-900">Messages</h2>
+              <ChatView courseId={course.id} compact />
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

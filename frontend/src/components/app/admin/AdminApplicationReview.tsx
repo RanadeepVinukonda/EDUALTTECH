@@ -10,6 +10,7 @@ import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import CoverImage from "@/components/ui/CoverImage";
 import Button, { buttonClass } from "@/components/ui/Button";
+import FlipClock from "@/components/ui/FlipClock";
 import Input from "@/components/ui/Input";
 import LinkIcon from "@mui/icons-material/Link";
 import Event from "@mui/icons-material/Event";
@@ -195,16 +196,20 @@ export default function AdminApplicationReview({ id }: { id: string }) {
                         Join interview
                       </a>
                     )}
-                    {interviewStatus && (
-                      <span
-                        className={
-                          interviewStatus === "Live now"
-                            ? "text-sm font-semibold text-green-700"
-                            : "text-sm font-semibold text-brand-700"
-                        }
-                      >
-                        {interviewStatus}
-                      </span>
+                    {interviewStart > now && application.interviewAt ? (
+                      <FlipClock to={application.interviewAt} label="Starts in" />
+                    ) : (
+                      interviewStatus && (
+                        <span
+                          className={
+                            interviewStatus === "Live now"
+                              ? "text-sm font-semibold text-green-700"
+                              : "text-sm font-semibold text-brand-700"
+                          }
+                        >
+                          {interviewStatus}
+                        </span>
+                      )
                     )}
                   </div>
                 }

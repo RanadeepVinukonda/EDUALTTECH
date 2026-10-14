@@ -11,7 +11,7 @@ import Button from "@/components/ui/Button";
 import LinkButton from "@/components/ui/LinkButton";
 import EnrollButton from "@/components/ui/EnrollButton";
 import PayButton from "@/components/ui/PayButton";
-import Countdown from "@/components/ui/Countdown";
+import FlipClock from "@/components/ui/FlipClock";
 import { api, ApiError } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
 import { formatPrice } from "@/lib/format";
@@ -155,12 +155,7 @@ export default function CourseActions({
                     })}
                   </p>
                 )}
-                {application.interviewAt && (
-                  <Countdown
-                    to={application.interviewAt}
-                    className="inline-block rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-brand-700"
-                  />
-                )}
+                {application.interviewAt && <FlipClock to={application.interviewAt} label="Starts in" />}
                 {application.interviewUrl && (
                   <a
                     href={application.interviewUrl}

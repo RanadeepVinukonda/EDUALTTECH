@@ -17,7 +17,7 @@ function peerOf(c: Conversation, meId: string) {
   return c.learnerUserId === meId ? c.mentor : c.learner;
 }
 
-export default function ChatView({ courseId, title }: { courseId?: string; title?: string } = {}) {
+export default function ChatView({ courseId, title, compact = false }: { courseId?: string; title?: string; compact?: boolean } = {}) {
   const { user } = useAuth();
   const [convs, setConvs] = useState<Conversation[] | null>(null);
   const [convError, setConvError] = useState<string | null>(null);
@@ -129,9 +129,11 @@ export default function ChatView({ courseId, title }: { courseId?: string; title
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="font-display text-2xl font-extrabold text-ink-900">
-        {title ? `Messages · ${title}` : "Messages"}
-      </h1>
+      {!compact && (
+        <h1 className="font-display text-2xl font-extrabold text-ink-900">
+          {title ? `Messages · ${title}` : "Messages"}
+        </h1>
+      )}
 
       {visible.length === 0 ? (
         <EmptyState
@@ -143,8 +145,8 @@ export default function ChatView({ courseId, title }: { courseId?: string; title
           }
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
-          <nav aria-label="Conversations" className={cn("flex flex-col gap-1", selectedId && "hidden lg:flex")}>
+        <div className={cn("grid gap-4", !compact && "lg:grid-cols-[20rem_1fr]")}>
+          <nav aria-label="Conversations" className={cn("flex flex-col gap-1", selectedId && (compact ? "hidden" : "hidden lg:flex"))}>
             {visible.map((c) => {
               const peer = peerOf(c, user.id);
               const active = c.id === selectedId;
@@ -176,7 +178,7 @@ export default function ChatView({ courseId, title }: { courseId?: string; title
             })}
           </nav>
 
-          <section aria-label="Conversation" className={cn("flex flex-col rounded-[20px] border border-slate-200 bg-white", !selectedId && "hidden lg:flex")}>
+          <section aria-label="Conversation" className={cn("flex flex-col rounded-[20px] border border-slate-200 bg-white", !selectedId && (compact ? "hidden" : "hidden lg:flex"))}>
             {!selected ? (
               <p className="p-6 text-sm text-slate-500">Select a conversation.</p>
             ) : (
@@ -189,12 +191,12 @@ export default function ChatView({ courseId, title }: { courseId?: string; title
                     <p className="text-xs text-slate-500">{selected.course.title}</p>
                   </div>
                   <button type="button" className={buttonClass("ghost", "sm")} onClick={() => setSelectedId(null)}>
-                    <span className="lg:hidden">Back</span>
-                    <span className="hidden lg:inline">Close</span>
+                    <span className={compact ? "" : "lg:hidden"}>Back</span>
+                    <span className={compact ? "hidden" : "hidden lg:inline"}>Close</span>
                   </button>
                 </header>
 
-                <div className="flex max-h-[60vh] min-h-[24rem] flex-1 flex-col gap-2 overflow-y-auto p-4">
+                <div className={cn("flex flex-1 flex-col gap-2 overflow-y-auto p-4", compact ? "max-h-[50vh] min-h-[16rem]" : "max-h-[60vh] min-h-[24rem]")}>
                   {hasMore && (
                     <div className="flex justify-center">
                       <button
