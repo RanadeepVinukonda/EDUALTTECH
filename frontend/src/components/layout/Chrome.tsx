@@ -18,7 +18,6 @@ const AUTH_BARE = [
   "/onboarding",
   "/reactivate",
   "/auth",
-  "/maintenance",
 ];
 
 // Routes that are bare until signed in, then get the workspace shell.

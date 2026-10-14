@@ -1,5 +1,3 @@
-import { cookies } from "next/headers";
-
 // Server-side origin for backend API calls. BACKEND_ORIGIN is required in
 // production; fall back to the deployed backend so misconfigured env vars
 // can't silently break server-rendered public pages.
@@ -8,18 +6,6 @@ const ORIGIN =
   (process.env.NODE_ENV === "production" ? "https://edualttech.onrender.com" : "http://localhost:5000");
 
 type Query = Record<string, string | number | undefined>;
-
-async function maintHeaders(): Promise<HeadersInit> {
-  const headers: Record<string, string> = {};
-  try {
-    const store = await cookies();
-    const key = store.get("maint_key")?.value;
-    if (key) headers["x-maintenance-token"] = key;
-  } catch {
-    // Outside a request context — no cookie available. Fine.
-  }
-  return headers;
-}
 
 /**
  * Server-side fetch for public (unauthenticated) content.
@@ -36,7 +22,6 @@ export async function publicFetch<T>(path: string, query: Query = {}, revalidate
   try {
     const res = await fetch(`${ORIGIN}/api${path}${qs ? `?${qs}` : ""}`, {
       next: { revalidate },
-      headers: await maintHeaders(),
     });
     if (!res.ok) return null;
     const json = (await res.json()) as { success?: boolean; data?: T };
@@ -65,7 +50,6 @@ export async function publicFetchStrict<T>(
   try {
     const res = await fetch(`${ORIGIN}/api${path}${qs ? `?${qs}` : ""}`, {
       next: { revalidate },
-      headers: await maintHeaders(),
     });
     if (res.status === 404) return { data: null, error: false };
     if (!res.ok) return { data: null, error: true };

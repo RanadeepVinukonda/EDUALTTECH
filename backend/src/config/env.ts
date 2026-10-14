@@ -1,9 +1,6 @@
 import dotenv from "dotenv";
-import { createHash } from "node:crypto";
 
 dotenv.config();
-
-const sha256Hex = (value: string) => createHash("sha256").update(value).digest("hex");
 
 function required(name: string): string {
   const value = process.env[name];
@@ -70,14 +67,6 @@ export const config = {
   // Local dev sets AUTH_SKIP_OTP=true to accept the dev code 000000.
   auth: {
     skipOtp: bool("AUTH_SKIP_OTP", false),
-  },
-
-  // Full-site lock: MAINTENANCE_MODE=true blocks every /api/* request (except
-  // health + CORS preflight) unless the caller sends the correct token hash in
-  // the `x-maintenance-token` header. Hash, not the raw secret, is compared.
-  maintenance: {
-    enabled: bool("MAINTENANCE_MODE", false),
-    tokenHash: sha256Hex(process.env.MAINTENANCE_TOKEN?.trim() ?? ""),
   },
 
   logLevel: process.env.LOG_LEVEL ?? "info",

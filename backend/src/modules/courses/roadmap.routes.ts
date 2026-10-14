@@ -7,7 +7,7 @@ import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { audit } from "../../lib/audit.js";
 import { getCourseAccess, assertCourseOwner } from "../../lib/course-access.js";
-import { signedUrl, removePrivate, sanitizeFileName, fileExt, contentTypeFor } from "../../lib/storage.js";
+import { signedUrl, removePrivate, fileExt } from "../../lib/storage.js";
 import { supabaseAdmin } from "../../lib/supabase.js";
 import { config } from "../../config/env.js";
 import { sendEmail, layout } from "../../lib/email.js";
