@@ -85,7 +85,7 @@ async function seedOne(slug: string, authorId: string): Promise<{ chapters: numb
                   type: l.type,
                   textContent: l.body,
                   order: li + 1,
-                  isPublished: true,
+                  isPublished: false,
                   createdById: authorId,
                 })),
               },

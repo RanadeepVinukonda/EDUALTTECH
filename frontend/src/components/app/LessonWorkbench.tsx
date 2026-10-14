@@ -6,6 +6,7 @@ import { uploadPrivateFile } from "@/lib/upload";
 import { describeError } from "@/lib/errors";
 import type { Roadmap, LessonRow, TopicRow, ChapterRow, MeetingRow, ResourceRow } from "@/lib/app-types";
 import { notifyError, notifySuccess } from "@/lib/notify";
+import { cn } from "@/lib/cn";
 import Button, { buttonClass } from "@/components/ui/Button";
 import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
@@ -24,7 +25,7 @@ import Article from "@mui/icons-material/Article";
 
 const RES_ACCEPT = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.png,.jpg,.jpeg,.webp,.gif,.svg,.mp4,.webm";
 const MAX_BYTES = 5 * 1024 * 1024;
-type Panel = "meeting" | "recording" | "resource";
+type Panel = "meeting" | "recording" | "resource" | "text";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -168,6 +169,43 @@ function RecordingForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; 
   );
 }
 
+function TextForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; onClose: () => void }) {
+  const [text, setText] = useState(lesson.textContent ?? "");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await apiPatch(`/courses/lessons/${lesson.id}`, { type: "READING", textContent: text.trim() ? text : null });
+      notifySuccess("Lesson text saved.");
+      ctx.onChanged();
+      onClose();
+    } catch (e) {
+      notifyError(describeError(e, "Could not save the lesson text."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-3 flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={5}
+        aria-label="Lesson text"
+        placeholder="Lesson text content"
+        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+      />
+      <div className="flex gap-2">
+        <Button type="submit" size="sm" loading={busy}>Save text</Button>
+        <Button type="button" size="sm" variant="ghost" onClick={onClose}>Cancel</Button>
+      </div>
+    </form>
+  );
+}
+
 function ResourceForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState("pdf");
@@ -293,6 +331,20 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
     }
   }
 
+  async function setType(next: "READING" | "VIDEO") {
+    if (next === lesson.type) return;
+    setBusy(true);
+    try {
+      await apiPatch(`/courses/lessons/${lesson.id}`, { type: next });
+      notifySuccess(next === "VIDEO" ? "Set as video lesson." : "Set as reading lesson.");
+      ctx.onChanged();
+    } catch (e) {
+      notifyError(describeError(e, "Could not change the lesson type."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function move(dir: -1 | 1) {
     const j = index + dir;
     if (j < 0 || j >= siblings.length) return;
@@ -341,6 +393,9 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
                   {lesson.type === "VIDEO" ? "Video" : "Reading"}
                 </span>
                 {lesson.hasVideo && <span className="inline-flex items-center gap-1 text-slate-500"><Movie fontSize="inherit" aria-hidden /> uploaded</span>}
+                {lesson.type === "READING" && Boolean((lesson.textContent ?? "").trim()) && (
+                  <span className="inline-flex items-center gap-1 text-slate-500"><Article fontSize="inherit" aria-hidden /> text set</span>
+                )}
                 {resCount > 0 && <span aria-hidden>·</span>}
                 {resCount > 0 && <span className="inline-flex items-center gap-1"><MenuBook fontSize="inherit" aria-hidden /> {resCount} {resCount === 1 ? "resource" : "resources"}</span>}
                 {lesson.isPublished
@@ -359,6 +414,27 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
           </span>
         )}
 
+        <div className="inline-flex overflow-hidden rounded-lg border border-slate-200" role="group" aria-label="Lesson type">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void setType("READING")}
+            aria-pressed={lesson.type === "READING"}
+            className={cn("px-2.5 py-1.5 text-xs font-semibold transition", lesson.type === "READING" ? "bg-brand-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50")}
+          >
+            Reading
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void setType("VIDEO")}
+            aria-pressed={lesson.type === "VIDEO"}
+            className={cn("px-2.5 py-1.5 text-xs font-semibold transition", lesson.type === "VIDEO" ? "bg-brand-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50")}
+          >
+            Video
+          </button>
+        </div>
+
         <div className="relative flex items-center gap-1">
           <button
             type="button"
@@ -370,12 +446,17 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
             <Add fontSize="small" />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-full z-10 mt-1 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-              {([
-                { kind: "meeting" as Panel, label: "Schedule meeting", icon: <Event fontSize="small" /> },
-                { kind: "recording" as Panel, label: "Recording (link/file)", icon: <Movie fontSize="small" /> },
-                { kind: "resource" as Panel, label: "Add resource", icon: <MenuBook fontSize="small" /> },
-              ]).map((opt) => (
+            <div className="absolute right-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+              {(lesson.type === "VIDEO"
+                ? [
+                    { kind: "meeting" as Panel, label: "Schedule meeting", icon: <Event fontSize="small" /> },
+                    { kind: "recording" as Panel, label: "Recording (link/file)", icon: <Movie fontSize="small" /> },
+                  ]
+                : [
+                    { kind: "text" as Panel, label: "Lesson text", icon: <Article fontSize="small" /> },
+                    { kind: "resource" as Panel, label: "Add resource", icon: <MenuBook fontSize="small" /> },
+                  ]
+              ).map((opt) => (
                 <button
                   key={opt.kind}
                   type="button"
@@ -396,6 +477,7 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
       {panel === "meeting" && <MeetingForm lesson={lesson} ctx={ctx} onClose={() => setPanel(null)} />}
       {panel === "recording" && <RecordingForm lesson={lesson} ctx={ctx} onClose={() => setPanel(null)} />}
       {panel === "resource" && <ResourceForm lesson={lesson} ctx={ctx} onClose={() => setPanel(null)} />}
+      {panel === "text" && <TextForm lesson={lesson} ctx={ctx} onClose={() => setPanel(null)} />}
     </li>
   );
 }
@@ -453,8 +535,9 @@ export default function LessonWorkbench({
     <div className="flex flex-col gap-6">
       {!isOwner && (
         <p role="note" className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-          Use the <strong>+</strong> on any lesson to attach a meeting, a session recording (link or upload),
-          or resources. Tick the checkbox to mark a lesson complete and unlock it for learners.
+          You choose whether each lesson is a <strong>Reading</strong> or a <strong>Video</strong>. For a reading,
+          add lesson <strong>text</strong> or <strong>resources</strong>; for a video, schedule a <strong>meeting</strong> or
+          attach a <strong>recording</strong>. Tick the checkbox to mark a lesson complete and unlock it for learners.
         </p>
       )}
 

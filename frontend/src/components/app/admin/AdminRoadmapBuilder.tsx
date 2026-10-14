@@ -8,14 +8,10 @@ import { notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
-import Checkbox from "@/components/ui/Checkbox";
-import Select from "@/components/ui/Select";
 import Title from "@mui/icons-material/Title";
-import MenuBook from "@mui/icons-material/MenuBook";
-import LinkIcon from "@mui/icons-material/Link";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import { AdminHeader, Panel, Skeleton, StatusPill, useAsync } from "./admin-ui";
+import { AdminHeader, Panel, Skeleton, useAsync } from "./admin-ui";
 
 function rmError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
@@ -34,15 +30,6 @@ function move<T>(list: T[], index: number, dir: -1 | 1): T[] | null {
   const next = [...list];
   [next[index], next[target]] = [next[target], next[index]];
   return next;
-}
-
-function isUrl(value: string): boolean {
-  try {
-    const u = new URL(value);
-    return u.protocol === "http:" || u.protocol === "https:";
-  } catch {
-    return false;
-  }
 }
 
 export default function AdminRoadmapBuilder({
@@ -339,12 +326,6 @@ function LessonCard({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(lesson.title);
-  const [type, setType] = useState<"VIDEO" | "READING">(lesson.type);
-  const [contentUrl, setContentUrl] = useState(lesson.contentUrl ?? "");
-  const [textContent, setTextContent] = useState(lesson.textContent ?? "");
-  const [isPublished, setIsPublished] = useState(lesson.isPublished);
-
-  const urlInvalid = type === "VIDEO" && contentUrl.trim().length > 0 && !isUrl(contentUrl.trim());
 
   async function run(fn: () => Promise<unknown>) {
     setBusy(true);
@@ -366,16 +347,8 @@ function LessonCard({
   }
 
   async function save() {
-    if (urlInvalid || title.trim().length < 2) return;
-    await run(() =>
-      apiPatch(`/courses/lessons/${lesson.id}`, {
-        title: title.trim(),
-        type,
-        contentUrl: type === "VIDEO" && contentUrl.trim() ? contentUrl.trim() : null,
-        textContent: type === "READING" && textContent.trim() ? textContent : null,
-        isPublished,
-      }),
-    ).then(() => setEditing(false));
+    if (title.trim().length < 2) return;
+    await run(() => apiPatch(`/courses/lessons/${lesson.id}`, { title: title.trim() })).then(() => setEditing(false));
   }
 
   return (
@@ -386,53 +359,17 @@ function LessonCard({
             e.preventDefault();
             void save();
           }}
-          className="space-y-3"
+          className="flex flex-wrap items-end gap-2"
         >
-          <Input aria-label="Lesson title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} required />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Select
-              aria-label="Lesson type"
-              value={type}
-              icon={<MenuBook fontSize="small" />}
-              onChange={(e) => setType(e.target.value as "VIDEO" | "READING")}
-            >
-              <option value="READING">READING</option>
-              <option value="VIDEO">VIDEO</option>
-            </Select>
-            <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
-              <Checkbox checked={isPublished} onChange={setIsPublished} />
-              Published
-            </label>
+          <div className="min-w-[200px] flex-1">
+            <Input aria-label="Lesson title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} required />
           </div>
-          {type === "VIDEO" ? (
-            <div>
-              <Input aria-label="Video URL" value={contentUrl} icon={<LinkIcon fontSize="small" />} onChange={(e) => setContentUrl(e.target.value)} placeholder="https://…" error={urlInvalid} />
-              {urlInvalid && <p className="mt-1 text-xs text-red-600">Enter a valid URL.</p>}
-            </div>
-          ) : (
-            <textarea
-              aria-label="Lesson text"
-              value={textContent}
-              onChange={(e) => setTextContent(e.target.value)}
-              rows={5}
-              maxLength={100000}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
-              placeholder="Lesson content"
-            />
-          )}
-          {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-          <div className="flex gap-2">
-            <Button type="submit" size="sm" loading={busy}>Save lesson</Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
-          </div>
+          <Button type="submit" size="sm" loading={busy} disabled={title.trim().length < 2}>Save</Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => { setEditing(false); setTitle(lesson.title); }}>Cancel</Button>
         </form>
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <StatusPill tone={lesson.isPublished ? "success" : "warn"}>{lesson.isPublished ? "Published" : "Draft"}</StatusPill>
-            <span className="truncate text-sm font-medium text-ink-900">{lesson.title}</span>
-            <span className="text-xs text-slate-400">{lesson.type}</span>
-          </div>
+          <span className="min-w-0 truncate text-sm font-medium text-ink-900">{lesson.title}</span>
           <div className="flex flex-wrap items-center gap-1">
             <Button variant="ghost" size="sm" disabled={busy || index === 0} onClick={() => reorder(-1)} aria-label={`Move ${lesson.title} up`}>↑</Button>
             <Button variant="ghost" size="sm" disabled={busy || index === count - 1} onClick={() => reorder(1)} aria-label={`Move ${lesson.title} down`}>↓</Button>
@@ -530,33 +467,17 @@ function AddTopicForm({ chapterId, onChanged }: { chapterId: string; onChanged: 
 
 function AddLessonForm({ topicId, onChanged }: { topicId: string; onChanged: () => void }) {
   const [title, setTitle] = useState("");
-  const [type, setType] = useState<"VIDEO" | "READING">("READING");
-  const [contentUrl, setContentUrl] = useState("");
-  const [textContent, setTextContent] = useState("");
-  const [isPublished, setIsPublished] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const urlInvalid = type === "VIDEO" && contentUrl.trim().length > 0 && !isUrl(contentUrl.trim());
-  const valid = title.trim().length >= 2 && !urlInvalid;
-
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (busy || !valid) return;
+    if (busy || title.trim().length < 2) return;
     setBusy(true);
     setError(null);
     try {
-      await apiPost(`/courses/topics/${topicId}/lessons`, {
-        title: title.trim(),
-        type,
-        contentUrl: type === "VIDEO" && contentUrl.trim() ? contentUrl.trim() : null,
-        textContent: type === "READING" && textContent.trim() ? textContent : null,
-        isPublished,
-      });
+      await apiPost(`/courses/topics/${topicId}/lessons`, { title: title.trim(), isPublished: false });
       setTitle("");
-      setContentUrl("");
-      setTextContent("");
-      setIsPublished(false);
       notifySuccess("Lesson added");
       onChanged();
     } catch (err) {
@@ -569,43 +490,15 @@ function AddLessonForm({ topicId, onChanged }: { topicId: string; onChanged: () 
   return (
     <details className="rounded-lg border border-dashed border-slate-300 bg-white p-3">
       <summary className="cursor-pointer text-sm font-semibold text-brand-700">Add lesson</summary>
-      <form onSubmit={submit} className="mt-3 space-y-3" noValidate>
-        <Input aria-label="New lesson title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Lesson title" required />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Select
-            aria-label="Lesson type"
-            value={type}
-            icon={<MenuBook fontSize="small" />}
-            onChange={(e) => setType(e.target.value as "VIDEO" | "READING")}
-          >
-            <option value="READING">READING</option>
-            <option value="VIDEO">VIDEO</option>
-          </Select>
-          <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
-            <Checkbox checked={isPublished} onChange={setIsPublished} />
-            Publish immediately
-          </label>
+      <p className="mt-2 text-xs text-slate-500">
+        Add the lesson title only. The mentor chooses whether it is a reading or a video and fills in the content.
+      </p>
+      <form onSubmit={submit} className="mt-3 flex flex-wrap items-end gap-2" noValidate>
+        <div className="min-w-[200px] flex-1">
+          <Input aria-label="New lesson title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Lesson title" required />
         </div>
-        {type === "VIDEO" ? (
-          <div>
-            <Input aria-label="Video URL" value={contentUrl} icon={<LinkIcon fontSize="small" />} onChange={(e) => setContentUrl(e.target.value)} placeholder="https://…" error={urlInvalid} />
-            {urlInvalid && <p className="mt-1 text-xs text-red-600">Enter a valid URL.</p>}
-          </div>
-        ) : (
-          <textarea
-            aria-label="Lesson text"
-            value={textContent}
-            onChange={(e) => setTextContent(e.target.value)}
-            rows={4}
-            maxLength={100000}
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
-            placeholder="Lesson content"
-          />
-        )}
-        {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-        <div className="flex gap-2">
-          <Button type="submit" size="sm" loading={busy} disabled={!valid}>Add lesson</Button>
-        </div>
+        <Button type="submit" size="sm" loading={busy} disabled={title.trim().length < 2}>Add lesson</Button>
+        {error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}
       </form>
     </details>
   );
