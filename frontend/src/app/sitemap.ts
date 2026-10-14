@@ -32,13 +32,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: r.priority,
   }));
 
-  const courses = await publicFetch<{ items: CourseListItem[] }>("/courses", { limit: 500, sort: "newest" }, 3600);
-  const courseEntries: MetadataRoute.Sitemap = (courses?.items ?? []).map((c) => ({
-    url: `${base}/courses/${c.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+  // The backend caps `limit` at 50, so page through the catalogue.
+  // ponytail: 40-page ceiling (2000 courses); raise if the catalogue outgrows it.
+  const courseEntries: MetadataRoute.Sitemap = [];
+  for (let page = 1; page <= 40; page++) {
+    const batch = await publicFetch<{ items: CourseListItem[]; hasMore?: boolean }>(
+      "/courses",
+      { limit: 50, page, sort: "newest" },
+      3600,
+    );
+    const items = batch?.items ?? [];
+    for (const c of items) {
+      courseEntries.push({
+        url: `${base}/courses/${c.slug}`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      });
+    }
+    if (!batch?.hasMore || items.length === 0) break;
+  }
 
   return [...staticEntries, ...courseEntries];
 }

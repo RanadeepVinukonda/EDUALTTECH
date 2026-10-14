@@ -39,6 +39,14 @@ export async function generateMetadata(): Promise<Metadata> {
   // emit localhost links by accident.
   const metadataBase = new URL(await siteUrl());
 
+  // Search-engine ownership verification. Set these env vars after creating the
+  // property in Google Search Console / Bing Webmaster Tools. Unset ⇒ no tag.
+  const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+  const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION?.trim();
+  const verification: Metadata["verification"] = {};
+  if (googleVerification) verification.google = googleVerification;
+  if (bingVerification) verification.other = { "msvalidate.01": bingVerification };
+
   return {
     metadataBase,
     title: { default: "EduAltTech — Learn. Build. Grow.", template: "%s · EduAltTech" },
@@ -46,6 +54,10 @@ export async function generateMetadata(): Promise<Metadata> {
     applicationName: SITE_NAME,
     keywords: [
       "EduAltTech",
+      "Edu Alt Tech",
+      "EduTech",
+      "Edu Tech",
+      "edtech India",
       "online courses India",
       "learn AI",
       "entrepreneurship courses",
@@ -69,6 +81,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "max-video-preview": -1,
       },
     },
+    ...(Object.keys(verification).length ? { verification } : {}),
     openGraph: {
       type: "website",
       siteName: SITE_NAME,
@@ -96,10 +109,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         "@type": "EducationalOrganization",
         "@id": `${base}/#organization`,
         name: SITE_NAME,
+        alternateName: ["Edu Alt Tech", "EduTech", "Edu Tech"],
         url: base,
         logo: `${base}/media/brand/logo.png`,
         description: SITE_DESCRIPTION,
-        sameAs: [] as string[],
+        email: "info@edualttech.com",
+        foundingDate: "2024",
+        sameAs: ["https://www.linkedin.com/company/edu-alt-tech"],
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Kakinada",
+          addressRegion: "Andhra Pradesh",
+          addressCountry: "IN",
+        },
       },
       {
         "@type": "WebSite",
