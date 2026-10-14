@@ -24,20 +24,20 @@ export default function PartnerStrip({ className, divider = true }: { className?
           Schools &amp; organizations we work with
         </p>
 
-        <div className="marquee mt-6">
+        <div className="marquee mt-8">
           <ul className="marquee-track list-none">
             {[...PARTNERS, ...PARTNERS].map((p, i) => (
               <li
                 key={`${p.name}-${i}`}
                 aria-hidden={i >= PARTNERS.length || undefined}
-                className="flex h-16 w-44 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-6"
+                className="flex h-28 w-64 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-8 shadow-elev1"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={p.src}
                   alt={p.name}
                   loading="lazy"
-                  className="max-h-9 w-auto max-w-full object-contain opacity-70 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"
+                  className="max-h-16 w-auto max-w-full object-contain"
                 />
               </li>
             ))}
