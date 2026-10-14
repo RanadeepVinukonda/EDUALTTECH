@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const courses = await publicFetch<{ items: CourseListItem[] }>("/courses", { limit: 3, sort: "newest" });
+  const courses = await publicFetch<{ items: CourseListItem[] }>("/courses", { limit: 6, sort: "newest" });
   const courseItems = courses?.items ?? [];
   const coursesFailed = courses === null;
 
@@ -41,7 +41,6 @@ export default async function HomePage() {
             <SectionHeading
               eyebrow="Courses"
               title="Start with something you can build"
-              lead="A sample of published courses. Open the catalogue to see everything available."
             />
             <Link
               href="/courses"
