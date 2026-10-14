@@ -27,6 +27,13 @@ function hslToHex(h: number, s: number, l: number): string {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+// Distinct, readable level colors (pill background; white text on top).
+const LEVEL_COLOR: Record<CourseSeed["level"], string> = {
+  Beginner: hslToHex(150, 60, 40),
+  Intermediate: hslToHex(36, 92, 48),
+  Advanced: hslToHex(350, 68, 52),
+};
+
 function buildSvg(c: CourseSeed): string {
   const h = c.hue;
   const accent = (h + 190) % 360;
@@ -43,7 +50,8 @@ function buildSvg(c: CourseSeed): string {
   const startY = bottom - (c.lines.length - 1) * lh;
   const domainY = startY - Math.round(fs * 0.92);
   const title = c.lines.map((l, i) => `<tspan x="84" y="${startY + i * lh}">${esc(l)}</tspan>`).join("");
-  const pillW = 34 + c.level.length * 11;
+  const levelFill = LEVEL_COLOR[c.level];
+  const pillW = 52 + c.level.length * 12;
 
   return `<svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -73,11 +81,10 @@ function buildSvg(c: CourseSeed): string {
   <rect width="1200" height="675" fill="url(#dots)"/>
 
   <g>
-    <rect x="84" y="70" rx="19" width="${pillW}" height="40" fill="#ffffff" fill-opacity="0.14"/>
-    <text x="84" y="98" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="20" font-weight="600"
-      letter-spacing="1.5" fill="#ffffff" fill-opacity="0.9" text-anchor="start" dx="17">${esc(
-        c.level.toUpperCase(),
-      )}</text>
+    <rect x="84" y="70" rx="19" width="${pillW}" height="40" fill="${levelFill}"/>
+    <circle cx="108" cy="90" r="5" fill="#ffffff" fill-opacity="0.92"/>
+    <text x="124" y="98" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="20" font-weight="700"
+      letter-spacing="1.6" fill="#ffffff">${esc(c.level.toUpperCase())}</text>
   </g>
 
   <text x="84" y="${domainY}" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="23" font-weight="700"
