@@ -13,7 +13,7 @@ const router = Router();
 const resourceSelect = {
   id: true, title: true, description: true, kind: true, url: true, storagePath: true,
   fileSizeBytes: true, mimeType: true, downloads: true, isPublished: true, createdAt: true,
-  courseId: true, topicId: true, ownerId: true,
+  courseId: true, topicId: true, lessonId: true, ownerId: true,
   owner: { select: { firstName: true, lastName: true } },
   course: { select: { id: true, slug: true, title: true } },
 } as const;
@@ -88,6 +88,7 @@ router.post(
       kind: z.string().trim().max(20).default("pdf"),
       courseId: z.string().nullable().optional(),
       topicId: z.string().nullable().optional(),
+      lessonId: z.string().nullable().optional(),
       linkUrl: z.string().url().nullable().optional(),
       file: z.object({ name: z.string().min(1).max(200), type: z.string().min(3), data: z.string().min(16) }).nullable().optional(),
     }),
@@ -95,9 +96,19 @@ router.post(
   async (req, res) => {
     const input = body<{
       title: string; description?: string | null; kind: string;
-      courseId?: string | null; topicId?: string | null; linkUrl?: string | null;
+      courseId?: string | null; topicId?: string | null; lessonId?: string | null; linkUrl?: string | null;
       file?: { name: string; type: string; data: string } | null;
     }>(req);
+
+    if (input.lessonId) {
+      const lesson = await prisma.lesson.findUnique({ where: { id: input.lessonId }, select: { courseId: true, topicId: true } });
+      if (!lesson) throw ApiError.badRequest("Lesson not found");
+      if (input.courseId && lesson.courseId !== input.courseId) {
+        throw ApiError.badRequest("Lesson does not belong to the selected course");
+      }
+      input.courseId = lesson.courseId;
+      input.topicId = lesson.topicId;
+    }
 
     if (input.topicId) {
       const topic = await prisma.topic.findUnique({ where: { id: input.topicId }, select: { courseId: true } });
@@ -132,6 +143,7 @@ router.post(
         kind: input.kind,
         courseId: input.courseId ?? null,
         topicId: input.topicId ?? null,
+        lessonId: input.lessonId ?? null,
         url: input.linkUrl ?? null,
         storagePath,
         fileSizeBytes,

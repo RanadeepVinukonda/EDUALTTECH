@@ -87,6 +87,9 @@ export interface MeetingRow {
   createdBy?: { firstName: string; lastName: string; avatarUrl: string | null };
   chapter?: { id: string; title: string } | null;
   topic?: { id: string; title: string } | null;
+  topicId?: string | null;
+  lessonId?: string | null;
+  lesson?: { id: string; title: string } | null;
 }
 
 export interface ApplicationRow {
@@ -127,6 +130,7 @@ export interface Membership {
 
 export interface LessonRow {
   id: string;
+  topicId: string;
   title: string;
   type: "VIDEO" | "READING";
   contentUrl: string | null;
@@ -329,6 +333,7 @@ export interface ResourceRow {
   createdAt: string;
   courseId: string | null;
   topicId: string | null;
+  lessonId: string | null;
   ownerId: string;
   owner: { firstName: string; lastName: string };
   course: { id: string; slug: string; title: string } | null;

@@ -39,6 +39,7 @@ const meetingBody = z.object({
   meetingUrl: z.string().url(),
   chapterId: z.string().nullable().optional(),
   topicId: z.string().nullable().optional(),
+  lessonId: z.string().nullable().optional(),
 });
 
 // List for course members (staff sees all; learners see future by default).
@@ -63,6 +64,7 @@ router.get("/courses/:courseId/meetings", requireAuth, validate({ query: z.objec
       createdBy: { select: { firstName: true, lastName: true, avatarUrl: true } },
       chapter: { select: { id: true, title: true } },
       topic: { select: { id: true, title: true } },
+      lesson: { select: { id: true, title: true } },
       course: { select: { id: true, slug: true, title: true } },
     },
   });
@@ -82,6 +84,11 @@ router.post("/courses/:courseId/meetings", requireAuth, validate({ body: meeting
   const access = await getCourseAccess(req.params.courseId, req.user!);
   if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required");
   const input = body<z.infer<typeof meetingBody>>(req);
+
+  if (input.lessonId) {
+    const lesson = await prisma.lesson.findUnique({ where: { id: input.lessonId }, select: { courseId: true } });
+    if (!lesson || lesson.courseId !== req.params.courseId) throw ApiError.badRequest("Lesson does not belong to this course");
+  }
 
   const meeting = await prisma.liveMeeting.create({
     data: { courseId: req.params.courseId, ...input, createdById: req.user!.id },

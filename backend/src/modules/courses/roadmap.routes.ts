@@ -36,7 +36,7 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res) => {
             // Learners see every lesson; locked (unpublished) ones render with a
             // lock and open only once the mentor unlocks them.
             orderBy: { order: "asc" },
-            select: { id: true, title: true, type: true, contentUrl: true, textContent: true, videoPath: true, order: true, isPublished: true, createdAt: true },
+            select: { id: true, topicId: true, title: true, type: true, contentUrl: true, textContent: true, videoPath: true, order: true, isPublished: true, createdAt: true },
           },
         },
       },

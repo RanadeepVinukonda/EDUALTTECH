@@ -265,7 +265,9 @@ model Lesson {
   createdBy   User       @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
 
-  progress LessonProgress[]
+  progress  LessonProgress[]
+  meetings  LiveMeeting[]
+  resources Resource[]
 
   @@unique([topicId, order])
   @@index([courseId])
@@ -363,6 +365,8 @@ model LiveMeeting {
   chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
   topicId     String?
   topic       Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  lessonId    String?
+  lesson      Lesson?  @relation(fields: [lessonId], references: [id], onDelete: SetNull)
   title       String
   description String?
   scheduledAt DateTime
@@ -375,6 +379,7 @@ model LiveMeeting {
 
   @@index([courseId, scheduledAt])
   @@index([topicId])
+  @@index([lessonId])
 }
 
 // File/link attachments. Private files live in the private bucket behind
@@ -392,6 +397,8 @@ model Resource {
   course        Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   topicId       String?
   topic         Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  lessonId      String?
+  lesson        Lesson?  @relation(fields: [lessonId], references: [id], onDelete: SetNull)
   ownerId       String
   owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   downloads     Int      @default(0)
@@ -401,6 +408,7 @@ model Resource {
   @@index([ownerId])
   @@index([courseId])
   @@index([topicId])
+  @@index([lessonId])
 }
 
 // ────────────────────────────────────────────────────────────────────
