@@ -30,7 +30,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
-      <PartnerStrip />
+      <PartnerStrip scroll />
       <Offerings />
       <PhotoBand />
 

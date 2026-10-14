@@ -9,10 +9,19 @@ const PARTNERS = [
 ];
 
 /**
- * Static strip of the schools and organizations we work with — each logo
- * shown with the organization's name underneath.
+ * Schools and organizations we work with. `scroll` renders an auto-scrolling
+ * marquee (landing page); otherwise a static grid with each org's name under
+ * its logo (partners page).
  */
-export default function PartnerStrip({ className, divider = true }: { className?: string; divider?: boolean }) {
+export default function PartnerStrip({
+  className,
+  divider = true,
+  scroll = false,
+}: {
+  className?: string;
+  divider?: boolean;
+  scroll?: boolean;
+}) {
   return (
     <section
       aria-label="Schools and organizations we work with"
@@ -23,25 +32,47 @@ export default function PartnerStrip({ className, divider = true }: { className?
           Schools &amp; organizations we work with
         </p>
 
-        <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {PARTNERS.map((p) => (
-            <li
-              key={p.name}
-              className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-elev1"
-            >
-              <div className="flex h-20 items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.src}
-                  alt={p.name}
-                  loading="lazy"
-                  className="max-h-16 w-auto max-w-full object-contain"
-                />
-              </div>
-              <span className="text-center text-sm font-semibold text-ink-800">{p.name}</span>
-            </li>
-          ))}
-        </ul>
+        {scroll ? (
+          <div className="marquee mt-8">
+            <ul className="marquee-track list-none">
+              {[...PARTNERS, ...PARTNERS].map((p, i) => (
+                <li
+                  key={`${p.name}-${i}`}
+                  aria-hidden={i >= PARTNERS.length || undefined}
+                  className="flex h-28 w-64 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-8 shadow-elev1"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.src}
+                    alt={p.name}
+                    loading="lazy"
+                    className="max-h-16 w-auto max-w-full object-contain"
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {PARTNERS.map((p) => (
+              <li
+                key={p.name}
+                className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-elev1"
+              >
+                <div className="flex h-20 items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.src}
+                    alt={p.name}
+                    loading="lazy"
+                    className="max-h-16 w-auto max-w-full object-contain"
+                  />
+                </div>
+                <span className="text-center text-sm font-semibold text-ink-800">{p.name}</span>
+              </li>
+            ))}
+          </ul>
+        )}
 
         <p className="mt-6 text-center text-sm text-slate-500">
           <Link href="/partners" className="font-semibold text-brand-700 hover:text-brand-800">
