@@ -11,6 +11,9 @@ import SectionHeading from "@/components/landing/SectionHeading";
 import WorkCard from "@/components/landing/WorkCard";
 import DataUnavailable from "@/components/landing/DataUnavailable";
 import LinkButton from "@/components/ui/LinkButton";
+import CoverImage from "@/components/ui/CoverImage";
+import { initialsFromName } from "@/lib/name";
+import { TEAM } from "@/lib/team";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -240,6 +243,32 @@ export default async function AboutPage() {
               </Link>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Team */}
+      <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
+        <div className={wrap}>
+          <SectionHeading
+            eyebrow="Our team"
+            title="The people behind EduAltTech"
+            lead="The educators, builders, and mentors who make our courses and school technology work."
+          />
+          <ul className="mx-auto mt-12 grid max-w-xl grid-cols-1 gap-8 min-[500px]:grid-cols-2 md:max-w-3xl md:grid-cols-3 lg:max-w-full lg:grid-cols-5">
+            {TEAM.map((m) => (
+              <li key={m.name} className="group text-center">
+                <div className="mx-auto mb-6 h-40 w-40 overflow-hidden rounded-full border border-solid border-transparent transition-all duration-500 group-hover:border-brand-600">
+                  <CoverImage src={m.image} alt={`Portrait of ${m.name}`} fallback={initialsFromName(m.name)} />
+                </div>
+                <h3 className="mb-2 font-display text-xl font-semibold capitalize text-ink-900 transition-all duration-500 group-hover:text-brand-700">
+                  {m.name}
+                </h3>
+                <span className="block text-slate-500 transition-all duration-500 group-hover:text-ink-900">
+                  {m.title}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
