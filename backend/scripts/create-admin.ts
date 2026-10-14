@@ -29,7 +29,10 @@ async function main(): Promise<void> {
     authUser = data.user;
     console.log(`[admin] created Supabase auth user ${EMAIL}`);
   } else {
-    console.log(`[admin] reusing Supabase auth user ${EMAIL}`);
+    // Ensure the known demo password, since the row may predate this script.
+    const { error } = await admin.auth.admin.updateUserById(authUser.id, { password: PASSWORD, email_confirm: true });
+    if (error) throw new Error(`updateUserById failed: ${error.message}`);
+    console.log(`[admin] reusing Supabase auth user ${EMAIL} (password reset)`);
   }
 
   const user = await prisma.user.upsert({
