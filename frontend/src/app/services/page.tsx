@@ -8,14 +8,10 @@ import Extension from "@mui/icons-material/Extension";
 import Search from "@mui/icons-material/Search";
 import Handshake from "@mui/icons-material/Handshake";
 import { publicFetch } from "@/lib/server-api";
-import type { ProgramItem, WorkItem } from "@/lib/types";
-import { formatPrice } from "@/lib/format";
+import type { WorkItem } from "@/lib/types";
 import SectionHeading from "@/components/landing/SectionHeading";
 import WorkCard from "@/components/landing/WorkCard";
-import DataUnavailable from "@/components/landing/DataUnavailable";
-import CoverImage from "@/components/ui/CoverImage";
 import LinkButton from "@/components/ui/LinkButton";
-import InquiryForm from "@/components/contact/InquiryForm";
 
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
@@ -34,14 +30,8 @@ const ENGAGEMENT = [
 ];
 
 export default async function ServicesPage() {
-  const [programs, work] = await Promise.all([
-    publicFetch<{ items: ProgramItem[] }>("/cms/public/programs"),
-    publicFetch<{ items: WorkItem[] }>("/cms/public/work", { limit: 3 }),
-  ]);
-
-  const programItems = programs?.items ?? [];
+  const work = await publicFetch<{ items: WorkItem[] }>("/cms/public/work", { limit: 3 });
   const workItems = work?.items ?? [];
-  const programsFailed = programs === null;
 
   return (
     <div className="bg-white">
@@ -70,73 +60,11 @@ export default async function ServicesPage() {
             lead="EduAltTech runs structured courses, alternate education, and tuition for students; employs skilled people as paid mentors; and builds digital solutions with schools. Find the fit for you below."
           />
           <div className="mt-8 flex flex-wrap gap-3">
-            <LinkButton href="#programs" variant="secondary">
-              Educational programs
-            </LinkButton>
             <LinkButton href="#services" variant="secondary">
               School technology
             </LinkButton>
-            <LinkButton href="#enquiry">Talk to us</LinkButton>
+            <LinkButton href="/contact">Talk to us</LinkButton>
           </div>
-        </div>
-      </section>
-
-      {/* Educational programs */}
-      <section id="programs" className="scroll-mt-24 py-16 sm:py-20">
-        <div className={wrap}>
-          <SectionHeading
-            eyebrow="Educational programs"
-            title="Programs and learning initiatives"
-            lead="Structured learning we run with schools and learners. Programs are published here as they are confirmed."
-          />
-
-          {programsFailed ? (
-            <div className="mt-12">
-              <DataUnavailable label="our programs" />
-            </div>
-          ) : programItems.length > 0 ? (
-            <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {programItems.map((p) => (
-                <li key={p.id} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                  <div className="aspect-[16/10] w-full overflow-hidden bg-slate-100">
-                    <CoverImage src={p.coverUrl} alt="" fallback={p.organization?.name ?? "Program"} />
-                  </div>
-                  <div className="flex flex-1 flex-col p-6">
-                    {p.organization && (
-                      <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
-                        {p.organization.name}
-                      </p>
-                    )}
-                    <h3 className="mt-2 font-display text-lg font-bold text-ink-900">{p.title}</h3>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-600">{p.summary}</p>
-                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
-                      {typeof p.pricePaise === "number" && p.pricePaise > 0 ? (
-                        <span className="font-semibold text-ink-900">{formatPrice(p.pricePaise, p.currency)}</span>
-                      ) : (
-                        <span className="text-sm text-slate-500">Price on inquiry</span>
-                      )}
-                      <a href="#enquiry" className="text-sm font-semibold text-brand-700 hover:text-brand-800">
-                        Enquire
-                      </a>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-slate-50 p-8">
-              <p className="text-lg leading-relaxed text-ink-700">
-                Program details are published as they are confirmed. In the meantime, our course catalogue is
-                open, and you can reach us directly with a specific requirement.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <LinkButton href="/courses">Browse courses</LinkButton>
-                <LinkButton href="#enquiry" variant="secondary">
-                  Contact us
-                </LinkButton>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
@@ -173,7 +101,7 @@ export default async function ServicesPage() {
                 sessions, and hands-on practice, in person and online.
               </p>
               <div className="mt-6">
-                <LinkButton href="#enquiry" variant="secondary">
+                <LinkButton href="/contact" variant="secondary">
                   Enquire about tuition
                 </LinkButton>
               </div>
@@ -218,7 +146,7 @@ export default async function ServicesPage() {
                 integrations, timelines, or support commitments beyond what has been agreed.
               </p>
               <div className="pt-2">
-                <LinkButton href="#enquiry">Discuss a requirement</LinkButton>
+                <LinkButton href="/contact">Discuss a requirement</LinkButton>
               </div>
             </div>
           </div>
@@ -271,7 +199,7 @@ export default async function ServicesPage() {
                 about recent work relevant to your school.
               </p>
               <div className="mt-6">
-                <LinkButton href="#enquiry" variant="secondary">
+                <LinkButton href="/contact" variant="secondary">
                   Ask about our work
                 </LinkButton>
               </div>
@@ -288,8 +216,8 @@ export default async function ServicesPage() {
             {[
               { title: "Learners", body: "Discover courses and tuition built around practical skill.", href: "/courses", cta: "Explore courses" },
               { title: "Skilled people seeking work", body: "Turn your skills into paid teaching. Apply for a course.", href: "/mentor", cta: "Teach with us" },
-              { title: "Schools & organizations", body: "Tell us your requirement and start a conversation.", href: "#enquiry", cta: "Contact us" },
-              { title: "Program participants", body: "Open the published program that fits you.", href: "#programs", cta: "View programs" },
+              { title: "Schools & organizations", body: "Tell us your requirement and start a conversation.", href: "/contact", cta: "Contact us" },
+              { title: "Program participants", body: "Open the published program that fits you.", href: "/courses", cta: "View programs" },
             ].map((c) => (
               <div key={c.title} className="rounded-2xl border border-white/10 bg-white/5 p-6">
                 <h3 className="font-display text-lg font-bold text-white">{c.title}</h3>
@@ -303,22 +231,6 @@ export default async function ServicesPage() {
                 </Link>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact conversion */}
-      <section id="enquiry" className="scroll-mt-24 bg-slate-50 py-16 sm:py-20">
-        <div className={wrap}>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
-            <SectionHeading
-              eyebrow="Contact"
-              title="Tell us what you need"
-              lead="Send us a message and we will respond by email. This does not create a project or enrol anyone — it starts a conversation."
-            />
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-              <InquiryForm />
-            </div>
           </div>
         </div>
       </section>
