@@ -50,7 +50,6 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }
-    if (!user.onboardingDone) router.replace("/onboarding");
   }, [loading, user, pathname, router, isSigningOut]);
 
   useEffect(() => {
@@ -93,7 +92,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       </div>
     );
   }
-  if (!user || !user.onboardingDone) return null;
+  if (!user) return null;
 
   const primary: NavLink[] = isAdmin
     ? []

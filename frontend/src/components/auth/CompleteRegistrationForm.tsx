@@ -65,7 +65,7 @@ export default function CompleteRegistrationForm() {
       );
       await setSessionFromTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken });
       clearSignupFlow();
-      router.replace(safeNext(flow.next));
+      router.replace(safeNext(flow.next, "/dashboard"));
     } catch (err) {
       if (err instanceof ApiError) setError({ text: err.message, code: err.code });
       else setError({ text: "We could not complete your registration. Please try again." });

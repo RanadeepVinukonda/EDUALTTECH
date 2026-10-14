@@ -15,13 +15,14 @@ const AUTH_BARE = [
   "/complete-registration",
   "/forgot-password",
   "/reset-password",
+  "/onboarding",
   "/reactivate",
   "/auth",
   "/maintenance",
 ];
 
 // Routes that are bare until signed in, then get the workspace shell.
-const AUTH_FLOW = ["/onboarding", "/checkout"];
+const AUTH_FLOW = ["/checkout"];
 
 export default function Chrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";
