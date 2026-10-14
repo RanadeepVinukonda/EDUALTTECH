@@ -116,10 +116,10 @@ export default function CourseCard({
           </dl>
         ) : featureList.length > 0 ? (
           <div className="grid grid-cols-2 gap-x-3 gap-y-3">
-            {featureList.map((f, i) => (
+            {featureList.map((f) => (
               <div key={f} className="flex items-center gap-2">
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700">
-                  <FeatureIcon index={i} />
+                  <FeatureIcon feature={f} />
                 </span>
                 <span className="text-xs font-semibold text-ink-700">{f}</span>
               </div>

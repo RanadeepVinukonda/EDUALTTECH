@@ -199,9 +199,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 What you&apos;ll get
               </h2>
               <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-                {course.features.map((f, i) => (
+                {course.features.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-ink-700">
-                    <FeatureIcon index={i} className="shrink-0 text-brand-600" />
+                    <FeatureIcon feature={f} className="shrink-0 text-brand-600" />
                     {f}
                   </li>
                 ))}
