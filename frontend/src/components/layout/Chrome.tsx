@@ -42,12 +42,13 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
   if (AUTH_BARE.some(matches)) return bare;
 
   // Signed-in users see their own workspace nav on every page - never the
-  // marketing header/footer.
+  // marketing header. Public routes still keep the footer.
   if (user) {
     return (
       <>
         <OfflineBanner />
         <DashboardShell>{children}</DashboardShell>
+        <PublicFooter />
       </>
     );
   }
