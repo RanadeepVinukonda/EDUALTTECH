@@ -46,7 +46,7 @@ export default function PublicFooter() {
               <BrandLogo onDark />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
-              Courses, alternate education, and tuition for students — taught by skilled people we employ
+              Courses, alternate education, and tuition for students - taught by skilled people we employ
               as paid mentors. Plus working software built for schools.
             </p>
           </div>
