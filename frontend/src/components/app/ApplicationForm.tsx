@@ -152,7 +152,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
           <h1 className="font-display text-2xl font-extrabold text-ink-900">Apply to mentor</h1>
           <p className="mt-1 text-sm text-slate-500">
             Choose a course and tell us about your expertise. Submission does not grant teaching
-            access — a reviewer assesses every application.
+            access - a reviewer assesses every application.
           </p>
         </header>
         <div className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
@@ -175,7 +175,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
         <h1 className="font-display text-2xl font-extrabold text-ink-900">Apply to mentor</h1>
         <p className="mt-1 text-sm text-slate-500">
           Choose a course and tell us about your expertise. Submission does not grant teaching
-          access — a reviewer assesses every application.
+          access - a reviewer assesses every application.
         </p>
       </header>
 
@@ -210,7 +210,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
               <option value="">Select a course…</option>
               {available.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.title} — {c.category}
+                  {c.title} - {c.category}
                 </option>
               ))}
             </Select>

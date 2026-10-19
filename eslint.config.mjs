@@ -35,7 +35,7 @@ export default tseslint.config(
       ...nextPlugin.configs["core-web-vitals"].rules,
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      // No pages/ directory — app router only.
+      // No pages/ directory - app router only.
       "@next/next/no-html-link-for-pages": "off",
     },
   },

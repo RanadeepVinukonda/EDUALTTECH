@@ -42,7 +42,7 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]) {
       .finally(() => {
         if (id === seq.current) setLoading(false);
       });
-    // deps intentionally spread — callers pass a memoized fetcher plus keys.
+    // deps intentionally spread - callers pass a memoized fetcher plus keys.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick, ...deps]);
 

@@ -1,7 +1,7 @@
 /**
  * Populates the authored syllabus (course-curriculum.ts) for every catalogue
  * course: six chapters × four topics of lessons, plus a capstone project
- * chapter. Non-destructive and idempotent — it only replaces the chapters of
+ * chapter. Non-destructive and idempotent - it only replaces the chapters of
  * the courses named in CURRICULUM, and never touches enrolments or other data.
  *
  *   cd backend && npx tsx scripts/seed-curriculum.ts
@@ -33,7 +33,7 @@ function lessonsFor(topic: string, chapter: string, count: number) {
       "- Follow the worked example",
       "- Finish with a short exercise",
       "",
-      "> Lesson content — edit or replace this from the admin lesson editor.",
+      "> Lesson content - edit or replace this from the admin lesson editor.",
     ].join("\n");
     return { title, type: p.type, body };
   });
@@ -45,7 +45,7 @@ async function seedOne(slug: string, authorId: string): Promise<{ chapters: numb
 
   const course = await prisma.course.findUnique({ where: { slug }, select: { id: true } });
   if (!course) {
-    console.log(`  skip ${slug} — course not found`);
+    console.log(`  skip ${slug} - course not found`);
     return null;
   }
 
@@ -96,7 +96,7 @@ async function seedOne(slug: string, authorId: string): Promise<{ chapters: numb
     });
   }
 
-  console.log(`  ${slug} — ${chapters.length} chapters, ${topicCount} topics, ${lessonCount} lessons`);
+  console.log(`  ${slug} - ${chapters.length} chapters, ${topicCount} topics, ${lessonCount} lessons`);
   return { chapters: chapters.length, topics: topicCount, lessons: lessonCount };
 }
 
@@ -104,7 +104,7 @@ async function main(): Promise<void> {
   const author =
     (await prisma.user.findFirst({ where: { role: "ADMIN" }, orderBy: { createdAt: "asc" } })) ??
     (await prisma.user.findFirst({ orderBy: { createdAt: "asc" } }));
-  if (!author) throw new Error("No user found — create an admin before seeding.");
+  if (!author) throw new Error("No user found - create an admin before seeding.");
 
   const slugs = Object.keys(CURRICULUM);
   console.log(`seeding curriculum for ${slugs.length} courses…`);
@@ -122,7 +122,7 @@ async function main(): Promise<void> {
       lessons += r.lessons;
     }
   }
-  console.log(`\ndone — ${ok}/${slugs.length} courses, ${chapters} chapters, ${topics} topics, ${lessons} lessons`);
+  console.log(`\ndone - ${ok}/${slugs.length} courses, ${chapters} chapters, ${topics} topics, ${lessons} lessons`);
 }
 
 main()

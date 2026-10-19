@@ -16,9 +16,9 @@ import LinkButton from "@/components/ui/LinkButton";
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
 export const metadata: Metadata = {
-  title: "Edu Alt Tech (EduAltTech) — practical AI, entrepreneurship and technology courses",
+  title: "Edu Alt Tech (EduAltTech) - practical AI, entrepreneurship and technology courses",
   description:
-    "Edu Alt Tech (EduAltTech) teaches practical AI, entrepreneurship, and technology through structured courses, alternate learning, and tuition — taught by skilled mentors we employ, plus the software we build for schools.",
+    "Edu Alt Tech (EduAltTech) teaches practical AI, entrepreneurship, and technology through structured courses, alternate learning, and tuition - taught by skilled mentors we employ, plus the software we build for schools.",
   alternates: { canonical: "/" },
 };
 

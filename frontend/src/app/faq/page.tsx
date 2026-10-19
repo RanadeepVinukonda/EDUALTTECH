@@ -87,7 +87,7 @@ const items: FaqItem[] = [
     question: "Can I get a refund?",
     answer: (
       <p>
-        Refunds are reviewed case by case. Requesting a refund does not automatically complete one — only an
+        Refunds are reviewed case by case. Requesting a refund does not automatically complete one - only an
         approved refund returns money. See our{" "}
         <Link href="/refund-policy" className="font-semibold text-brand-700 hover:underline">
           Refund &amp; Cancellation Policy
@@ -139,7 +139,7 @@ const FAQ_SCHEMA: Array<{ q: string; a: string }> = [
   { q: "Are all courses paid?", a: "No. Some courses are free and you can join them directly. Paid courses require payment, and access is granted once the payment is verified and your enrolment succeeds." },
   { q: "How do I enrol in a course?", a: "Open a course and use the enrolment action. Free courses are joined immediately; paid courses take you to checkout. You can also save courses to your wishlist to return to them later." },
   { q: "How do I become a mentor?", a: "Mentorship is per course. From a course you are interested in teaching, you can apply to mentor it. Applications are reviewed by our team, and teaching access is granted only after approval. You cannot be both a learner and a mentor in the same course." },
-  { q: "Can I get a refund?", a: "Refunds are reviewed case by case. Requesting a refund does not automatically complete one — only an approved refund returns money. See our Refund & Cancellation Policy." },
+  { q: "Can I get a refund?", a: "Refunds are reviewed case by case. Requesting a refund does not automatically complete one - only an approved refund returns money. See our Refund & Cancellation Policy." },
   { q: "How is my information used?", a: "We use your information to run your account, courses, and mentorship features, and to respond to your enquiries. We do not sell your personal information. Read our Privacy Policy." },
   { q: "How do I reach you?", a: "Use our contact page or email info@edualttech.com. We will respond by email." },
 ];

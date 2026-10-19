@@ -4,7 +4,7 @@
  *   cd backend && npx tsx scripts/generate-course-thumbnails.ts
  *
  * Output: frontend/public/media/courses/<slug>.jpg
- * Abstract, per-course gradient art — deliberately not stock/AI imagery.
+ * Abstract, per-course gradient art - deliberately not stock/AI imagery.
  */
 import { mkdirSync } from "node:fs";
 import path from "node:path";
@@ -105,7 +105,7 @@ async function main(): Promise<void> {
     await sharp(Buffer.from(buildSvg(c))).jpeg({ quality: 88, mozjpeg: true }).toFile(out);
     console.log(`[thumb] ${c.slug}.jpg`);
   }
-  console.log(`[thumb] done — ${COURSES.length} files in ${OUT_DIR}`);
+  console.log(`[thumb] done - ${COURSES.length} files in ${OUT_DIR}`);
 }
 
 main().catch((err) => {

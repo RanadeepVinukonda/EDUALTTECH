@@ -76,7 +76,7 @@ export default function ApplicationDetailView({ id }: { id: string }) {
   const meta = APPLICATION_STATUS_META[application.status];
 
   const interviewStart = application.interviewAt ? new Date(application.interviewAt).getTime() : 0;
-  // ponytail: no stored interview duration — treat the first 60 minutes as live.
+  // ponytail: no stored interview duration - treat the first 60 minutes as live.
   const interviewStatus = !interviewStart
     ? null
     : now < interviewStart

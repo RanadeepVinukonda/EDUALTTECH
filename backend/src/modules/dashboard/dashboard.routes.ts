@@ -4,7 +4,7 @@ import { requireAuth } from "../../middlewares/auth.js";
 
 const router = Router();
 
-/** One payload per role — learner, mentor, admin. Frontend renders what it needs. */
+/** One payload per role - learner, mentor, admin. Frontend renders what it needs. */
 router.get("/", requireAuth, async (req, res) => {
   const userId = req.user!.id;
   const now = new Date();

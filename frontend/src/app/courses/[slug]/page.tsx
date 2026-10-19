@@ -150,7 +150,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
       <div className={`${wrap} grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14`}>
         <div className="min-w-0">
-          {/* Hero — translucent thumbnail with title + tags on it */}
+          {/* Hero - translucent thumbnail with title + tags on it */}
           <div className="relative flex min-h-[240px] items-end overflow-hidden rounded-[20px] bg-slate-900 shadow-elev2">
             {course.thumbnailUrl && (
               <div className="absolute inset-0">
@@ -321,14 +321,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </div>
                 <p className="mt-5 font-display text-base font-bold text-ink-900">Waiting for a mentor</p>
                 <p className="mx-auto mt-1 max-w-md text-sm text-ink-600">
-                  No mentor is assigned to this course yet. Check back soon — you can still apply to mentor below.
+                  No mentor is assigned to this course yet. Check back soon - you can still apply to mentor below.
                 </p>
               </div>
             )}
           </section>
         </div>
 
-        {/* Enrolment rail — before enrolment / application */}
+        {/* Enrolment rail - before enrolment / application */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <CourseActions
             courseId={course.id}

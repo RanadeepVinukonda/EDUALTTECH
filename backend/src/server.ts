@@ -5,10 +5,10 @@ import { logger } from "./utils/logger.js";
 
 async function main(): Promise<void> {
   // A service_role key pasted as the anon key silently breaks every private-file
-  // read (resumes, lesson videos) — storage RLS returns "Object not found".
+  // read (resumes, lesson videos) - storage RLS returns "Object not found".
   if (config.supabase.serviceRoleKey === config.supabase.anonKey) {
     logger.error(
-      "SUPABASE_SERVICE_ROLE_KEY equals SUPABASE_ANON_KEY — private file signing (resumes, lesson videos) will fail. Set the real service_role key.",
+      "SUPABASE_SERVICE_ROLE_KEY equals SUPABASE_ANON_KEY - private file signing (resumes, lesson videos) will fail. Set the real service_role key.",
     );
   }
 

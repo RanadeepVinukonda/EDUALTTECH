@@ -195,7 +195,7 @@ function UserEditor({ user, expectedId, onSaved }: { user: AdminUserRow; expecte
               label="Status"
               value={<StatusPill tone={user.isActive ? "success" : "danger"}>{user.isActive ? "Active" : "Inactive"}</StatusPill>}
             />
-            <Row label="Mobile" value={user.mobile || "—"} />
+            <Row label="Mobile" value={user.mobile || "-"} />
             <Row label="Mobile verified" value={user.mobileVerifiedAt ? "Yes" : "No"} />
             <Row label="Email verified" value={user.emailVerifiedAt ? "Yes" : "No"} />
             <Row label="Learner enrolments" value={String(user._count.participations)} />

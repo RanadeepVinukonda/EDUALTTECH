@@ -18,7 +18,7 @@ async function main(): Promise<void> {
     orderBy: { createdAt: "asc" },
     select: { id: true, email: true },
   });
-  if (!admin) throw new Error("No ADMIN user found — create one before seeding courses.");
+  if (!admin) throw new Error("No ADMIN user found - create one before seeding courses.");
 
   const orders = await prisma.order.count();
   if (orders > 0) throw new Error(`Refusing to delete courses: ${orders} order(s) exist. Clear orders first.`);

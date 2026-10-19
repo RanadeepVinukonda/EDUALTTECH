@@ -6,7 +6,7 @@ type Tx = Prisma.TransactionClient;
 
 /**
  * Creates the LEARNER participant inside an open transaction.
- * Idempotent: an existing row (any status) returns its id — the caller decides
+ * Idempotent: an existing row (any status) returns its id - the caller decides
  * whether that is an error. A learner-chosen mentor is honoured only when that
  * mentor is an ACTIVE seat with room; otherwise the seat is auto-picked under
  * row locks, so a full/absent choice can never block a paid enrollment or
@@ -91,7 +91,7 @@ async function notifyEnrollment(
       recipientId: learnerUserId,
       title: "You're enrolled",
       body: mentorName
-        ? `You're enrolled in ${courseTitle}. Your mentor is ${mentorName} — say hi in Messages.`
+        ? `You're enrolled in ${courseTitle}. Your mentor is ${mentorName} - say hi in Messages.`
         : `You're enrolled in ${courseTitle}. A mentor will be assigned shortly.`,
       courseId,
     },

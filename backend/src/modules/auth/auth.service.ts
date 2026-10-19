@@ -48,7 +48,7 @@ async function issueCode(identifier: string): Promise<{ devCode?: string }> {
 
 /**
  * Issues an email code. Always resolves successfully for unknown/known
- * addresses alike — no email-enumeration oracle (spec §6).
+ * addresses alike - no email-enumeration oracle (spec §6).
  */
 export async function sendEmailCode(email: string): Promise<{ ok: true; devCode?: string }> {
   const out = await issueCode(email.toLowerCase().trim());
@@ -63,7 +63,7 @@ export async function verifyEmailCode(email: string, code: string): Promise<{ ok
       where: { channel: "email", identifier, verifiedAt: { not: null } },
     });
     if (row) return { ok: true, devCode: DEV_CODE };
-    // Row missing (server restarted) — recreate a verified dev row.
+    // Row missing (server restarted) - recreate a verified dev row.
     await prisma.verificationCode.deleteMany({ where: { channel: "email", identifier } });
     await prisma.verificationCode.create({
       data: {
@@ -102,7 +102,7 @@ export async function verifyEmailCode(email: string, code: string): Promise<{ ok
   return { ok: true };
 }
 
-/** True when a recently-verified row exists — register requires this before creating the account. */
+/** True when a recently-verified row exists - register requires this before creating the account. */
 export async function hasVerifiedCode(email: string): Promise<boolean> {
   const identifier = email.toLowerCase().trim();
   const row = await prisma.verificationCode.findFirst({

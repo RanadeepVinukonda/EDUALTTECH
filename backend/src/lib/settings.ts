@@ -17,7 +17,7 @@ export async function setSetting(key: string, value: unknown): Promise<void> {
   });
 }
 
-/** Mentor seat default — Setting `mentor_capacity`, falling back to 20. */
+/** Mentor seat default - Setting `mentor_capacity`, falling back to 20. */
 export async function mentorCapacityDefault(): Promise<number> {
   const v = await getSetting<number | string>("mentor_capacity", DEFAULT_MENTOR_CAPACITY);
   const n = typeof v === "string" ? Number(v) : v;

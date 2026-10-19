@@ -12,7 +12,7 @@ const CODE_MESSAGES: Record<string, string> = {
   HAS_ORDERS: "This course has orders and can’t be deleted.",
   HAS_PARTICIPANTS: "This course has participants and can’t be deleted.",
   PAYMENT_REQUIRED: "Payment is required before you can enroll.",
-  FREE_COURSE: "This course is free — no payment is needed.",
+  FREE_COURSE: "This course is free - no payment is needed.",
   ALREADY_ENROLLED: "You’re already enrolled in this course.",
   ALREADY_PARTICIPANT: "This person already has a role in this course.",
   APPLICATION_EXISTS: "You’ve already applied for this course.",
@@ -27,7 +27,7 @@ export function isApiError(err: unknown): err is ApiError {
   return err instanceof ApiError;
 }
 
-/** Network/transport failure or timeout — distinct from an authoritative backend response. */
+/** Network/transport failure or timeout - distinct from an authoritative backend response. */
 export function isNetworkError(err: unknown): boolean {
   if (isApiError(err)) return err.code === "NETWORK" || err.status === 0;
   if (err instanceof DOMException && err.name === "AbortError") return true;

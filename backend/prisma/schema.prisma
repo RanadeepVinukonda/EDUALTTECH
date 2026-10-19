@@ -1,9 +1,9 @@
-// EduAltTech — Prisma schema (Supabase Postgres)
+// EduAltTech - Prisma schema (Supabase Postgres)
 // Product of Setsuzoku.
 //
 // Two platform roles: ADMIN | USER.
 // Course participation is separate: CourseParticipant.role = LEARNER | MENTOR.
-// A user cannot be both LEARNER and MENTOR in the same course — enforced by
+// A user cannot be both LEARNER and MENTOR in the same course - enforced by
 // @@unique([courseId, userId]) (one row per user per course) plus service-level
 // checks inside transactions.
 //
@@ -78,7 +78,7 @@ model User {
   avatarUrl      String?
   isActive       Boolean  @default(true)
 
-  // Verification — email is the account identity; mobile is verified lazily
+  // Verification - email is the account identity; mobile is verified lazily
   // (purchase / mentor application), never during signup.
   emailVerifiedAt DateTime?
   mobile          String?
@@ -87,7 +87,7 @@ model User {
   mobileOtpExpiresAt DateTime?
   mobileOtpAttempts  Int    @default(0)
 
-  // Profile — structured education, no arbitrary blobs
+  // Profile - structured education, no arbitrary blobs
   dateOfBirth     DateTime?
   bio             String?
   educationLevel  String? // dropdown: School | Diploma | Bachelor | Master | PhD | Other
@@ -95,7 +95,7 @@ model User {
   fieldOfStudy    String?
   gradYear        Int?
 
-  // Account lifecycle — archive keeps access for a grace month then deactivates
+  // Account lifecycle - archive keeps access for a grace month then deactivates
   deactivationScheduledAt DateTime?
   deactivatedAt           DateTime?
 
@@ -138,7 +138,7 @@ model User {
   @@index([role])
 }
 
-// Email verification codes — keyed by identifier, not userId (row exists
+// Email verification codes - keyed by identifier, not userId (row exists
 // before the account). Code stored as sha256(`${identifier}:${code}`).
 model VerificationCode {
   id         String              @id @default(cuid())
@@ -154,7 +154,7 @@ model VerificationCode {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Courses — admin owns lifecycle, structure, pricing
+// Courses - admin owns lifecycle, structure, pricing
 // ────────────────────────────────────────────────────────────────────
 
 enum CourseType {
@@ -207,7 +207,7 @@ model Course {
   @@index([createdById])
 }
 
-// Admin roadmap: Chapter → Topic. Stable explicit ordering — never insertion order.
+// Admin roadmap: Chapter → Topic. Stable explicit ordering - never insertion order.
 model Chapter {
   id        String   @id @default(cuid())
   courseId  String
@@ -247,7 +247,7 @@ model Topic {
 }
 
 // Mentor-authored teaching content inside admin topics.
-// Mentors teach within the syllabus — they never restructure it.
+// Mentors teach within the syllabus - they never restructure it.
 model Lesson {
   id          String     @id @default(cuid())
   courseId    String
@@ -287,7 +287,7 @@ model LessonProgress {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Participation — LEARNER | MENTOR, one row per user per course.
+// Participation - LEARNER | MENTOR, one row per user per course.
 // The unique constraint IS the mentor/learner exclusivity rule.
 // ────────────────────────────────────────────────────────────────────
 
@@ -321,7 +321,7 @@ model CourseParticipant {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Mentor applications — course-specific, state machine enforced server-side
+// Mentor applications - course-specific, state machine enforced server-side
 // ────────────────────────────────────────────────────────────────────
 
 model MentorApplication {
@@ -383,7 +383,7 @@ model LiveMeeting {
 }
 
 // File/link attachments. Private files live in the private bucket behind
-// storagePath and are served via short-lived signed URLs — never public URLs.
+// storagePath and are served via short-lived signed URLs - never public URLs.
 model Resource {
   id            String   @id @default(cuid())
   title         String
@@ -412,7 +412,7 @@ model Resource {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Chat — course-aware learner ↔ mentor only
+// Chat - course-aware learner ↔ mentor only
 // ────────────────────────────────────────────────────────────────────
 
 model Conversation {
@@ -483,7 +483,7 @@ model AuditLog {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Payments — Razorpay, server-authoritative, order snapshots course price
+// Payments - Razorpay, server-authoritative, order snapshots course price
 // ────────────────────────────────────────────────────────────────────
 
 model Order {
@@ -493,7 +493,7 @@ model Order {
   user            User        @relation(fields: [userId], references: [id])
   courseId        String
   course          Course      @relation(fields: [courseId], references: [id])
-  amountPaise     Int // snapshot of Course.pricePaise at purchase time — immutable
+  amountPaise     Int // snapshot of Course.pricePaise at purchase time - immutable
   currency        String      @default("INR")
   status          OrderStatus @default(CREATED)
   mentorUserId    String? // learner-chosen mentor at checkout; seat re-checked at fulfilment
@@ -525,7 +525,7 @@ model Payment {
   @@index([orderId])
 }
 
-// Append-only webhook trail — never mutated.
+// Append-only webhook trail - never mutated.
 model WebhookEvent {
   id          String    @id @default(cuid())
   provider    String    @default("razorpay")
@@ -539,7 +539,7 @@ model WebhookEvent {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Misc — wishlist, contact, settings
+// Misc - wishlist, contact, settings
 // ────────────────────────────────────────────────────────────────────
 
 model WishlistItem {
@@ -577,7 +577,7 @@ model Setting {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Public website CMS — media, work, partners, team, programs
+// Public website CMS - media, work, partners, team, programs
 // ────────────────────────────────────────────────────────────────────
 
 enum OrganizationType {

@@ -19,7 +19,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("fulfillPaidOrder — payment/enrollment integrity", () => {
+describe("fulfillPaidOrder - payment/enrollment integrity", () => {
   it("enrolls exactly once and records the payment on first fulfilment", async () => {
     mockPrisma.order.findUnique.mockResolvedValue({ id: "o1", userId: "u1", courseId: "c1", mentorUserId: "m1" });
     const tx = {

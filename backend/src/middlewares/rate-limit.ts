@@ -1,6 +1,6 @@
 import rateLimit from "express-rate-limit";
 
-/** General API limiter — generous; sensitive endpoints get their own buckets. */
+/** General API limiter - generous; sensitive endpoints get their own buckets. */
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 600,
@@ -11,7 +11,7 @@ export const apiLimiter = rateLimit({
 });
 
 /**
- * Auth endpoints — a shared bucket lets code-spam lock victims out of login,
+ * Auth endpoints - a shared bucket lets code-spam lock victims out of login,
  * so login/register/refresh use this 30/15m limiter while email-code issuance
  * (codeLimiter) and password resets (passwordResetLimiter) get their own.
  */
@@ -23,7 +23,7 @@ export const authLimiter = rateLimit({
   message: { success: false, error: { code: "RATE_LIMITED", message: "Too many attempts. Please wait and try again." } },
 });
 
-/** Password-reset issuance — own bucket so reset spam can't exhaust login. */
+/** Password-reset issuance - own bucket so reset spam can't exhaust login. */
 export const passwordResetLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
@@ -32,7 +32,7 @@ export const passwordResetLimiter = rateLimit({
   message: { success: false, error: { code: "RATE_LIMITED", message: "Too many reset requests. Please wait a few minutes." } },
 });
 
-/** Tight bucket for code issuance — throttles resend spam per IP. */
+/** Tight bucket for code issuance - throttles resend spam per IP. */
 export const codeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 8,

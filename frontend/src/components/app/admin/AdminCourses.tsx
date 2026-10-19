@@ -38,8 +38,8 @@ interface CoursesResponse {
 function courseError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
     if (err.code === "ROADMAP_INCOMPLETE") return "Add at least one chapter with a topic before publishing.";
-    if (err.code === "HAS_ORDERS") return "Paid orders exist — archive the course instead of deleting.";
-    if (err.code === "HAS_PARTICIPANTS") return "Enrolled participants exist — archive the course instead.";
+    if (err.code === "HAS_ORDERS") return "Paid orders exist - archive the course instead of deleting.";
+    if (err.code === "HAS_PARTICIPANTS") return "Enrolled participants exist - archive the course instead.";
     if (err.code === "FORBIDDEN" || err.status === 403) return "You don’t have permission for this course action.";
     if (err.code === "UNAUTHORIZED" || err.status === 401) return "Your session expired. Please sign in again.";
     if (err.code === "RATE_LIMITED" || err.status === 429) return "Too many requests. Please wait a moment.";

@@ -197,7 +197,7 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
     setBusyId(l.id);
     try {
       await apiPatch(`/courses/lessons/${l.id}`, { isPublished: !l.isPublished });
-      notifySuccess(l.isPublished ? "Lesson locked." : "Lesson unlocked — learners notified.");
+      notifySuccess(l.isPublished ? "Lesson locked." : "Lesson unlocked - learners notified.");
       onChanged();
     } catch (e) {
       notifyError(describeError(e, "Could not update the lesson."));

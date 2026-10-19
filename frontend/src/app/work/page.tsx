@@ -50,7 +50,7 @@ export default async function WorkPage() {
             as="h1"
             eyebrow="Our Work"
             title="Applications and digital solutions we have built"
-            lead="Practical software made for educational and organizational needs — the same problem-solving our courses teach. We present work here only when it is verified and cleared for public view."
+            lead="Practical software made for educational and organizational needs - the same problem-solving our courses teach. We present work here only when it is verified and cleared for public view."
           />
         </div>
       </section>

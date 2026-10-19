@@ -93,7 +93,7 @@ export default function VerifyEmailForm({ emailFromQuery, next }: { emailFromQue
     }
   }
 
-  // No email to verify and none supplied — send them to start.
+  // No email to verify and none supplied - send them to start.
   if (!email) {
     return (
       <div className="space-y-4">

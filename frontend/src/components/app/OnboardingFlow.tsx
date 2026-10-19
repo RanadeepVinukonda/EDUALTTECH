@@ -49,7 +49,7 @@ export default function OnboardingFlow() {
         ...(year ? { gradYear: year } : {}),
       });
       await refresh();
-      notifySuccess(done ? "You're all set." : "Saved — you can add this later in Profile.");
+      notifySuccess(done ? "You're all set." : "Saved - you can add this later in Profile.");
       router.replace("/dashboard");
     } catch (err) {
       notifyError(err instanceof Error ? err.message : "Could not save. Try again.");
@@ -98,7 +98,7 @@ export default function OnboardingFlow() {
         <section className="rounded-[24px] border border-slate-200 bg-white p-8 shadow-elev1">
           <p className="text-sm font-semibold text-brand-700">Step 2 of 2</p>
           <h1 className="mt-1 font-display text-2xl font-bold text-ink-900">A little about you</h1>
-          <p className="mt-2 text-sm text-slate-500">All optional — change any of it later in your profile.</p>
+          <p className="mt-2 text-sm text-slate-500">All optional - change any of it later in your profile.</p>
 
           <div className="mt-6 space-y-4">
             <div>

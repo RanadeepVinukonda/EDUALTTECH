@@ -168,7 +168,7 @@ export default function CourseActions({
               </div>
             ) : (
               <p className="mt-2 text-sm text-ink-600">
-                Your application is under review. Enrolment opens here once it&apos;s cleared — we&apos;ll notify you.
+                Your application is under review. Enrolment opens here once it&apos;s cleared - we&apos;ll notify you.
               </p>
             )}
           </div>

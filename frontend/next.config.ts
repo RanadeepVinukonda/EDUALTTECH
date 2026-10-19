@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     // Proxy API calls in development to avoid CORS setup friction.
-    // Backend mounts everything under /api — the rewrite must keep that prefix.
+    // Backend mounts everything under /api - the rewrite must keep that prefix.
     return process.env.NODE_ENV === "development"
       ? [{ source: "/backend/:path*", destination: `${backendOrigin}/api/:path*` }]
       : [];

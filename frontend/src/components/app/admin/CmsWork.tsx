@@ -104,7 +104,7 @@ export default function CmsWork() {
                       <p className="line-clamp-1 text-xs text-slate-500">{w.summary}</p>
                     </td>
                     <td className="px-2 py-3 text-slate-600">{w.category}</td>
-                    <td className="px-2 py-3 text-slate-600">{w.organization?.name ?? "—"}</td>
+                    <td className="px-2 py-3 text-slate-600">{w.organization?.name ?? "-"}</td>
                     <td className="px-2 py-3">
                       <StatusPill tone={w.isPublished ? "success" : "warn"}>{w.isPublished ? "published" : "draft"}</StatusPill>
                     </td>

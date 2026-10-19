@@ -20,17 +20,17 @@ export function layout(title: string, intro: string, ctaLabel?: string, ctaUrl?:
     <h1 style="font-size:20px;margin:8px 0 12px">${escape(title)}</h1>
     <p style="line-height:1.6;color:#334155;margin:0">${intro}</p>
     ${button}
-    <p style="font-size:12px;color:#94a3b8;margin-top:24px">${footer ?? "EduAltTech — a product by Setsuzoku"}</p>
+    <p style="font-size:12px;color:#94a3b8;margin-top:24px">${footer ?? "EduAltTech - a product by Setsuzoku"}</p>
   </div></body></html>`;
 }
 
 /**
- * Sends via Resend REST (no SDK dependency). Failures are logged and swallowed —
+ * Sends via Resend REST (no SDK dependency). Failures are logged and swallowed -
  * callers must never let email delivery corrupt a business transaction.
  */
 export async function sendEmail(input: EmailInput): Promise<boolean> {
   if (!config.email.resendApiKey) {
-    logger.warn("email skipped — RESEND_API_KEY not set", { to: input.to, subject: input.subject });
+    logger.warn("email skipped - RESEND_API_KEY not set", { to: input.to, subject: input.subject });
     return false;
   }
   try {

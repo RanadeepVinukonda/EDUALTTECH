@@ -83,7 +83,7 @@ export default function AdminAudit() {
                         <p className="text-slate-500">Target: <span className="font-mono text-ink-900">{l.targetType}{l.targetId ? ` / ${l.targetId}` : ""}</span></p>
                         <p className="mt-2 font-semibold text-slate-500">Metadata</p>
                         <pre className={cn("mt-1 overflow-x-auto whitespace-pre-wrap break-words text-ink-900")}>
-                          {l.meta == null ? "—" : JSON.stringify(l.meta, null, 2)}
+                          {l.meta == null ? "-" : JSON.stringify(l.meta, null, 2)}
                         </pre>
                       </div>
                     )}

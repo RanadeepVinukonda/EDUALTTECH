@@ -33,7 +33,7 @@ export default function CmsTeam() {
     const b = list[j];
     setOrderBusy(true);
     try {
-      // Swap the actual order values, not the array indices — indices drift
+      // Swap the actual order values, not the array indices - indices drift
       // from persisted order once members are added/deleted.
       await apiPatch(`/cms/admin/team/${a.id}`, { order: b.order });
       await apiPatch(`/cms/admin/team/${b.id}`, { order: a.order });

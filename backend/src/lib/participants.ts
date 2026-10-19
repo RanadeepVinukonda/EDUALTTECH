@@ -3,7 +3,7 @@ import { mentorCapacityDefault } from "./settings.js";
 
 type Tx = Prisma.TransactionClient;
 
-/** Row-locks the caller — serializes concurrent enroll/apply/approve on one user. */
+/** Row-locks the caller - serializes concurrent enroll/apply/approve on one user. */
 export async function lockUser(tx: Tx, userId: string): Promise<void> {
   await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
 }
@@ -16,7 +16,7 @@ export async function lockParticipant(tx: Tx, participantId: string): Promise<vo
 /**
  * Deterministic mentor seat selection under lock: the ACTIVE mentor with the
  * most free seats (null capacity → platform `mentor_capacity`). Returns null
- * when no mentor has room — caller stores mentorUserId = null, admin sees it.
+ * when no mentor has room - caller stores mentorUserId = null, admin sees it.
  */
 export async function pickMentorSeat(tx: Tx, courseId: string): Promise<string | null> {
   const defaultCap = await mentorCapacityDefault();

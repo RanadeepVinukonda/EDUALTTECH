@@ -192,7 +192,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
             <p className="mt-3 text-xs text-slate-500">
               {isPaid
                 ? "Payments are processed securely by Razorpay. Access is granted only after your payment is confirmed."
-                : "This course is free — enroll to start learning."}
+                : "This course is free - enroll to start learning."}
             </p>
           </section>
 
@@ -204,7 +204,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
 
             {mentors.length === 0 ? (
               <p className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-ink-600">
-                No mentors are listed yet — we&apos;ll assign one to you after enrollment.
+                No mentors are listed yet - we&apos;ll assign one to you after enrollment.
               </p>
             ) : (
               <ul className="mt-4 space-y-3">

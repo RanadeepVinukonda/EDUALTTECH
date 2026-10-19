@@ -9,7 +9,7 @@ import { audit } from "../../lib/audit.js";
 
 const router = Router();
 
-// Public — rate-limited. No auth, honeypot-style length limits instead of CAPTCHA.
+// Public - rate-limited. No auth, honeypot-style length limits instead of CAPTCHA.
 router.post(
   "/",
   codeLimiter,

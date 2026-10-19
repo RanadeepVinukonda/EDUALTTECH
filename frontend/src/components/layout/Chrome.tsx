@@ -41,7 +41,7 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
 
   if (AUTH_BARE.some(matches)) return bare;
 
-  // Signed-in users see their own workspace nav on every page — never the
+  // Signed-in users see their own workspace nav on every page - never the
   // marketing header/footer.
   if (user) {
     return (

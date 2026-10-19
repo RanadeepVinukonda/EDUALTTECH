@@ -13,7 +13,7 @@ export interface PaymentRecord {
 /**
  * Payment fulfilment: Order CREATED→PAID + payment row + enrollment, all in
  * ONE transaction. The conditional update (status CREATED only) is the
- * single-flight gate — webhook + checkout-verify racing together results in
+ * single-flight gate - webhook + checkout-verify racing together results in
  * exactly one enrollment, and the loser sees alreadyPaid=true.
  */
 export async function fulfillPaidOrder(orderId: string, payment: PaymentRecord): Promise<{ alreadyPaid: boolean }> {

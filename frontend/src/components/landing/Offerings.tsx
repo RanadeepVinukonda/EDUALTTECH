@@ -10,14 +10,14 @@ const OFFERINGS = [
   {
     icon: School,
     title: "Education and alternate education",
-    body: "Structured courses in AI, entrepreneurship, and applied technology, plus alternate learning for students who need a path beyond the standard syllabus — organised into clear chapters, topics, and lessons.",
+    body: "Structured courses in AI, entrepreneurship, and applied technology, plus alternate learning for students who need a path beyond the standard syllabus - organised into clear chapters, topics, and lessons.",
     href: "/courses",
     cta: "Browse courses",
   },
   {
     icon: AutoStories,
     title: "Tuition facilities",
-    body: "Guided tuition and coaching that sits alongside our courses — subject support, doubt sessions, and hands-on practice, in person and online.",
+    body: "Guided tuition and coaching that sits alongside our courses - subject support, doubt sessions, and hands-on practice, in person and online.",
     href: "/services",
     cta: "See tuition",
   },
@@ -31,7 +31,7 @@ const OFFERINGS = [
   {
     icon: Apartment,
     title: "Technology for schools",
-    body: "We build practical digital solutions with and for schools — the same problems our courses teach learners to solve.",
+    body: "We build practical digital solutions with and for schools - the same problems our courses teach learners to solve.",
     href: "/services",
     cta: "See school solutions",
   },
@@ -44,7 +44,7 @@ export default function Offerings() {
         <SectionHeading
           eyebrow="What we offer"
           title="Four things EduAltTech does"
-          lead="Education for students and work for the people who teach them — the two halves feed each other."
+          lead="Education for students and work for the people who teach them - the two halves feed each other."
         />
 
         <div className="mt-12 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">

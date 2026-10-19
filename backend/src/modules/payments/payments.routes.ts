@@ -12,7 +12,7 @@ import { audit } from "../../lib/audit.js";
 
 const router = Router();
 
-// Webhook needs the exact raw bytes for HMAC — mounted before json parsing upstream.
+// Webhook needs the exact raw bytes for HMAC - mounted before json parsing upstream.
 router.use("/webhook", raw({ type: "*/*", limit: "1mb" }));
 
 const orderInclude = {
@@ -46,7 +46,7 @@ router.post(
 
     const course = await prisma.course.findUnique({ where: { id: courseId } });
     if (!course || course.status !== "PUBLISHED") throw ApiError.notFound("Course not found");
-    if (course.pricePaise <= 0) throw ApiError.badRequest("This course is free — just enroll", "FREE_COURSE");
+    if (course.pricePaise <= 0) throw ApiError.badRequest("This course is free - just enroll", "FREE_COURSE");
 
     const enrolled = await prisma.courseParticipant.findUnique({
       where: { courseId_userId: { courseId, userId } },
@@ -76,7 +76,7 @@ router.post(
       }
     }
 
-    // DB row first (pending razorpay id), then the provider call — a crash in
+    // DB row first (pending razorpay id), then the provider call - a crash in
     // between leaves a resumable CREATED order, never a provider orphans-to-DB gap.
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -106,7 +106,7 @@ router.post(
         notes: { dbOrderId: order.id, courseId, userId },
       });
     } catch (err) {
-      // Provider call failed before a real order existed — drop the placeholder
+      // Provider call failed before a real order existed - drop the placeholder
       // so the idempotency key stays usable for a clean retry.
       await prisma.order.delete({ where: { id: order.id } }).catch(() => undefined);
       throw err;
@@ -251,7 +251,7 @@ router.post("/webhook", async (req, res) => {
     }
   }
 
-  // Unknown/unsupported event — mark handled so retries stay quiet.
+  // Unknown/unsupported event - mark handled so retries stay quiet.
   await prisma.webhookEvent.update({
     where: { id: record.id },
     data: { processed: true, processedAt: new Date() },

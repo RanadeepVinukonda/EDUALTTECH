@@ -62,7 +62,7 @@ export const config = {
     verifyServiceSid: optional("TWILIO_VERIFY_SERVICE_SID"),
   },
 
-  // OTP/verification bypass — testing switch until Supabase OTP is wired in.
+  // OTP/verification bypass - testing switch until Supabase OTP is wired in.
   // Secure by default: OFF unless AUTH_SKIP_OTP is explicitly "true"/"1".
   // Local dev sets AUTH_SKIP_OTP=true to accept the dev code 000000.
   auth: {

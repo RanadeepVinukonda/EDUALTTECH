@@ -6,13 +6,13 @@ import { ApiError } from "../utils/ApiError.js";
 /**
  * Replaces a request accessor with the parsed value. Express 5 defines
  * `req.query` as a getter-only accessor, so a plain assignment is a no-op/
- * throws — an own data property shadows it instead.
+ * throws - an own data property shadows it instead.
  */
 function setParsed(req: Request<any>, key: "query" | "params", value: unknown): void {
   Object.defineProperty(req, key, { value, writable: true, configurable: true, enumerable: true });
 }
 
-/** Zod validation for body/query/params — 422 with per-field details. */
+/** Zod validation for body/query/params - 422 with per-field details. */
 export function validate(schemas: { body?: ZodType; query?: ZodType; params?: ZodType }): RequestHandler<any, any, any, any, any> {
   return (req: Request<any>, _res: Response, next: NextFunction): void => {
     try {

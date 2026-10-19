@@ -4,7 +4,7 @@ import { verifyHmac, verifyCheckoutSignature } from "../src/lib/razorpay.js";
 
 const SECRET = "rzp_test_secret";
 
-describe("verifyHmac — webhook signature (constant-time)", () => {
+describe("verifyHmac - webhook signature (constant-time)", () => {
   it("accepts a correctly signed raw body", () => {
     const body = JSON.stringify({ event: "payment.captured", id: "evt_1" });
     const signature = createHmac("sha256", "whsec").update(body).digest("hex");
@@ -24,7 +24,7 @@ describe("verifyHmac — webhook signature (constant-time)", () => {
   });
 });
 
-describe("verifyCheckoutSignature — client callback cannot be forged", () => {
+describe("verifyCheckoutSignature - client callback cannot be forged", () => {
   it("accepts the signature Razorpay would produce for order|payment", () => {
     const orderId = "order_abc";
     const paymentId = "pay_xyz";

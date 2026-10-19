@@ -1,4 +1,4 @@
-# EduAltTech — Design Theme (source of truth)
+# EduAltTech - Design Theme (source of truth)
 
 Product: **EduAltTech**, a product by **Setsuzoku**.
 Direction: sleek, modern, educational, premium, human, confident, clean.
@@ -6,14 +6,14 @@ NOT: generic AI SaaS, glassmlobs, blobs, excessive gradients/neon, endless cards
 
 ## Identity
 
-- Brand: EduAltTech. Company: Setsuzoku (footer, about, legal only — never overpower).
+- Brand: EduAltTech. Company: Setsuzoku (footer, about, legal only - never overpower).
 - Terminology: User, Course, Learner, Mentor, Mentor Application, Roadmap, Chapter, Topic, Lesson, Meeting, Resource, Order, Payment.
 - Roles: platform `ADMIN | USER`; course participation `LEARNER | MENTOR` (never global).
 
 ## Colors (Tailwind v4 `@theme`)
 
 ```css
-/* Green brand scale — primary #038C3E, hover #026B2F */
+/* Green brand scale - primary #038C3E, hover #026B2F */
 --color-brand-50:  #f0fff5;
 --color-brand-100: #d7f5e1;
 --color-brand-200: #b0e8c5;
@@ -26,7 +26,7 @@ NOT: generic AI SaaS, glassmlobs, blobs, excessive gradients/neon, endless cards
 --color-brand-900: #023a1c;
 --color-brand-950: #012312;
 
-/* Ink scale — headings/accent/footer #024059 */
+/* Ink scale - headings/accent/footer #024059 */
 --color-ink-100: #e3eef4;
 --color-ink-200: #bcd5e3;
 --color-ink-300: #8fb5cc;
@@ -63,7 +63,7 @@ Semantic aliases to add on rebuild:
 --radius-sm: 0.5rem;   /* 8px */
 --radius-md: 0.75rem;  /* 12px */
 --radius-lg: 1rem;     /* 16px */
---radius-xl: 1.75rem;  /* 28px — cards */
+--radius-xl: 1.75rem;  /* 28px - cards */
 --radius-full: 9999px;
 ```
 
@@ -86,7 +86,7 @@ Semantic aliases to add on rebuild:
 
 Loaded via `next/font` in root layout. Body: `bg-slate-50 text-slate-800 antialiased`.
 
-## Component recipes (from signup form — canonical)
+## Component recipes (from signup form - canonical)
 
 - **Input**: `w-full rounded-xl border border-slate-300 px-4 py-3 text-[15px] bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 outline-none placeholder:text-slate-400`
 - **Label**: `block text-[15px] font-medium text-slate-700 mb-1.5`
@@ -108,4 +108,4 @@ Loaded via `next/font` in root layout. Body: `bg-slate-50 text-slate-800 antiali
 - Max content width `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`.
 - Focus ring visible everywhere; `prefers-reduced-motion` kills animations.
 - Every component: loading, empty, error, populated states.
-- Page feel: Coursera-class information hierarchy — obvious, not impressive.
+- Page feel: Coursera-class information hierarchy - obvious, not impressive.

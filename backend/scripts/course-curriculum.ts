@@ -3,7 +3,7 @@
  *
  * Six chapters of four topics each, plus a capstone project (title,
  * description and milestone list). Lesson titles are generated from the topic
- * in seed-curriculum.ts — the topic titles below are the authored, visible
+ * in seed-curriculum.ts - the topic titles below are the authored, visible
  * curriculum. Keys must match CourseSeed.slug.
  */
 export interface ChapterSpec {

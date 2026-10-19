@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UI preview — EduAltTech</title>
+<title>UI preview - EduAltTech</title>
 <style>
   :root {
     --brand-50:#f0fff5; --brand-100:#d7f5e1; --brand-200:#b0e8c5; --brand-300:#82d5a0;
@@ -82,12 +82,12 @@
   .hv-btn:disabled { opacity:.5; cursor:default; }
   .bin-icon { width:12px; transition-duration:.3s; }
 
-  /* delete — bin lid rotates open, red */
+  /* delete - bin lid rotates open, red */
   .bin-top { transform-origin:bottom right; }
   .hv-btn--delete:hover:not(:disabled) .bin-top, .hv-btn--delete:focus-visible:not(:disabled) .bin-top { transition-duration:.5s; transform:rotate(160deg); }
   .hv-btn--delete:hover:not(:disabled), .hv-btn--delete:focus-visible:not(:disabled) { background-color:rgb(255,69,69); }
 
-  /* view — eye opens, navy */
+  /* view - eye opens, navy */
   .eye-closed, .eye-open { position:absolute; inset:0; margin:auto; width:24px; height:24px; transition-duration:.28s; transition-timing-function:cubic-bezier(.2,.8,.2,1); }
   .eye-closed { opacity:1; }
   .eye-open { opacity:0; transform:scaleY(0); }
@@ -245,7 +245,7 @@
 <div class="shell">
 
   <!-- ============ 1. COURSE CARD ============ -->
-  <h1 class="screen-title">Course card — new layout</h1>
+  <h1 class="screen-title">Course card - new layout</h1>
   <p class="screen-note">Thumbnail → title + domain → four course features → price with view icon. Regular card style, app theme.</p>
   <div class="bar"></div>
   <div class="card-grid">
@@ -321,7 +321,7 @@
   </div>
 
   <!-- ============ 1b. COURSE VIEW PAGE ============ -->
-  <h1 class="screen-title">Course view page — /courses/&lt;slug&gt;</h1>
+  <h1 class="screen-title">Course view page - /courses/&lt;slug&gt;</h1>
   <p class="screen-note">Hero thumbnail with semi-transparent overlay (title + domain on it) → description → curriculum → mentors (seats left + qualification). Right rail: enrol, wishlist, apply to mentor.</p>
   <div class="bar"></div>
 
@@ -424,14 +424,14 @@
           <a class="wish-btn" href="#"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/></svg>Add to wishlist</a>
           <a class="wish-btn" href="#">Apply to mentor</a>
         </div>
-        <p class="cv-rail-note">Seats limited — 10 of 15 filled for the next cohort. Learning content unlocks after confirmed enrolment.</p>
+        <p class="cv-rail-note">Seats limited - 10 of 15 filled for the next cohort. Learning content unlocks after confirmed enrolment.</p>
       </div>
     </aside>
   </div>
 
   <!-- action buttons -->
   <h1 class="screen-title">Action buttons</h1>
-  <p class="screen-note">Delete — bin lid rotates open, turns red. View — eye opens, turns brand navy. Hover / focus each.</p>
+  <p class="screen-note">Delete - bin lid rotates open, turns red. View - eye opens, turns brand navy. Hover / focus each.</p>
   <div class="bar"></div>
   <div class="btn-demo">
     <div class="btn-demo-item">
@@ -448,7 +448,7 @@
   </div>
 
   <!-- ============ 2. ENROLL PANEL + STATES ============ -->
-  <h1 class="screen-title">Course page enrol panel — states</h1>
+  <h1 class="screen-title">Course page enrol panel - states</h1>
   <p class="screen-note">Animated "Pay now" (design 1). Mentor application pending → status card, no enrol button, no re-apply. Learner/Mentor → portal CTA.</p>
   <div class="bar"></div>
 
@@ -485,7 +485,7 @@
 
     <div class="panel" style="max-width:400px;">
       <p class="price">Application status</p>
-      <p class="price-sub" style="margin-top:4px;">What the user sees on /courses/[slug] — no enrol button, no re-apply.</p>
+      <p class="price-sub" style="margin-top:4px;">What the user sees on /courses/[slug] - no enrol button, no re-apply.</p>
 
       <div class="stack">
         <div class="state-card st-submitted" style="margin-top:8px;">
@@ -514,7 +514,7 @@
   </div>
 
   <!-- ============ 3. LEARNER PORTAL ============ -->
-  <h1 class="screen-title">Learner portal — course overview (inside /dashboard/courses/&lt;slug&gt;)</h1>
+  <h1 class="screen-title">Learner portal - course overview (inside /dashboard/courses/&lt;slug&gt;)</h1>
   <p class="screen-note">Hero with resume CTA, progress ring, topic tree refined. Entering a course anywhere routes here.</p>
   <div class="bar"></div>
 
@@ -536,7 +536,7 @@
     </div>
     <div style="min-width:0;">
       <div class="row1"><span>Keep going</span><span style="color:var(--brand-700)">26 of 42 lessons done</span></div>
-      <div class="row2">Next up · Prompting 101 — your last position is saved.</div>
+      <div class="row2">Next up · Prompting 101 - your last position is saved.</div>
     </div>
     <a class="btn-primary pp-btn" href="#" style="padding:11px 18px; border-radius:10px; text-decoration:none;">Continue learning →</a>
   </div>
@@ -557,14 +557,14 @@
       <p style="font-size:12px; font-weight:700; color:var(--ink-500); text-transform:uppercase; letter-spacing:.04em;">Video lesson</p>
       <h3 style="margin-top:8px; font-size:20px; font-weight:800;">Prompting 101</h3>
       <p style="margin-top:12px; color:var(--ink-600); font-size:14px; line-height:1.6;">
-        A reusable frame for writing classroom prompts: context → role → task → format. We apply it to lesson planning, rubrics, and parent emails — then revise together.
+        A reusable frame for writing classroom prompts: context → role → task → format. We apply it to lesson planning, rubrics, and parent emails - then revise together.
       </p>
       <button class="btn-primary" style="margin-top:18px; padding:11px 20px; border:none;">Mark as complete</button>
     </div>
   </div>
 
   <!-- ============ 4. ROADMAP ============ -->
-  <h1 class="screen-title">Roadmap — improved</h1>
+  <h1 class="screen-title">Roadmap - improved</h1>
   <p class="screen-note">Cleaner timeline, per-chapter progress chips, richer lesson rows (type + state), keep Continue CTA.</p>
   <div class="bar"></div>
 
@@ -623,7 +623,7 @@
   </div>
 
   <!-- ============ 5. MENTOR WORKSPACE ============ -->
-  <h1 class="screen-title">Mentor workspace — /dashboard/mentor/courses/&lt;slug&gt;</h1>
+  <h1 class="screen-title">Mentor workspace - /dashboard/mentor/courses/&lt;slug&gt;</h1>
   <p class="screen-note">Assigned mentors land here when they open the course anywhere. Stat strip, roster, curriculum/meetings/resources/messages.</p>
   <div class="bar"></div>
 
@@ -656,13 +656,13 @@
     </div>
     <div class="panel">
       <b style="font-size:15px;">Upcoming sessions</b>
-      <div class="roster-row"><div style="flex:1;"><b style="font-size:13.5px;">Live Q&amp;A — Prompting</b><div style="font-size:11.5px; color:var(--ink-500);">Tomorrow · 6:00 PM · 45 min</div></div><span style="font-size:11px; font-weight:700; color:var(--brand-700);">In 1 day</span></div>
+      <div class="roster-row"><div style="flex:1;"><b style="font-size:13.5px;">Live Q&amp;A - Prompting</b><div style="font-size:11.5px; color:var(--ink-500);">Tomorrow · 6:00 PM · 45 min</div></div><span style="font-size:11px; font-weight:700; color:var(--brand-700);">In 1 day</span></div>
       <div class="roster-row"><div style="flex:1;"><b style="font-size:13.5px;">Rubric clinic</b><div style="font-size:11.5px; color:var(--ink-500);">Thu · 6:00 PM · 45 min</div></div><span style="font-size:11px; font-weight:700; color:var(--brand-700);">In 3 days</span></div>
     </div>
   </div>
 
   <!-- ============ 6. CHECKOUT (design 2) ============ -->
-  <h1 class="screen-title">Checkout — tx-card "New Transaction" (design 2)</h1>
+  <h1 class="screen-title">Checkout - tx-card "New Transaction" (design 2)</h1>
   <p class="screen-note">Used once a mentor is selected. Hover / press animates card → slip → ₹.</p>
   <div class="bar"></div>
 
@@ -691,7 +691,7 @@
 </div>
 
 <style>
-  /* —— inline tx-card styles (matches app globals.css) —— */
+  /* -- inline tx-card styles (matches app globals.css) -- */
   .tx-card { background:#fff; display:flex; width:460px; max-width:100%; height:120px; position:relative; border-radius:6px; transition:.3s ease-in-out; overflow:hidden; }
   .tx-card.go { transform:scale(1.03); width:220px; }
   .tx-card.go .tx-left { width:100%; }

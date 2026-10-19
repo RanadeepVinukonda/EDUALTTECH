@@ -9,10 +9,10 @@ let fail = 0;
 function record(name: string, ok: boolean, detail = ""): void {
   if (ok) {
     pass++;
-    console.log(`  PASS  ${name}${detail ? "  — " + detail : ""}`);
+    console.log(`  PASS  ${name}${detail ? "  - " + detail : ""}`);
   } else {
     fail++;
-    console.log(`  FAIL  ${name}${detail ? "  — " + detail : ""}`);
+    console.log(`  FAIL  ${name}${detail ? "  - " + detail : ""}`);
   }
 }
 

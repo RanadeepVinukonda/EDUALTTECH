@@ -249,7 +249,7 @@ router.get("/courses", validate({ query: z.object({
   res.json({ success: true, data: { courses, total, page, limit, hasMore: page * limit < total } });
 });
 
-// Direct mentor assignment (bypasses application flow — admin override)
+// Direct mentor assignment (bypasses application flow - admin override)
 router.post("/courses/:courseId/mentors", validate({ body: z.object({
   userId: z.string().min(1),
   capacity: z.number().int().min(1).max(1000).nullable().optional(),

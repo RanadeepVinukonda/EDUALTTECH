@@ -2,7 +2,7 @@
   "name": "@edu-alt-tech/backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Edu-Alt-Tech API — Express 5 + TypeScript + Prisma + Supabase Postgres",
+  "description": "Edu-Alt-Tech API - Express 5 + TypeScript + Prisma + Supabase Postgres",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",

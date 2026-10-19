@@ -207,7 +207,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
             </div>
           </div>
         )}
-        {!isLearner && <p className="mt-3 text-sm font-semibold text-ink-700">Mentor / staff view — read only.</p>}
+        {!isLearner && <p className="mt-3 text-sm font-semibold text-ink-700">Mentor / staff view - read only.</p>}
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,380px)]">

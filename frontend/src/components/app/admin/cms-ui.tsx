@@ -222,7 +222,7 @@ export function MediaUploadButton({
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      setError("Image is too large — keep it under 2 MB.");
+      setError("Image is too large - keep it under 2 MB.");
       return;
     }
     setBusy(true);

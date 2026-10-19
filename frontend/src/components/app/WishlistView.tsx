@@ -36,7 +36,7 @@ export default function WishlistView() {
     setPending((p) => new Set(p).add(courseId));
     try {
       await apiDelete(`/wishlist/${courseId}`);
-      await load(); // authoritative refresh — reconciles stale/deleted items
+      await load(); // authoritative refresh - reconciles stale/deleted items
       notifySuccess("Removed from your wishlist.");
     } catch (err) {
       notifyError(err instanceof Error ? err.message : "Could not remove this course.");
@@ -73,7 +73,7 @@ export default function WishlistView() {
     <div className="space-y-6">
       <header>
         <h1 className="font-display text-3xl font-bold text-ink-900">Wishlist</h1>
-        <p className="mt-1 text-[15px] text-slate-500">Saved courses. Saving does not enroll you — that happens at checkout.</p>
+        <p className="mt-1 text-[15px] text-slate-500">Saved courses. Saving does not enroll you - that happens at checkout.</p>
       </header>
 
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

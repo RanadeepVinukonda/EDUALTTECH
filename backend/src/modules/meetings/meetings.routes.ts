@@ -16,7 +16,7 @@ import { logger } from "../../utils/logger.js";
 
 const router = Router();
 
-/** Emails every active learner in the course (best-effort — never blocks the request). */
+/** Emails every active learner in the course (best-effort - never blocks the request). */
 async function emailCourseLearners(courseId: string, subject: string, title: string, intro: string, ctaUrl: string) {
   const learners = await prisma.courseParticipant.findMany({
     where: { courseId, role: "LEARNER", status: "ACTIVE" },
@@ -104,7 +104,7 @@ router.post("/courses/:courseId/meetings", requireAuth, validate({ body: meeting
       data: learners.map((l) => ({
         recipientId: l.userId,
         title: "New live session scheduled",
-        body: `${meeting.title} — ${formatDateTime(meeting.scheduledAt)}`,
+        body: `${meeting.title} - ${formatDateTime(meeting.scheduledAt)}`,
         courseId: meeting.courseId,
       })),
     });

@@ -445,8 +445,8 @@ router.delete("/:id", requireAuth, async (req, res) => {
     prisma.courseParticipant.count({ where: { courseId: course.id } }),
     prisma.order.count({ where: { courseId: course.id, status: "PAID" } }),
   ]);
-  if (paidOrders > 0) throw ApiError.conflict("Paid orders exist — archive the course instead", "HAS_ORDERS");
-  if (participants > 0) throw ApiError.conflict("Enrolled participants exist — archive the course instead", "HAS_PARTICIPANTS");
+  if (paidOrders > 0) throw ApiError.conflict("Paid orders exist - archive the course instead", "HAS_ORDERS");
+  if (participants > 0) throw ApiError.conflict("Enrolled participants exist - archive the course instead", "HAS_PARTICIPANTS");
 
   await prisma.course.delete({ where: { id: course.id } });
   audit(req.user!.id, "course.deleted", "course", course.id, { title: course.title });
@@ -462,7 +462,7 @@ router.post("/:id/enroll", requireAuth, validate({ body: z.object({
   const course = await prisma.course.findUnique({ where: { id: req.params.id } });
   if (!course || course.status !== "PUBLISHED") throw ApiError.notFound("Course not found");
   if (course.pricePaise > 0) {
-    throw ApiError.badRequest("This course is paid — complete checkout first", "PAYMENT_REQUIRED");
+    throw ApiError.badRequest("This course is paid - complete checkout first", "PAYMENT_REQUIRED");
   }
   const result = await enrollFree(course.id, req.user!.id, mentorUserId ?? null);
   res.status(201).json({ success: true, data: result });

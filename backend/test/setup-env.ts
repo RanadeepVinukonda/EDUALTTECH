@@ -1,5 +1,5 @@
 // Runs before every test file. `config/env.ts` validates these at import time,
-// so they must exist before any backend module is imported. Values are dummies —
+// so they must exist before any backend module is imported. Values are dummies -
 // real services are never contacted (Prisma/Supabase are mocked in tests).
 process.env.NODE_ENV ||= "test";
 process.env.DATABASE_URL ||= "postgresql://test:test@localhost:5432/test";

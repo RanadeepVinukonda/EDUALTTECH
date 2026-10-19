@@ -23,7 +23,7 @@ export default function RouteError({
       </span>
       <h1 className="mt-4 font-display text-2xl font-bold text-ink-900">Something went wrong</h1>
       <p className="mt-2 text-[15px] text-ink-600">
-        This section ran into an unexpected problem. Try again, or continue elsewhere — the rest of your workspace is unaffected.
+        This section ran into an unexpected problem. Try again, or continue elsewhere - the rest of your workspace is unaffected.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Button size="sm" onClick={reset}>

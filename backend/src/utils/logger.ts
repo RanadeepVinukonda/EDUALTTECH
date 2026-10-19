@@ -17,7 +17,7 @@ function scrub(value: unknown): unknown {
   return value;
 }
 
-/** Structured JSON logs. Never pass secrets in `meta` — keys matching SENSITIVE are redacted (recursively). */
+/** Structured JSON logs. Never pass secrets in `meta` - keys matching SENSITIVE are redacted (recursively). */
 function log(level: Level, msg: string, meta?: Record<string, unknown>) {
   if (LEVELS[level] < LEVELS[configured]) return;
   const safe = meta ? (scrub(meta) as Record<string, unknown>) : undefined;

@@ -2,7 +2,7 @@
   "name": "edu-alt-tech",
   "version": "0.1.0",
   "private": true,
-  "description": "Edu-Alt-Tech — ed-tech platform: digital classrooms, practice zone, AI tutor, resources, teacher & admin panels",
+  "description": "Edu-Alt-Tech - ed-tech platform: digital classrooms, practice zone, AI tutor, resources, teacher & admin panels",
   "workspaces": [
     "backend",
     "frontend"

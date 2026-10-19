@@ -8,7 +8,7 @@
  *   lesson titles only, all unpublished).
  * - Enrols two learners with NO mentor assigned.
  *
- * Lessons carry no text, video or resources on purpose — building lesson
+ * Lessons carry no text, video or resources on purpose - building lesson
  * content is the mentor's job, done from the teaching workspace after they
  * take the course.
  */
@@ -36,7 +36,7 @@ async function main(): Promise<void> {
   const author =
     (await prisma.user.findFirst({ where: { role: "ADMIN" }, orderBy: { createdAt: "asc" } })) ??
     (await prisma.user.findFirst({ orderBy: { createdAt: "asc" } }));
-  if (!author) throw new Error("No user found — create an admin before seeding.");
+  if (!author) throw new Error("No user found - create an admin before seeding.");
 
   const removed = await prisma.course.deleteMany({ where: { slug: { in: OLD_SLUGS } } });
   console.log(`removed ${removed.count} previous test course(s)`);
@@ -46,13 +46,13 @@ async function main(): Promise<void> {
     update: {
       status: "PUBLISHED",
       pricePaise: 0,
-      title: "Test Course — Python Foundations",
+      title: "Test Course - Python Foundations",
       description:
         "A fresh test course with curriculum ready to be taught. Lesson content is added by the mentor from the teaching workspace.",
     },
     create: {
       slug: NEW_SLUG,
-      title: "Test Course — Python Foundations",
+      title: "Test Course - Python Foundations",
       description:
         "A fresh test course with curriculum ready to be taught. Lesson content is added by the mentor from the teaching workspace.",
       type: "EDUCATION",
@@ -67,7 +67,7 @@ async function main(): Promise<void> {
       thumbnailUrl: "/media/courses/python-for-kids.jpg",
       createdById: author.id,
       roadmapTitle: "Your first steps in Python",
-      roadmapSummary: "From printing your first line to building a small game — a complete, bitesize Python path.",
+      roadmapSummary: "From printing your first line to building a small game - a complete, bitesize Python path.",
     },
   });
 
@@ -110,11 +110,11 @@ async function main(): Promise<void> {
     });
   }
 
-  // Two learners, no mentor — a mentor can take the course later.
+  // Two learners, no mentor - a mentor can take the course later.
   for (const email of LEARNER_EMAILS) {
     const student = await prisma.user.findUnique({ where: { email } });
     if (!student) {
-      console.log(`learner ${email} not found — run create-demo-users.ts`);
+      console.log(`learner ${email} not found - run create-demo-users.ts`);
       continue;
     }
     await prisma.courseParticipant.upsert({
@@ -124,7 +124,7 @@ async function main(): Promise<void> {
     });
   }
 
-  console.log(`course: /courses/${NEW_SLUG} — ${CHAPTERS.length} chapters, ${topicCount} topics, ${lessonCount} lessons (unpublished), 2 learners, no mentor`);
+  console.log(`course: /courses/${NEW_SLUG} - ${CHAPTERS.length} chapters, ${topicCount} topics, ${lessonCount} lessons (unpublished), 2 learners, no mentor`);
 }
 
 main()

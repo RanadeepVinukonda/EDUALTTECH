@@ -7,7 +7,7 @@ import CourseBrowser from "@/components/courses/CourseBrowser";
 export const metadata: Metadata = {
   title: "Courses",
   description:
-    "Browse published EduAltTech courses in AI, entrepreneurship, and technology — structured roadmaps with mentors, taught for practical outcomes.",
+    "Browse published EduAltTech courses in AI, entrepreneurship, and technology - structured roadmaps with mentors, taught for practical outcomes.",
   alternates: { canonical: "/courses" },
 };
 
@@ -36,7 +36,7 @@ export default function CoursesPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink-600">
             Practical, roadmap-structured programs in AI, entrepreneurship, and applied technology.
-            Every course is built around doing — with mentors on hand to guide you through it.
+            Every course is built around doing - with mentors on hand to guide you through it.
           </p>
         </div>
       </div>

@@ -9,7 +9,7 @@ export default function Pathway() {
         <SectionHeading
           eyebrow="Get involved"
           title="Learn as a student, or earn as a mentor"
-          lead="Two clear paths. Mentoring is a paid role granted per course after review — never as a global account role."
+          lead="Two clear paths. Mentoring is a paid role granted per course after review - never as a global account role."
         />
 
         <div className="mt-12 grid gap-6 lg:grid-cols-2">
@@ -19,7 +19,7 @@ export default function Pathway() {
               {[
                 "Create an account and verify your email.",
                 "Browse the catalogue and open a course to see its roadmap.",
-                "Enrol — free or paid — and start at your own pace.",
+                "Enrol - free or paid - and start at your own pace.",
                 "Work through lessons with your course mentors.",
               ].map((step, i) => (
                 <li key={step} className="flex gap-4">

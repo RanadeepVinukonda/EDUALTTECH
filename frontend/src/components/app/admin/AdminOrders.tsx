@@ -97,7 +97,7 @@ export default function AdminOrders() {
       <WebhookEvents />
 
       <p className="text-sm text-slate-500">
-        Refunds and cancellations are not supported by the backend — there is no admin endpoint for them, so no such
+        Refunds and cancellations are not supported by the backend - there is no admin endpoint for them, so no such
         actions are offered here.
       </p>
     </div>
@@ -147,8 +147,8 @@ function Row({ order: o }: { order: AdminOrderRow }) {
               <Field label="Provider order ref" mono value={o.razorpayOrderId} />
               {p ? (
                 <>
-                  <Field label="Payment id" mono value={p.razorpayPaymentId ?? "—"} />
-                  <Field label="Method" value={p.method ?? "—"} />
+                  <Field label="Payment id" mono value={p.razorpayPaymentId ?? "-"} />
+                  <Field label="Method" value={p.method ?? "-"} />
                   <Field label="Payment verified" value={p.verified ? "Yes" : "No"} />
                   <Field label="Payment recorded" value={formatDate(p.createdAt)} />
                 </>
@@ -242,7 +242,7 @@ function WebhookEvents() {
               <Field label="Received at" value={formatDate(selected.receivedAt)} />
             </dl>
             <p className="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-              The raw payload and signature are intentionally not rendered — they can contain payment and signing data.
+              The raw payload and signature are intentionally not rendered - they can contain payment and signing data.
               Use the backend logs if a deep inspection is required.
             </p>
             <div className="mt-5 text-right">

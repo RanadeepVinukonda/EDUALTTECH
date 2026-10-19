@@ -67,7 +67,7 @@ export function createApp() {
   app.use("/api/cms", cmsRoutes);
   app.use("/api/auth", authRoutes);
   // Mounted at /api: course-scoped meeting routes are /courses/:courseId/meetings,
-  // item routes are /meetings/:id — matching the frontend's apiGet paths.
+  // item routes are /meetings/:id - matching the frontend's apiGet paths.
   app.use("/api", meetingsRoutes);
 
   app.use(notFoundHandler);

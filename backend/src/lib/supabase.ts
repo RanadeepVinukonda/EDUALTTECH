@@ -4,7 +4,7 @@ import { config } from "../config/env.js";
 let admin: SupabaseClient | null = null;
 let anon: SupabaseClient | null = null;
 
-/** Service-role client — server-side only, never leaves the backend. */
+/** Service-role client - server-side only, never leaves the backend. */
 export function supabaseAdmin(): SupabaseClient {
   admin ??= createClient(config.supabase.url, config.supabase.serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },

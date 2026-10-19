@@ -91,7 +91,7 @@ function MeetingForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; on
         lessonId: lesson.id,
         topicId: lesson.topicId,
       });
-      notifySuccess("Meeting scheduled — learners notified.");
+      notifySuccess("Meeting scheduled - learners notified.");
       ctx.reloadMeetings();
       onClose();
     } catch (e) {
@@ -291,7 +291,7 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
     setBusy(true);
     try {
       await apiPatch(`/courses/lessons/${lesson.id}`, { isPublished: next });
-      notifySuccess(next ? "Lesson unlocked — learners notified." : "Lesson locked.");
+      notifySuccess(next ? "Lesson unlocked - learners notified." : "Lesson locked.");
       ctx.onChanged();
     } catch (e) {
       notifyError(describeError(e, "Could not update the lesson."));

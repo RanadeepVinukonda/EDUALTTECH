@@ -51,7 +51,7 @@ describe("requireAuth", () => {
     expect((req as { user?: unknown }).user).toMatchObject({ id: "u1", role: "USER" });
   });
 
-  it("never trusts a client-supplied role — role comes from the DB row", async () => {
+  it("never trusts a client-supplied role - role comes from the DB row", async () => {
     mockGetUserByToken.mockResolvedValue({ id: "u1" });
     mockPrisma.user.findUnique.mockResolvedValue({ id: "u1", email: "a@b.c", role: "USER", isActive: true });
     const req = reqWith("Bearer good") as Request & { user?: { role: string } };

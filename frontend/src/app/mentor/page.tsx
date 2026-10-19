@@ -29,7 +29,7 @@ export default function MentorPage() {
         Turn your skills into paid teaching
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-slate-600">
-        If you have real skill but no steady work, teaching here is a paid role — not volunteering.
+        If you have real skill but no steady work, teaching here is a paid role - not volunteering.
         Mentors author lessons and run live sessions for the courses they are assigned. Apply for a
         specific course and our team will review your application.
       </p>
@@ -72,7 +72,7 @@ export default function MentorPage() {
         <ul className="mt-4 flex flex-col gap-2 text-slate-700">
           <li>Choose the course you want to teach.</li>
           <li>Write a qualification summary describing your relevant expertise.</li>
-          <li>Have a resume ready (PDF, DOC, DOCX, or TXT — up to 5 MB).</li>
+          <li>Have a resume ready (PDF, DOC, DOCX, or TXT - up to 5 MB).</li>
         </ul>
       </section>
 

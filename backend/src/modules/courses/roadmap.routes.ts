@@ -43,7 +43,7 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res) => {
     },
   });
 
-  // Never expose the raw private storage key — surface a boolean flag instead.
+  // Never expose the raw private storage key - surface a boolean flag instead.
   const safeChapters = chapters.map((ch) => ({
     ...ch,
     topics: ch.topics.map((t) => ({
@@ -197,7 +197,7 @@ async function notifyLessonUnlocked(courseId: string, lessonTitle: string) {
     })),
   });
 
-  // Best-effort email — delivery must never break the unlock transaction.
+  // Best-effort email - delivery must never break the unlock transaction.
   const url = `${config.appBaseUrl}/dashboard/courses/${course?.slug ?? ""}`;
   await Promise.allSettled(
     learners.map((l) =>

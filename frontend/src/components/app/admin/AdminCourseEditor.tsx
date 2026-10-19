@@ -56,8 +56,8 @@ interface EditorCourse {
 function editorError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
     if (err.code === "ROADMAP_INCOMPLETE") return "Add at least one chapter with a topic before publishing.";
-    if (err.code === "HAS_ORDERS") return "Paid orders exist — archive the course instead of deleting.";
-    if (err.code === "HAS_PARTICIPANTS") return "Enrolled participants exist — archive the course instead.";
+    if (err.code === "HAS_ORDERS") return "Paid orders exist - archive the course instead of deleting.";
+    if (err.code === "HAS_PARTICIPANTS") return "Enrolled participants exist - archive the course instead.";
     if (err.code === "INVALID_TRANSITION") return err.message;
     if (err.code === "FORBIDDEN" || err.status === 403) return "You don’t have permission to edit this course.";
     if (err.code === "UNAUTHORIZED" || err.status === 401) return "Your session expired. Please sign in again.";
@@ -409,7 +409,7 @@ function CourseForm({
                     }
                   }}
                   maxLength={32}
-                  placeholder="e.g. 2D Graphics, Game Dev — press Enter"
+                  placeholder="e.g. 2D Graphics, Game Dev - press Enter"
                 />
                 <p className="mt-1 text-xs text-slate-500">Topic tags like “2D Graphics”, “Game Dev”. Up to 20.</p>
               </div>
@@ -505,7 +505,7 @@ function CourseForm({
         <div className="space-y-6">
           <Panel title="Preview">
             <p className="text-sm text-slate-500">
-              Current price: <strong className="text-ink-900">{priceInvalid ? "—" : formatMoney(pricePaise ?? 0, initial.currency)}</strong>
+              Current price: <strong className="text-ink-900">{priceInvalid ? "-" : formatMoney(pricePaise ?? 0, initial.currency)}</strong>
             </p>
             {thumbnailUrl && (
               <div className="mt-3">

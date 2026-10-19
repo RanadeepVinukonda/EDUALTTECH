@@ -137,11 +137,11 @@ export default function CmsOrganizations() {
                           {host(o.websiteUrl)}
                         </a>
                       ) : (
-                        "—"
+                        "-"
                       )}
                     </td>
                     <td className="px-2 py-3 text-slate-600">
-                      {o._count ? `${o._count.members} members · ${o._count.workItems} work · ${o._count.programs} programs` : "—"}
+                      {o._count ? `${o._count.members} members · ${o._count.workItems} work · ${o._count.programs} programs` : "-"}
                     </td>
                     <td className="px-2 py-3">
                       <StatusPill tone={o.isPublished ? "success" : "warn"}>{o.isPublished ? "published" : "draft"}</StatusPill>
@@ -325,7 +325,7 @@ function OrgEditor({ item, onClose, onSaved }: { item: OrganizationRow | null; o
           </div>
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Website URL" htmlFor="o-site" hint="Public — shown on the Partners page.">
+          <Field label="Website URL" htmlFor="o-site" hint="Public - shown on the Partners page.">
             <Input id="o-site" type="url" value={websiteUrl} icon={<LinkIcon fontSize="small" />} onChange={(e) => setWebsiteUrl(e.target.value)} error={websiteUrl.length > 0 && siteInvalid} placeholder="https://…" />
           </Field>
           <Field label="Contact email" htmlFor="o-email" hint="Internal only; never shown publicly.">

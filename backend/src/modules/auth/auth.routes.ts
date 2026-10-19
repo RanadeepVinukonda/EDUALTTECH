@@ -82,7 +82,7 @@ router.post(
   },
 );
 
-// ── Register — requires a verified code, never emails passwords ────
+// ── Register - requires a verified code, never emails passwords ────
 
 router.post(
   "/register",
@@ -147,7 +147,7 @@ async function signIn(email: string, password: string): Promise<{ accessToken: s
   return { accessToken: data.session.access_token, refreshToken: data.session.refresh_token };
 }
 
-// ── Account lifecycle helper — an archived account auto-deactivates once its
+// ── Account lifecycle helper - an archived account auto-deactivates once its
 // grace month expires. Applied wherever a session is established or refreshed.
 async function applyArchiveDeadline(user: NonNullable<Profile>) {
   if (user.isActive && user.deactivationScheduledAt && user.deactivationScheduledAt <= new Date()) {
@@ -228,7 +228,7 @@ router.post(
         });
       }
     }
-    // Always the same response — no account-existence oracle.
+    // Always the same response - no account-existence oracle.
     res.json({ success: true, data: { ok: true } });
   },
 );
@@ -273,7 +273,7 @@ router.patch("/me", requireAuth, validate({ body: profileSchema }), async (req, 
   res.json({ success: true, data: { user: shape(user) } });
 });
 
-// ── Account lifecycle — archive (1-month grace) / deactivate / reactivate ──
+// ── Account lifecycle - archive (1-month grace) / deactivate / reactivate ──
 
 const ARCHIVE_DAYS = 30;
 
@@ -349,7 +349,7 @@ router.post(
   },
 );
 
-// ── Mobile verification (lazy — purchase / application trigger) ────
+// ── Mobile verification (lazy - purchase / application trigger) ────
 
 const PHONE_TTL_MIN = 10;
 const PHONE_MAX_ATTEMPTS = 5;

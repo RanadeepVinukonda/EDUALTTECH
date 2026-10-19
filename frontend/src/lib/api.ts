@@ -82,7 +82,7 @@ export async function api<T = unknown>(path: string, opts: ApiOptions = {}): Pro
       body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
     });
   } catch (err) {
-    // Transport failure / offline / aborted — not an authoritative backend response.
+    // Transport failure / offline / aborted - not an authoritative backend response.
     if (err instanceof DOMException && err.name === "AbortError") throw err;
     throw new ApiError(0, { code: "NETWORK", message: "Could not reach the server." });
   }

@@ -116,7 +116,7 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
       void loadConversations();
     } catch {
       // Preserve the draft so the user can retry.
-      setThreadError("Message not sent. Your text was kept — try again.");
+      setThreadError("Message not sent. Your text was kept - try again.");
     } finally {
       sendingRef.current = false;
       setSending(false);

@@ -19,7 +19,7 @@ const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "EduAltTech helps learners build practical AI, entrepreneurship, and technology skills — and builds working digital solutions for schools. A product by Setsuzoku.",
+    "EduAltTech helps learners build practical AI, entrepreneurship, and technology skills - and builds working digital solutions for schools. A product by Setsuzoku.",
   alternates: { canonical: "/about" },
 };
 
@@ -32,7 +32,7 @@ const APPROACH = [
   {
     icon: Lightbulb,
     title: "Understand the problem first",
-    body: "Before choosing a tool, we teach learners to understand the real problem in front of them — the same discipline we apply to our own projects.",
+    body: "Before choosing a tool, we teach learners to understand the real problem in front of them - the same discipline we apply to our own projects.",
   },
   {
     icon: Storefront,
@@ -42,7 +42,7 @@ const APPROACH = [
   {
     icon: Flag,
     title: "Aim beyond theory",
-    body: "The goal is a working outcome — a prototype, a small venture, or a tool that solves a problem around you.",
+    body: "The goal is a working outcome - a prototype, a small venture, or a tool that solves a problem around you.",
   },
 ];
 
@@ -74,7 +74,7 @@ export default async function AboutPage() {
             as="h1"
             eyebrow="About EduAltTech"
             title="Practical learning, and work for the people who teach it"
-            lead="EduAltTech does two connected things. We help students learn practical skills in AI, entrepreneurship, and technology — through courses, alternate education, and tuition — and we employ skilled people who were out of work as the mentors who teach them. We also build useful software for the schools that run our programs."
+            lead="EduAltTech does two connected things. We help students learn practical skills in AI, entrepreneurship, and technology - through courses, alternate education, and tuition - and we employ skilled people who were out of work as the mentors who teach them. We also build useful software for the schools that run our programs."
           />
         </div>
       </section>
@@ -88,8 +88,8 @@ export default async function AboutPage() {
             </h2>
             <div className="max-w-prose space-y-5 text-lg leading-relaxed text-ink-700">
               <p>
-                The skills that matter most — building software, solving a real problem, turning an idea
-                into something people can use — are learned by doing. A syllabus alone rarely produces
+                The skills that matter most - building software, solving a real problem, turning an idea
+                into something people can use - are learned by doing. A syllabus alone rarely produces
                 them.
               </p>
               <p>
@@ -122,7 +122,7 @@ export default async function AboutPage() {
               },
               {
                 title: "Tuition facilities",
-                body: "Guided tuition and coaching alongside our courses — subject support, doubt sessions, and hands-on practice, in person and online.",
+                body: "Guided tuition and coaching alongside our courses - subject support, doubt sessions, and hands-on practice, in person and online.",
               },
               {
                 title: "Employment for skilled people",
@@ -173,7 +173,7 @@ export default async function AboutPage() {
             <SectionHeading
               eyebrow="Technology for schools"
               title="Software built with schools, not just for them"
-              lead="We design and build digital solutions that reduce administrative load and support teaching — starting from a concrete problem a school is facing."
+              lead="We design and build digital solutions that reduce administrative load and support teaching - starting from a concrete problem a school is facing."
             />
             <div className="max-w-prose space-y-5 text-lg leading-relaxed text-ink-700">
               <p>

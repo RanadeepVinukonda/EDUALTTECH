@@ -1059,7 +1059,7 @@ body {
   opacity: 0.5;
 }
 
-/* delete — bin lid rotates open, turns red */
+/* delete - bin lid rotates open, turns red */
 .bin-icon {
   width: 12px;
   transition-duration: 0.3s;
@@ -1077,7 +1077,7 @@ body {
   background-color: rgb(255, 69, 69);
 }
 
-/* view — eye opens, turns brand navy */
+/* view - eye opens, turns brand navy */
 .hv-btn .eye-closed,
 .hv-btn .eye-open {
   position: absolute;

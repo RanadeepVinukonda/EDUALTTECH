@@ -22,7 +22,7 @@ export default function AdminParticipants({ courseId, embedded = false }: { cour
     <div className={embedded ? "space-y-4" : "space-y-6"}>
       {!embedded && (
         <AdminHeader
-          title={`Participants — ${course.title}`}
+          title={`Participants - ${course.title}`}
           description="Course-specific participation. MENTOR and LEARNER are per-course roles, never global account roles."
           actions={
             <Link href={`/dashboard/admin/courses/${course.id}`} className="text-sm font-semibold text-brand-700 hover:underline">

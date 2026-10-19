@@ -40,7 +40,7 @@ export default function OAuthCallback({ next }: { next?: string }) {
         setError("We could not complete sign-in. Please try again.");
         return;
       }
-      // A first OAuth sign-in has a Supabase user but no Prisma row yet — provision it.
+      // A first OAuth sign-in has a Supabase user but no Prisma row yet - provision it.
       try {
         const data = await api<{ user: { email: string; isActive: boolean } }>("/auth/oauth/sync", {
           method: "POST",

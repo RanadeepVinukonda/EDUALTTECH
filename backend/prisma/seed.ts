@@ -17,7 +17,7 @@ async function main(): Promise<void> {
   });
 
   if (!email || !password) {
-    console.log("[seed] ADMIN_EMAIL / ADMIN_PASSWORD not set — created settings only.");
+    console.log("[seed] ADMIN_EMAIL / ADMIN_PASSWORD not set - created settings only.");
     return;
   }
 
@@ -25,13 +25,13 @@ async function main(): Promise<void> {
   const url = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) {
-    console.log("[seed] SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set — skipping admin user.");
+    console.log("[seed] SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set - skipping admin user.");
     return;
   }
 
   const admin = createClient(url, serviceKey);
 
-  // Upsert the auth identity first — User.id IS the Supabase auth id.
+  // Upsert the auth identity first - User.id IS the Supabase auth id.
   const { data: existing } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
   let authUser = existing?.users.find((u) => u.email?.toLowerCase() === email);
 

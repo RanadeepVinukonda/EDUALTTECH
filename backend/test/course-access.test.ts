@@ -27,7 +27,7 @@ beforeEach(() => {
   mockPrisma.courseParticipant.findUnique.mockResolvedValue(null);
 });
 
-describe("getCourseAccess — authorization derivation", () => {
+describe("getCourseAccess - authorization derivation", () => {
   it("grants full staff access to a platform admin without a participant lookup", async () => {
     const access = await getCourseAccess("c1", ADMIN);
     expect(access).toMatchObject({ isAdmin: true, isStaff: true, canRead: true });
@@ -74,7 +74,7 @@ describe("getCourseAccess — authorization derivation", () => {
   });
 });
 
-describe("assert guards — least privilege", () => {
+describe("assert guards - least privilege", () => {
   it("assertCourseOwner forbids a non-owner mentor", async () => {
     mockPrisma.courseParticipant.findUnique.mockResolvedValue({ role: "MENTOR", status: "ACTIVE" });
     await expect(assertCourseOwner("c1", USER)).rejects.toBeInstanceOf(ApiError);

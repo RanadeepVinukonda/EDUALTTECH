@@ -220,7 +220,7 @@ router.post(
           "Mentor application update",
         body:
           action === "ACCEPTED"
-            ? `Congratulations — you are now a mentor for ${application.course.title}.`
+            ? `Congratulations - you are now a mentor for ${application.course.title}.`
             : action === "INTERVIEW_SCHEDULED"
               ? `Your interview for ${application.course.title} has been ${isReschedule ? "rescheduled" : "scheduled"}${interviewAt ? ` for ${formatDateTime(interviewAt)}` : ""}.`
               : `Your application for ${application.course.title} moved to ${action.replace("_", " ").toLowerCase()}.`,
@@ -236,14 +236,14 @@ router.post(
     await sendEmail({
       to: application.user.email,
       subject: interviewEmail
-        ? `Interview ${isReschedule ? "rescheduled" : "scheduled"} — ${application.course.title}`
-        : `Your EduAltTech mentor application — ${action.replace("_", " ").toLowerCase()}`,
+        ? `Interview ${isReschedule ? "rescheduled" : "scheduled"} - ${application.course.title}`
+        : `Your EduAltTech mentor application - ${action.replace("_", " ").toLowerCase()}`,
       html: layout(
         interviewEmail ? `Interview ${isReschedule ? "rescheduled" : "scheduled"}` : "Application update",
         interviewEmail
           ? `Your mentor interview for <strong>${application.course.title}</strong> is ${isReschedule ? "rescheduled" : "scheduled"}${
               whenInterview ? ` for <strong>${formatDateTime(whenInterview)}</strong>` : ""
-            }. Join on time using the button below — your interview window opens at the scheduled time.`
+            }. Join on time using the button below - your interview window opens at the scheduled time.`
           : `Your mentor application for <strong>${application.course.title}</strong> is now <strong>${action.replace("_", " ").toLowerCase()}</strong>.`,
         interviewEmail ? (joinLink ? "Join interview" : "View your application") : "View your applications",
         interviewEmail ? joinLink ?? viewLink : viewLink,

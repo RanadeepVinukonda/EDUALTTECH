@@ -74,7 +74,7 @@ export default function InquiryForm() {
       <div role="status" className="rounded-2xl border border-brand-200 bg-brand-50 p-8 text-center">
         <h3 className="font-display text-xl font-bold text-ink-900">Message sent</h3>
         <p className="mx-auto mt-2 max-w-md text-ink-600">
-          Thank you — we have received your inquiry and will get back to you by email.
+          Thank you - we have received your inquiry and will get back to you by email.
         </p>
         <button
           type="button"

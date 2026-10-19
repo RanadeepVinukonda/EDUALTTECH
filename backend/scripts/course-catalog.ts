@@ -25,7 +25,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 69900,
     features: ["Logic & reasoning", "Algorithms", "Patterns", "Problem solving"],
     tags: ["Logic", "Algorithms"],
-    description: "Logic, problem solving, algorithms and patterns — the thinking foundation under every language.",
+    description: "Logic, problem solving, algorithms and patterns - the thinking foundation under every language.",
     hue: 210,
   },
   {
@@ -38,7 +38,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 69900,
     features: ["Files & folders", "Typing", "Internet", "Online safety"],
     tags: ["Digital Literacy"],
-    description: "Files, folders, typing and safe internet use — the everyday skills that make a computer useful.",
+    description: "Files, folders, typing and safe internet use - the everyday skills that make a computer useful.",
     hue: 190,
   },
   {
@@ -64,7 +64,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 69900,
     features: ["Presentations", "Documents", "Research", "Productivity"],
     tags: ["Office", "Research"],
-    description: "Documents, presentations and simple research — the digital literacy every student needs.",
+    description: "Documents, presentations and simple research - the digital literacy every student needs.",
     hue: 160,
   },
   {
@@ -90,7 +90,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 89900,
     features: ["Tables", "Charts", "Data types", "Simple analysis"],
     tags: ["Data", "Charts"],
-    description: "Tables, charts and simple data — learn to read, organise and understand information.",
+    description: "Tables, charts and simple data - learn to read, organise and understand information.",
     hue: 220,
   },
   {
@@ -142,7 +142,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 149900,
     features: ["Searching", "Sorting", "Logic", "Interview basics"],
     tags: ["Algorithms", "DSA"],
-    description: "Searching, sorting and logical problems — how to think like a programmer.",
+    description: "Searching, sorting and logical problems - how to think like a programmer.",
     hue: 205,
   },
   {
@@ -160,7 +160,7 @@ export const COURSES: CourseSeed[] = [
   },
   {
     slug: "databases-basic-sql",
-    title: "Databases — Basic SQL",
+    title: "Databases - Basic SQL",
     lines: ["Databases", "Basic SQL"],
     domain: "Databases",
     category: "AI & Data",
@@ -168,7 +168,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 129900,
     features: ["SQL", "Tables", "Queries", "Storing data"],
     tags: ["SQL", "Databases"],
-    description: "Store and query information with SQL — tables, queries and real databases.",
+    description: "Store and query information with SQL - tables, queries and real databases.",
     hue: 175,
   },
   {
@@ -207,7 +207,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 199900,
     features: ["Frontend", "Backend", "APIs", "Databases"],
     tags: ["Full-Stack", "Web"],
-    description: "Frontend and backend together — build a complete web application.",
+    description: "Frontend and backend together - build a complete web application.",
     hue: 250,
   },
   {
@@ -233,7 +233,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 199900,
     features: ["Pandas", "Visualisation", "Statistics", "Insights"],
     tags: ["Data", "Pandas"],
-    description: "Pandas, visualisation and statistics — turn raw data into insight.",
+    description: "Pandas, visualisation and statistics - turn raw data into insight.",
     hue: 200,
   },
   {
@@ -337,7 +337,7 @@ export const COURSES: CourseSeed[] = [
     pricePaise: 299900,
     features: ["Git", "Testing", "Architecture", "Code review"],
     tags: ["Git", "Testing"],
-    description: "Git, testing and architecture — the practices professional teams rely on.",
+    description: "Git, testing and architecture - the practices professional teams rely on.",
     hue: 215,
   },
   {

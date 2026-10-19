@@ -6,8 +6,8 @@ Canonical asset folder. Frontend serves its own copy at `frontend/public/media/`
 
 | Folder   | Contents |
 |----------|----------|
-| `brand/` | `logo.svg`, `logo.png` — EduAltTech logo |
-| `team/`  | 10 team member photos — names in `team.json` |
+| `brand/` | `logo.svg`, `logo.png` - EduAltTech logo |
+| `team/`  | 10 team member photos - names in `team.json` |
 | `logos/` | Partner school logos: genesis.png, mamasparsh.png, new_era.jpg, sharada_vidhyalaya.jpeg |
 | `photos/`| `EAT2.jpg`, `EAT3.jpg`, `EAT4.jpg` event photos, `og-image.jpg` OG image |
 

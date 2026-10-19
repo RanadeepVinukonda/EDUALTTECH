@@ -51,7 +51,7 @@ export async function optionalAuth(req: Request<any>, _res: Response, next: Next
   }
 }
 
-/** Mobile verification gate — spec §7: prompted at purchase/application time only. */
+/** Mobile verification gate - spec §7: prompted at purchase/application time only. */
 export async function requireVerifiedMobile(req: Request<any>, _res: Response, next: NextFunction): Promise<void> {
   if (!req.user) return next(ApiError.unauthorized());
   const user = await prisma.user.findUnique({

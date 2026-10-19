@@ -100,7 +100,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
       .catch(() => setCategories([]));
   }, []);
 
-  // Course list — aborts the previous request so stale results never win.
+  // Course list - aborts the previous request so stale results never win.
   useEffect(() => {
     const ctrl = new AbortController();
     setLoading(true);

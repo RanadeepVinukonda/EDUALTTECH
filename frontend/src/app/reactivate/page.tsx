@@ -19,7 +19,7 @@ export default async function ReactivatePage({
   return (
     <AuthShell
       title="Reactivate your account"
-      subtitle="Your account has been deactivated. Re-enter your password to restore access — your courses, messages, and progress are all kept."
+      subtitle="Your account has been deactivated. Re-enter your password to restore access - your courses, messages, and progress are all kept."
     >
       <ReactivateForm email={email} />
     </AuthShell>

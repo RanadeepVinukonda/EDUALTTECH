@@ -23,7 +23,7 @@ export default function AvatarUploader({ avatarUrl, firstName, lastName }: { ava
       return;
     }
     if (file.size > MAX_BYTES) {
-      notifyError("Image is too large — keep it under 2 MB.");
+      notifyError("Image is too large - keep it under 2 MB.");
       return;
     }
 

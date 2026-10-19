@@ -10,7 +10,7 @@ import type { Role } from "@prisma/client";
 const router = Router();
 
 // Conversation access: a member of the thread, or course staff (a mentor of the
-// course can message any of its learners) — never an unrelated user or plain admin.
+// course can message any of its learners) - never an unrelated user or plain admin.
 async function memberConversation(conversationId: string, user: { id: string; role: Role }) {
   const conversation = await prisma.conversation.findUnique({
     where: { id: conversationId },

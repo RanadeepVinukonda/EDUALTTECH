@@ -23,7 +23,7 @@ export default function OfflineBanner() {
   return (
     <div role="status" className="flex items-center justify-center gap-2 bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-800">
       <CloudOff fontSize="small" aria-hidden />
-      You are offline — changes will save when you reconnect.
+      You are offline - changes will save when you reconnect.
     </div>
   );
 }

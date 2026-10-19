@@ -1,6 +1,6 @@
 "use client";
 
-// Ephemeral signup wizard state. In-memory only — the verification code is
+// Ephemeral signup wizard state. In-memory only - the verification code is
 // never written to localStorage/sessionStorage or the URL. A hard refresh
 // intentionally drops it and the user restarts from /verify-email.
 interface SignupFlow {
