@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { apiGet, apiPost, signalNotificationsChanged } from "@/lib/api";
 import type { NotificationItem } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
@@ -16,7 +17,10 @@ type Filter = "all" | "unread";
 const LIMIT = 20;
 
 export default function NotificationsView() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [filter, setFilter] = useState<Filter>("all");
+  const [ready, setReady] = useState(false);
   const [items, setItems] = useState<NotificationItem[] | null>(null);
   const [unread, setUnread] = useState(0);
   const [hasMore, setHasMore] = useState(false);
@@ -49,9 +53,26 @@ export default function NotificationsView() {
     [filter],
   );
 
+  // Restore the filter from the URL.
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("filter") === "unread") setFilter("unread");
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
     void load(1, true);
-  }, [load]);
+  }, [load, ready]);
+
+  // Keep the filter in the URL.
+  useEffect(() => {
+    if (!ready) return;
+    const params = new URLSearchParams(window.location.search);
+    if (filter === "unread") params.set("filter", "unread");
+    else params.delete("filter");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [filter, ready, pathname, router]);
 
   useEffect(() => {
     function onFocus() {
@@ -105,17 +126,16 @@ export default function NotificationsView() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div role="tablist" aria-label="Notification filter" className="flex gap-1">
+          <div role="group" aria-label="Notification filter" className="flex gap-1">
             {(["all", "unread"] as Filter[]).map((f) => (
               <button
                 key={f}
                 type="button"
-                role="tab"
-                aria-selected={filter === f}
+                aria-pressed={filter === f}
                 onClick={() => setFilter(f)}
                 className={cn(
                   "rounded-full px-3 py-1.5 text-sm font-semibold capitalize",
-                  filter === f ? "bg-brand-600 text-white" : "bg-slate-100 text-ink-700",
+                  filter === f ? "bg-brand-600 text-white" : "bg-slate-100 text-ink-700 hover:bg-slate-200",
                 )}
               >
                 {f}

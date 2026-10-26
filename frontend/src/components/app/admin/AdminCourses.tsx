@@ -38,8 +38,8 @@ interface CoursesResponse {
 function courseError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
     if (err.code === "ROADMAP_INCOMPLETE") return "Add at least one chapter with a topic before publishing.";
-    if (err.code === "HAS_ORDERS") return "Paid orders exist - archive the course instead of deleting.";
-    if (err.code === "HAS_PARTICIPANTS") return "Enrolled participants exist - archive the course instead.";
+    if (err.code === "HAS_ORDERS") return "Paid orders exist — archive the course instead of deleting.";
+    if (err.code === "HAS_PARTICIPANTS") return "Enrolled participants exist — archive the course instead.";
     if (err.code === "FORBIDDEN" || err.status === 403) return "You don’t have permission for this course action.";
     if (err.code === "UNAUTHORIZED" || err.status === 401) return "Your session expired. Please sign in again.";
     if (err.code === "RATE_LIMITED" || err.status === 429) return "Too many requests. Please wait a moment.";
@@ -89,7 +89,7 @@ export default function AdminCourses() {
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[220px] flex-1">
             <label htmlFor="course-search" className="mb-1 block text-sm font-semibold text-ink-700">Search</label>
-            <Input id="course-search" type="search" value={query} icon={<Search fontSize="small" />} onChange={(e) => setQuery(e.target.value)} placeholder="Course title" />
+            <Input id="course-search" type="search" value={query} icon={<Search fontSize="small" />} onChange={(e) => setQuery(e.target.value)} placeholder="e.g. Intro to design…" />
           </div>
           <div>
             <label htmlFor="course-status" className="mb-1 block text-sm font-semibold text-ink-700">Status</label>
@@ -220,7 +220,7 @@ function CourseRow({ course, onChanged }: { course: AdminCourseSummary; onChange
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <Link href={`/dashboard/admin/courses/${course.id}`} className="font-semibold text-ink-900 hover:text-brand-700">
+            <Link href={`/dashboard/admin/courses/${course.id}`} className="block truncate font-semibold text-ink-900 hover:text-brand-700">
               {course.title}
             </Link>
             <StatusPill tone={statusTone(course.status)}>{course.status.toLowerCase()}</StatusPill>
@@ -261,7 +261,7 @@ function CourseRow({ course, onChanged }: { course: AdminCourseSummary; onChange
         <div role="alertdialog" aria-modal="true" aria-label={`Confirm ${confirm.label}`} className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
           <p className="text-sm text-amber-900">{confirm.detail}</p>
           <div className="mt-2 flex gap-2">
-            <Button size="sm" loading={busy} onClick={() => apply(confirm.status)}>
+            <Button size="sm" autoFocus loading={busy} onClick={() => apply(confirm.status)}>
               Confirm {confirm.label.toLowerCase()}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setConfirm(null)} disabled={busy}>

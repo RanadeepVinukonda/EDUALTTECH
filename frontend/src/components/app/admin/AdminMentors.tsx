@@ -67,11 +67,11 @@ export default function AdminMentors() {
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-2 py-2 font-semibold">Mentor</th>
-                  <th className="px-2 py-2 font-semibold">Course</th>
-                  <th className="px-2 py-2 font-semibold">Capacity</th>
-                  <th className="px-2 py-2 font-semibold">Assigned learners</th>
-                  <th className="px-2 py-2 font-semibold">Status</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Mentor</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Course</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Capacity</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Assigned learners</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -86,8 +86,8 @@ export default function AdminMentors() {
                         {m.course.title}
                       </Link>
                     </td>
-                    <td className="px-2 py-3 text-slate-600">{m.capacity ?? "platform default"}</td>
-                    <td className="px-2 py-3 text-slate-600">{m.assignedLearners}</td>
+                    <td className="px-2 py-3 text-slate-600 tabular-nums">{m.capacity ?? "platform default"}</td>
+                    <td className="px-2 py-3 text-slate-600 tabular-nums">{m.assignedLearners}</td>
                     <td className="px-2 py-3">
                       <StatusPill tone={statusTone(m.status)}>{m.status.toLowerCase()}</StatusPill>
                     </td>
@@ -158,7 +158,6 @@ function AssignDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
       <div className="mt-4 space-y-4">
         <div>
           <label htmlFor="a-course" className="block text-sm font-semibold text-ink-900">Course</label>
-          <label htmlFor="a-course" className="block text-sm font-semibold text-ink-900">Course</label>
           <Select
             id="a-course"
             value={courseId}
@@ -187,6 +186,7 @@ function AssignDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
               <Input
                 id="a-user"
                 type="search"
+                autoComplete="off"
                 value={userQuery}
                 icon={<PersonOutlined fontSize="small" />}
                 onChange={(e) => setUserQuery(e.target.value)}

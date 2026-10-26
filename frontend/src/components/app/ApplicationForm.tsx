@@ -152,7 +152,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
           <h1 className="font-display text-2xl font-extrabold text-ink-900">Apply to mentor</h1>
           <p className="mt-1 text-sm text-slate-500">
             Choose a course and tell us about your expertise. Submission does not grant teaching
-            access - a reviewer assesses every application.
+            access — a reviewer assesses every application.
           </p>
         </header>
         <div className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
@@ -175,7 +175,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
         <h1 className="font-display text-2xl font-extrabold text-ink-900">Apply to mentor</h1>
         <p className="mt-1 text-sm text-slate-500">
           Choose a course and tell us about your expertise. Submission does not grant teaching
-          access - a reviewer assesses every application.
+          access — a reviewer assesses every application.
         </p>
       </header>
 
@@ -210,7 +210,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
               <option value="">Select a course…</option>
               {available.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.title} - {c.category}
+                  {c.title} — {c.category}
                 </option>
               ))}
             </Select>
@@ -227,7 +227,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
               rows={5}
               value={qualification}
               onChange={(e) => setQualification(e.target.value)}
-              placeholder="Describe your relevant experience and subject expertise."
+              placeholder="Describe your relevant experience and subject expertise…"
               className={cn(
                 "w-full rounded-xl border bg-white px-4 py-3 text-[15px] outline-none transition focus:ring-2",
                 fieldErrors.qualification
@@ -250,7 +250,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Anything you'd like the reviewer to know."
+              placeholder="Anything you'd like the reviewer to know…"
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
             />
           </div>

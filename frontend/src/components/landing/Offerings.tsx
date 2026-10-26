@@ -2,7 +2,6 @@ import Link from "next/link";
 import School from "@mui/icons-material/School";
 import AutoStories from "@mui/icons-material/AutoStories";
 import CoPresent from "@mui/icons-material/CoPresent";
-import Apartment from "@mui/icons-material/Apartment";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import SectionHeading from "./SectionHeading";
 
@@ -10,14 +9,14 @@ const OFFERINGS = [
   {
     icon: School,
     title: "Education and alternate education",
-    body: "Structured courses in AI, entrepreneurship, and applied technology, plus alternate learning for students who need a path beyond the standard syllabus - organised into clear chapters, topics, and lessons.",
+    body: "Structured courses in AI, entrepreneurship, and applied technology, plus alternate learning for students who need a path beyond the standard syllabus — organised into clear chapters, topics, and lessons.",
     href: "/courses",
     cta: "Browse courses",
   },
   {
     icon: AutoStories,
     title: "Tuition facilities",
-    body: "Guided tuition and coaching that sits alongside our courses - subject support, doubt sessions, and hands-on practice, in person and online.",
+    body: "Guided tuition and coaching that sits alongside our courses — subject support, doubt sessions, and hands-on practice, in person and online.",
     href: "/services",
     cta: "See tuition",
   },
@@ -28,13 +27,6 @@ const OFFERINGS = [
     href: "/mentor",
     cta: "Teach with us",
   },
-  {
-    icon: Apartment,
-    title: "Technology for schools",
-    body: "We build practical digital solutions with and for schools - the same problems our courses teach learners to solve.",
-    href: "/services",
-    cta: "See school solutions",
-  },
 ];
 
 export default function Offerings() {
@@ -43,8 +35,8 @@ export default function Offerings() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="What we offer"
-          title="Four things EduAltTech does"
-          lead="Education for students and work for the people who teach them - the two halves feed each other."
+          title="Three things EduAltTech does"
+          lead="Education for students and work for the people who teach them — the two halves feed each other."
         />
 
         <div className="mt-12 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">

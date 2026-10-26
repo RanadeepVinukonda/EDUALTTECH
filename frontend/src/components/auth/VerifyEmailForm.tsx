@@ -93,7 +93,7 @@ export default function VerifyEmailForm({ emailFromQuery, next }: { emailFromQue
     }
   }
 
-  // No email to verify and none supplied - send them to start.
+  // No email to verify and none supplied — send them to start.
   if (!email) {
     return (
       <div className="space-y-4">
@@ -146,7 +146,12 @@ export default function VerifyEmailForm({ emailFromQuery, next }: { emailFromQue
           <form onSubmit={verify} className="space-y-4" noValidate>
             <div>
               <p className="mb-1.5 block text-sm font-medium text-ink-900">6-digit code</p>
-              <PinInput length={6} value={code} onChange={setCode} autoFocus />
+              <PinInput
+                length={6}
+                value={code}
+                onChange={setCode}
+                autoFocus={typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches}
+              />
               {errors.code && (
                 <p role="alert" className="mt-1.5 text-sm text-danger">
                   {errors.code}

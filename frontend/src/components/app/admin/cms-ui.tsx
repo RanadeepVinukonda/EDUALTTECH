@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApiError, apiGet, apiPost } from "@/lib/api";
 import type { MediaAssetRow } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import Button from "@/components/ui/Button";
 import Dropzone from "@/components/ui/Dropzone";
+import { useFocusTrap } from "@/components/ui/useFocusTrap";
 import { Skeleton, useAsync } from "./admin-ui";
 
 export function cmsError(err: unknown, fallback: string): string {
@@ -62,19 +63,14 @@ export function CmsDialog({
   footer?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, busy, onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, busy ? undefined : onClose);
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-ink-900/40 p-4" role="presentation" onClick={() => !busy && onClose()}>
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto overscroll-contain bg-ink-900/40 p-4" role="presentation" onClick={() => !busy && onClose()}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="cms-dialog-title"
@@ -85,7 +81,7 @@ export function CmsDialog({
           <h2 id="cms-dialog-title" className="font-display text-lg font-bold text-ink-900">{title}</h2>
           {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5">{children}</div>
         <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 px-6 py-4">{footer}</div>
       </div>
     </div>
@@ -118,14 +114,8 @@ export function MediaPicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, assets.data]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, onClose);
 
   if (!open) return null;
 
@@ -139,6 +129,7 @@ export function MediaPicker({
   return (
     <div className="fixed inset-0 z-[60] grid place-items-center bg-ink-900/50 p-4" role="presentation" onClick={onClose}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="media-picker-title"
@@ -151,7 +142,7 @@ export function MediaPicker({
           </h2>
           <p className="mt-1 text-sm text-slate-500">Pick from assets already registered in the media library.</p>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">
           {assets.error ? (
             <p className="text-sm text-red-700">{assets.error}</p>
           ) : assets.loading && !assets.data ? (
@@ -177,7 +168,7 @@ export function MediaPicker({
                     >
                       <span className="block aspect-square overflow-hidden bg-slate-100">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={a.url} alt={a.alt ?? ""} loading="lazy" className="h-full w-full object-cover" />
+                        <img src={a.url} alt={a.alt ?? ""} width={400} height={300} loading="lazy" className="h-full w-full object-cover" />
                       </span>
                       <span className="block truncate px-2 py-1 text-xs text-slate-600">{a.category ?? a.kind}</span>
                     </button>
@@ -222,7 +213,7 @@ export function MediaUploadButton({
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      setError("Image is too large - keep it under 2 MB.");
+      setError("Image is too large — keep it under 2 MB.");
       return;
     }
     setBusy(true);
@@ -294,7 +285,7 @@ export function MediaReference({
   return (
     <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={url} alt={alt ?? ""} loading="lazy" className="h-14 w-20 rounded-lg object-cover" />
+      <img src={url} alt={alt ?? ""} width={80} height={56} loading="lazy" className="h-14 w-20 rounded-lg object-cover" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs text-slate-500">{url}</p>
       </div>

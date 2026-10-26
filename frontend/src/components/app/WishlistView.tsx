@@ -31,19 +31,20 @@ export default function WishlistView() {
     void load();
   }, [load]);
 
-  async function remove(courseId: string) {
-    if (pending.has(courseId)) return;
-    setPending((p) => new Set(p).add(courseId));
+  async function remove(item: WishlistItem) {
+    if (pending.has(item.courseId)) return;
+    if (!confirm(`Remove "${item.course.title}" from your wishlist?`)) return;
+    setPending((p) => new Set(p).add(item.courseId));
     try {
-      await apiDelete(`/wishlist/${courseId}`);
-      await load(); // authoritative refresh - reconciles stale/deleted items
+      await apiDelete(`/wishlist/${item.courseId}`);
+      await load(); // authoritative refresh — reconciles stale/deleted items
       notifySuccess("Removed from your wishlist.");
     } catch (err) {
       notifyError(err instanceof Error ? err.message : "Could not remove this course.");
     } finally {
       setPending((p) => {
         const n = new Set(p);
-        n.delete(courseId);
+        n.delete(item.courseId);
         return n;
       });
     }
@@ -73,7 +74,7 @@ export default function WishlistView() {
     <div className="space-y-6">
       <header>
         <h1 className="font-display text-3xl font-bold text-ink-900">Wishlist</h1>
-        <p className="mt-1 text-[15px] text-slate-500">Saved courses. Saving does not enroll you - that happens at checkout.</p>
+        <p className="mt-1 text-[15px] text-slate-500">Saved courses. Saving does not enroll you — that happens at checkout.</p>
       </header>
 
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -90,7 +91,7 @@ export default function WishlistView() {
                   <IconActionButton
                     icon="delete"
                     label={busy ? "Removing" : "Remove"}
-                    onClick={() => void remove(item.courseId)}
+                    onClick={() => void remove(item)}
                     disabled={busy}
                     aria-label={`Remove ${item.course.title} from wishlist`}
                   />

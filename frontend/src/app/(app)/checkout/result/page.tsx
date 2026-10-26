@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import PaymentResultView from "@/components/app/PaymentResultView";
 
-export const metadata: Metadata = { title: "Payment result" };
+export const metadata: Metadata = { title: "Payment Result" };
 
 export default async function PaymentResultPage({
   searchParams,

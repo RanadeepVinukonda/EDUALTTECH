@@ -54,6 +54,8 @@ export default function PinInput({
           autoFocus={autoFocus && i === 0}
           inputMode="numeric"
           autoComplete={i === 0 ? "one-time-code" : "off"}
+          autoCapitalize="off"
+          spellCheck={false}
           maxLength={1}
           aria-label={`${ariaLabel} digit ${i + 1}`}
           onChange={(e) => {

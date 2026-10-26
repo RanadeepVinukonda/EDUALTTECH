@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { uploadPrivateFile } from "@/lib/upload";
 import { describeError } from "@/lib/errors";
@@ -42,12 +42,7 @@ function isValidUrl(v: string): boolean {
   try { new URL(v); return true; } catch { return false; }
 }
 
-function Countdown({ to }: { to: string }) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
+function Countdown({ to, now }: { to: string; now: number }) {
   const ms = new Date(to).getTime() - now;
   if (ms <= 0) return <span className="font-semibold text-emerald-700">Live now</span>;
   const d = Math.floor(ms / 86400000);
@@ -64,6 +59,7 @@ interface Ctx {
   reloadResources: () => void;
   nextMeeting: Map<string, MeetingRow>;
   resourceCount: Map<string, number>;
+  now: number;
 }
 
 function MeetingForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; onClose: () => void }) {
@@ -91,7 +87,7 @@ function MeetingForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; on
         lessonId: lesson.id,
         topicId: lesson.topicId,
       });
-      notifySuccess("Meeting scheduled - learners notified.");
+      notifySuccess("Meeting scheduled — learners notified.");
       ctx.reloadMeetings();
       onClose();
     } catch (e) {
@@ -103,7 +99,7 @@ function MeetingForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; on
 
   return (
     <form onSubmit={submit} className="mt-3 flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-      <Input value={title} icon={<Event fontSize="small" />} onChange={(e) => setTitle(e.target.value)} placeholder="Session title" aria-label="Meeting title" />
+      <Input value={title} icon={<Event fontSize="small" />} onChange={(e) => setTitle(e.target.value)} placeholder="Session title…" aria-label="Meeting title" />
       <div className="flex flex-wrap gap-2">
         <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} aria-label="Meeting time" className="w-56" />
         <Input type="number" min={15} max={480} value={durationMin} onChange={(e) => setDurationMin(Number(e.target.value) || 60)} aria-label="Duration (minutes)" className="w-28" />
@@ -193,7 +189,7 @@ function TextForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; onClo
         onChange={(e) => setText(e.target.value)}
         rows={5}
         aria-label="Lesson text"
-        placeholder="Lesson text content"
+        placeholder="Lesson text content…"
         className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
       />
       <div className="flex gap-2">
@@ -248,7 +244,7 @@ function ResourceForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; o
   return (
     <form onSubmit={submit} className="mt-3 flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
       <div className="flex flex-wrap gap-2">
-        <Input value={title} icon={<MenuBook fontSize="small" />} onChange={(e) => setTitle(e.target.value)} placeholder="Resource title" aria-label="Resource title" className="min-w-[12rem] flex-1" />
+        <Input value={title} icon={<MenuBook fontSize="small" />} onChange={(e) => setTitle(e.target.value)} placeholder="Resource title…" aria-label="Resource title" className="min-w-[12rem] flex-1" />
         <Select value={kind} icon={<Category fontSize="small" />} onChange={(e) => setKind(e.target.value)} aria-label="Resource kind" className="w-36">
           <option value="pdf">PDF</option>
           <option value="doc">Doc</option>
@@ -282,6 +278,23 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(lesson.title);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   const meeting = ctx.nextMeeting.get(lesson.id);
   const resCount = ctx.resourceCount.get(lesson.id) ?? 0;
@@ -291,7 +304,7 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
     setBusy(true);
     try {
       await apiPatch(`/courses/lessons/${lesson.id}`, { isPublished: next });
-      notifySuccess(next ? "Lesson unlocked - learners notified." : "Lesson locked.");
+      notifySuccess(next ? "Lesson unlocked — learners notified." : "Lesson locked.");
       ctx.onChanged();
     } catch (e) {
       notifyError(describeError(e, "Could not update the lesson."));
@@ -392,40 +405,42 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">
             <Event fontSize="inherit" aria-hidden />
             <span className="text-slate-500">in</span>
-            <Countdown to={meeting.scheduledAt} />
+            <Countdown to={meeting.scheduledAt} now={ctx.now} />
           </span>
         )}
 
         <div className="relative flex items-center gap-1">
-          <button
-            type="button"
-            className={buttonClass("ghost", "sm")}
-            aria-label="Add to lesson"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <Add fontSize="small" />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-              {[
-                { kind: "text" as Panel, label: "Lesson text", icon: <Article fontSize="small" /> },
-                { kind: "resource" as Panel, label: "Add resource", icon: <MenuBook fontSize="small" /> },
-                { kind: "meeting" as Panel, label: "Schedule meeting", icon: <Event fontSize="small" /> },
-                { kind: "recording" as Panel, label: "Recording (link/file)", icon: <Movie fontSize="small" /> },
-              ].map((opt) => (
-                <button
-                  key={opt.kind}
-                  type="button"
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink-700 hover:bg-slate-50"
-                  onClick={() => open(opt.kind)}
-                >
-                  {opt.icon}
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          )}
+          <div ref={menuRef}>
+            <button
+              type="button"
+              className={buttonClass("ghost", "sm")}
+              aria-label="Add to lesson"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              <Add fontSize="small" />
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                {[
+                  { kind: "text" as Panel, label: "Lesson text", icon: <Article fontSize="small" /> },
+                  { kind: "resource" as Panel, label: "Add resource", icon: <MenuBook fontSize="small" /> },
+                  { kind: "meeting" as Panel, label: "Schedule meeting", icon: <Event fontSize="small" /> },
+                  { kind: "recording" as Panel, label: "Recording (link/file)", icon: <Movie fontSize="small" /> },
+                ].map((opt) => (
+                  <button
+                    key={opt.kind}
+                    type="button"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink-700 hover:bg-slate-50"
+                    onClick={() => open(opt.kind)}
+                  >
+                    {opt.icon}
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button type="button" className={buttonClass("ghost", "sm")} onClick={() => void move(-1)} disabled={index === 0 || busy} aria-label="Move lesson up">↑</button>
           <button type="button" className={buttonClass("ghost", "sm")} onClick={() => void move(1)} disabled={index === siblings.length - 1 || busy} aria-label="Move lesson down">↓</button>
           <DeleteButton onClick={() => void remove()} disabled={busy} />
@@ -452,6 +467,7 @@ export default function LessonWorkbench({
 }) {
   const [meetings, setMeetings] = useState<MeetingRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
+  const [now, setNow] = useState(() => Date.now());
 
   const reloadMeetings = useCallback(async () => {
     try {
@@ -480,13 +496,25 @@ export default function LessonWorkbench({
     return m;
   }, [meetings]);
 
+  // One shared ticker for every meeting chip — runs only while a session is pending.
+  useEffect(() => {
+    const targets = [...nextMeeting.values()].map((m) => new Date(m.scheduledAt).getTime());
+    if (targets.length === 0) return;
+    const t = setInterval(() => {
+      const tick = Date.now();
+      setNow(tick);
+      if (targets.every((x) => x <= tick)) clearInterval(t);
+    }, 1000);
+    return () => clearInterval(t);
+  }, [nextMeeting]);
+
   const resourceCount = useMemo(() => {
     const m = new Map<string, number>();
     for (const r of resources) if (r.lessonId) m.set(r.lessonId, (m.get(r.lessonId) ?? 0) + 1);
     return m;
   }, [resources]);
 
-  const ctx: Ctx = { courseId, onChanged, reloadMeetings: () => void reloadMeetings(), reloadResources: () => void reloadResources(), nextMeeting, resourceCount };
+  const ctx: Ctx = { courseId, onChanged, reloadMeetings: () => void reloadMeetings(), reloadResources: () => void reloadResources(), nextMeeting, resourceCount, now };
 
   return (
     <div className="flex flex-col gap-6">

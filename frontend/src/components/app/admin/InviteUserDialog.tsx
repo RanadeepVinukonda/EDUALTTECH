@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import MailOutlined from "@mui/icons-material/MailOutlined";
 import PersonOutlined from "@mui/icons-material/PersonOutlined";
@@ -10,6 +10,7 @@ import type { AdminUserRow, Role } from "@/lib/app-types";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Button, { buttonClass } from "@/components/ui/Button";
+import { useFocusTrap } from "@/components/ui/useFocusTrap";
 import { notifySuccess } from "@/lib/notify";
 
 function inviteError(err: ApiError): string {
@@ -58,14 +59,8 @@ export default function InviteUserDialog({
     setRole("USER");
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, onClose);
 
   if (!open) return null;
 
@@ -96,10 +91,11 @@ export default function InviteUserDialog({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4" role="presentation" onClick={onClose}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="invite-title"
-        className="w-full max-w-md rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="invite-title" className="font-display text-xl font-bold text-ink-900">
@@ -161,13 +157,13 @@ export default function InviteUserDialog({
                 <label htmlFor="invite-first" className="mb-1 block text-sm font-semibold text-ink-700">
                   First name
                 </label>
-                <Input id="invite-first" value={firstName} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setFirstName(e.target.value)} maxLength={80} required />
+                <Input id="invite-first" autoComplete="given-name" value={firstName} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setFirstName(e.target.value)} maxLength={80} required />
               </div>
               <div>
                 <label htmlFor="invite-last" className="mb-1 block text-sm font-semibold text-ink-700">
                   Last name
                 </label>
-                <Input id="invite-last" value={lastName} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setLastName(e.target.value)} maxLength={80} required />
+                <Input id="invite-last" autoComplete="family-name" value={lastName} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setLastName(e.target.value)} maxLength={80} required />
               </div>
             </div>
             <div>

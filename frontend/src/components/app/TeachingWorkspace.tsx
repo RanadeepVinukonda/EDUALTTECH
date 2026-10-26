@@ -65,7 +65,7 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-w-0 flex-col gap-6">
           <details className="group rounded-2xl border border-slate-200 bg-white">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
               <span className="font-display text-lg font-bold text-ink-900">Student analytics</span>
               <span aria-hidden className="text-slate-400 transition group-open:rotate-180">▾</span>
             </summary>

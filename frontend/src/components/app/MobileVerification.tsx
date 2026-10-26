@@ -73,7 +73,7 @@ export default function MobileVerification() {
     <VerifyCard>
       {user?.mobile && !sent && (
         <p className="text-sm text-slate-500">
-          Current: {user.mobile} - not verified. Verify to unlock purchases and mentor applications.
+          Current: {user.mobile} — not verified. Verify to unlock purchases and mentor applications.
         </p>
       )}
       <div className="flex flex-wrap items-end gap-3">
@@ -99,7 +99,7 @@ export default function MobileVerification() {
       {sent && (
         <div className="space-y-3">
           <p className="block text-sm font-semibold text-ink-700">6-digit code</p>
-          <PinInput length={6} value={code} onChange={setCode} autoFocus />
+          <PinInput length={6} value={code} onChange={setCode} />
           <Button onClick={() => void verify()} variant="secondary" className="w-full btn-neo" loading={verifying}>
             Verify
           </Button>
@@ -108,7 +108,7 @@ export default function MobileVerification() {
 
       {devCode && (
         <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          Dev mode - use code <strong>{devCode}</strong>.
+          Dev mode — use code <strong>{devCode}</strong>.
         </p>
       )}
     </VerifyCard>

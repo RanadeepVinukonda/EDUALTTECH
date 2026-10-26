@@ -11,7 +11,7 @@ const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
 export const metadata: Metadata = {
   title: "Team",
-  description: "The people behind EduAltTech's educational and technology work.",
+  description: "The people behind EduAltTech's courses and programs.",
   alternates: { canonical: "/team" },
 };
 
@@ -39,7 +39,7 @@ export default function TeamPage() {
             as="h1"
             eyebrow="Our team"
             title="The people behind EduAltTech"
-            lead="The educators, builders, and mentors who make our courses and school technology work."
+            lead="The educators, builders, and mentors who make our courses work."
           />
         </div>
       </section>
@@ -66,14 +66,11 @@ export default function TeamPage() {
         <div className={`${wrap} text-center`}>
           <h2 className="mx-auto max-w-2xl font-display text-3xl font-bold text-ink-900">Want to work with us?</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-ink-600">
-            Explore our courses, see the technology we build, or get in touch.
+            Explore our courses or get in touch.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <LinkButton href="/courses" size="lg">
               Explore courses
-            </LinkButton>
-            <LinkButton href="/work" variant="secondary" size="lg">
-              Our work
             </LinkButton>
             <LinkButton href="/contact" variant="secondary" size="lg">
               Contact

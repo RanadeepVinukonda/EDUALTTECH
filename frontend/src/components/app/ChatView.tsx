@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { apiGet, apiPost } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import type { ChatMessage, ChatPeer, Conversation } from "@/lib/app-types";
@@ -19,10 +20,13 @@ function peerOf(c: Conversation, meId: string) {
 
 export default function ChatView({ courseId, title, compact = false, roster }: { courseId?: string; title?: string; compact?: boolean; roster?: ChatPeer[] } = {}) {
   const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [convs, setConvs] = useState<Conversation[] | null>(null);
   const [convError, setConvError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rosterBusy, setRosterBusy] = useState<string | null>(null);
+  const preferredId = useRef<string | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -80,18 +84,35 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
     [convs, courseId],
   );
 
+  // The selected conversation lives in the URL so a reload restores it.
+  useEffect(() => {
+    preferredId.current = new URLSearchParams(window.location.search).get("conversation");
+  }, []);
+
   useEffect(() => {
     if (!visible) return;
-    setSelectedId((cur) => (cur && visible.some((c) => c.id === cur) ? cur : visible[0]?.id ?? null));
+    setSelectedId((cur) => {
+      const wanted = preferredId.current;
+      if (wanted && visible.some((c) => c.id === wanted)) return wanted;
+      return cur && visible.some((c) => c.id === cur) ? cur : visible[0]?.id ?? null;
+    });
   }, [visible]);
 
   useEffect(() => {
     if (selectedId) void loadThread(selectedId);
   }, [selectedId, loadThread]);
 
+  // Only jump to the newest message when the reader is already at the bottom.
+  useEffect(() => {
+    const container = bottomRef.current?.parentElement;
+    if (!container) return;
+    const distance = container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (distance < 120) bottomRef.current?.scrollIntoView({ block: "end" });
+  }, [messages.length]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [messages.length, selectedId]);
+  }, [selectedId]);
 
   // Refresh unread counts + open thread when the window regains focus (no polling).
   useEffect(() => {
@@ -102,6 +123,16 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, [loadConversations, loadThread, selectedId]);
+
+  function select(id: string | null) {
+    setSelectedId(id);
+    preferredId.current = id;
+    const params = new URLSearchParams(window.location.search);
+    if (id) params.set("conversation", id);
+    else params.delete("conversation");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -116,7 +147,7 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
       void loadConversations();
     } catch {
       // Preserve the draft so the user can retry.
-      setThreadError("Message not sent. Your text was kept - try again.");
+      setThreadError("Message not sent. Your text was kept — try again.");
     } finally {
       sendingRef.current = false;
       setSending(false);
@@ -128,7 +159,7 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
     if (rosterBusy) return;
     const existing = visible?.find((c) => c.learnerUserId === peer.id);
     if (existing) {
-      setSelectedId(existing.id);
+      select(existing.id);
       return;
     }
     if (!courseId) return;
@@ -139,7 +170,7 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
         learnerUserId: peer.id,
       });
       await loadConversations();
-      setSelectedId(conversation.id);
+      select(conversation.id);
     } catch (e) {
       setConvError(e instanceof Error ? e.message : "Could not start the conversation.");
     } finally {
@@ -215,7 +246,7 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => setSelectedId(c.id)}
+                  onClick={() => select(c.id)}
                   aria-current={active ? "true" : undefined}
                   className={cn(
                     "flex flex-col gap-0.5 rounded-xl border p-3 text-left transition",
@@ -251,7 +282,7 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
                     </p>
                     <p className="text-xs text-slate-500">{selected.course.title}</p>
                   </div>
-                  <button type="button" className={buttonClass("ghost", "sm")} onClick={() => setSelectedId(null)}>
+                  <button type="button" className={buttonClass("ghost", "sm")} onClick={() => select(null)}>
                     <span className={compact ? "" : "lg:hidden"}>Back</span>
                     <span className={compact ? "hidden" : "hidden lg:inline"}>Close</span>
                   </button>

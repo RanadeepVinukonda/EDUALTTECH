@@ -91,11 +91,25 @@ export default function DashboardView() {
     void load();
   }, [load]);
 
-  // Ticks the live countdown for upcoming sessions.
+  // Ticks the live countdown for upcoming sessions — every second only when one is imminent.
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
+    const list = data?.upcomingMeetings ?? [];
+    if (list.length === 0) return;
+    const windows = list.map((m) => {
+      const start = new Date(m.scheduledAt).getTime();
+      return { start, end: start + m.durationMin * 60_000 };
+    });
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      const tickNow = Date.now();
+      setNow(tickNow);
+      const next = windows.filter((w) => w.end > tickNow).sort((a, b) => a.start - b.start)[0];
+      if (!next) return;
+      timer = setTimeout(tick, next.start - tickNow <= 3_600_000 ? 1000 : 60_000);
+    };
+    timer = setTimeout(tick, 1000);
+    return () => clearTimeout(timer);
+  }, [data]);
 
   // Admins have their own home; the learner dashboard is not theirs.
   useEffect(() => {

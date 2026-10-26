@@ -21,9 +21,15 @@ export default function ApplicationDetailView({ id }: { id: string }) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
+    if (!application?.interviewAt) return;
+    const end = new Date(application.interviewAt).getTime() + 60 * 60_000;
+    const t = setInterval(() => {
+      const tick = Date.now();
+      setNow(tick);
+      if (tick >= end) clearInterval(t);
+    }, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [application?.interviewAt]);
 
   const load = useCallback(async () => {
     setError(null);
@@ -76,7 +82,7 @@ export default function ApplicationDetailView({ id }: { id: string }) {
   const meta = APPLICATION_STATUS_META[application.status];
 
   const interviewStart = application.interviewAt ? new Date(application.interviewAt).getTime() : 0;
-  // ponytail: no stored interview duration - treat the first 60 minutes as live.
+  // ponytail: no stored interview duration — treat the first 60 minutes as live.
   const interviewStatus = !interviewStart
     ? null
     : now < interviewStart

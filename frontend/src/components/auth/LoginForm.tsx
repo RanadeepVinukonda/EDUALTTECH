@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import MailOutlined from "@mui/icons-material/MailOutlined";
@@ -21,6 +21,7 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ text: string; code?: string } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -31,6 +32,11 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
       active = false;
     };
   }, [next, router]);
+
+  useEffect(() => {
+    if (!Object.keys(errors).length) return;
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+  }, [errors]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +81,7 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
       <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-slate-400">
         <span className="h-px flex-1 bg-slate-200" /> or <span className="h-px flex-1 bg-slate-200" />
       </div>
-      <form onSubmit={submit} className="space-y-4" noValidate>
+      <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>
         <TextField
           label="Email address"
           type="email"

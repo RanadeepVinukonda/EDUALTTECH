@@ -11,9 +11,9 @@ import LinkButton from "@/components/ui/LinkButton";
 import BrandLogo from "@/components/brand/BrandLogo";
 
 const NAV = [
+  { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
   { href: "/services", label: "Services & Programs" },
-  { href: "/work", label: "Our Work" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -68,17 +68,9 @@ export default function PublicHeader() {
               Dashboard
             </Link>
           ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:text-ink-900"
-              >
-                Sign in
-              </Link>
-              <LinkButton href="/signup" size="sm">
-                Get started
-              </LinkButton>
-            </>
+            <LinkButton href="/login" size="sm" variant="secondary">
+              Sign in
+            </LinkButton>
           )}
         </nav>
 
@@ -127,18 +119,9 @@ export default function PublicHeader() {
                 Dashboard
               </Link>
             ) : (
-              <>
-                <LinkButton href="/signup" className="w-full">
-                  Get started
-                </LinkButton>
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2 text-center text-sm font-medium text-ink-600 hover:bg-slate-100"
-                >
-                  Sign in
-                </Link>
-              </>
+              <LinkButton href="/login" className="w-full">
+                Sign in
+              </LinkButton>
             )}
           </div>
         </nav>

@@ -178,10 +178,10 @@ function ChapterCard({
       )}
 
       {confirmDelete && (
-        <div role="alertdialog" aria-modal="true" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+        <div role="alertdialog" aria-modal="true" aria-label="Confirm delete chapter" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
           <p className="text-sm text-red-700">Delete “{chapter.title}” and all its topics and lessons? This can’t be undone.</p>
           <div className="mt-2 flex gap-2">
-            <Button variant="danger" size="sm" loading={busy} onClick={() => run(() => apiDelete(`/courses/chapters/${chapter.id}`))}>Delete chapter</Button>
+            <Button variant="danger" size="sm" autoFocus loading={busy} onClick={() => run(() => apiDelete(`/courses/chapters/${chapter.id}`))}>Delete chapter</Button>
             <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)} disabled={busy}>Cancel</Button>
           </div>
         </div>
@@ -279,10 +279,10 @@ function TopicCard({
       )}
       {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
       {confirmDelete && (
-        <div role="alertdialog" aria-modal="true" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2">
-          <p className="text-sm text-red-700">Delete “{topic.title}” and its lessons?</p>
+        <div role="alertdialog" aria-modal="true" aria-label="Confirm delete topic" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2">
+          <p className="text-sm text-red-700">Delete “{topic.title}” and all its lessons? This can’t be undone.</p>
           <div className="mt-2 flex gap-2">
-            <Button variant="danger" size="sm" loading={busy} onClick={() => run(() => apiDelete(`/courses/topics/${topic.id}`))}>Delete topic</Button>
+            <Button variant="danger" size="sm" autoFocus loading={busy} onClick={() => run(() => apiDelete(`/courses/topics/${topic.id}`))}>Delete topic</Button>
             <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)} disabled={busy}>Cancel</Button>
           </div>
         </div>
@@ -380,10 +380,10 @@ function LessonCard({
       )}
       {error && !editing && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
       {confirmDelete && (
-        <div role="alertdialog" aria-modal="true" className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-          <p className="text-sm text-red-700">Delete “{lesson.title}”?</p>
+        <div role="alertdialog" aria-modal="true" aria-label="Confirm delete lesson" className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+          <p className="text-sm text-red-700">Delete “{lesson.title}”? This can’t be undone.</p>
           <div className="mt-2 flex gap-2">
-            <Button variant="danger" size="sm" loading={busy} onClick={() => run(() => apiDelete(`/courses/lessons/${lesson.id}`))}>Delete lesson</Button>
+            <Button variant="danger" size="sm" autoFocus loading={busy} onClick={() => run(() => apiDelete(`/courses/lessons/${lesson.id}`))}>Delete lesson</Button>
             <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)} disabled={busy}>Cancel</Button>
           </div>
         </div>

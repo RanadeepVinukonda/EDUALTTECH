@@ -1,6 +1,6 @@
 export default function NotFoundFace() {
   return (
-    <main className="nf-face-container">
+    <div className="nf-face-container">
       <svg className="nf-face-svg" viewBox="0 0 320 380" role="img" aria-label="Lost face">
         <g
           fill="none"
@@ -26,6 +26,6 @@ export default function NotFoundFace() {
           </g>
         </g>
       </svg>
-    </main>
+    </div>
   );
 }

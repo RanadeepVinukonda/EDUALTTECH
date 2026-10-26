@@ -16,7 +16,7 @@ export default function Checkbox({
   "aria-label"?: string;
 }) {
   return (
-    <span className={cn("relative inline-flex h-5 w-5 shrink-0 items-center justify-center", className)}>
+    <span className={cn("relative inline-flex h-6 w-6 shrink-0 items-center justify-center", className)}>
       <input
         type="checkbox"
         checked={checked}
@@ -29,7 +29,7 @@ export default function Checkbox({
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden
-        className="pointer-events-none relative h-3.5 w-3.5 text-white"
+        className="pointer-events-none relative h-4 w-4 text-white"
       >
         <path
           d="M5 13l4 4L19 7"

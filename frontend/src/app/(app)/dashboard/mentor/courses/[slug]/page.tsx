@@ -3,7 +3,7 @@ import TeachingWorkspace from "@/components/app/TeachingWorkspace";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  return { title: `Teaching · ${slug}` };
+  return { title: `Teaching · ${slug.replace(/-/g, " ")}` };
 }
 
 export default async function TeachingWorkspacePage({ params }: { params: Promise<{ slug: string }> }) {

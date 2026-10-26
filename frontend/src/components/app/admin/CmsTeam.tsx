@@ -33,7 +33,7 @@ export default function CmsTeam() {
     const b = list[j];
     setOrderBusy(true);
     try {
-      // Swap the actual order values, not the array indices - indices drift
+      // Swap the actual order values, not the array indices — indices drift
       // from persisted order once members are added/deleted.
       await apiPatch(`/cms/admin/team/${a.id}`, { order: b.order });
       await apiPatch(`/cms/admin/team/${b.id}`, { order: a.order });
@@ -108,7 +108,7 @@ export default function CmsTeam() {
                 </div>
                 {m.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.avatarUrl} alt="" loading="lazy" className="h-11 w-11 rounded-full object-cover" />
+                  <img src={m.avatarUrl} alt="" width={44} height={44} loading="lazy" className="h-11 w-11 rounded-full object-cover" />
                 ) : (
                   <span aria-hidden className="grid h-11 w-11 place-items-center rounded-full bg-slate-100 text-sm font-semibold text-slate-500">
                     {m.name.slice(0, 1).toUpperCase()}

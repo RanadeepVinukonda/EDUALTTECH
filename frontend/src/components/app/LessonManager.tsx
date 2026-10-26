@@ -103,7 +103,7 @@ function LessonForm({
         value={draft.title}
         icon={<Title fontSize="small" />}
         onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-        placeholder="Lesson title"
+        placeholder="e.g. Intro to closures…"
         aria-label="Lesson title"
       />
       <div className="flex flex-wrap items-center gap-4">
@@ -144,7 +144,7 @@ function LessonForm({
           value={draft.textContent}
           onChange={(e) => setDraft({ ...draft, textContent: e.target.value })}
           rows={4}
-          placeholder="Lesson text"
+          placeholder="Lesson text content…"
           aria-label="Lesson text"
           className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
         />
@@ -197,7 +197,7 @@ function TopicBlock({ topic, onChanged }: { topic: TopicRow; onChanged: () => vo
     setBusyId(l.id);
     try {
       await apiPatch(`/courses/lessons/${l.id}`, { isPublished: !l.isPublished });
-      notifySuccess(l.isPublished ? "Lesson locked." : "Lesson unlocked - learners notified.");
+      notifySuccess(l.isPublished ? "Lesson locked." : "Lesson unlocked — learners notified.");
       onChanged();
     } catch (e) {
       notifyError(describeError(e, "Could not update the lesson."));

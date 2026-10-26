@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import { uploadPrivateFile, fetchPrivateUrl } from "@/lib/upload";
 import type { MeetingRow, Roadmap } from "@/lib/app-types";
@@ -120,7 +121,10 @@ function RecordingUploader({ meetingId, hasRecording, onDone }: { meetingId: str
 }
 
 export default function MeetingManager({ courseId, readOnly = false }: { courseId: string; readOnly?: boolean }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [scope, setScope] = useState<Scope>("upcoming");
+  const [ready, setReady] = useState(false);
   const [meetings, setMeetings] = useState<MeetingRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -145,9 +149,27 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
     }
   }, [courseId, scope]);
 
+  // Restore the scope filter from the URL.
   useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("scope");
+    if (raw === "past" || raw === "all") setScope(raw);
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
     void load();
-  }, [load]);
+  }, [load, ready]);
+
+  // Keep the scope filter in the URL.
+  useEffect(() => {
+    if (!ready) return;
+    const params = new URLSearchParams(window.location.search);
+    if (scope === "upcoming") params.delete("scope");
+    else params.set("scope", scope);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [scope, ready, pathname, router]);
 
   // Live countdown so both learner and mentor see the session approaching.
   useEffect(() => {
@@ -308,17 +330,16 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
           <h3 id="meetings-h" className="font-display text-lg font-bold text-ink-900">
             Meetings
           </h3>
-          <div role="tablist" aria-label="Meeting scope" className="flex gap-1">
+          <div role="group" aria-label="Meeting scope" className="flex gap-1">
             {(["upcoming", "past", "all"] as Scope[]).map((s) => (
               <button
                 key={s}
                 type="button"
-                role="tab"
-                aria-selected={scope === s}
+                aria-pressed={scope === s}
                 onClick={() => setScope(s)}
                 className={cn(
                   "rounded-full px-3 py-1.5 text-sm font-semibold capitalize",
-                  scope === s ? "bg-brand-600 text-white" : "bg-slate-100 text-ink-700",
+                  scope === s ? "bg-brand-600 text-white" : "bg-slate-100 text-ink-700 hover:bg-slate-200",
                 )}
               >
                 {s}

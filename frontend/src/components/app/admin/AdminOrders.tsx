@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
 import { apiGet } from "@/lib/api";
@@ -8,7 +8,8 @@ import type { AdminOrderRow, Page, WebhookEventRow } from "@/lib/app-types";
 import { formatDate, formatMoney } from "@/lib/format";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import { AdminHeader, FilterSelect, Pagination, Panel, Skeleton, StatusPill, statusTone, useAsync, userName } from "./admin-ui";
+import { useFocusTrap } from "@/components/ui/useFocusTrap";
+import { AdminHeader, FilterSelect, Pagination, Panel, Skeleton, StatusPill, humanizeStatus, statusTone, useAsync, userName } from "./admin-ui";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All statuses" },
@@ -64,12 +65,12 @@ export default function AdminOrders() {
               <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="text-xs uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th className="px-2 py-2 font-semibold">Order</th>
-                    <th className="px-2 py-2 font-semibold">Purchaser</th>
-                    <th className="px-2 py-2 font-semibold">Course</th>
-                    <th className="px-2 py-2 font-semibold">Amount</th>
-                    <th className="px-2 py-2 font-semibold">Status</th>
-                    <th className="px-2 py-2 font-semibold">Created</th>
+                    <th scope="col" className="px-2 py-2 font-semibold">Order</th>
+                    <th scope="col" className="px-2 py-2 font-semibold">Purchaser</th>
+                    <th scope="col" className="px-2 py-2 font-semibold">Course</th>
+                    <th scope="col" className="px-2 py-2 font-semibold">Amount</th>
+                    <th scope="col" className="px-2 py-2 font-semibold">Status</th>
+                    <th scope="col" className="px-2 py-2 font-semibold">Created</th>
                     <th className="px-2 py-2" />
                   </tr>
                 </thead>
@@ -90,14 +91,14 @@ export default function AdminOrders() {
             />
           </div>
         ) : (
-          <p className="py-8 text-center text-sm text-slate-500">No orders match this filter.</p>
+          <EmptyState title="No orders found" description="Orders appear here once a learner completes checkout." />
         )}
       </Panel>
 
       <WebhookEvents />
 
       <p className="text-sm text-slate-500">
-        Refunds and cancellations are not supported by the backend - there is no admin endpoint for them, so no such
+        Refunds and cancellations are not supported by the backend — there is no admin endpoint for them, so no such
         actions are offered here.
       </p>
     </div>
@@ -122,9 +123,9 @@ function Row({ order: o }: { order: AdminOrderRow }) {
             {o.course.title}
           </Link>
         </td>
-        <td className="px-2 py-3 font-semibold text-ink-900">{formatMoney(o.amountPaise, o.currency)}</td>
+        <td className="px-2 py-3 font-semibold text-ink-900 tabular-nums">{formatMoney(o.amountPaise, o.currency)}</td>
         <td className="px-2 py-3">
-          <StatusPill tone={statusTone(o.status)}>{o.status}</StatusPill>
+          <StatusPill tone={statusTone(o.status)}>{humanizeStatus(o.status)}</StatusPill>
         </td>
         <td className="px-2 py-3 text-slate-600">{formatDate(o.createdAt)}</td>
         <td className="px-2 py-3 text-right">
@@ -147,8 +148,8 @@ function Row({ order: o }: { order: AdminOrderRow }) {
               <Field label="Provider order ref" mono value={o.razorpayOrderId} />
               {p ? (
                 <>
-                  <Field label="Payment id" mono value={p.razorpayPaymentId ?? "-"} />
-                  <Field label="Method" value={p.method ?? "-"} />
+                  <Field label="Payment id" mono value={p.razorpayPaymentId ?? "—"} />
+                  <Field label="Method" value={p.method ?? "—"} />
                   <Field label="Payment verified" value={p.verified ? "Yes" : "No"} />
                   <Field label="Payment recorded" value={formatDate(p.createdAt)} />
                 </>
@@ -168,6 +169,8 @@ function Row({ order: o }: { order: AdminOrderRow }) {
 function WebhookEvents() {
   const events = useAsync(() => apiGet<{ events: WebhookEventRow[] }>("/payments/webhook-events"), []);
   const [selected, setSelected] = useState<WebhookEventRow | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, selected !== null, () => setSelected(null));
 
   return (
     <Panel title="Webhook events" description="Latest payment events from the provider.">
@@ -184,10 +187,10 @@ function WebhookEvents() {
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-2 py-2 font-semibold">Event</th>
-                <th className="px-2 py-2 font-semibold">Provider ref</th>
-                <th className="px-2 py-2 font-semibold">Processing</th>
-                <th className="px-2 py-2 font-semibold">Received</th>
+                <th scope="col" className="px-2 py-2 font-semibold">Event</th>
+                <th scope="col" className="px-2 py-2 font-semibold">Provider ref</th>
+                <th scope="col" className="px-2 py-2 font-semibold">Processing</th>
+                <th scope="col" className="px-2 py-2 font-semibold">Received</th>
                 <th className="px-2 py-2" />
               </tr>
             </thead>
@@ -224,10 +227,11 @@ function WebhookEvents() {
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4" role="presentation" onClick={() => setSelected(null)}>
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="wh-title"
-            className="w-full max-w-lg rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="wh-title" className="font-display text-lg font-bold text-ink-900">
@@ -242,7 +246,7 @@ function WebhookEvents() {
               <Field label="Received at" value={formatDate(selected.receivedAt)} />
             </dl>
             <p className="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-              The raw payload and signature are intentionally not rendered - they can contain payment and signing data.
+              The raw payload and signature are intentionally not rendered — they can contain payment and signing data.
               Use the backend logs if a deep inspection is required.
             </p>
             <div className="mt-5 text-right">

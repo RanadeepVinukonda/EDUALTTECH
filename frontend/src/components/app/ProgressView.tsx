@@ -121,7 +121,14 @@ export default function ProgressView({ compact = false }: { compact?: boolean })
                     </div>
                   </div>
                   <div className="mt-4">
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100" role="img" aria-label={`${r.progressPct}% complete`}>
+                    <div
+                      className="h-2 w-full overflow-hidden rounded-full bg-slate-100"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={r.progressPct}
+                      aria-label={`${r.title} progress`}
+                    >
                       <div className="h-full rounded-full bg-brand-600" style={{ width: `${r.progressPct}%` }} />
                     </div>
                     <p className="mt-1 text-xs text-slate-500">{r.progressPct}% complete</p>

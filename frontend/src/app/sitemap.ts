@@ -10,7 +10,6 @@ const PUBLIC_ROUTES: Array<{ path: string; priority: number; freq: MetadataRoute
   { path: "/courses", priority: 0.9, freq: "weekly" },
   { path: "/services", priority: 0.8, freq: "monthly" },
   { path: "/mentor", priority: 0.7, freq: "monthly" },
-  { path: "/work", priority: 0.6, freq: "monthly" },
   { path: "/team", priority: 0.6, freq: "monthly" },
   { path: "/partners", priority: 0.5, freq: "monthly" },
   { path: "/about", priority: 0.6, freq: "monthly" },

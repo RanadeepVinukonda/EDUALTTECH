@@ -5,10 +5,7 @@ import Lightbulb from "@mui/icons-material/Lightbulb";
 import Build from "@mui/icons-material/Build";
 import Storefront from "@mui/icons-material/Storefront";
 import Flag from "@mui/icons-material/Flag";
-import { publicFetch } from "@/lib/server-api";
-import type { WorkItem } from "@/lib/types";
 import SectionHeading from "@/components/landing/SectionHeading";
-import WorkCard from "@/components/landing/WorkCard";
 import LinkButton from "@/components/ui/LinkButton";
 import CoverImage from "@/components/ui/CoverImage";
 import { initialsFromName } from "@/lib/name";
@@ -19,7 +16,7 @@ const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "EduAltTech helps learners build practical AI, entrepreneurship, and technology skills - and builds working digital solutions for schools. A product by Setsuzoku.",
+    "EduAltTech helps learners build practical AI, entrepreneurship, and technology skills. A product by Setsuzoku.",
   alternates: { canonical: "/about" },
 };
 
@@ -32,7 +29,7 @@ const APPROACH = [
   {
     icon: Lightbulb,
     title: "Understand the problem first",
-    body: "Before choosing a tool, we teach learners to understand the real problem in front of them - the same discipline we apply to our own projects.",
+    body: "Before choosing a tool, we teach learners to understand the real problem in front of them — the same discipline we apply to our own projects.",
   },
   {
     icon: Storefront,
@@ -42,14 +39,11 @@ const APPROACH = [
   {
     icon: Flag,
     title: "Aim beyond theory",
-    body: "The goal is a working outcome - a prototype, a small venture, or a tool that solves a problem around you.",
+    body: "The goal is a working outcome — a prototype, a small venture, or a tool that solves a problem around you.",
   },
 ];
 
-export default async function AboutPage() {
-  const work = await publicFetch<{ items: WorkItem[] }>("/cms/public/work", { limit: 3 });
-  const workItems = work?.items ?? [];
-
+export default function AboutPage() {
   return (
     <div className="bg-white">
       {/* Intro */}
@@ -74,7 +68,7 @@ export default async function AboutPage() {
             as="h1"
             eyebrow="About EduAltTech"
             title="Practical learning, and work for the people who teach it"
-            lead="EduAltTech does two connected things. We help students learn practical skills in AI, entrepreneurship, and technology - through courses, alternate education, and tuition - and we employ skilled people who were out of work as the mentors who teach them. We also build useful software for the schools that run our programs."
+            lead="EduAltTech does two connected things. We help students learn practical skills in AI, entrepreneurship, and technology — through courses, alternate education, and tuition — and we employ skilled people who were out of work as the mentors who teach them."
           />
         </div>
       </section>
@@ -83,23 +77,19 @@ export default async function AboutPage() {
       <section className="py-16 sm:py-20">
         <div className={wrap}>
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-            <h2 className="font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-ink-900 text-balance sm:text-4xl">
               Why practical learning
             </h2>
             <div className="max-w-prose space-y-5 text-lg leading-relaxed text-ink-700">
               <p>
-                The skills that matter most - building software, solving a real problem, turning an idea
-                into something people can use - are learned by doing. A syllabus alone rarely produces
+                The skills that matter most — building software, solving a real problem, turning an idea
+                into something people can use — are learned by doing. A syllabus alone rarely produces
                 them.
               </p>
               <p>
                 EduAltTech exists to close that gap. We build structured courses where learners work
                 through real, practical tasks with mentors, and we keep the focus on outcomes rather than
                 theory.
-              </p>
-              <p>
-                The same belief shapes our work with schools: understand the problem, then build something
-                that actually helps.
               </p>
             </div>
           </div>
@@ -122,7 +112,7 @@ export default async function AboutPage() {
               },
               {
                 title: "Tuition facilities",
-                body: "Guided tuition and coaching alongside our courses - subject support, doubt sessions, and hands-on practice, in person and online.",
+                body: "Guided tuition and coaching alongside our courses — subject support, doubt sessions, and hands-on practice, in person and online.",
               },
               {
                 title: "Employment for skilled people",
@@ -166,63 +156,51 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* School technology */}
-      <section className="py-16 sm:py-20">
-        <div className={wrap}>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-            <SectionHeading
-              eyebrow="Technology for schools"
-              title="Software built with schools, not just for them"
-              lead="We design and build digital solutions that reduce administrative load and support teaching - starting from a concrete problem a school is facing."
-            />
-            <div className="max-w-prose space-y-5 text-lg leading-relaxed text-ink-700">
-              <p>
-                Each engagement begins with understanding how a school actually works, then building the
-                smallest thing that genuinely helps. We do not claim a solution is deployed unless the
-                record shows it.
-              </p>
-              <div className="flex flex-wrap gap-3 pt-2">
-                <LinkButton href="/services">Services & programs</LinkButton>
-                <LinkButton href="/work" variant="secondary">
-                  See our work
-                </LinkButton>
-              </div>
-            </div>
-          </div>
-
-          {workItems.length > 0 && (
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {workItems.map((w) => (
-                <WorkCard key={w.id} item={w} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* Team */}
       <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
         <div className={wrap}>
           <SectionHeading
             eyebrow="Our team"
             title="The people behind EduAltTech"
-            lead="The educators, builders, and mentors who make our courses and school technology work."
+            lead="The educators, builders, and mentors who make our courses work."
           />
           <ul className="mx-auto mt-12 grid max-w-xl grid-cols-1 gap-8 min-[500px]:grid-cols-2 md:max-w-3xl md:grid-cols-3 lg:max-w-full lg:grid-cols-5">
             {TEAM.map((m) => (
               <li key={m.name} className="group text-center">
-                <div className="mx-auto mb-6 h-40 w-40 overflow-hidden rounded-full border border-solid border-transparent transition-all duration-500 group-hover:border-brand-600">
+                <div className="mx-auto mb-6 h-40 w-40 overflow-hidden rounded-full border border-solid border-transparent transition-colors duration-500 group-hover:border-brand-600">
                   <CoverImage src={m.image} alt={`Portrait of ${m.name}`} fallback={initialsFromName(m.name)} />
                 </div>
-                <h3 className="mb-2 font-display text-xl font-semibold capitalize text-ink-900 transition-all duration-500 group-hover:text-brand-700">
+                <h3 className="mb-2 font-display text-xl font-semibold capitalize text-ink-900 transition-colors duration-500 group-hover:text-brand-700">
                   {m.name}
                 </h3>
-                <span className="block text-slate-500 transition-all duration-500 group-hover:text-ink-900">
+                <span className="block text-slate-500 transition-colors duration-500 group-hover:text-ink-900">
                   {m.title}
                 </span>
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* Setsuzoku */}
+      <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
+        <div className={wrap}>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+            <SectionHeading
+              eyebrow="Parent company"
+              title="A product by Setsuzoku"
+              lead="EduAltTech is built and run by Setsuzoku — the team behind our product, engineering, and design work."
+            />
+            <div className="max-w-prose space-y-5 text-lg leading-relaxed text-ink-700">
+              <p>
+                Setsuzoku is the parent company behind EduAltTech. Everything on this platform — the
+                courses, the platform itself, and the programs we run — comes from the same team.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <LinkButton href="https://setsuzoku.in">Visit setsuzoku.in</LinkButton>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -233,7 +211,7 @@ export default async function AboutPage() {
             Where would you like to start?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-ink-600">
-            Learn something practical, see technology we have built, or talk to us about your school.
+            Learn something practical, or talk to us about your school.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <LinkButton href="/courses" size="lg">

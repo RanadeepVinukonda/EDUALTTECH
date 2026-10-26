@@ -70,9 +70,11 @@ export default function AdminSettings() {
               value={value}
               icon={<Numbers fontSize="small" />}
               onChange={(e) => setValue(e.target.value)}
+              aria-invalid={invalid && value !== ""}
+              aria-describedby="mentor-capacity-error"
             />
             {invalid && value !== "" && (
-              <p className="text-xs text-red-700">Enter a whole number between {MIN} and {MAX}.</p>
+              <p id="mentor-capacity-error" className="text-xs text-red-700">Enter a whole number between {MIN} and {MAX}.</p>
             )}
             <div className="flex gap-2 pt-1">
               <Button size="sm" disabled={invalid || !dirty} loading={saving} onClick={save}>

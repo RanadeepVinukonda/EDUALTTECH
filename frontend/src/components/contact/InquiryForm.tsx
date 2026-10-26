@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import MailOutlined from "@mui/icons-material/MailOutlined";
 import Phone from "@mui/icons-material/Phone";
@@ -30,6 +30,12 @@ export default function InquiryForm() {
   const [errors, setErrors] = useState<Partial<Record<keyof Fields, string>>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!Object.keys(errors).length) return;
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+  }, [errors]);
 
   const set = (k: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setFields((f) => ({ ...f, [k]: e.target.value }));
@@ -74,7 +80,7 @@ export default function InquiryForm() {
       <div role="status" className="rounded-2xl border border-brand-200 bg-brand-50 p-8 text-center">
         <h3 className="font-display text-xl font-bold text-ink-900">Message sent</h3>
         <p className="mx-auto mt-2 max-w-md text-ink-600">
-          Thank you - we have received your inquiry and will get back to you by email.
+          Thank you — we have received your inquiry and will get back to you by email.
         </p>
         <button
           type="button"
@@ -88,7 +94,7 @@ export default function InquiryForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-4">
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="inq-name" className="mb-1.5 block text-sm font-semibold text-ink-700">
@@ -96,6 +102,7 @@ export default function InquiryForm() {
           </label>
           <Input
             id="inq-name"
+            name="name"
             value={fields.name}
             onChange={set("name")}
             error={Boolean(errors.name)}
@@ -115,6 +122,7 @@ export default function InquiryForm() {
           </label>
           <Input
             id="inq-email"
+            name="email"
             type="email"
             value={fields.email}
             onChange={set("email")}
@@ -138,6 +146,9 @@ export default function InquiryForm() {
           </label>
           <Input
             id="inq-phone"
+            name="phone"
+            type="tel"
+            inputMode="tel"
             value={fields.phone}
             onChange={set("phone")}
             error={Boolean(errors.phone)}
@@ -157,6 +168,7 @@ export default function InquiryForm() {
           </label>
           <Input
             id="inq-subject"
+            name="subject"
             value={fields.subject}
             onChange={set("subject")}
             error={Boolean(errors.subject)}
@@ -177,6 +189,7 @@ export default function InquiryForm() {
         </label>
         <textarea
           id="inq-body"
+          name="body"
           rows={5}
           value={fields.body}
           onChange={set("body")}

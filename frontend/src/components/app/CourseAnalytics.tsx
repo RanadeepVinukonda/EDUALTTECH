@@ -62,8 +62,8 @@ export default function CourseAnalyticsView({ slug }: { slug: string }) {
             <thead>
               <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-3">Learner</th>
-                <th className="px-4 py-3">Progress</th>
-                <th className="px-4 py-3">Lessons</th>
+                <th className="px-4 py-3 tabular-nums">Progress</th>
+                <th className="px-4 py-3 tabular-nums">Lessons</th>
                 <th className="px-4 py-3">Last active</th>
               </tr>
             </thead>
@@ -83,7 +83,7 @@ export default function CourseAnalyticsView({ slug }: { slug: string }) {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 tabular-nums">
                     <div className="flex items-center gap-2">
                       <span
                         className={cn("h-1.5 w-24 overflow-hidden rounded-full bg-slate-100")}
@@ -95,10 +95,10 @@ export default function CourseAnalyticsView({ slug }: { slug: string }) {
                       >
                         <span className="block h-full rounded-full bg-brand-600" style={{ width: `${l.progressPct}%` }} />
                       </span>
-                      <span className="text-xs font-semibold text-ink-700">{l.progressPct}%</span>
+                      <span className="text-xs font-semibold text-ink-700 tabular-nums">{l.progressPct}%</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-600 tabular-nums">
                     {l.lessonsCompleted}/{l.totalLessons}
                   </td>
                   <td className="px-4 py-3 text-slate-600">{formatDate(l.lastActiveAt)}</td>

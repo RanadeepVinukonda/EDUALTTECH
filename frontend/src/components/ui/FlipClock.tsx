@@ -51,22 +51,49 @@ export default function FlipClock({
   onDone?: () => void;
 }) {
   const target = new Date(to).getTime();
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   const fired = useRef(false);
 
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    let interval: number | null = null;
+
+    const tick = () => setNow(Date.now());
+    const start = () => {
+      if (interval === null) interval = window.setInterval(tick, 1000);
+    };
+    const stop = () => {
+      if (interval !== null) {
+        window.clearInterval(interval);
+        interval = null;
+      }
+    };
+    const onVisibility = () => {
+      if (document.hidden) {
+        stop();
+        return;
+      }
+      tick();
+      start();
+    };
+
+    tick();
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   useEffect(() => {
-    if (!fired.current && target - now <= 0) {
+    if (now === null || fired.current) return;
+    if (target - now <= 0) {
       fired.current = true;
       onDone?.();
     }
   }, [target, now, onDone]);
 
-  const p = parts(target, now);
+  const p = parts(target, now ?? target);
 
   return (
     <div className={cn("fc-clock", className)} role="timer" aria-label={label ?? "Countdown"}>

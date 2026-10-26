@@ -93,13 +93,13 @@ function AnalyticsBody({ data }: { data: AnalyticsData }) {
         title="New registrations"
         summary={`${totals.newUsers} new accounts over ${series.length} buckets.`}
         points={series.map((p) => ({ label: p.date, value: p.newUsers }))}
-        formatValue={(v) => `${v}`}
+        formatValue={(v) => new Intl.NumberFormat().format(v)}
       />
       <SeriesChart
         title="New enrolments"
         summary={`${totals.enrollments} learner enrolments over ${series.length} buckets.`}
         points={series.map((p) => ({ label: p.date, value: p.enrollments }))}
-        formatValue={(v) => `${v}`}
+        formatValue={(v) => new Intl.NumberFormat().format(v)}
       />
 
       <TopCourses courses={data.topCourses} />
@@ -163,7 +163,7 @@ function SeriesChart({
                   {points.map((p, i) => (
                     <tr key={`${p.label}-${i}`}>
                       <th scope="row" className="py-1.5 pr-4 font-normal text-slate-600">{bucketLabel(p.label)}</th>
-                      <td className="py-1.5 text-ink-900">{formatValue(p.value)}</td>
+                      <td className="py-1.5 text-ink-900 tabular-nums">{formatValue(p.value)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -206,7 +206,7 @@ function TopCourses({ courses }: { courses: AnalyticsTopCourse[] }) {
                     <StatusPill tone={statusTone(c.status)}>{c.status.toLowerCase()}</StatusPill>
                   </td>
                   <td className="py-2 pr-4 text-slate-600">{c.pricePaise > 0 ? formatMoney(c.pricePaise) : "Free"}</td>
-                  <td className="py-2 font-semibold text-ink-900">{c.enrolledCount}</td>
+                  <td className="py-2 font-semibold text-ink-900 tabular-nums">{c.enrolledCount}</td>
                 </tr>
               ))}
             </tbody>

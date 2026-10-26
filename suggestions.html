@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EduAltTech — before / after</title>
+<meta name="description" content="Visual before and after for the mobile responsiveness and footer changes, plus a code-free index of proposals.">
+<style>
+@font-face{font-family:Sora;src:url(frontend/src/app/fonts/sora-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:Inter;src:url(frontend/src/app/fonts/inter-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{--bg:#0a121b;--panel:#101b26;--line:#22323f;--text:#e8f0f4;--muted:#93a8b6;--brand:#4fbc75;--brand2:#038c3e;--red:#f87171;--ink:#011c2b}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.top{border-bottom:1px solid var(--line);background:rgba(10,18,27,.9);position:sticky;top:0;z-index:10;backdrop-filter:blur(10px)}
+.top .wrap{display:flex;align-items:center;gap:18px;height:58px;overflow-x:auto;white-space:nowrap}
+.top b{font-family:Sora;font-size:14px;letter-spacing:-.01em}
+.top a{color:var(--muted);text-decoration:none;font-size:13px}.top a:hover{color:var(--text)}
+.hero{padding:64px 0 34px;border-bottom:1px solid var(--line);background:radial-gradient(700px 260px at 15% -10%,rgba(79,188,117,.16),transparent 65%)}
+.kicker{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--brand)}
+.hero h1{font-family:Sora;font-size:clamp(30px,5vw,52px);line-height:1.05;letter-spacing:-.035em;margin:12px 0 14px;max-width:820px}
+.hero p{color:var(--muted);max-width:680px;margin:0 0 26px;font-size:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:720px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+.stat b{display:block;font-family:Sora;font-size:21px}.stat span{font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px;font-size:12px;color:var(--muted);align-items:center}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:800;letter-spacing:.02em}
+.badge.ship{background:rgba(79,188,117,.13);color:#8fe0ab;border:1px solid rgba(79,188,117,.35)}
+.badge.red{background:rgba(248,113,113,.12);color:#fca5a5;border:1px solid rgba(248,113,113,.3)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot.red{background:var(--red)}.dot.green{background:var(--brand)}
+.block{padding:48px 0 10px}
+.block h2{font-family:Sora;font-size:24px;letter-spacing:-.02em;margin:0 0 6px}
+.block .sub{color:var(--muted);margin:0 0 24px;font-size:14px}
+.compare{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;margin:0 0 22px}
+.compare-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
+.compare h3{font-family:Sora;font-size:19px;letter-spacing:-.02em;margin:0 0 2px}
+.route{color:var(--muted);font-size:12px;margin:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.pair.stack{grid-template-columns:1fr}
+figure{margin:0}
+figcaption{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;display:flex;align-items:center}
+.note{font-size:12.5px;color:var(--muted);margin:9px 2px 0;line-height:1.45;min-height:36px}
+.change{font-size:13px;color:#c7d6de;border-top:1px solid var(--line);margin:18px 0 0;padding-top:14px}
+.change b{color:var(--text);margin-right:8px}
+.device{position:relative;width:100%;background:#050a0f;border:7px solid #1b2833;border-radius:30px;box-shadow:0 18px 40px rgba(0,0,0,.35);overflow:hidden;max-width:380px;margin:0 auto}
+.device.before{border-color:#3a2930;box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 0 1px rgba(248,113,113,.25)}
+.device.after{border-color:#1f3a2b;box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 0 1px rgba(79,188,117,.28)}
+.notch{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:66px;height:15px;background:#050a0f;border-radius:0 0 10px 10px;z-index:3}
+.screen{height:520px;overflow:hidden;background:#f8fafc;color:var(--ink);border-radius:23px;position:relative;font-size:11px;line-height:1.35}
+.pair.stack .device{max-width:820px;margin:0 auto}
+.pair>figure{min-width:0}
+.browser-device{border-radius:14px;border-width:1px;border-color:#2b3b47;background:#0b141c;max-width:820px;overflow-x:auto;overflow-y:hidden}
+.browser-device .browser{min-width:720px}
+.browser-device .browser{height:auto}
+.site-head{height:52px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#fff;border-bottom:1px solid #e2e8f0;position:relative;z-index:2}
+.mark{width:26px;height:26px;object-fit:contain}
+.wordmark{font-family:Sora;font-weight:800;font-size:13px;letter-spacing:-.02em;color:#011c2b;white-space:nowrap}
+.grow{flex:1}
+.hamb{width:18px;height:12px;border-top:2px solid #0f172a;border-bottom:2px solid #0f172a;position:relative}
+.hamb:after{content:"";position:absolute;left:0;right:0;top:4px;border-top:2px solid #0f172a}
+.bell{width:16px;height:16px;border-radius:50%;border:2px solid #475569}
+.avatar{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#d7f5e1;color:#026b2f;font-weight:800;font-size:10px;border:1px solid #b0e8c5}
+.hero-mock{padding:18px 14px 0;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,#f0fff5,#f8fafc 55%)}
+.hero-copy{display:flex;flex-direction:column;gap:7px}
+.kicker{font-size:7px;font-weight:800;letter-spacing:.12em;color:#038c3e}
+.h1line{display:block;height:13px;border-radius:4px;background:#011c2b}
+.pline{display:block;height:6px;border-radius:4px;background:#cbd5e1}
+.w80{width:80%}.w60{width:60%}.w90{width:90%}.w70{width:70%}
+.btn{display:inline-flex;align-items:center;justify-content:center;background:#038c3e;color:#fff;font-weight:700;border-radius:8px;padding:7px 11px;font-size:9px;margin-top:3px;width:max-content}
+.btn.wide{width:100%;padding:9px;font-size:10px}
+.btn.sm{padding:7px 9px;font-size:9px;flex:none}
+.hero-art{height:96px;border-radius:12px;background:linear-gradient(135deg,#d7f5e1,#b0e8c5 55%,#4fbc75);position:relative;overflow:hidden}
+.hero-art:after{content:"";position:absolute;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.35);right:-18px;bottom:-24px}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mcard{height:64px;border-radius:10px;background:#fff;border:1px solid #e2e8f0}
+.dash-body{padding:16px 13px;background:#f1f5f9;min-height:468px}
+.dash-title{font-family:Sora;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.dash-sub{color:#64748b;font-size:9px;margin:2px 0 12px}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dash-card{height:72px;border-radius:10px;background:#fff;border:1px solid #e2e8f0}
+.dash-card.tall{grid-row:span 2;height:auto}
+.auth-page{padding:18px 13px 0;min-height:520px;background:#f8fafc;display:flex;flex-direction:column;align-items:center}
+.lockup{display:flex;align-items:center;gap:7px;justify-content:center;margin-bottom:14px}
+.auth-card.narrow{max-width:226px}
+.auth-card{width:100%;max-width:250px;overflow:hidden;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;box-shadow:0 2px 6px rgba(2,64,89,.06)}
+.auth-title{font-family:Sora;font-weight:800;font-size:15px;letter-spacing:-.02em;margin-bottom:3px}
+.auth-sub{color:#64748b;font-size:8.5px;margin-bottom:12px}
+.label{font-size:8px;font-weight:700;color:#334155;margin:8px 0 3px}
+.input{display:block;height:24px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;line-height:22px;padding:0 7px;font-size:9px;color:#475569}
+.input.full{width:100%}
+.auth-link{text-align:center;font-size:8.5px;color:#038c3e;font-weight:700;margin-top:8px}
+.helper{font-size:7.5px;color:#64748b;margin-top:6px}
+.fieldrow{display:flex;gap:5px;align-items:center;margin-top:2px}
+.fieldrow .input{flex:1;min-width:0;width:0}
+.fieldrow.before{flex-wrap:wrap}
+.fieldrow.before .input{flex:none;width:200px;min-width:200px}
+.admin-body{display:flex;flex-direction:column;min-height:468px;background:#f8fafc}
+.admin-side{width:100%;flex:none;border-bottom:1px solid #e2e8f0;background:#fff;padding:10px 9px;overflow:hidden}
+.admin-side.compact{border-bottom:1px solid #e2e8f0;padding:8px 6px;overflow:hidden}
+.admin-body.before .admin-side{padding:11px 13px}
+.admin-body.before .nav-item{font-size:10px;padding:7px 8px}
+.admin-body.before .nav-group{margin-bottom:9px}
+.admin-body.before .nav-label{font-size:8px;padding:2px 8px 4px}
+.chips{display:flex;gap:4px;overflow:hidden;padding-bottom:2px}
+.chip{flex:none;border-radius:7px;background:#f1f5f9;border:1px solid #e2e8f0;padding:5px 7px;font-size:7px;font-weight:700;color:#334155;white-space:nowrap}
+.chip.active{background:#038c3e;border-color:#038c3e;color:#fff}
+.nav-group{margin-bottom:7px}
+.nav-label{font-size:6.5px;font-weight:800;letter-spacing:.08em;color:#94a3b8;text-transform:uppercase;padding:2px 4px 3px}
+.nav-item{font-size:7.5px;font-weight:600;color:#334155;padding:4px 5px;border-radius:5px;margin-bottom:1px}
+.nav-item.active{background:#038c3e;color:#fff}
+.admin-main{flex:1;padding:10px 9px;min-width:0}
+.admin-h{font-family:Sora;font-weight:800;font-size:12px;margin-bottom:8px}
+.statrow{display:flex;gap:5px;margin-bottom:7px}
+.statcard{flex:1;height:38px;border-radius:7px;background:#fff;border:1px solid #e2e8f0}
+.panel{height:88px;border-radius:8px;background:#fff;border:1px solid #e2e8f0;margin-bottom:6px}
+.panel.short{height:52px}
+.otp-wrap{margin:12px 0 13px;overflow:hidden;position:relative}
+.otp{display:flex;gap:7px;justify-content:center}
+.otp span{flex:1;min-width:0;max-width:38px;height:44px;border-radius:5px;background:#ebebeb;display:grid;place-items:center;font-weight:700;font-size:11px;color:#011c2b;box-shadow:inset 2px 2px 4px #d1d1d1,inset -2px -2px 4px #fff}
+.otp-wrap:after{content:"";position:absolute;right:0;top:0;bottom:0;width:18px;background:linear-gradient(90deg,transparent,#fff)}
+.otp.before{justify-content:flex-start;gap:8px}
+.otp.before span{flex:none;width:40px;min-width:40px;max-width:40px;height:44px}
+.browser{background:#fff;color:#011c2b;min-height:250px}
+.browser.dark{background:#011c2b;color:#cbd5e1}
+.browser-bar{height:24px;background:#e8eef3;border-bottom:1px solid #d5e0e8;display:flex;align-items:center;gap:4px;padding:0 8px}
+.browser.dark .browser-bar{background:#0b2534;border-color:#123746}
+.browser-bar i{width:5px;height:5px;border-radius:50%;background:#c4d0d9;display:block}
+.browser.dark .browser-bar i{background:#2c4b5c}
+.browser-bar .url{margin-left:6px;font-size:7px;color:#64748b}
+.foot-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:18px;padding:22px 24px 14px}
+.fcol h4{font-family:Sora;font-size:11px;margin:0 0 8px;color:inherit}
+.fcol p{font-size:8px;margin:0 0 4px;line-height:1.4;color:#64748b}
+.dark .fcol p{color:#93a8b6}
+.dark .fcol h4{color:#fff}
+.fdesc{max-width:160px;margin-top:8px!important}
+.fcol.brand .lockup{justify-content:flex-start;margin:0}
+.fcol.brand .wordmark{color:inherit}
+.socials{display:flex;gap:6px}
+.socials span{width:22px;height:22px;border-radius:50%;border:1px solid #cbd5e1;display:grid;place-items:center;font-size:8px;font-weight:800;color:#124a72}
+.fp{min-height:520px;background:#f8fafc;color:#011c2b}
+.fp.dark{background:#011c2b;color:#cbd5e1}
+.fp-page{height:118px;padding:16px 14px;background:linear-gradient(180deg,#f0fff5,#f8fafc);border-bottom:1px solid #e2e8f0}
+.fp.dark .fp-page{background:linear-gradient(180deg,#022d41,#011c2b);border-color:#123746}
+.fp-hero{height:66px;border-radius:10px;background:linear-gradient(135deg,#d7f5e1,#4fbc75);margin-top:8px}
+.fp-brand,.fp-col{padding:0 16px;margin-top:10px}
+.fp-brand .lockup{justify-content:flex-start;margin:0}
+.fp-brand .wordmark{color:inherit}
+.fp-brand .fdesc{max-width:230px}
+.fp-col h4{font-family:Sora;font-size:11px;margin:0 0 7px;color:inherit}
+.fp-col p{font-size:9px;margin:0 0 3px;color:#64748b}
+.fp.dark .fp-col p{color:#93a8b6}
+.fp.dark .fp-col h4{color:#fff}
+.fp-legal{margin:11px 16px 0;padding:8px 0 12px;border-top:1px solid #e2e8f0;font-size:7.5px;line-height:1.6;color:#64748b}
+.fp.dark .fp-legal{border-color:rgba(255,255,255,.12);color:#93a8b6}
+.legal{border-top:1px solid #e2e8f0;margin:0 24px;padding:9px 0 12px;display:flex;justify-content:space-between;gap:10px;font-size:7px;color:#64748b}
+.dark .legal{border-color:rgba(255,255,255,.12);color:#93a8b6}
+.dark .wordmark{color:#fff}
+.dark .socials span{border-color:rgba(255,255,255,.2);color:#cbd5e1}
+.fp.dark .wordmark{color:#fff}
+.group{border:1px solid var(--line);border-radius:14px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+.group summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;font-family:Sora;font-weight:700;font-size:14px}
+.group summary::-webkit-details-marker{display:none}
+.group summary b{font-size:11px;font-weight:800;color:var(--brand);background:rgba(79,188,117,.12);padding:2px 8px;border-radius:999px}
+.group table{width:100%;border-collapse:collapse;font-size:12.5px}
+.group th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-weight:800}
+.group td{padding:9px 16px;border-bottom:1px solid rgba(34,50,63,.55);vertical-align:top}
+.group tr:last-child td{border-bottom:0}
+.group td.t{width:220px;font-weight:700;color:#dbe7ed}
+.group td.n{color:var(--muted)}
+.foot{padding:38px 0 56px;border-top:1px solid var(--line);margin-top:40px;color:var(--muted);font-size:12px}
+@media (max-width:820px){
+  .pair{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .compare{padding:16px;border-radius:16px}
+  .group td.t{width:150px}
+  .hero{padding:42px 0 26px}
+  .top .wrap{height:52px}
+}
+@media (max-width:520px){
+  .wrap{padding:0 14px}
+  .compare-head{flex-direction:column;gap:8px}
+  .device{border-width:6px;border-radius:24px}
+  .screen{border-radius:18px}
+  .group td.t{width:110px}
+  .group td.n{font-size:11.5px}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .legal{flex-direction:column}
+}
+@media print{
+  body{background:#fff;color:#111}
+  .top{display:none}
+  .compare,.group,.stat{background:#fff;border-color:#ddd;break-inside:avoid}
+  .hero{background:none;border-color:#ddd}
+  .hero p,.note,.sub,.route,.group td.n,.legend{color:#555}
+  .change{color:#111;border-color:#ddd}
+  .mark{filter:none}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <b>EduAltTech</b>
+  <a href="#shipped">Shipped</a>
+  <a href="#proposals">Proposals</a>
+  <a href="#b-footer">Footer</a>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <p class="kicker">VISUAL REVIEW</p>
+  <h1>Before and after, shown — not coded</h1>
+  <p>The six mobile fixes and the footer redesign are live on the <b>fix/mobile-responsive-brand-footer</b> branch. Proposals are listed by page and intent only; nothing else is applied.</p>
+  <div class="stats">
+    <div class="stat"><b>7</b><span>shipped change groups</span></div>
+    <div class="stat"><b>61</b><span>proposals, not applied</span></div>
+    <div class="stat"><b>0</b><span>code blocks</span></div>
+    <div class="stat"><b>0</b><span>new dependencies</span></div>
+  </div>
+  <div class="legend"><span class="badge red">Before</span> the reported problem <span class="badge ship">After</span> what ships now</div>
+</div></section>
+
+<main class="wrap" id="shipped">
+  <section class="block">
+    <h2>Shipped now</h2>
+    <p class="sub">Device-width previews built from the same markup and tokens. Read top to bottom; every “after” is what the branch renders.</p>
+    
+<article class="compare" id="b-header">
+  <div class="compare-head">
+    <div><h3>Public header wordmark</h3><p class="route">all public pages</p></div>
+    <span class="badge ship">shipped</span>
+  </div>
+  <div class="pair">
+    <figure>
+      <figcaption><span class="dot red"></span>Before</figcaption>
+      <div class="device before"><div class="notch"></div><div class="screen"><div class="site-head"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="grow"></span><span class="hamb"></span></div><div class="hero-mock"><div class="hero-copy"><span class="kicker">LEARN WITH PEOPLE, NOT VIDEOS</span><span class="h1line w80"></span><span class="h1line w60"></span><span class="pline w90"></span><span class="pline w70"></span><span class="btn">Explore courses</span></div><div class="hero-art"></div></div><div class="cards3"><span class="mcard"></span><span class="mcard"></span><span class="mcard"></span></div></div></div>
+      <p class="note">Below 640px the brand name disappeared, leaving a naked logo.</p>
+    </figure>
+    <figure>
+      <figcaption><span class="dot green"></span>After</figcaption>
+      <div class="device after"><div class="notch"></div><div class="screen"><div class="site-head"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span><span class="grow"></span><span class="hamb"></span></div><div class="hero-mock"><div class="hero-copy"><span class="kicker">LEARN WITH PEOPLE, NOT VIDEOS</span><span class="h1line w80"></span><span class="h1line w60"></span><span class="pline w90"></span><span class="pline w70"></span><span class="btn">Explore courses</span></div><div class="hero-art"></div></div><div class="cards3"><span class="mcard"></span><span class="mcard"></span><span class="mcard"></span></div></div></div>
+      <p class="note">The wordmark stays visible at 14px on phones and 16px from 640px.</p>
+    </figure>
+  </div>
+  <p class="change"><b>What changed</b>One responsive lockup on every public page.</p>
+</article>
+    
+<article class="compare" id="b-dashboard">
+  <div class="compare-head">
+    <div><h3>Dashboard header</h3><p class="route">every signed-in page</p></div>
+    <span class="badge ship">shipped</span>
+  </div>
+  <div class="pair">
+    <figure>
+      <figcaption><span class="dot red"></span>Before</figcaption>
+      <div class="device before"><div class="notch"></div><div class="screen"><div class="site-head"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="grow"></span><span class="bell"></span><span class="avatar">A</span></div><div class="dash-body"><div class="dash-title">Dashboard</div><div class="dash-sub">Welcome back. Pick up where you left off.</div><div class="dash-grid"><div class="dash-card tall"></div><div class="dash-card"></div><div class="dash-card"></div></div></div></div></div>
+      <p class="note">Wordmark hidden below 640px; icon alone had to carry the brand.</p>
+    </figure>
+    <figure>
+      <figcaption><span class="dot green"></span>After</figcaption>
+      <div class="device after"><div class="notch"></div><div class="screen"><div class="site-head"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span><span class="grow"></span><span class="bell"></span><span class="avatar">A</span></div><div class="dash-body"><div class="dash-title">Dashboard</div><div class="dash-sub">Welcome back. Pick up where you left off.</div><div class="dash-grid"><div class="dash-card tall"></div><div class="dash-card"></div><div class="dash-card"></div></div></div></div></div>
+      <p class="note">Wordmark stays visible at 14px; avatar and bell still fit at 320px.</p>
+    </figure>
+  </div>
+  <p class="change"><b>What changed</b>The lockup now uses the same responsive wordmark as the public header.</p>
+</article>
+    
+<article class="compare" id="b-auth">
+  <div class="compare-head">
+    <div><h3>Auth shell brand</h3><p class="route">login · signup · reset · verify</p></div>
+    <span class="badge ship">shipped</span>
+  </div>
+  <div class="pair">
+    <figure>
+      <figcaption><span class="dot red"></span>Before</figcaption>
+      <div class="device before"><div class="notch"></div><div class="screen"><div class="auth-page"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""></div><div class="auth-card"><div class="auth-title">Welcome back</div><div class="auth-sub">Sign in to continue.</div><div class="label">Email</div><span class="input full"></span><div class="label">Password</div><span class="input full"></span><div class="btn wide">Sign in</div><div class="auth-link">Forgot password?</div></div></div></div></div>
+      <p class="note">Auth pages showed only the mark above the card.</p>
+    </figure>
+    <figure>
+      <figcaption><span class="dot green"></span>After</figcaption>
+      <div class="device after"><div class="notch"></div><div class="screen"><div class="auth-page"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span></div><div class="auth-card"><div class="auth-title">Welcome back</div><div class="auth-sub">Sign in to continue.</div><div class="label">Email</div><span class="input full"></span><div class="label">Password</div><span class="input full"></span><div class="btn wide">Sign in</div><div class="auth-link">Forgot password?</div></div></div></div></div>
+      <p class="note">Company name is present at 16px, matching the public lockup.</p>
+    </figure>
+  </div>
+  <p class="change"><b>What changed</b>Auth screens read as EduAltTech, not an unbranded form.</p>
+</article>
+    
+<article class="compare" id="b-admin">
+  <div class="compare-head">
+    <div><h3>Admin section navigation</h3><p class="route">every /dashboard/admin route</p></div>
+    <span class="badge ship">shipped</span>
+  </div>
+  <div class="pair">
+    <figure>
+      <figcaption><span class="dot red"></span>Before</figcaption>
+      <div class="device before"><div class="notch"></div><div class="screen"><div class="site-head"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span><span class="grow"></span><span class="bell"></span><span class="avatar">A</span></div><div class="admin-body before"><aside class="admin-side"><div class="nav-group"><div class="nav-label">Main</div><div class="nav-item active">Overview</div><div class="nav-item">Analytics</div><div class="nav-item">Courses</div></div><div class="nav-group"><div class="nav-label">People</div><div class="nav-item">Users</div><div class="nav-item">Mentors</div><div class="nav-item">Applications</div></div><div class="nav-group"><div class="nav-label">CMS</div><div class="nav-item">Website CMS</div></div><div class="nav-group"><div class="nav-label">Sales</div><div class="nav-item">Orders</div></div><div class="nav-group"><div class="nav-label">System</div><div class="nav-item">Audit log</div><div class="nav-item">Settings</div></div></aside><main class="admin-main"><div class="admin-h">Admin overview</div><div class="statrow"><div class="statcard"></div><div class="statcard"></div><div class="statcard"></div></div><div class="panel"></div><div class="panel short"></div></main></div></div></div>
+      <p class="note">Five labelled groups stacked vertically pushed page content below the fold.</p>
+    </figure>
+    <figure>
+      <figcaption><span class="dot green"></span>After</figcaption>
+      <div class="device after"><div class="notch"></div><div class="screen"><div class="site-head"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span><span class="grow"></span><span class="bell"></span><span class="avatar">A</span></div><div class="admin-body"><aside class="admin-side compact"><div class="chips"><span class="chip active">Overview</span><span class="chip">Analytics</span><span class="chip">Courses</span><span class="chip">Users</span><span class="chip">Mentors</span><span class="chip">Applications</span><span class="chip">Website CMS</span><span class="chip">Orders</span><span class="chip">Audit log</span><span class="chip">Settings</span></div></aside><main class="admin-main"><div class="admin-h">Admin overview</div><div class="statrow"><div class="statcard"></div><div class="statcard"></div><div class="statcard"></div></div><div class="panel"></div><div class="panel short"></div></main></div></div></div>
+      <p class="note">One scrollable chip row; the first dashboard stats are visible immediately.</p>
+    </figure>
+  </div>
+  <p class="change"><b>What changed</b>Mobile gets a horizontal chip row; desktop keeps the existing sidebar.</p>
+</article>
+    
+<article class="compare" id="b-otp">
+  <div class="compare-head">
+    <div><h3>One-time-code input</h3><p class="route">verify email · settings · checkout</p></div>
+    <span class="badge ship">shipped</span>
+  </div>
+  <div class="pair">
+    <figure>
+      <figcaption><span class="dot red"></span>Before</figcaption>
+      <div class="device before"><div class="notch"></div><div class="screen"><div class="auth-page"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""></div><div class="auth-card"><div class="auth-title">Verify your email</div><div class="auth-sub">Code sent to you@example.com</div><div class="otp-wrap before"><div class="otp before"><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span></div></div><div class="btn wide">Verify</div><div class="auth-link">Resend code</div></div></div></div></div>
+      <p class="note">Six fixed-width boxes overflowed the card on a 320px phone.</p>
+    </figure>
+    <figure>
+      <figcaption><span class="dot green"></span>After</figcaption>
+      <div class="device after"><div class="notch"></div><div class="screen"><div class="auth-page"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span></div><div class="auth-card"><div class="auth-title">Verify your email</div><div class="auth-sub">Code sent to you@example.com</div><div class="otp-wrap"><div class="otp"><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span></div></div><div class="btn wide">Verify</div><div class="auth-link">Resend code</div></div></div></div></div>
+      <p class="note">Boxes share the row, keep a 44px height, and never clip.</p>
+    </figure>
+  </div>
+  <p class="change"><b>What changed</b>Inputs shrink together instead of forcing horizontal overflow.</p>
+</article>
+    
+<article class="compare" id="b-field">
+  <div class="compare-head">
+    <div><h3>Mobile number row</h3><p class="route">Settings → Mobile number</p></div>
+    <span class="badge ship">shipped</span>
+  </div>
+  <div class="pair">
+    <figure>
+      <figcaption><span class="dot red"></span>Before</figcaption>
+      <div class="device before"><div class="notch"></div><div class="screen"><div class="auth-page"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""></div><div class="auth-card narrow"><div class="auth-title">Settings</div><div class="auth-sub">Mobile number</div><div class="label">Mobile number</div><div class="fieldrow before"><span class="input">+91 98765 43210</span><span class="btn sm">Send code</span></div><div class="helper">We send a 6-digit code by SMS.</div></div></div></div></div>
+      <p class="note">The 200px minimum forced the send button out of the card.</p>
+    </figure>
+    <figure>
+      <figcaption><span class="dot green"></span>After</figcaption>
+      <div class="device after"><div class="notch"></div><div class="screen"><div class="auth-page"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span></div><div class="auth-card narrow"><div class="auth-title">Settings</div><div class="auth-sub">Mobile number</div><div class="label">Mobile number</div><div class="fieldrow"><span class="input">+91 98765 43210</span><span class="btn sm">Send code</span></div><div class="helper">We send a 6-digit code by SMS.</div></div></div></div></div>
+      <p class="note">The field shrinks first; label and button stay inside the card.</p>
+    </figure>
+  </div>
+  <p class="change"><b>What changed</b>The number row now fits the narrowest settings column.</p>
+</article>
+  </section>
+
+  <section class="block" id="footer">
+    <h2>Footer redesign</h2>
+    <p class="sub">Same brand, new structure on the original ink-dark surface: quick links, contact, social row, and legal links.</p>
+    
+<article class="compare" id="b-footer">
+  <div class="compare-head">
+    <div><h3>Footer redesign</h3><p class="route">all public pages</p></div>
+    <span class="badge ship">shipped</span>
+  </div>
+  <div class="pair stack">
+    <figure>
+      <figcaption><span class="dot red"></span>Before</figcaption>
+      <div class="device browser-device"><div class="browser dark"><div class="browser-bar"><i></i><i></i><i></i><span class="url">edualttech.com</span></div><div class="foot-grid"><div class="fcol brand"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""></div><p class="fdesc">Courses, alternate education, and tuition for students &mdash; taught by paid mentors.</p></div><div class="fcol"><h4>Learn</h4><p>Courses</p><p>Services &amp; Programs</p></div><div class="fcol"><h4>Company</h4><p>About</p><p>Our Work</p><p>Partners</p><p>Team</p><p>Contact</p></div><div class="fcol"><h4>Account</h4><p>Sign in</p><p>Get started</p><p>Become a mentor</p></div></div><div class="legal"><span>&copy; 2026 EduAltTech (Edu Alt Tech). A product by Setsuzoku.</span><span>Help &amp; FAQ &middot; Privacy &middot; Terms &middot; Refunds</span></div></div></div>
+      <p class="note">Dark three-column footer with a long paragraph and no contact or social row.</p>
+    </figure>
+    <figure>
+      <figcaption><span class="dot green"></span>After</figcaption>
+      <div class="device browser-device"><div class="browser dark"><div class="browser-bar"><i></i><i></i><i></i><span class="url">edualttech.com</span></div><div class="foot-grid"><div class="fcol brand"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span></div></div><div class="fcol"><h4>Quick Links</h4><p>Home</p><p>Courses</p><p>Services &amp; Programs</p><p>About</p><p>Contact</p></div><div class="fcol"><h4>Contact Us</h4><p>Email: info@edualttech.com</p><p>A product by Setsuzoku.</p></div><div class="fcol"><h4>Follow Us</h4><div class="socials"><span>f</span><span>x</span><span>ig</span><span>in</span></div></div></div><div class="legal"><span>&copy; 2026 EduAltTech (Edu Alt Tech). All rights reserved.</span><span>Help &amp; FAQ &middot; Privacy Policy &middot; Terms of Service &middot; Refunds</span></div></div></div>
+      <p class="note">Dark four-column footer: wordmark, quick links, contact, and social row.</p>
+    </figure>
+  </div>
+  <p class="change"><b>What changed</b>Footer keeps the original ink-dark surface and gains contact details plus a social row.</p>
+</article>
+    
+<article class="compare" id="b-footer-mobile">
+  <div class="compare-head">
+    <div><h3>Footer on a phone</h3><p class="route">all public pages · ≤640px</p></div>
+    <span class="badge ship">shipped</span>
+  </div>
+  <div class="pair">
+    <figure>
+      <figcaption><span class="dot red"></span>Before</figcaption>
+      <div class="device before"><div class="notch"></div><div class="screen"><div class="fp dark"><div class="fp-page"><span class="kicker">EDUALTTECH</span><div class="fp-hero"></div></div><div class="fp-brand"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""></div><p class="fdesc">Courses, alternate education, and tuition for students &mdash; taught by paid mentors.</p></div><div class="fp-col"><h4>Learn</h4><p>Courses</p><p>Services &amp; Programs</p></div><div class="fp-col"><h4>Company</h4><p>About</p><p>Our Work</p><p>Partners</p><p>Team</p><p>Contact</p></div><div class="fp-col"><h4>Account</h4><p>Sign in</p><p>Get started</p><p>Become a mentor</p></div><div class="fp-legal">&copy; 2026 EduAltTech. A product by Setsuzoku.<br>Help &amp; FAQ &middot; Privacy &middot; Terms &middot; Refunds</div></div></div></div>
+      <p class="note">Dense stacked columns and a paragraph pushed legal links far down.</p>
+    </figure>
+    <figure>
+      <figcaption><span class="dot green"></span>After</figcaption>
+      <div class="device after"><div class="notch"></div><div class="screen"><div class="fp dark"><div class="fp-page"><span class="kicker">EDUALTTECH</span><div class="fp-hero"></div></div><div class="fp-brand"><div class="lockup"><img class="mark" src="frontend/public/media/brand/logo.png" alt=""><span class="wordmark">EduAltTech</span></div></div><div class="fp-col"><h4>Quick Links</h4><p>Home</p><p>Courses</p><p>Services &amp; Programs</p><p>About</p><p>Contact</p></div><div class="fp-col"><h4>Contact Us</h4><p>info@edualttech.com</p><p>A product by Setsuzoku.</p></div><div class="fp-col"><h4>Follow Us</h4><div class="socials"><span>f</span><span>x</span><span>ig</span><span>in</span></div></div><div class="fp-legal">&copy; 2026 EduAltTech. All rights reserved.<br>Help &amp; FAQ &middot; Privacy &middot; Terms &middot; Refunds</div></div></div></div>
+      <p class="note">Sections stack cleanly; contact and legal links stay in reach.</p>
+    </figure>
+  </div>
+  <p class="change"><b>What changed</b>The redesign keeps the same order on mobile without cramped columns.</p>
+</article>
+  </section>
+
+  <section class="block" id="proposals">
+    <h2>Proposals — not applied</h2>
+    <p class="sub">61 items, grouped by area. Text only until you approve a direction; no code and no design changes are live.</p>
+    <details class="group">
+  <summary><span>Shared patterns</span><b>1</b></summary>
+  <table><thead><tr><th>Page or pattern</th><th>Proposed change</th></tr></thead><tbody><tr><td class="t">Page-header + section rhythm all app pages</td><td class="n">Learner pages hand-roll h1 sizes (2xl vs 3xl) and card padding (p-5 vs p-6 vs p-8). One small PageHeader + spacing scale removes the drift without touching content.</td></tr></tbody></table>
+</details><details class="group">
+  <summary><span>Public &amp; auth pages</span><b>24</b></summary>
+  <table><thead><tr><th>Page or pattern</th><th>Proposed change</th></tr></thead><tbody><tr><td class="t">Footer social links all public pages</td><td class="n">Four social buttons point to “#”, so they look live but do nothing. Replace with real profiles, or remove the block until the accounts exist.</td></tr><tr><td class="t">Home /</td><td class="n">The hero is strong, but ownership and proof arrive late. Add a compact proof row under the CTAs and give the hero image a real caption. Keep the marquee moving only when reduced-motion is off.</td></tr><tr><td class="t">Course catalogue /courses</td><td class="n">Filters are three full-width selects stacked above results on mobile — the first course sits ~500px down. Put search first, then a single scrollable filter row, and show the result count beside it.</td></tr><tr><td class="t">Course detail /courses/[slug]</td><td class="n">On phones the enrolment card falls after the whole curriculum. Add a sticky bottom bar with price + enrol so the action is always one tap away; keep the rail sticky on desktop.</td></tr><tr><td class="t">Services &amp; Programs /services</td><td class="n">Service rows read as a long list. Give each one an outcome line and a clear next step, and place the “talk to us” CTA after the second item on mobile.</td></tr><tr><td class="t">Become a Mentor /mentor</td><td class="n">The page explains the process but not the reward. Add a short “what you get” strip (paid role, assigned course, workspace) and keep the apply CTA visible on mobile with a bottom bar.</td></tr><tr><td class="t">Team /team</td><td class="n">Portraits are 80px thumbnails in a text list. A 3-up portrait grid with names and roles reads as a team page rather than a directory dump.</td></tr><tr><td class="t">Partners /partners</td><td class="n">Grouped logo lists are informative but visually flat. Add a count per group and a compact logo card grid so schools can scan for themselves.</td></tr><tr><td class="t">About /about</td><td class="n">The story and values are solid. Add a short timeline (founded → first school → mentor model) so the “education company that employs people” claim has a sequence, not just prose.</td></tr><tr><td class="t">Contact /contact</td><td class="n">The form is already two-column on desktop. On mobile, the “what we can help with” list sits before the form and delays the task. Put the form first on phones, details second.</td></tr><tr><td class="t">Help &amp; FAQ /faq</td><td class="n">Search + category chips already work. Surface the five most-asked questions before the filter UI, and add a “still stuck?” contact card after the list.</td></tr><tr><td class="t">Privacy · Terms · Refund /privacy · /terms · /refund-policy</td><td class="n">Long legal pages have no wayfinding. Add a sticky “On this page” index on desktop and a last-updated line at the top.</td></tr><tr><td class="t">Sign in /login</td><td class="n">A single centred card works, but desktop leaves half the viewport empty. Add a branded aside with one testimonial and three outcomes; keep the card first on mobile.</td></tr><tr><td class="t">Create account /signup</td><td class="n">Show the three-step flow before the form (email → code → details) so the verification screen is expected, and add password guidance inline.</td></tr><tr><td class="t">Forgot password /forgot-password</td><td class="n">Add the expected timeline (“usually arrives in under a minute”) and a resend countdown so people do not hammer the button.</td></tr><tr><td class="t">Reset password /reset-password</td><td class="n">Show password rules and a live strength meter before submit; disable the button until both fields match.</td></tr><tr><td class="t">Verify email /verify-email</td><td class="n">The OTP flow is correct. Add the masked email to the heading, a resend countdown, and a “change email” link so a typo is recoverable.</td></tr><tr><td class="t">Reactivate account /reactivate</td><td class="n">Explain exactly what is restored and what is not, and show the account email so people know which account they are reviving.</td></tr><tr><td class="t">Complete registration /complete-registration</td><td class="n">The final step is the highest-anxiety screen. Keep a visible step count, show the verified email read-only, and put password rules beside the field.</td></tr><tr><td class="t">OAuth callback /auth/callback</td><td class="n">It is a silent spinner. Add a status line and a fallback link after 10 seconds so a stalled OAuth round-trip is not a blank screen.</td></tr><tr><td class="t">Checkout /checkout</td><td class="n">On mobile the summary and mentor picker stack before the pay button. Pin the total + pay action to the bottom and collapse the mentor list into a select.</td></tr><tr><td class="t">Payment result /checkout/result</td><td class="n">The result screen is a single message. Add a receipt block (course, amount, order ref) and two explicit next actions: open course or retry payment.</td></tr><tr><td class="t">Onboarding /onboarding</td><td class="n">The two-step card has no progress signal. Add “1 of 2”, allow Skip, and preserve answers if the user refreshes.</td></tr><tr><td class="t">404 / route errors not-found · global-error</td><td class="n">Keep the illustration, but offer search and three likely destinations instead of a single “home” button.</td></tr></tbody></table>
+</details><details class="group">
+  <summary><span>Learner pages</span><b>14</b></summary>
+  <table><thead><tr><th>Page or pattern</th><th>Proposed change</th></tr></thead><tbody><tr><td class="t">Dashboard /dashboard</td><td class="n">The hero and stat row are good. Turn the four counters into actionable tiles and add a “this week” goal so the page answers “what should I do now?”</td></tr><tr><td class="t">My Learning /dashboard/my-learning</td><td class="n">Every course renders the same card. Add progress-first sorting and tabs for In progress / Completed / Not started.</td></tr><tr><td class="t">Course home /dashboard/courses/[slug]</td><td class="n">The three-column desktop layout is dense; on mobile the lesson list and chat stack without a clear order. Make the current lesson the first block and collapse curriculum into a drawer.</td></tr><tr><td class="t">Lesson viewer /dashboard/courses/[slug]/lessons/[lessonId]</td><td class="n">Long lessons have no reading progress or persistent next action. Add a top progress bar and a sticky prev/next footer.</td></tr><tr><td class="t">Roadmap /dashboard/courses/[slug]/roadmap</td><td class="n">The timeline is readable on desktop but dense on mobile. Switch to a vertical stepper below lg and show only the current + next chapter until expanded.</td></tr><tr><td class="t">Live sessions /dashboard/courses/[slug]/meetings</td><td class="n">List rows show date and time but bury the join action. Add a state chip (Live / Starts in 2h / Recording) and one primary action per row.</td></tr><tr><td class="t">Resources /dashboard/courses/[slug]/resources</td><td class="n">Files render as a flat list. Group by week/type, show file size and type icon, and add a download-all action for mentors.</td></tr><tr><td class="t">Progress /dashboard/progress</td><td class="n">Three stat cards plus course rows. Add one chart (lessons per week) so progress over time is visible, not just totals.</td></tr><tr><td class="t">Orders /dashboard/orders</td><td class="n">Rows expand for details, but there is no receipt. Add a download invoice action on paid orders and a status timeline in the expanded panel.</td></tr><tr><td class="t">Notifications /dashboard/notifications</td><td class="n">Filter chips and mark-all work. Group items by day and add a per-item link target so a notification is actionable, not just readable.</td></tr><tr><td class="t">Wishlist /dashboard/wishlist</td><td class="n">Saved courses should show price and a direct enrol action, not just a link back to the detail page.</td></tr><tr><td class="t">Settings /dashboard/settings</td><td class="n">Three stacked cards become a long scroll on mobile. Switch to tabs (Account / Mobile / Security / Notifications) and keep the danger zone last.</td></tr><tr><td class="t">Profile /dashboard/profile</td><td class="n">Avatar, details, and edit form are separate cards. Add a completion meter and put “Edit” actions on each field group, not one global form.</td></tr><tr><td class="t">Messages /dashboard/chat</td><td class="n">Mobile already switches between thread list and conversation — good. Add unread badges, a typing indicator, and a date divider so long threads stay scannable.</td></tr></tbody></table>
+</details><details class="group">
+  <summary><span>Mentor pages</span><b>5</b></summary>
+  <table><thead><tr><th>Page or pattern</th><th>Proposed change</th></tr></thead><tbody><tr><td class="t">Mentor dashboard /dashboard/mentor</td><td class="n">Teaching and application sections are stacked with equal weight. Lead with today’s sessions and a compact earnings/impact strip, then applications.</td></tr><tr><td class="t">Apply to mentor /dashboard/mentor/apply</td><td class="n">One long form. Break it into three steps (About you → Experience → Course) with a progress bar; keep the resume upload in step 2.</td></tr><tr><td class="t">Teaching course /dashboard/mentor/courses/[slug]</td><td class="n">The workspace is one long page. Add a sticky course header (title + learner count + status) and tabs for Lessons / Meetings / Learners.</td></tr><tr><td class="t">Application detail /dashboard/mentor/applications/[id]</td><td class="n">Show the decision state as a timeline (submitted → reviewed → decided) and surface any reviewer note before the form data.</td></tr><tr><td class="t">Teaching workspace /dashboard/mentor/*</td><td class="n">Lesson and meeting editors share buttons but not a layout. Give editors a sticky action bar (Save / Preview / Publish) and collapse long forms into sections.</td></tr></tbody></table>
+</details><details class="group">
+  <summary><span>Admin &amp; CMS</span><b>17</b></summary>
+  <table><thead><tr><th>Page or pattern</th><th>Proposed change</th></tr></thead><tbody><tr><td class="t">Admin overview /dashboard/admin</td><td class="n">Eight equal metric cards have no hierarchy, and every card shouts at once. Lead with four KPIs, put the rest behind a “more stats” row, and add pending actions.</td></tr><tr><td class="t">Users /dashboard/admin/users</td><td class="n">Table + mobile cards already exist — keep that. Add bulk selection, a role filter chip row, and make the email copyable.</td></tr><tr><td class="t">User detail /dashboard/admin/users/[id]</td><td class="n">One long column mixes account, enrolments, and actions. Split into tabs and pin the destructive actions to a clearly separated danger zone.</td></tr><tr><td class="t">Courses /dashboard/admin/courses</td><td class="n">The table is desktop-only. Add cover thumbnails, status filters, and a card list on mobile.</td></tr><tr><td class="t">Course editor /dashboard/admin/courses/new · /[id]</td><td class="n">The editor is a very long form with one save button at the bottom. Add a section index on the left and a sticky save bar; validate inline before save.</td></tr><tr><td class="t">Roadmap builder /dashboard/admin/courses/[id]/roadmap</td><td class="n">Chapter rows are tall and repetitive. Add drag handles, collapse rows, and show lesson counts per chapter in a compact header.</td></tr><tr><td class="t">Participants /dashboard/admin/courses/[id]/participants</td><td class="n">Add progress bars, last-seen, and a CSV export. Keep the table scrollable on mobile, or switch to cards.</td></tr><tr><td class="t">Mentors /dashboard/admin/mentors</td><td class="n">Capacity is the key number but reads as a bare integer. Show a capacity bar and flag mentors at/over capacity.</td></tr><tr><td class="t">Orders /dashboard/admin/orders</td><td class="n">Money and statuses are the whole point of this page. Add a status chip, filter row, tabular figures, and a receipt drawer instead of a modal wall of text.</td></tr><tr><td class="t">Applications /dashboard/admin/applications</td><td class="n">A list of applications is a queue. Add a kanban-style status column or tabs (Pending / Interview / Decided) and show course + applicant in the first line.</td></tr><tr><td class="t">Application review /dashboard/admin/applications/[id]</td><td class="n">Decision controls sit far from the evidence. Use a two-column reviewer layout with a sticky decision panel, and require a note for rejection.</td></tr><tr><td class="t">Analytics /dashboard/admin/analytics</td><td class="n">Charts and tables are useful but static. Add a date-range control and tabular figures; make the chart bars tappable for exact values on mobile.</td></tr><tr><td class="t">Audit log /dashboard/admin/audit</td><td class="n">Add a filter by actor/action and make each entry expandable to show the before/after payload.</td></tr><tr><td class="t">Platform settings /dashboard/admin/settings</td><td class="n">Group related settings into sections with descriptions, and add a sticky save bar so changes are not lost below the fold.</td></tr><tr><td class="t">CMS pages /dashboard/admin/cms/*</td><td class="n">Five CMS screens repeat the same table + dialog pattern. One shared responsive data table and one dialog shell would cut the code and make mobile behaviour consistent.</td></tr><tr><td class="t">Media library /dashboard/admin/cms/media</td><td class="n">The grid is good. Add drag-and-drop upload, an “unused assets” filter, and warn before deleting an asset that is still referenced.</td></tr><tr><td class="t">Admin dialogs all admin + CMS routes</td><td class="n">Dialogs look right but are hand-rolled per screen. One shared dialog with focus trap, Escape, scroll lock, and focus restore fixes every page at once.</td></tr></tbody></table>
+</details>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap">Rendered from the working branch. Previews are HTML reconstructions at device width; use a real device or browser for pixel QA.</div></footer>
+</body>
+</html>

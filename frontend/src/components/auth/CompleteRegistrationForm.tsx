@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PersonOutlined from "@mui/icons-material/PersonOutlined";
@@ -27,9 +27,10 @@ export default function CompleteRegistrationForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ text: string; code?: string } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (ready) return;
+    if (!ready) return;
     let active = true;
     hasSession().then((yes) => {
       if (active && yes) router.replace("/");
@@ -38,6 +39,11 @@ export default function CompleteRegistrationForm() {
       active = false;
     };
   }, [ready, router]);
+
+  useEffect(() => {
+    if (!Object.keys(errors).length) return;
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+  }, [errors]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,10 +104,10 @@ export default function CompleteRegistrationForm() {
   return (
     <div className="space-y-6">
       <p className="text-sm leading-relaxed text-ink-600">
-        Last step - add your name and choose a password to finish creating your account for{" "}
+        Last step — add your name and choose a password to finish creating your account for{" "}
         <span className="font-semibold text-ink-900">{flow.email}</span>.
       </p>
-      <form onSubmit={submit} className="space-y-4" noValidate>
+      <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField
             label="First name"

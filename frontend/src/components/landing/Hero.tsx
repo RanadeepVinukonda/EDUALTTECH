@@ -9,10 +9,10 @@ export default function Hero() {
             Education beyond the syllabus
           </p>
           <h1 className="mt-5 font-display text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]">
-            Edu Alt Tech - an education company that also puts skilled people to work
+            Edu Alt Tech — an education company that also puts skilled people to work
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-600">
-            EduAltTech teaches students through structured courses, alternate learning, and tuition -
+            EduAltTech teaches students through structured courses, alternate learning, and tuition —
             and employs skilled people who were out of work as the mentors who teach them. One platform,
             opportunity on both sides.
           </p>
@@ -32,6 +32,7 @@ export default function Hero() {
             <img
               src="/media/photos/EAT3.jpg"
               alt="An EduAltTech learning session"
+              fetchPriority="high"
               className="aspect-[4/3] w-full object-cover"
             />
           </div>

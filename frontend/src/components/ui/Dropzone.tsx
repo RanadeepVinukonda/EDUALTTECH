@@ -41,7 +41,8 @@ export default function Dropzone({
         type="file"
         accept={accept}
         className="sr-only"
-        aria-label={ariaLabel}
+        tabIndex={-1}
+        aria-label={ariaLabel ?? label}
         onChange={(e) => {
           onFile(e.target.files?.[0] ?? null);
           e.target.value = "";
@@ -79,7 +80,9 @@ export default function Dropzone({
         >
           {icon ?? <UploadFile fontSize="small" />}
         </span>
-        <span className="text-sm font-semibold text-ink-700">{file ? file.name : label}</span>
+        <span className="max-w-full truncate text-sm font-semibold text-ink-700">
+          {file ? file.name : label}
+        </span>
         <span className="text-xs text-slate-500">{file ? "Click to replace" : hint}</span>
       </button>
     </div>

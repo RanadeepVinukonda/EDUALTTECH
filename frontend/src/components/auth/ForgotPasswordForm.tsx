@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import MailOutlined from "@mui/icons-material/MailOutlined";
 import { apiPost, ApiError } from "@/lib/api";
@@ -13,6 +13,12 @@ export default function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string>("");
   const [fieldError, setFieldError] = useState<string>("");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!fieldError) return;
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+  }, [fieldError]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,7 +66,7 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4" noValidate>
+    <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>
       <p className="text-sm leading-relaxed text-ink-600">
         Enter the email address for your account and we will send you a link to reset your password.
       </p>

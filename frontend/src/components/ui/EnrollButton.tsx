@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
@@ -16,11 +16,24 @@ export default function EnrollButton({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean }) {
   const [paying, setPaying] = useState(false);
+  const timer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    },
+    [],
+  );
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (paying || loading || disabled) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      onClick?.(e);
+      return;
+    }
     setPaying(true);
-    window.setTimeout(() => {
+    timer.current = window.setTimeout(() => {
+      timer.current = null;
       setPaying(false);
       onClick?.(e);
     }, ANIM_MS);

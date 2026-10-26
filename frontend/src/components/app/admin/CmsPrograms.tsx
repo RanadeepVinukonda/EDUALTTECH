@@ -52,7 +52,7 @@ export default function CmsPrograms() {
     <div className="space-y-6">
       <AdminHeader
         title="Programs"
-        description="Offering catalogue. Programs are informational records - the backend has no enrolment, dates, or category for them yet."
+        description="Offering catalogue. Programs are informational records — the backend has no enrolment, dates, or category for them yet."
         actions={
           <Button size="sm" onClick={() => setCreating(true)}>
             New program
@@ -89,11 +89,11 @@ export default function CmsPrograms() {
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-2 py-2 font-semibold">Title</th>
-                  <th className="px-2 py-2 font-semibold">Organization</th>
-                  <th className="px-2 py-2 font-semibold">Price</th>
-                  <th className="px-2 py-2 font-semibold">Status</th>
-                  <th className="px-2 py-2 font-semibold">Updated</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Title</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Organization</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Price</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Status</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Updated</th>
                   <th className="px-2 py-2" />
                 </tr>
               </thead>
@@ -104,8 +104,8 @@ export default function CmsPrograms() {
                       <p className="font-semibold text-ink-900">{p.title}</p>
                       <p className="line-clamp-1 text-xs text-slate-500">{p.summary}</p>
                     </td>
-                    <td className="px-2 py-3 text-slate-600">{p.organization?.name ?? "-"}</td>
-                    <td className="px-2 py-3 text-slate-600">{p.pricePaise == null ? "-" : formatMoney(p.pricePaise)}</td>
+                    <td className="px-2 py-3 text-slate-600">{p.organization?.name ?? "—"}</td>
+                    <td className="px-2 py-3 text-slate-600 tabular-nums">{p.pricePaise == null ? "—" : formatMoney(p.pricePaise)}</td>
                     <td className="px-2 py-3">
                       <StatusPill tone={p.isPublished ? "success" : "warn"}>{p.isPublished ? "published" : "draft"}</StatusPill>
                     </td>
@@ -131,7 +131,7 @@ export default function CmsPrograms() {
       </Panel>
 
       <p className="text-sm text-slate-500">
-        The backend model has no start/end dates, no category, and no enrolment or checkout flow for programs - only a
+        The backend model has no start/end dates, no category, and no enrolment or checkout flow for programs — only a
         price and an optional organisation.
       </p>
 

@@ -56,8 +56,8 @@ interface EditorCourse {
 function editorError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
     if (err.code === "ROADMAP_INCOMPLETE") return "Add at least one chapter with a topic before publishing.";
-    if (err.code === "HAS_ORDERS") return "Paid orders exist - archive the course instead of deleting.";
-    if (err.code === "HAS_PARTICIPANTS") return "Enrolled participants exist - archive the course instead.";
+    if (err.code === "HAS_ORDERS") return "Paid orders exist — archive the course instead of deleting.";
+    if (err.code === "HAS_PARTICIPANTS") return "Enrolled participants exist — archive the course instead.";
     if (err.code === "INVALID_TRANSITION") return err.message;
     if (err.code === "FORBIDDEN" || err.status === 403) return "You don’t have permission to edit this course.";
     if (err.code === "UNAUTHORIZED" || err.status === 401) return "Your session expired. Please sign in again.";
@@ -409,7 +409,7 @@ function CourseForm({
                     }
                   }}
                   maxLength={32}
-                  placeholder="e.g. 2D Graphics, Game Dev - press Enter"
+                  placeholder="e.g. 2D Graphics, Game Dev — press Enter"
                 />
                 <p className="mt-1 text-xs text-slate-500">Topic tags like “2D Graphics”, “Game Dev”. Up to 20.</p>
               </div>
@@ -422,6 +422,7 @@ function CourseForm({
                     <Input
                       key={i}
                       value={f}
+                      aria-label={`Feature ${i + 1}`}
                       onChange={(e) => setFeatures((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))}
                       maxLength={40}
                       placeholder={FEATURE_HINTS[i]}
@@ -445,7 +446,7 @@ function CourseForm({
                     placeholder="0 for free"
                   />
                   <p className="mt-1 text-xs text-slate-500">
-                    {priceInvalid ? "Enter a valid amount between ₹0 and ₹1,00,000." : `Stored as ${pricePaise?.toLocaleString("en-IN")} paise.`}
+                    {priceInvalid ? "Enter a valid amount between ₹0 and ₹1,00,000." : `Stored as ${new Intl.NumberFormat("en-IN").format(pricePaise ?? 0)} paise.`}
                   </p>
                 </div>
                 <div>
@@ -505,12 +506,12 @@ function CourseForm({
         <div className="space-y-6">
           <Panel title="Preview">
             <p className="text-sm text-slate-500">
-              Current price: <strong className="text-ink-900">{priceInvalid ? "-" : formatMoney(pricePaise ?? 0, initial.currency)}</strong>
+              Current price: <strong className="text-ink-900">{priceInvalid ? "—" : formatMoney(pricePaise ?? 0, initial.currency)}</strong>
             </p>
             {thumbnailUrl && (
               <div className="mt-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={thumbnailUrl} alt="" className="aspect-[16/10] w-full rounded-xl object-cover" />
+                <img src={thumbnailUrl} alt="" width={320} height={200} className="aspect-[16/10] w-full rounded-xl object-cover" />
               </div>
             )}
           </Panel>
@@ -575,7 +576,7 @@ function EditHeader({ course, onSaved }: { course: EditorCourse; onSaved?: () =>
         <div role="alertdialog" aria-modal="true" aria-label={`Confirm ${confirm.label}`} className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
           <p className="text-sm text-amber-900">{confirm.detail}</p>
           <div className="mt-2 flex gap-2">
-            <Button size="sm" loading={busy} onClick={() => apply(confirm.next)}>
+            <Button size="sm" autoFocus loading={busy} onClick={() => apply(confirm.next)}>
               Confirm {confirm.label.toLowerCase()}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setConfirm(null)} disabled={busy}>

@@ -66,6 +66,7 @@ export default function AdminAudit() {
                       type="button"
                       onClick={() => setOpenId(open ? null : l.id)}
                       aria-expanded={open}
+                      aria-controls={`audit-detail-${l.id}`}
                       className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 py-3 text-left hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
                     >
                       <span className="font-mono text-xs font-semibold text-brand-800">{l.action}</span>
@@ -77,13 +78,13 @@ export default function AdminAudit() {
                       <span className="ml-auto text-xs text-slate-500">{formatDate(l.createdAt)}</span>
                     </button>
                     {open && (
-                      <div className="mb-2 rounded-xl bg-slate-50 p-3 text-xs">
+                      <div id={`audit-detail-${l.id}`} className="mb-2 rounded-xl bg-slate-50 p-3 text-xs">
                         <p className="text-slate-500">Event id: <span className="font-mono text-ink-900">{l.id}</span></p>
                         {l.actorId && <p className="text-slate-500">Actor id: <span className="font-mono text-ink-900">{l.actorId}</span></p>}
                         <p className="text-slate-500">Target: <span className="font-mono text-ink-900">{l.targetType}{l.targetId ? ` / ${l.targetId}` : ""}</span></p>
                         <p className="mt-2 font-semibold text-slate-500">Metadata</p>
                         <pre className={cn("mt-1 overflow-x-auto whitespace-pre-wrap break-words text-ink-900")}>
-                          {l.meta == null ? "-" : JSON.stringify(l.meta, null, 2)}
+                          {l.meta == null ? "—" : JSON.stringify(l.meta, null, 2)}
                         </pre>
                       </div>
                     )}

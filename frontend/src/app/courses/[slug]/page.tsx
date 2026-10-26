@@ -150,7 +150,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
       <div className={`${wrap} grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14`}>
         <div className="min-w-0">
-          {/* Hero - translucent thumbnail with title + tags on it */}
+          {/* Hero — translucent thumbnail with title + tags on it */}
           <div className="relative flex min-h-[240px] items-end overflow-hidden rounded-[20px] bg-slate-900 shadow-elev2">
             {course.thumbnailUrl && (
               <div className="absolute inset-0">
@@ -166,7 +166,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </span>
                 {course.domain && <span className="text-white/60">{course.domain}</span>}
               </div>
-              <h1 className="mt-3.5 max-w-[660px] font-display text-2xl font-extrabold tracking-tight sm:text-[27px]">
+              <h1 className="mt-3.5 max-w-[660px] font-display text-2xl font-extrabold tracking-tight text-balance break-words sm:text-[27px]">
                 {course.title}
               </h1>
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-brand-100">
@@ -187,7 +187,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <h2 id="about-heading" className="font-display text-lg font-bold text-ink-900">
               About this course
             </h2>
-            <p className="mt-2.5 whitespace-pre-line leading-relaxed text-ink-700">
+            <p className="mt-2.5 whitespace-pre-line leading-relaxed break-words text-ink-700">
               {course.roadmapSummary?.trim() || course.description}
             </p>
           </section>
@@ -240,7 +240,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                             />
                           </summary>
                           {ch.summary && (
-                            <p className="border-t border-slate-100 px-4 py-3 text-sm whitespace-pre-line text-ink-600">
+                            <p className="border-t border-slate-100 px-4 py-3 text-sm whitespace-pre-line break-words text-ink-600">
                               {ch.summary}
                             </p>
                           )}
@@ -249,7 +249,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                               {ch.topics.map((t) => (
                                 <div key={t.id} className="flex items-center gap-2.5 border-t border-slate-100 px-4 py-2.5 text-[13.5px] text-ink-700 first:border-t-0">
                                   <span className="min-w-0">{t.title}</span>
-                                  <span className="ml-auto shrink-0 text-[11px] text-ink-500">
+                                  <span className="ml-auto shrink-0 text-[11px] tabular-nums text-ink-500">
                                     {t._count.lessons} {t._count.lessons === 1 ? "lesson" : "lessons"}
                                   </span>
                                 </div>
@@ -302,7 +302,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                           <div className="text-[21px] font-extrabold leading-none text-brand-700">{m.free}</div>
                           <div className="mt-1 text-[11px] text-ink-500">seats left</div>
                           <div className="mt-2 h-[5px] w-[74px] overflow-hidden rounded-full bg-slate-100">
-                            <i className="block h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} />
+                            <span aria-hidden="true" className="block h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
                       ) : (
@@ -321,14 +321,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </div>
                 <p className="mt-5 font-display text-base font-bold text-ink-900">Waiting for a mentor</p>
                 <p className="mx-auto mt-1 max-w-md text-sm text-ink-600">
-                  No mentor is assigned to this course yet. Check back soon - you can still apply to mentor below.
+                  No mentor is assigned to this course yet. Check back soon — you can still apply to mentor below.
                 </p>
               </div>
             )}
           </section>
         </div>
 
-        {/* Enrolment rail - before enrolment / application */}
+        {/* Enrolment rail — before enrolment / application */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <CourseActions
             courseId={course.id}

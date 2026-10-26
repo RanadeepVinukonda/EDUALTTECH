@@ -22,7 +22,7 @@ export default function AdminParticipants({ courseId, embedded = false }: { cour
     <div className={embedded ? "space-y-4" : "space-y-6"}>
       {!embedded && (
         <AdminHeader
-          title={`Participants - ${course.title}`}
+          title={`Participants — ${course.title}`}
           description="Course-specific participation. MENTOR and LEARNER are per-course roles, never global account roles."
           actions={
             <Link href={`/dashboard/admin/courses/${course.id}`} className="text-sm font-semibold text-brand-700 hover:underline">
@@ -44,8 +44,8 @@ export default function AdminParticipants({ courseId, embedded = false }: { cour
             <table className="w-full min-w-[520px] text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-2 py-2 font-semibold">Mentor</th>
-                  <th className="px-2 py-2 font-semibold">Capacity</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Mentor</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Capacity</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -55,7 +55,7 @@ export default function AdminParticipants({ courseId, embedded = false }: { cour
                       <p className="font-semibold text-ink-900">{userName(m.user)}</p>
                       {m.user.bio && <p className="line-clamp-1 text-xs text-slate-500">{m.user.bio}</p>}
                     </td>
-                    <td className="px-2 py-3 text-slate-600">{m.capacity ?? "platform default"}</td>
+                    <td className="px-2 py-3 text-slate-600 tabular-nums">{m.capacity ?? "platform default"}</td>
                   </tr>
                 ))}
               </tbody>

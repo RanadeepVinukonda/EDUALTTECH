@@ -19,6 +19,12 @@ export default function ResetPasswordForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const settled = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!Object.keys(errors).length) return;
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+  }, [errors]);
 
   useEffect(() => {
     const sb = getSupabase();
@@ -87,7 +93,7 @@ export default function ResetPasswordForm() {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4" noValidate>
+    <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>
       <PasswordField
         label="New password"
         name="password"

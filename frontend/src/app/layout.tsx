@@ -8,10 +8,10 @@ import "./globals.css";
 
 const SITE_NAME = "EduAltTech";
 const SITE_DESCRIPTION =
-  "Edu Alt Tech (EduAltTech) - courses, mentors, and structured roadmaps for ambitious learners. Learn in-demand skills with real mentors. A product by Setsuzoku.";
+  "Edu Alt Tech (EduAltTech) — courses, mentors, and structured roadmaps for ambitious learners. Learn in-demand skills with real mentors. A product by Setsuzoku.";
 
 export const viewport: Viewport = {
-  themeColor: "#038c3e",
+  themeColor: "#ffffff",
   colorScheme: "light",
   width: "device-width",
   initialScale: 1,
@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase,
-    title: { default: "EduAltTech - Learn. Build. Grow.", template: "%s · EduAltTech" },
+    title: { default: "EduAltTech — Learn. Build. Grow.", template: "%s · EduAltTech" },
     description: SITE_DESCRIPTION,
     applicationName: SITE_NAME,
     keywords: [
@@ -87,13 +87,13 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: SITE_NAME,
       locale: "en_IN",
       url: "/",
-      title: "EduAltTech - Learn. Build. Grow.",
+      title: "EduAltTech — Learn. Build. Grow.",
       description: SITE_DESCRIPTION,
       images: [{ url: "/media/photos/og-image.jpg", width: 1200, height: 630, alt: "EduAltTech" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "EduAltTech - Learn. Build. Grow.",
+      title: "EduAltTech — Learn. Build. Grow.",
       description: SITE_DESCRIPTION,
       images: ["/media/photos/og-image.jpg"],
     },

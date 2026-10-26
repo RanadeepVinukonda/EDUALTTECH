@@ -31,7 +31,12 @@ export default function Button({
   loading?: boolean;
 }) {
   return (
-    <button className={buttonClass(variant, size, className)} disabled={disabled || loading} {...props}>
+    <button
+      className={buttonClass(variant, size, className)}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...props}
+    >
       {loading && (
         <span
           aria-hidden

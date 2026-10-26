@@ -203,11 +203,11 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
               <span className="text-slate-500">{progress}%</span>
             </div>
             <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-brand-600 transition-all" style={{ width: `${progress}%` }} />
+              <div className="h-full rounded-full bg-brand-600 transition-[width] duration-500" style={{ width: `${progress}%` }} />
             </div>
           </div>
         )}
-        {!isLearner && <p className="mt-3 text-sm font-semibold text-ink-700">Mentor / staff view - read only.</p>}
+        {!isLearner && <p className="mt-3 text-sm font-semibold text-ink-700">Mentor / staff view — read only.</p>}
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,380px)]">

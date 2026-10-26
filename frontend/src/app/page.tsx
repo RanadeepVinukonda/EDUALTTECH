@@ -4,6 +4,7 @@ import ArrowForward from "@mui/icons-material/ArrowForward";
 import { publicFetch } from "@/lib/server-api";
 import type { CourseListItem } from "@/lib/types";
 import Hero from "@/components/landing/Hero";
+import HomeAuthRedirect from "@/components/layout/HomeAuthRedirect";
 import PartnerStrip from "@/components/landing/PartnerStrip";
 import Offerings from "@/components/landing/Offerings";
 import PhotoBand from "@/components/landing/PhotoBand";
@@ -16,9 +17,9 @@ import LinkButton from "@/components/ui/LinkButton";
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
 export const metadata: Metadata = {
-  title: "Edu Alt Tech (EduAltTech) - practical AI, entrepreneurship and technology courses",
+  title: "Edu Alt Tech (EduAltTech) — practical AI, entrepreneurship and technology courses",
   description:
-    "Edu Alt Tech (EduAltTech) teaches practical AI, entrepreneurship, and technology through structured courses, alternate learning, and tuition - taught by skilled mentors we employ, plus the software we build for schools.",
+    "Edu Alt Tech (EduAltTech) teaches practical AI, entrepreneurship, and technology through structured courses, alternate learning, and tuition — taught by skilled mentors we employ.",
   alternates: { canonical: "/" },
 };
 
@@ -29,6 +30,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <HomeAuthRedirect />
       <Hero />
       <PartnerStrip scroll />
       <Offerings />
@@ -83,12 +85,12 @@ export default async function HomePage() {
       {/* Final call to action */}
       <section className="bg-brand-700 py-16 sm:py-20">
         <div className={`${wrap} text-center`}>
-          <h2 className="mx-auto max-w-2xl font-display text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="mx-auto max-w-2xl font-display text-3xl font-bold text-white text-balance sm:text-4xl">
             Learn with us, or teach and earn with us
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-brand-50">
-            Whether you are a student ready to build, a skilled person looking for work, or a school
-            after a technology partner, there is a clear next step.
+            Whether you are a student ready to build or a skilled person looking for work, there is a
+            clear next step.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <LinkButton href="/courses" variant="secondary" size="lg">

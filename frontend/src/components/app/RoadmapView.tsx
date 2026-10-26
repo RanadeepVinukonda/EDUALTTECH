@@ -139,7 +139,7 @@ export default function RoadmapView({ slug }: { slug: string }) {
             aria-valuemax={100}
             aria-valuenow={percent}
           >
-            <div className="h-full rounded-full bg-brand-600 transition-all" style={{ width: `${percent}%` }} />
+            <div className="h-full rounded-full bg-brand-600 transition-[width]" style={{ width: `${percent}%` }} />
           </div>
           <p className="mt-1.5 text-right text-[11px] text-slate-500">
             {doneCount} of {totalLessons} lessons completed

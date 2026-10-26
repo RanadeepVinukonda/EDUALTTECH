@@ -41,14 +41,14 @@ export default function PartnerStrip({
                 <li
                   key={`${p.name}-${i}`}
                   aria-hidden={i >= PARTNERS.length || undefined}
-                  className="flex h-28 w-64 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-8 shadow-elev1"
+                  className="flex h-40 w-96 shrink-0 items-center justify-center px-10"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={p.src}
                     alt={p.name}
                     loading="lazy"
-                    className="max-h-16 w-auto max-w-full object-contain"
+                    className="max-h-28 w-auto max-w-full object-contain"
                   />
                 </li>
               ))}

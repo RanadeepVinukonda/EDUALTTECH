@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI Review Report — Web Interface Guidelines</title>
+<style>
+:root{
+  --bg:#0b0d10;--panel:#14171c;--panel2:#1a1e24;--border:#262b33;
+  --text:#e6e9ee;--muted:#9aa3af;--accent:#4f8cff;--green:#3ecf8e;
+  --amber:#f5b942;--red:#ff6b6b;--purple:#c084fc;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+code,pre,kbd{font-family:ui-monospace,"Cascadia Code",Consolas,monospace}
+.layout{display:flex;min-height:100vh}
+nav{position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto;width:260px;flex:none;padding:24px 16px;border-right:1px solid var(--border);background:var(--panel)}
+nav h1{font-size:15px;margin:0 0 4px}
+nav p{margin:0 0 16px;font-size:12px;color:var(--muted)}
+nav a{display:block;padding:6px 10px;color:var(--muted);text-decoration:none;border-radius:6px;font-size:13px}
+nav a:hover,nav a:focus-visible{background:var(--panel2);color:var(--text);outline:none}
+nav a.on{background:var(--panel2);color:var(--accent)}
+nav .sec{margin-top:14px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+main{flex:1;min-width:0;padding:32px clamp(16px,4vw,56px);max-width:1100px}
+h2{font-size:22px;margin:48px 0 6px;scroll-margin-top:16px}
+h2:first-of-type{margin-top:0}
+.sub{color:var(--muted);margin:0 0 20px;font-size:14px}
+.pri{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.04em;margin-left:8px;vertical-align:2px}
+.p1{background:#3a1218;color:#ff8f8f}.p2{background:#3a2c12;color:var(--amber)}.p3{background:#12303a;color:#6cd3ff}.p4{background:#241a3a;color:var(--purple)}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:14px 0}
+.finding{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--border)}
+.finding:first-child{border-top:none;padding-top:0}
+.file{color:var(--accent);text-decoration:none;white-space:nowrap;font-family:ui-monospace,monospace;font-size:13px}
+.file:hover{text-decoration:underline}
+.why{color:var(--muted);font-size:13px;margin-top:2px}
+.snip{flex:none}
+pre{background:#0e1116;border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-size:13px;line-height:1.55;margin:10px 0}
+pre code{background:none;padding:0}
+.c{color:#6b7686}.k{color:#c084fc}.s{color:#3ecf8e}.t{color:#4f8cff}.fn{color:#f5b942}
+details{margin:8px 0}
+summary{cursor:pointer;color:var(--accent);font-size:13px;padding:4px 0}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.pass{color:var(--green);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600}
+.bar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:6px 0 2px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--green))}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px}
+.stat b{display:block;font-size:26px}
+.stat span{font-size:12px;color:var(--muted)}
+.copy{float:right;background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--text);border-color:var(--accent);outline:none}
+.tag{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:1px 7px;font-size:12px;color:var(--muted);margin:2px 3px 2px 0}
+@media (max-width:860px){
+  .layout{flex-direction:column}
+  nav{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+  nav a{display:inline-block}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <h1>UI Review Report</h1>
+  <p>Vercel Web Interface Guidelines · 190 files · 21 Oct 2026</p>
+  <div class="sec">Sections</div>
+  <a href="#summary" class="on">Summary</a>
+  <a href="#p1">P1 — Accessibility</a>
+  <a href="#p2">P2 — Layout / Visual</a>
+  <a href="#p3">P3 — Interaction / State</a>
+  <a href="#p4">P4 — Type / Copy sweep</a>
+  <a href="#snippets">Fix Snippets</a>
+  <a href="#pass">Files Passing</a>
+</nav>
+<main>
+
+<h2 id="summary">Summary</h2>
+<p class="sub">All frontend <code>.tsx</code> files reviewed against the latest Web Interface Guidelines. Findings grouped by priority. Click any path to open in VS Code.</p>
+
+<div class="stats">
+  <div class="stat"><b>190</b><span>files reviewed</span></div>
+  <div class="stat"><b>~140</b><span>findings</span></div>
+  <div class="stat"><b>60+</b><span>files pass clean</span></div>
+  <div class="stat"><b>5</b><span>fixes by impact</span></div>
+</div>
+
+<div class="card">
+  <b>Top 5 fixes by impact</b>
+  <table>
+    <tr><th>#</th><th>Fix</th><th>Where</th></tr>
+    <tr><td>1</td><td>Dialog focus traps (8 custom dialogs, none trapped)</td><td><span class="tag">admin-ui.tsx:254</span><span class="tag">cms-ui.tsx:76</span><span class="tag">InviteUserDialog.tsx:97</span><span class="tag">AdminOrders.tsx:224</span></td></tr>
+    <tr><td>2</td><td><code>.tx-card:focus-visible</code> — keyboard focus invisible (outline:none)</td><td><span class="tag">globals.css</span><span class="tag">EnrollButton.tsx:30</span></td></tr>
+    <tr><td>3</td><td>Focus first invalid field on submit</td><td><span class="tag">4 auth forms</span><span class="tag">InquiryForm.tsx:41</span></td></tr>
+    <tr><td>4</td><td><code>theme-color</code> green on white pages</td><td><span class="tag">app/layout.tsx:14</span></td></tr>
+    <tr><td>5</td><td>Reduced-motion timer guards (dead 1.3–3s waits)</td><td><span class="tag">EnrollButton.tsx:20</span><span class="tag">PayButton.tsx:43</span></td></tr>
+  </table>
+</div>
+
+<h2 id="p1">P1 — Accessibility blockers <span class="pri p1">P1</span></h2>
+<p class="sub">Breaks screen-reader / keyboard use. Fix first.</p>
+<div class="card" id="p1list"></div>
+
+<h2 id="p2">P2 — Layout / Visual risks <span class="pri p2">P2</span></h2>
+<p class="sub">CLS, overflow, scroll hijacking, background re-renders.</p>
+<div class="card" id="p2list"></div>
+
+<h2 id="p3">P3 — Interaction / State <span class="pri p3">P3</span></h2>
+<p class="sub">Deep-linking, confirmation, motion, focus behavior.</p>
+<div class="card" id="p3list"></div>
+
+<h2 id="p4">P4 — Typography / Copy sweep <span class="pri p4">P4</span></h2>
+<p class="sub">Small but numerous. Mostly one-line edits.</p>
+<div class="card" id="p4list"></div>
+
+<h2 id="snippets">Fix Snippets</h2>
+<p class="sub">10 reusable fixes covering the largest clusters of findings.</p>
+
+<div class="card">
+  <b>1 · Shared modal — focus trap + Escape + overscroll + focus restore</b> <span class="tag">kills 8 dialog violations</span>
+  <button class="copy">copy</button>
+<pre><code><span class="c">// ui/Modal.tsx — replace ConfirmDialog / CmsDialog / InviteUserDialog / inline alertdialogs</span>
+<span class="k">useEffect</span>(() =&gt; {
+  <span class="k">const</span> prev = document.<span class="fn">activeElement</span> <span class="k">as</span> HTMLElement;
+  <span class="k">const</span> node = ref.current;
+  <span class="k">const</span> onKey = (e: KeyboardEvent) =&gt; {
+    <span class="k">if</span> (e.key === <span class="s">"Escape"</span>) { <span class="fn">onClose</span>(); <span class="k">return</span>; }
+    <span class="k">if</span> (e.key !== <span class="s">"Tab"</span>) <span class="k">return</span>;
+    <span class="k">const</span> f = node.<span class="fn">querySelectorAll</span>&lt;HTMLElement&gt;(
+      <span class="s">'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])'</span>
+    );
+    <span class="k">const</span> first = f[0], last = f[f.length - <span class="t">1</span>];
+    <span class="k">if</span> (e.shiftKey &amp;&amp; document.<span class="fn">activeElement</span> === first) { last.<span class="fn">focus</span>(); e.<span class="fn">preventDefault</span>(); }
+    <span class="k">else if</span> (!e.shiftKey &amp;&amp; document.<span class="fn">activeElement</span> === last) { first.<span class="fn">focus</span>(); e.<span class="fn">preventDefault</span>(); }
+  };
+  document.<span class="fn">addEventListener</span>(<span class="s">"keydown"</span>, onKey);
+  node.<span class="fn">querySelector</span>&lt;HTMLElement&gt;(<span class="s">"button,input"</span>)?.<span class="fn">focus</span>();
+  <span class="k">return</span> () =&gt; {
+    document.<span class="fn">removeEventListener</span>(<span class="s">"keydown"</span>, onKey);
+    prev?.<span class="fn">focus</span>();
+  };
+}, [onClose]);
+
+<span class="c">// scroll container gets:</span>
+<span class="k">&lt;div</span> <span class="fn">className</span>=<span class="s">"... overflow-y-auto overscroll-contain"</span><span class="k">&gt;</span></code></pre>
+</div>
+
+<div class="card">
+  <b>2 · Reduced-motion guard</b> <span class="tag">EnrollButton.tsx:20-27</span> <span class="tag">PayButton.tsx:43-50</span>
+  <button class="copy">copy</button>
+<pre><code><span class="k">const</span> reduced = window.matchMedia?.(<span class="s">"(prefers-reduced-motion: reduce)"</span>).<span class="fn">matches</span>;
+<span class="k">if</span> (reduced) { <span class="fn">onClick</span>?.(e); <span class="k">return</span>; }
+<span class="c">// also clear timeout on unmount</span></code></pre>
+</div>
+
+<div class="card">
+  <b>3 · Hydration-safe FlipClock</b> <span class="tag">ui/FlipClock.tsx:54</span>
+  <button class="copy">copy</button>
+<pre><code><span class="k">const</span> [now, setNow] = <span class="fn">useState</span>&lt;number | <span class="k">null</span>&gt;(<span class="k">null</span>);
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="fn">setNow</span>(<span class="fn">Date.now</span>());
+  <span class="k">const</span> t = <span class="fn">setInterval</span>(() =&gt; <span class="fn">setNow</span>(<span class="fn">Date.now</span>()), <span class="t">1000</span>);
+  <span class="k">return</span> () =&gt; <span class="fn">clearInterval</span>(t);
+}, []);
+<span class="k">if</span> (now === <span class="k">null</span>) <span class="k">return null</span>;</code></pre>
+</div>
+
+<div class="card">
+  <b>4 · Focus first invalid field</b> <span class="tag">LoginForm:41</span> <span class="tag">CompleteRegistrationForm:50</span> <span class="tag">ForgotPasswordForm:21</span> <span class="tag">ResetPasswordForm:53</span> <span class="tag">InquiryForm:41</span>
+  <button class="copy">copy</button>
+<pre><code><span class="k">if</span> (<span class="fn">Object.keys</span>(errs).<span class="fn">length</span>) {
+  formRef.current?.<span class="fn">querySelector</span>&lt;HTMLElement&gt;(<span class="s">'[aria-invalid="true"]'</span>)?.<span class="fn">focus</span>();
+  <span class="k">return</span>;
+}</code></pre>
+</div>
+
+<div class="card">
+  <b>5 · Visible focus for .tx-card</b> <span class="tag">globals.css</span> <span class="tag">outline:none → replacement</span>
+  <button class="copy">copy</button>
+<pre><code><span class="fn">.tx-card</span>:focus-visible {
+  outline: <span class="t">2px</span> solid <span class="fn">var</span>(--color-brand-<span class="t">600</span>);
+  outline-offset: <span class="t">2px</span>;
+}</code></pre>
+</div>
+
+<div class="card">
+  <b>6 · transition-all replacements</b> <span class="tag">CourseOverviewView:206</span> <span class="tag">RoadmapView:142</span> <span class="tag">about/page:214-220</span>
+  <button class="copy">copy</button>
+<pre><code><span class="k">&lt;div</span> <span class="fn">className</span>=<span class="s">"transition-[width] duration-500"</span><span class="k">&gt;</span>   <span class="c">// progress bars</span>
+<span class="k">&lt;div</span> <span class="fn">className</span>=<span class="s">"transition-colors duration-500"</span><span class="k">&gt;</span>  <span class="c">// about page</span></code></pre>
+</div>
+
+<div class="card">
+  <b>7 · Progress bar semantics</b> <span class="tag">ProgressView.tsx:124</span>
+  <button class="copy">copy</button>
+<pre><code><span class="k">&lt;div</span> <span class="fn">role</span>=<span class="s">"progressbar"</span> <span class="fn">aria-valuemin</span>={<span class="t">0</span>} <span class="fn">aria-valuemax</span>={<span class="t">100</span>}
+     <span class="fn">aria-valuenow</span>={r.progressPct} <span class="fn">aria-label</span>={`${r.title} progress`}<span class="k">/&gt;</span></code></pre>
+</div>
+
+<div class="card">
+  <b>8 · URL state for filters</b> <span class="tag">ChatView:24</span> <span class="tag">MeetingManager:123</span> <span class="tag">NotificationsView:19</span> <span class="tag">FaqBrowser:17</span> <span class="tag">WorkBrowser:14</span> <span class="tag">AdminUsers:40</span>
+  <button class="copy">copy</button>
+<pre><code><span class="k">const</span> setFilter = (v: <span class="k">string</span>) =&gt; {
+  <span class="k">const</span> params = <span class="k">new</span> <span class="fn">URLSearchParams</span>(searchParams);
+  params.<span class="fn">set</span>(<span class="s">"filter"</span>, v);
+  <span class="fn">router.replace</span>(`?${params}`, { scroll: <span class="k">false</span> });
+};</code></pre>
+</div>
+
+<div class="card">
+  <b>9 · Image CLS guard</b> <span class="tag">CoverImage:44</span> <span class="tag">Hero:32</span> <span class="tag">WorkCard:9</span> <span class="tag">work/page:72</span> <span class="tag">CMS imgs</span>
+  <button class="copy">copy</button>
+<pre><code><span class="k">&lt;img</span>
+  <span class="fn">src</span>={src} <span class="fn">alt</span>={alt}
+  <span class="fn">width</span>={<span class="t">320</span>} <span class="fn">height</span>={<span class="t">160</span>}
+  <span class="fn">loading</span>={aboveFold ? <span class="s">"eager"</span> : <span class="s">"lazy"</span>}
+  <span class="fn">fetchPriority</span>={aboveFold ? <span class="s">"high"</span> : <span class="s">"auto"</span>}
+<span class="k">/&gt;</span></code></pre>
+</div>
+
+<div class="card">
+  <b>10 · Skeleton instead of null</b> <span class="tag">dashboard/courses/page.tsx:14</span>
+  <button class="copy">copy</button>
+<pre><code><span class="k">&lt;Suspense</span> <span class="fn">fallback</span>={&lt;<span class="t">CoursesSkeleton</span> /&gt;}<span class="k">&gt;</span>
+  &lt;<span class="t">CourseBrowser</span> <span class="fn">basePath</span>=<span class="s">"/dashboard/courses"</span> /&gt;
+<span class="k">&lt;/Suspense&gt;</span></code></pre>
+</div>
+
+<h2 id="pass">Files Passing Clean</h2>
+<p class="sub">No violations found — do not touch.</p>
+<div class="card">
+  <span class="pass">✓</span> <b>ui/</b>
+  <div><span class="tag">AccessDenied</span><span class="tag">Badge</span><span class="tag">EmptyState</span><span class="tag">ErrorState</span><span class="tag">FeatureIcon</span><span class="tag">IconActionButton</span><span class="tag">Input</span><span class="tag">LinkButton</span><span class="tag">NotFoundActions</span><span class="tag">OfflineBanner</span><span class="tag">RouteError</span><span class="tag">Select</span><span class="tag">Skeleton</span><span class="tag">Spinner</span><span class="tag">SubmitApplicationButton</span><span class="tag">TapLoader*</span><span class="tag">Toaster</span><span class="tag">VerifyCard</span></div>
+  <p style="margin:10px 0 0"><span class="pass">✓</span> <b>app/</b> <span class="tag">AuthProvider</span><span class="tag">AvatarUploader</span><span class="tag">CheckoutView</span><span class="tag">CourseMeetings</span><span class="tag">CourseTabs</span><span class="tag">LearnerRoster</span><span class="tag">LearningProfileCard</span><span class="tag">MentorDashboardView</span><span class="tag">MyLearningView</span><span class="tag">OnboardingFlow</span><span class="tag">OrdersView</span><span class="tag">PaymentResultView</span><span class="tag">SettingsView</span></p>
+  <p style="margin:10px 0 0"><span class="pass">✓</span> <b>auth/</b> <span class="tag">AuthShell</span><span class="tag">Field</span><span class="tag">OAuthButtons</span><span class="tag">OAuthCallback</span> &nbsp; <b>layout/</b> <span class="tag">Chrome</span><span class="tag">PublicHeader</span><span class="tag">PublicFooter</span> &nbsp; <b>legal/</b> <span class="tag">LegalDocument</span></p>
+  <p style="margin:10px 0 0"><span class="pass">✓</span> <b>landing/</b> <span class="tag">CourseCard</span><span class="tag">CourseCardLive</span><span class="tag">DataUnavailable</span><span class="tag">Offerings</span><span class="tag">PartnerStrip</span><span class="tag">Pathway</span><span class="tag">PhotoBand</span><span class="tag">ProgramReveal</span><span class="tag">SectionHeading</span></p>
+  <p style="margin:10px 0 0"><span class="pass">✓</span> <b>pages</b> home, contact, faq, courses, work, team, partners, mentor, services, privacy, terms, refund-policy, login, signup, forgot/reset-password, reactivate, verify-email, complete-registration, auth/callback, error, loading, not-found &nbsp;·&nbsp; all 26 admin route wrappers</p>
+</div>
+<p class="sub">*TapLoader listed pass overall — has 1 minor aria flag in P1.</p>
+
+</main>
+</div>
+<script>
+const findings = {
+p1:[
+["frontend/src/components/ui/NotFoundFace.tsx","3","Nested &lt;main&gt; inside layout &lt;main&gt; → invalid HTML, broken landmarks","Change to &lt;div&gt;"],
+["frontend/src/components/ui/EnrollButton.tsx","30","Focus relies on .tx-card which sets outline:none — keyboard focus invisible","Add .tx-card:focus-visible in globals.css (snippet 5)"],
+["frontend/src/components/ui/Dropzone.tsx","37-49","sr-only file input in tab order, no accessible name","tabIndex={-1} + aria-label={ariaLabel ?? label}"],
+["frontend/src/components/ui/Checkbox.tsx","19","Hit target 20px &lt; WCAG 2.5.8 24px minimum","h-5 w-5 → h-6 w-6 (svg → h-4 w-4)"],
+["frontend/src/components/ui/TapLoader.tsx","3","Root aria-hidden with no role/status — SR users get nothing","Move aria-hidden to visual div; wrapper role=&quot;status&quot; + sr-only label"],
+["frontend/src/components/ui/Button.tsx","34-42","loading state silent to AT (spinner aria-hidden, text unchanged)","aria-busy={loading || undefined}"],
+["frontend/src/components/ui/PinInput.tsx","47-57","OTP inputs missing spellCheck=false","Add spellCheck={false} autoCapitalize=&quot;off&quot;"],
+["frontend/src/components/app/ProgressView.tsx","124","role=&quot;img&quot; on progress bar, no value exposed","role=&quot;progressbar&quot; + aria-valuenow (snippet 7)"],
+["frontend/src/components/app/DashboardShell.tsx","182","role=&quot;menu&quot; without arrow-key roving focus","Drop roles (plain popover + Escape) or implement arrow nav"],
+["frontend/src/components/app/MeetingManager.tsx","311","role=&quot;tablist&quot; w/o tabpanel / aria-controls","Toggle buttons with aria-pressed"],
+["frontend/src/components/app/NotificationsView.tsx","108","Same tablist misuse","Same fix"],
+["frontend/src/components/app/LessonViewer.tsx","177","&lt;video controls&gt; no captions track","Add &lt;track kind=&quot;captions&quot;&gt; when VTT available"],
+["frontend/src/components/app/MeetingManager.tsx","55","&lt;video controls&gt; no captions track","Same"],
+["frontend/src/components/app/admin/AdminMentors.tsx","160-161","Duplicate &lt;label htmlFor=&quot;a-course&quot;&gt; rendered twice","Delete line 161"],
+["frontend/src/components/app/admin/AdminCourseEditor.tsx","421","4 feature inputs, placeholder-only — no accessible label","aria-label={`Feature ${i+1}`}"],
+["frontend/src/components/app/admin/AdminAnalytics.tsx","131","&quot;View data table&quot; trigger inside aria-hidden — unreachable to AT","Move &lt;details&gt; outside aria-hidden wrapper"],
+["frontend/src/components/app/admin/AdminAudit.tsx","65","aria-expanded w/o aria-controls on expand row","Add id on panel + aria-controls"],
+["frontend/src/components/app/admin/AdminSettings.tsx","74","Inline error not linked via aria-invalid / aria-describedby","Add both attrs"],
+["frontend/src/components/auth/LoginForm.tsx","41","Errors set, focus never moves to first invalid field","Snippet 4"],
+["frontend/src/components/auth/CompleteRegistrationForm.tsx","50","Same","Snippet 4"],
+["frontend/src/components/auth/ForgotPasswordForm.tsx","21","Same","Snippet 4"],
+["frontend/src/components/auth/ResetPasswordForm.tsx","53","Same","Snippet 4"],
+["frontend/src/components/auth/ReactivateForm.tsx","31-37","Errors only in bottom alert, not inline on fields","Pass error prop to TextField / PasswordField"],
+["frontend/src/components/contact/InquiryForm.tsx","97-178","Inputs/textarea lack name attr","name=&quot;name&quot;/&quot;email&quot;/&quot;phone&quot;/&quot;subject&quot;/&quot;body&quot;"],
+["frontend/src/components/contact/InquiryForm.tsx","139","Phone missing type=&quot;tel&quot; + inputMode","type=&quot;tel&quot; inputMode=&quot;tel&quot;"],
+["frontend/src/components/contact/InquiryForm.tsx","41","No focus-first-error (aria-invalid already set)","Snippet 4"],
+["frontend/src/components/app/admin/admin-ui.tsx","254,270","ConfirmDialog: no focus trap, no focus restore","Snippet 1"],
+["frontend/src/components/app/admin/cms-ui.tsx","76,88","CmsDialog / MediaPicker: no focus trap, no overscroll-contain","Snippet 1"],
+["frontend/src/components/app/admin/InviteUserDialog.tsx","97","Dialog: Escape ✓ but no focus trap / restore","Snippet 1"],
+["frontend/src/components/app/admin/AdminOrders.tsx","224-259","Webhook modal: no Escape, no focus trap","Snippet 1"],
+["frontend/src/components/app/admin/AdminCourses.tsx","260-272","Inline alertdialog, no focus management","Snippet 1 (or autoFocus confirm)"],
+["frontend/src/components/app/admin/AdminCourseEditor.tsx","574-586","Inline alertdialog, no focus management","Snippet 1"],
+["frontend/src/components/app/admin/AdminRoadmapBuilder.tsx","181,282,383","role=&quot;alertdialog&quot; w/o accessible name + no focus mgmt","aria-label + snippet 1"],
+["frontend/src/components/app/admin/InviteUserDialog.tsx","146","Name inputs lack autocomplete","autoComplete=&quot;given-name&quot;/&quot;family-name&quot;"],
+["frontend/src/components/app/admin/AdminApplicationReview.tsx","275,279","Interview URL/time inputs lack name + autoComplete=off","Add name + autoComplete=&quot;off&quot; (url → &quot;url&quot;)"],
+["frontend/src/components/app/admin/AdminMentors.tsx","187","Search input may trigger password managers","autoComplete=&quot;off&quot;"],
+],
+p2:[
+["frontend/src/app/layout.tsx","14","themeColor #038c3e ≠ white page bg → green browser chrome","themeColor: &quot;#ffffff&quot;"],
+["frontend/src/components/ui/CoverImage.tsx","44","img no width/height, no loading=lazy → CLS + eager below-fold","loading=&quot;lazy&quot; + size via aspect wrapper / snippet 9"],
+["frontend/src/components/landing/Hero.tsx","32","Above-fold critical image missing priority","fetchPriority=&quot;high&quot;"],
+["frontend/src/components/landing/WorkCard.tsx","9","Below-fold image missing lazy","loading=&quot;lazy&quot;"],
+["frontend/src/app/work/page.tsx","72","img no width/height — CLS if wrapper changes","Snippet 9"],
+["frontend/src/components/app/admin/AdminCourseEditor.tsx","513","Preview img no width/height","width/height or keep aspect-[16/10] + explicit attrs"],
+["frontend/src/components/app/admin/CmsMediaLibrary.tsx","123,311","Grid/preview imgs no width/height","Snippet 9"],
+["frontend/src/components/app/admin/CmsOrganizations.tsx","124","Img no width/height","Snippet 9"],
+["frontend/src/components/app/admin/CmsTeam.tsx","111","Img no width/height","Snippet 9"],
+["frontend/src/components/app/admin/cms-ui.tsx","180,297","Media picker imgs no width/height","Snippet 9"],
+["frontend/src/app/courses/[slug]/page.tsx","169,190,243","CMS text no break-words → long strings overflow mobile","Add break-words to h1 / description / chapter summary"],
+["frontend/src/components/ui/Dropzone.tsx","82","Raw file.name, no truncate → dropzone overflow","max-w-full truncate on span"],
+["frontend/src/components/app/CourseResources.tsx","371","Long titles unbounded → card height jumps","line-clamp-2"],
+["frontend/src/components/app/admin/AdminCourses.tsx","223","Course title Link no truncate → pushes row layout","block truncate on title Link"],
+["frontend/src/components/app/admin/AdminRoadmapBuilder.tsx","191,269","Topic titles no min-w-0 / break-words","Add min-w-0 on flex child + break-words"],
+["frontend/src/components/app/admin/AdminApplications.tsx","107","min-w-0 on inline span — truncate unreliable","block min-w-0 or flex child"],
+["frontend/src/components/app/ChatView.tsx","93","scrollIntoView every message hijacks scroll","Scroll only when within 120px of bottom"],
+["frontend/src/app/(app)/dashboard/courses/page.tsx","14","Suspense fallback={null} → pop-in CLS","Snippet 10"],
+["frontend/src/components/app/ApplicationDetailView.tsx","23","1s interval always running, re-renders whole tree","Guard on application.interviewAt"],
+["frontend/src/components/app/DashboardView.tsx","95","Always-on 1s interval even with 0 upcoming meetings","Run only while a meeting is upcoming"],
+["frontend/src/components/app/LessonWorkbench.tsx","45","1s interval per meeting chip — N timers","Single shared ticker"],
+["frontend/src/components/ui/FlipClock.tsx","54,58","Date.now in useState → hydration mismatch every digit; runs when hidden","Snippet 3 + visibilitychange pause"],
+["frontend/src/components/ui/CoverImage.tsx","44","(also P1 img) — see above","—"],
+],
+p3:[
+["frontend/src/components/ui/EnrollButton.tsx","20-27","Action gated behind 1300ms timer ignoring reduced-motion","Snippet 2 + clear timeout on unmount"],
+["frontend/src/components/ui/PayButton.tsx","43-50","Same, 3000ms","Snippet 2"],
+["frontend/src/components/app/WishlistView.tsx","34","Destructive remove: no confirm, no undo","Reuse confirm() from CourseResources:187 or 5s undo toast"],
+["frontend/src/components/app/ChatView.tsx","24","Selected conversation not URL-synced — refresh loses thread","selectedId → query param"],
+["frontend/src/components/app/MeetingManager.tsx","123","Scope filter (upcoming/past/all) not URL-synced","Snippet 8"],
+["frontend/src/components/app/NotificationsView.tsx","19","Filter (all/unread) not URL-synced","Snippet 8"],
+["frontend/src/components/help/FaqBrowser.tsx","17-18","Search + category in useState only","?q= &amp; ?category= sync"],
+["frontend/src/components/work/WorkBrowser.tsx","14","Category filter not in URL","?category= via router.replace"],
+["frontend/src/components/app/admin/AdminUsers.tsx","40-48","Search/role/page state not URL-synced (AdminApplications does it right)","Snippet 8"],
+["frontend/src/components/app/MobileVerification.tsx","102","autoFocus pops keyboard on mobile-first flow","Drop autoFocus or gate on (pointer: fine)"],
+["frontend/src/components/auth/VerifyEmailForm.tsx","149","Same","autoFocus={window.matchMedia(&quot;(pointer: fine)&quot;).matches}"],
+["frontend/src/components/app/admin/cms-ui.tsx","76,88,140","Modal scroll containers lack overscroll-behavior: contain","overscroll-contain (in snippet 1)"],
+["frontend/src/components/app/admin/AdminUsers.tsx","180,204","router.push on icon &lt;button&gt; — no Cmd/Ctrl+click, no middle-click","Wrap in next/link &lt;Link&gt;"],
+["frontend/src/components/app/LessonWorkbench.tsx","410","Add-menu dropdown: no Escape / outside-click close","Same handlers as DashboardShell menu"],
+["frontend/src/components/app/admin/CmsWork.tsx","310","CMS editors close via backdrop, lose dirty edits silently","beforeunload guard like AdminUserDetail:112"],
+["frontend/src/components/app/MeetingManager.tsx","321","Inactive scope chips no hover state","hover:bg-slate-200"],
+["frontend/src/components/app/NotificationsView.tsx","118","Same","hover:bg-slate-200"],
+["frontend/src/components/app/TeachingWorkspace.tsx","68","&lt;summary&gt; no visible focus style","focus-visible:ring-2 ring-brand-600/40"],
+["frontend/src/components/app/admin/admin-ui.tsx","306","focus:outline-none uses :focus not :focus-visible (ring on click)","focus-visible: variants"],
+["frontend/src/components/app/admin/CmsMediaLibrary.tsx","141","&quot;Copied&quot; confirmation not announced","aria-live=&quot;polite&quot; region"],
+],
+p4:[
+["frontend/src/components/app/CourseOverviewView.tsx","206","transition-all","transition-[width] duration-500"],
+["frontend/src/components/app/RoadmapView.tsx","142","transition-all","transition-[width]"],
+["frontend/src/app/about/page.tsx","214,217,220","transition-all ×3","transition-colors duration-500"],
+["frontend/src/components/app/ApplicationForm.tsx","230,253","Placeholder missing …","Append … to both"],
+["frontend/src/components/app/CourseResources.tsx","254,259","Placeholder missing …","&quot;e.g. Week 1 slides…&quot; / &quot;Description (optional)…&quot;"],
+["frontend/src/components/app/LessonManager.tsx","106,147","Placeholder missing …","&quot;e.g. Intro to closures…&quot; / &quot;Lesson text content…&quot;"],
+["frontend/src/components/app/LessonWorkbench.tsx","106,196,251","Placeholder missing … ×3","Append …"],
+["frontend/src/components/app/ProfileView.tsx","147","Placeholder missing …","&quot;A short bio (optional)…&quot;"],
+["frontend/src/components/app/admin/AdminCourses.tsx","92","Placeholder missing … / example","&quot;e.g. Intro to design…&quot;"],
+["frontend/src/components/app/admin/AdminUsers.tsx","87","Placeholder missing …","&quot;Name or email…&quot;"],
+["frontend/src/components/app/admin/AdminDashboard.tsx","109-134","Metric numbers jitter — no tabular-nums","Add tabular-nums to MetricCard value"],
+["frontend/src/components/app/admin/AdminAnalytics.tsx","88,209","Number grids/columns no tabular-nums","tabular-nums"],
+["frontend/src/components/app/admin/AdminAnalytics.tsx","96,102","formatValue stringifies w/o Intl.NumberFormat","new Intl.NumberFormat().format(v)"],
+["frontend/src/components/app/admin/AdminCourseEditor.tsx","448","toLocaleString hardcoded — use Intl","Intl.NumberFormat(&quot;en-IN&quot;)"],
+["frontend/src/components/app/admin/AdminOrders.tsx","64","Money column no tabular-nums","tabular-nums"],
+["frontend/src/components/app/admin/AdminParticipants.tsx","44","Counts no tabular-nums","tabular-nums"],
+["frontend/src/components/app/admin/AdminMentors.tsx","67","Capacity column no tabular-nums","tabular-nums"],
+["frontend/src/components/app/admin/CmsPrograms.tsx","108","Price column no tabular-nums","tabular-nums"],
+["frontend/src/components/app/admin/CmsOrganizations.tsx","144","Counts no tabular-nums","tabular-nums"],
+["frontend/src/components/app/CourseAnalytics.tsx","98","% and 3/12 columns jitter","tabular-nums on td"],
+["frontend/src/app/courses/[slug]/page.tsx","252","Lesson counts no tabular-nums","tabular-nums"],
+["frontend/src/components/app/admin/AdminMentors.tsx","70-74","&lt;th&gt; missing scope=&quot;col&quot;","scope=&quot;col&quot;"],
+["frontend/src/components/app/admin/AdminOrders.tsx","67,187","&lt;th&gt; missing scope","scope=&quot;col&quot;"],
+["frontend/src/components/app/admin/AdminParticipants.tsx","47-48","&lt;th&gt; missing scope","scope=&quot;col&quot;"],
+["frontend/src/components/app/admin/CmsOrganizations.tsx","105","&lt;th&gt; missing scope","scope=&quot;col&quot;"],
+["frontend/src/components/app/admin/CmsPrograms.tsx","89","&lt;th&gt; missing scope","scope=&quot;col&quot;"],
+["frontend/src/components/app/admin/CmsWork.tsx","88","&lt;th&gt; missing scope","scope=&quot;col&quot;"],
+["frontend/src/app/(app)/checkout/result/page.tsx","4","&quot;Payment result&quot; not Title Case","&quot;Payment Result&quot;"],
+["frontend/src/app/(app)/dashboard/courses/[slug]/meetings/page.tsx","5","&quot;Course meetings&quot; not Title Case","&quot;Course Meetings&quot;"],
+["frontend/src/app/(app)/dashboard/courses/[slug]/resources/page.tsx","5","&quot;Course resources&quot; not Title Case","&quot;Course Resources&quot;"],
+["frontend/src/app/(app)/dashboard/mentor/apply/page.tsx","3","&quot;Apply to mentor&quot; not Title Case","&quot;Apply to Mentor&quot;"],
+["frontend/src/app/(app)/dashboard/courses/[slug]/page.tsx","7","Raw slug in title — garbles under auto-translate","Humanize slug or fetch real title"],
+["frontend/src/app/(app)/dashboard/courses/[slug]/roadmap/page.tsx","7","Raw slug in title","Same"],
+["frontend/src/app/(app)/dashboard/mentor/courses/[slug]/page.tsx","6","Raw slug in title","Same"],
+["frontend/src/components/auth/SignupForm.tsx","78","&quot;Continue&quot; non-specific button label","&quot;Send verification code&quot;"],
+["frontend/src/app/mentor/page.tsx","75","&quot;5 MB&quot; breaks across lines","5&nbsp;MB"],
+["frontend/src/app/about/page.tsx","86","Heading widows — no text-wrap balance","text-balance on display headings"],
+["frontend/src/app/page.tsx","86","Same","text-balance"],
+["frontend/src/app/courses/[slug]/page.tsx","169","Same","text-balance"],
+["frontend/src/app/courses/[slug]/page.tsx","305","Progress bar uses &lt;i&gt; (semantic misuse)","&lt;span aria-hidden className=&quot;block h-full…&quot;&gt;"],
+["frontend/src/components/app/admin/AdminOrders.tsx","127","Raw &quot;CREATED&quot; uppercase — inconsistent with humanizeStatus","o.status.toLowerCase()"],
+["frontend/src/components/app/admin/AdminOrders.tsx","93","Bare &lt;p&gt; empty state vs EmptyState component","Use EmptyState"],
+["frontend/src/components/app/admin/InviteUserDialog.tsx","152","Placeholder no trailing …","&quot;name@example.com…&quot; (pattern OK, minor)"],
+["frontend/src/components/app/admin/AdminParticipants.tsx","78","&quot;gap&quot; pill label confusing copy","&quot;not available&quot;"],
+]
+};
+function esc(s){const d=document.createElement('div');d.innerHTML=s;return d.innerHTML}
+for(const [pri,items] of Object.entries(findings)){
+  const el=document.getElementById(pri+'list');
+  el.innerHTML=items.map(([f,l,w,x])=>
+    `<div class="finding"><div><a class="file" href="vscode://file/D:/EDUALTTECH/${f}:${l}">${f}:${l}</a>`+
+    `<div class="why">${w}</div><div class="why" style="color:var(--green)">→ ${x}</div></div></div>`
+  ).join('');
+}
+document.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',()=>{
+  const code=b.parentElement.querySelector('code').innerText;
+  navigator.clipboard.writeText(code);
+  b.textContent='copied';setTimeout(()=>b.textContent='copy',1200);
+}));
+const links=[...document.querySelectorAll('nav a')];
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){
+  links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id));
+}})},{rootMargin:'-10% 0 -80% 0'});
+document.querySelectorAll('h2[id]').forEach(h=>obs.observe(h));
+</script>
+</body>
+</html>

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ApiError, apiGet } from "@/lib/api";
 import type { AdminUserRow, Role } from "@/lib/app-types";
 import { formatDate } from "@/lib/format";
 import Button from "@/components/ui/Button";
-import { ViewButton } from "@/components/ui/IconActionButton";
+import { EyeIcon } from "@/components/ui/IconActionButton";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
@@ -36,16 +37,32 @@ function listError(err: unknown): string {
 }
 
 export default function AdminUsers() {
+  return (
+    <Suspense fallback={null}>
+      <AdminUsersView />
+    </Suspense>
+  );
+}
+
+function AdminUsersView() {
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [role, setRole] = useState<"" | Role>("");
-  const [page, setPage] = useState(1);
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const initialRole = params.get("role");
+  const [query, setQuery] = useState(params.get("q") ?? "");
+  const [role, setRole] = useState<"" | Role>(initialRole === "ADMIN" || initialRole === "USER" ? initialRole : "");
+  const [page, setPage] = useState(Number(params.get("page") ?? "1") || 1);
   const [inviteOpen, setInviteOpen] = useState(false);
   const debouncedQuery = useDebouncedValue(query, 300);
 
   useEffect(() => {
-    setPage(1);
-  }, [debouncedQuery, role]);
+    const next = new URLSearchParams();
+    if (debouncedQuery.trim()) next.set("q", debouncedQuery.trim());
+    if (role) next.set("role", role);
+    if (page > 1) next.set("page", String(page));
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [debouncedQuery, role, page, pathname, router]);
 
   const { data, error, loading, reload } = useAsync(
     () =>
@@ -83,8 +100,11 @@ export default function AdminUsers() {
               type="search"
               value={query}
               icon={<Search fontSize="small" />}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Name or email"
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Name or email…"
             />
           </div>
           <div>
@@ -96,7 +116,10 @@ export default function AdminUsers() {
               value={role}
               icon={<Badge fontSize="small" />}
               className="w-auto"
-              onChange={(e) => setRole(e.target.value as "" | Role)}
+              onChange={(e) => {
+                setRole(e.target.value as "" | Role);
+                setPage(1);
+              }}
             >
               <option value="">All roles</option>
               <option value="USER">USER</option>
@@ -110,6 +133,7 @@ export default function AdminUsers() {
               onClick={() => {
                 setQuery("");
                 setRole("");
+                setPage(1);
               }}
             >
               Clear filters
@@ -173,13 +197,16 @@ export default function AdminUsers() {
                       <td className="py-3 pr-4">
                         <StatusPill tone={u.isActive ? "success" : "danger"}>{u.isActive ? "Active" : "Inactive"}</StatusPill>
                       </td>
-                      <td className="py-3 pr-4 text-slate-600">{u._count.participations}</td>
+                      <td className="py-3 pr-4 text-slate-600 tabular-nums">{u._count.participations}</td>
                       <td className="py-3 pr-4 text-slate-600">{formatDate(u.createdAt, { dateStyle: "medium" })}</td>
                       <td className="py-3 text-right">
-                        <ViewButton
-                          onClick={() => router.push(`/dashboard/admin/users/${u.id}?email=${encodeURIComponent(u.email)}`)}
+                        <Link
+                          href={`/dashboard/admin/users/${u.id}?email=${encodeURIComponent(u.email)}`}
+                          className="hv-btn hv-btn--view"
                           aria-label={`View user: ${userName(u)}`}
-                        />
+                        >
+                          <EyeIcon />
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -200,10 +227,13 @@ export default function AdminUsers() {
                         <span className="text-xs text-slate-500">{u._count.participations} enrolments</span>
                       </div>
                     </div>
-                    <ViewButton
-                      onClick={() => router.push(`/dashboard/admin/users/${u.id}?email=${encodeURIComponent(u.email)}`)}
+                    <Link
+                      href={`/dashboard/admin/users/${u.id}?email=${encodeURIComponent(u.email)}`}
+                      className="hv-btn hv-btn--view"
                       aria-label={`View user: ${userName(u)}`}
-                    />
+                    >
+                      <EyeIcon />
+                    </Link>
                   </div>
                 </li>
               ))}

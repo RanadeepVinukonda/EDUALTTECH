@@ -251,12 +251,12 @@ export default function CourseResources({ slug }: { slug: string }) {
             Post a resource
           </h3>
           <form onSubmit={create} className="mt-4 flex flex-col gap-3">
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" aria-label="Resource title" />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Week 1 slides…" aria-label="Resource title" />
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              placeholder="Description (optional)"
+              placeholder="Description (optional)…"
               aria-label="Resource description"
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
             />
@@ -368,7 +368,7 @@ export default function CourseResources({ slug }: { slug: string }) {
                       ) : (
                         <div className="flex h-full flex-col">
                           <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{r.kind}</span>
-                          <span className="mt-1 font-display text-lg font-bold text-ink-900">{r.title}</span>
+                          <span className="mt-1 line-clamp-2 font-display text-lg font-bold text-ink-900">{r.title}</span>
                           {r.description && <span className="mt-1 line-clamp-2 text-sm text-slate-600">{r.description}</span>}
                           <span className="mt-2 text-sm text-slate-500">
                             {r.storagePath ? "File" : r.url ? "Link" : "Resource"}

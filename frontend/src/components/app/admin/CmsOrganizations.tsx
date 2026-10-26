@@ -105,12 +105,12 @@ export default function CmsOrganizations() {
             <table className="w-full min-w-[820px] text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-2 py-2 font-semibold">Name</th>
-                  <th className="px-2 py-2 font-semibold">Type</th>
-                  <th className="px-2 py-2 font-semibold">Website</th>
-                  <th className="px-2 py-2 font-semibold">Linked</th>
-                  <th className="px-2 py-2 font-semibold">Status</th>
-                  <th className="px-2 py-2 font-semibold">Updated</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Name</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Type</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Website</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Linked</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Status</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Updated</th>
                   <th className="px-2 py-2" />
                 </tr>
               </thead>
@@ -121,7 +121,7 @@ export default function CmsOrganizations() {
                       <div className="flex items-center gap-2">
                         {o.logoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={o.logoUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-contain" />
+                          <img src={o.logoUrl} alt="" width={32} height={32} loading="lazy" className="h-8 w-8 rounded object-contain" />
                         ) : (
                           <span aria-hidden className="grid h-8 w-8 place-items-center rounded bg-slate-100 text-xs font-semibold text-slate-500">
                             {o.name.slice(0, 1).toUpperCase()}
@@ -137,11 +137,15 @@ export default function CmsOrganizations() {
                           {host(o.websiteUrl)}
                         </a>
                       ) : (
-                        "-"
+                        "—"
                       )}
                     </td>
                     <td className="px-2 py-3 text-slate-600">
-                      {o._count ? `${o._count.members} members · ${o._count.workItems} work · ${o._count.programs} programs` : "-"}
+                      {o._count ? (
+                        <span className="tabular-nums">{`${o._count.members} members · ${o._count.workItems} work · ${o._count.programs} programs`}</span>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="px-2 py-3">
                       <StatusPill tone={o.isPublished ? "success" : "warn"}>{o.isPublished ? "published" : "draft"}</StatusPill>
@@ -325,7 +329,7 @@ function OrgEditor({ item, onClose, onSaved }: { item: OrganizationRow | null; o
           </div>
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Website URL" htmlFor="o-site" hint="Public - shown on the Partners page.">
+          <Field label="Website URL" htmlFor="o-site" hint="Public — shown on the Partners page.">
             <Input id="o-site" type="url" value={websiteUrl} icon={<LinkIcon fontSize="small" />} onChange={(e) => setWebsiteUrl(e.target.value)} error={websiteUrl.length > 0 && siteInvalid} placeholder="https://…" />
           </Field>
           <Field label="Contact email" htmlFor="o-email" hint="Internal only; never shown publicly.">

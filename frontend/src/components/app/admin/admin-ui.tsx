@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import Button from "@/components/ui/Button";
+import { useFocusTrap } from "@/components/ui/useFocusTrap";
 
 export { default as Skeleton } from "@/components/ui/Skeleton";
 
@@ -42,7 +43,7 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]) {
       .finally(() => {
         if (id === seq.current) setLoading(false);
       });
-    // deps intentionally spread - callers pass a memoized fetcher plus keys.
+    // deps intentionally spread — callers pass a memoized fetcher plus keys.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick, ...deps]);
 
@@ -87,7 +88,7 @@ export function MetricCard({
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
       <p
         className={cn(
-          "mt-2 font-display text-2xl font-bold",
+          "mt-2 font-display text-2xl font-bold tabular-nums",
           tone === "warn" ? "text-amber-700" : tone === "danger" ? "text-red-700" : "text-ink-900",
         )}
       >
@@ -240,23 +241,18 @@ export function ConfirmDialog({
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, busy, onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, busy ? undefined : onClose);
 
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4" role="presentation" onClick={() => !busy && onClose()}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
-        className="w-full max-w-md rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="confirm-title" className="font-display text-lg font-bold text-ink-900">
@@ -303,7 +299,7 @@ export function FilterSelect({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`cursor-pointer appearance-none rounded-full border border-slate-300 bg-white py-1.5 pr-7 text-xs font-semibold text-ink-900 transition hover:border-brand-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 ${
+          className={`cursor-pointer appearance-none rounded-full border border-slate-300 bg-white py-1.5 pr-7 text-xs font-semibold text-ink-900 transition hover:border-brand-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 ${
             icon ? "pl-8" : "pl-3"
           }`}
         >

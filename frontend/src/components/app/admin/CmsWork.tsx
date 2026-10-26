@@ -88,11 +88,11 @@ export default function CmsWork() {
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-2 py-2 font-semibold">Title</th>
-                  <th className="px-2 py-2 font-semibold">Category</th>
-                  <th className="px-2 py-2 font-semibold">Organization</th>
-                  <th className="px-2 py-2 font-semibold">Status</th>
-                  <th className="px-2 py-2 font-semibold">Updated</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Title</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Category</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Organization</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Status</th>
+                  <th scope="col" className="px-2 py-2 font-semibold">Updated</th>
                   <th className="px-2 py-2" />
                 </tr>
               </thead>
@@ -104,7 +104,7 @@ export default function CmsWork() {
                       <p className="line-clamp-1 text-xs text-slate-500">{w.summary}</p>
                     </td>
                     <td className="px-2 py-3 text-slate-600">{w.category}</td>
-                    <td className="px-2 py-3 text-slate-600">{w.organization?.name ?? "-"}</td>
+                    <td className="px-2 py-3 text-slate-600">{w.organization?.name ?? "—"}</td>
                     <td className="px-2 py-3">
                       <StatusPill tone={w.isPublished ? "success" : "warn"}>{w.isPublished ? "published" : "draft"}</StatusPill>
                     </td>

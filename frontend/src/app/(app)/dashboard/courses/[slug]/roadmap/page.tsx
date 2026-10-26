@@ -4,7 +4,7 @@ import RoadmapView from "@/components/app/RoadmapView";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  return { title: `Roadmap · ${slug}` };
+  return { title: `Roadmap · ${slug.replace(/-/g, " ")}` };
 }
 
 export default async function RoadmapPage({ params }: { params: Promise<{ slug: string }> }) {

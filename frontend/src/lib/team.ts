@@ -11,12 +11,10 @@ export const TEAM: TeamMember[] = [
   { name: "Varun", title: "Full Stack Developer", image: "/media/newTeam/Varun_PP.png" },
   { name: "Satish", title: "Full Stack Developer", image: "/media/newTeam/satyanarayana.jpeg" },
   { name: "Harshitha", title: "Frontend Developer", image: "/media/newTeam/harsitha.jpeg" },
-  { name: "Avinash", title: "Marketing and Graphic Designer", image: "/media/newTeam/avinas.jpeg" },
   { name: "Srujan", title: "Client Relations", image: "/media/newTeam/srujan.jpeg" },
   { name: "Ranadeep", title: "Full Stack Developer, Client Relations", image: "/media/newTeam/Ranaadeep.jpeg" },
   { name: "Hemanth", title: "Full Stack Developer", image: "/media/newTeam/Hemanth.jpeg" },
   { name: "Chandhini", title: "Project Coordinator, AI Development", image: "/media/newTeam/alrihab.jpg" },
   { name: "Priya", title: "Graphic Designer", image: "/media/newTeam/Priya.jpeg" },
-  { name: "Gani", title: "Digital Marketing", image: "/media/newTeam/gani.jpeg" },
   { name: "Gnana", title: "Frontend Developer", image: "/media/newTeam/Gnana.jpeg" },
 ];

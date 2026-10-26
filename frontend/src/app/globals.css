@@ -403,6 +403,11 @@ body {
   cursor: pointer;
 }
 
+.tx-card:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+
 .tx-card.is-paying {
   transform: scale(1.03);
   width: 220px;
@@ -1067,7 +1072,7 @@ body {
   opacity: 0.5;
 }
 
-/* delete - bin lid rotates open, turns red */
+/* delete — bin lid rotates open, turns red */
 .bin-icon {
   width: 12px;
   transition-duration: 0.3s;
@@ -1085,7 +1090,7 @@ body {
   background-color: rgb(255, 69, 69);
 }
 
-/* view - eye opens, turns brand navy */
+/* view — eye opens, turns brand navy */
 .hv-btn .eye-closed,
 .hv-btn .eye-open {
   position: absolute;

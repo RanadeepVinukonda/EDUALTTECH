@@ -9,7 +9,7 @@ const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch with EduAltTech about courses, mentoring, school technology, or partnerships.",
+  description: "Get in touch with EduAltTech about courses, mentoring, or partnerships.",
   alternates: { canonical: "/contact" },
 };
 

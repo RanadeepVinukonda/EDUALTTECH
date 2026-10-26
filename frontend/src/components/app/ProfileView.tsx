@@ -144,7 +144,7 @@ export default function ProfileView() {
               rows={4}
               onChange={(e) => setBio(e.target.value)}
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
-              placeholder="A short bio (optional)"
+              placeholder="A short bio (optional)…"
             />
             <p className="mt-1 text-right text-xs text-slate-400">{bio.length}/1000</p>
           </div>

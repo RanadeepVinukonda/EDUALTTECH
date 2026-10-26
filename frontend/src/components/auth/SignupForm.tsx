@@ -75,7 +75,7 @@ export default function SignupForm({ next }: { next?: string }) {
           onChange={(e) => setEmail(e.target.value)}
         />
         <Button type="submit" className="w-full" loading={pending}>
-          Continue
+          Send verification code
         </Button>
       </form>
 

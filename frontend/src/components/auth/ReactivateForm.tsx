@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import MailOutlined from "@mui/icons-material/MailOutlined";
@@ -20,22 +20,26 @@ export default function ReactivateForm({ email: initialEmail }: { email?: string
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (initialEmail) setEmail(initialEmail);
   }, [initialEmail]);
 
+  useEffect(() => {
+    if (!Object.keys(errors).length) return;
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+  }, [errors]);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
-      setError("Enter a valid email address.");
-      return;
-    }
-    if (password.length < 1) {
-      setError("Enter your password.");
-      return;
-    }
+    const errs: Record<string, string> = {};
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) errs.email = "Enter a valid email address.";
+    if (password.length < 1) errs.password = "Enter your password.";
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
     setPending(true);
     try {
       const data = await apiPost<ReactivateResult>(
@@ -60,7 +64,7 @@ export default function ReactivateForm({ email: initialEmail }: { email?: string
         you left off.
       </div>
 
-      <form onSubmit={submit} className="space-y-4" noValidate>
+      <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>
         <TextField
           label="Email address"
           type="email"
@@ -69,10 +73,17 @@ export default function ReactivateForm({ email: initialEmail }: { email?: string
           inputMode="email"
           placeholder="you@example.com"
           value={email}
+          error={errors.email}
           icon={<MailOutlined fontSize="small" />}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <PasswordField label="Password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <PasswordField
+          label="Password"
+          name="password"
+          value={password}
+          error={errors.password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
         <Button type="submit" className="w-full" loading={pending}>
           Reactivate my account
         </Button>

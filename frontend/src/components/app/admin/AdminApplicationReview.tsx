@@ -18,7 +18,7 @@ import { AdminHeader, ConfirmDialog, Panel, Skeleton, StatusPill, statusTone, us
 
 type Decision = "UNDER_REVIEW" | "INTERVIEW_SCHEDULED" | "ACCEPTED" | "REJECTED";
 
-// Mirrors the backend state machine for UI affordance only - the server is authoritative.
+// Mirrors the backend state machine for UI affordance only — the server is authoritative.
 const TRANSITIONS: Record<ApplicationStatus, Decision[]> = {
   SUBMITTED: ["UNDER_REVIEW", "INTERVIEW_SCHEDULED", "REJECTED"],
   UNDER_REVIEW: ["INTERVIEW_SCHEDULED", "ACCEPTED", "REJECTED"],
@@ -123,7 +123,7 @@ export default function AdminApplicationReview({ id }: { id: string }) {
   const next = TRANSITIONS[application.status];
 
   const interviewStart = application.interviewAt ? new Date(application.interviewAt).getTime() : 0;
-  // ponytail: interviews have no stored duration - assume a 60-minute window for the "live" state.
+  // ponytail: interviews have no stored duration — assume a 60-minute window for the "live" state.
   const interviewStatus = !interviewStart
     ? null
     : now < interviewStart
@@ -148,8 +148,8 @@ export default function AdminApplicationReview({ id }: { id: string }) {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
           <dl className="grid flex-1 gap-4 sm:grid-cols-2">
             <Field label="Name" value={userName(application.user)} />
-            <Field label="Email" value={application.user?.email ?? "-"} />
-            <Field label="Mobile" value={application.user?.mobile ?? "-"} />
+            <Field label="Email" value={application.user?.email ?? "—"} />
+            <Field label="Mobile" value={application.user?.mobile ?? "—"} />
             <Field label="Status" value={<StatusPill tone={statusTone(application.status)}>{application.status.replace(/_/g, " ").toLowerCase()}</StatusPill>} />
             <Field label="Submitted" value={formatDate(application.createdAt)} />
           </dl>
@@ -273,7 +273,9 @@ export default function AdminApplicationReview({ id }: { id: string }) {
             <label htmlFor="iv-url" className="block text-sm font-semibold text-ink-900">Interview link (optional)</label>
             <Input
               id="iv-url"
+              name="interviewUrl"
               type="url"
+              autoComplete="url"
               value={interviewUrl}
               icon={<LinkIcon fontSize="small" />}
               onChange={(e) => setInterviewUrl(e.target.value)}
@@ -282,7 +284,9 @@ export default function AdminApplicationReview({ id }: { id: string }) {
             <label htmlFor="iv-at" className="block text-sm font-semibold text-ink-900">Interview time (optional)</label>
             <Input
               id="iv-at"
+              name="interviewAt"
               type="datetime-local"
+              autoComplete="off"
               value={interviewAt}
               icon={<Event fontSize="small" />}
               onChange={(e) => setInterviewAt(e.target.value)}

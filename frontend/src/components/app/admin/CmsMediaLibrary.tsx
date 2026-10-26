@@ -120,7 +120,7 @@ export default function CmsMediaLibrary() {
                 <div className="aspect-[4/3] overflow-hidden bg-slate-100">
                   {a.kind === "image" || a.kind === "logo" || a.kind === "icon" ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.url} alt={a.alt ?? ""} loading="lazy" className="h-full w-full object-cover" />
+                      <img src={a.url} alt={a.alt ?? ""} width={400} height={300} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
                     <div className="grid h-full place-items-center text-xs font-semibold uppercase tracking-wide text-slate-500">
                       {a.kind}
@@ -137,9 +137,11 @@ export default function CmsMediaLibrary() {
                   </p>
                   <div className="flex flex-wrap gap-2 pt-1">
                     <Button size="sm" variant="secondary" onClick={() => setEditing(a)}>Edit</Button>
-                    <Button size="sm" variant="ghost" onClick={() => copyUrl(a)}>
-                      {copied === a.id ? "Copied" : "Copy URL"}
-                    </Button>
+                    <span aria-live="polite" className="inline-flex">
+                      <Button size="sm" variant="ghost" onClick={() => copyUrl(a)}>
+                        {copied === a.id ? "Copied" : "Copy URL"}
+                      </Button>
+                    </span>
                     <DeleteButton onClick={() => setDeleting(a)} />
                   </div>
                 </div>
@@ -308,7 +310,7 @@ function MediaEditor({ item, onClose, onSaved }: { item: MediaAssetRow | null; o
         {isUrl(url.trim()) && (kind === "image" || kind === "logo" || kind === "icon") && (
           <div className="overflow-hidden rounded-xl border border-slate-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url.trim()} alt={alt || "Preview"} className="max-h-48 w-full object-contain bg-slate-50" />
+            <img src={url.trim()} alt={alt || "Preview"} width={800} height={600} className="max-h-48 w-full object-contain bg-slate-50" />
           </div>
         )}
       </form>

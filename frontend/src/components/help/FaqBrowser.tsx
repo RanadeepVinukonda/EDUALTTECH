@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Search from "@mui/icons-material/Search";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { cn } from "@/lib/cn";
+import Skeleton from "@/components/ui/Skeleton";
 
 export interface FaqItem {
   id: string;
@@ -12,12 +14,70 @@ export interface FaqItem {
   answer: React.ReactNode;
 }
 
-export default function FaqBrowser({ items }: { items: FaqItem[] }) {
-  const categories = useMemo(() => Array.from(new Set(items.map((i) => i.category))), [items]);
-  const [query, setQuery] = useState("");
-  const [active, setActive] = useState<string>("All");
+function FaqBrowserSkeleton() {
+  return (
+    <div aria-hidden>
+      <Skeleton className="h-12 w-full rounded-xl" />
+      <div className="mt-4 flex flex-wrap gap-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-9 w-28 rounded-full" />
+        ))}
+      </div>
+      <div className="mt-6 space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  const normalized = query.trim().toLowerCase();
+function FaqBrowserView({ items }: { items: FaqItem[] }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const categories = useMemo(() => Array.from(new Set(items.map((i) => i.category))), [items]);
+
+  const urlQuery = searchParams.get("q") ?? "";
+  const urlCategory = searchParams.get("category") ?? "";
+
+  const [query, setQuery] = useState(urlQuery);
+  const [category, setCategory] = useState(urlCategory);
+  const trimmed = query.trim();
+  const active = category || "All";
+
+  // Writes both owned params so a debounced search can never drop a category click.
+  const writeParams = useCallback(
+    (q: string, cat: string) => {
+      const sp = new URLSearchParams(searchParams.toString());
+      if (q) sp.set("q", q);
+      else sp.delete("q");
+      if (cat) sp.set("category", cat);
+      else sp.delete("category");
+      const qs = sp.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
+
+  // Keep the controls in sync when the URL changes (back/forward, reset).
+  useEffect(() => {
+    setQuery(urlQuery);
+  }, [urlQuery]);
+
+  useEffect(() => {
+    setCategory(urlCategory && categories.includes(urlCategory) ? urlCategory : "");
+  }, [urlCategory, categories]);
+
+  // Debounced search → URL.
+  useEffect(() => {
+    if (trimmed === urlQuery) return;
+    const h = setTimeout(() => writeParams(trimmed, category), 350);
+    return () => clearTimeout(h);
+  }, [trimmed, urlQuery, category, writeParams]);
+
+  const normalized = trimmed.toLowerCase();
   const filtered = items.filter((i) => {
     if (active !== "All" && i.category !== active) return false;
     if (!normalized) return true;
@@ -52,7 +112,11 @@ export default function FaqBrowser({ items }: { items: FaqItem[] }) {
             <button
               key={c}
               type="button"
-              onClick={() => setActive(c)}
+              onClick={() => {
+                const next = c === "All" ? "" : c;
+                setCategory(next);
+                writeParams(trimmed, next);
+              }}
               aria-pressed={active === c}
               className={cn(
                 "rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40",
@@ -97,7 +161,8 @@ export default function FaqBrowser({ items }: { items: FaqItem[] }) {
             type="button"
             onClick={() => {
               setQuery("");
-              setActive("All");
+              setCategory("");
+              writeParams("", "");
             }}
             className="mt-4 text-sm font-semibold text-brand-700 hover:text-brand-800"
           >
@@ -106,5 +171,13 @@ export default function FaqBrowser({ items }: { items: FaqItem[] }) {
         </div>
       )}
     </div>
+  );
+}
+
+export default function FaqBrowser({ items }: { items: FaqItem[] }) {
+  return (
+    <Suspense fallback={<FaqBrowserSkeleton />}>
+      <FaqBrowserView items={items} />
+    </Suspense>
   );
 }
