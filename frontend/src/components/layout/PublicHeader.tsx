@@ -41,8 +41,8 @@ export default function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Edu Alt Tech home">
-          <BrandLogo withWordmark wordmarkClassName="hidden text-base sm:inline" />
+        <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2" aria-label="Edu Alt Tech home">
+          <BrandLogo withWordmark wordmarkClassName="text-sm sm:text-base" />
         </Link>
 
         <nav aria-label="Primary" className="ml-auto hidden items-center gap-1 lg:flex">

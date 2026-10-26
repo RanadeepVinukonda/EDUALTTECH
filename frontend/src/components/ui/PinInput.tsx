@@ -42,7 +42,7 @@ export default function PinInput({
   }
 
   return (
-    <div className={cn("flex gap-2", className)} role="group" aria-label={ariaLabel}>
+    <div className={cn("flex w-full justify-center gap-1.5 sm:gap-2", className)} role="group" aria-label={ariaLabel}>
       {chars.map((c, i) => (
         <input
           key={i}
