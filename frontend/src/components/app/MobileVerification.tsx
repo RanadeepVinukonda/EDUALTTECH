@@ -77,7 +77,7 @@ export default function MobileVerification() {
         </p>
       )}
       <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-[200px] flex-1">
+        <div className="min-w-[10rem] flex-1">
           <label htmlFor="mv-mobile" className="mb-1 block text-sm font-semibold text-ink-700">
             Mobile number
           </label>

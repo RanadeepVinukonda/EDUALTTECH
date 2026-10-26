@@ -314,6 +314,12 @@ body {
   scale: 0.99;
 }
 
+@media (max-width: 420px) {
+  .verify-card {
+    padding: 24px 16px;
+  }
+}
+
 .verify-card__check {
   width: 60px;
   height: 60px;
@@ -333,13 +339,15 @@ body {
 }
 
 .pin-input {
-  width: 2.5em;
-  height: 2.5em;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 2.75rem;
+  height: 2.75rem;
   border-radius: 5px;
   border: none;
   background-color: rgb(235, 235, 235);
   box-shadow: inset 3px 3px 6px #d1d1d1, inset -3px -3px 6px #ffffff;
-  padding-left: 15px;
+  padding: 0;
   text-align: center;
   font-size: 1rem;
   font-weight: 600;

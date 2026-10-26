@@ -97,18 +97,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const linkClass = (active: boolean) =>
     cn(
-      "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold transition",
+      "flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition",
       active ? "bg-brand-600 text-white shadow-elev1" : "text-ink-700 hover:bg-slate-100",
     );
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-      <aside className="lg:sticky lg:top-24 lg:w-60 lg:shrink-0">
-        <nav aria-label="Admin sections" className="flex flex-col gap-5">
+      <aside className="min-w-0 lg:sticky lg:top-24 lg:w-60 lg:shrink-0">
+        <nav
+          aria-label="Admin sections"
+          className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:gap-5 lg:overflow-visible lg:pb-0"
+        >
           {GROUPS.map((group) => (
-            <div key={group.label}>
-              <p className="px-3 pb-1.5 text-xs font-bold uppercase tracking-wide text-slate-400">{group.label}</p>
-              <div className="flex flex-col gap-0.5">
+            <div key={group.label} className="contents lg:block">
+              <p className="hidden px-3 pb-1.5 text-xs font-bold uppercase tracking-wide text-slate-400 lg:block">
+                {group.label}
+              </p>
+              <div className="flex shrink-0 gap-1 lg:flex-col lg:gap-0.5">
                 {group.items.map(({ href, label, Icon, exact }) => {
                   const active = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
                   return (

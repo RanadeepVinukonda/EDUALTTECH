@@ -24,9 +24,9 @@ export default function BrandLogo({
       {withWordmark && (
         <span
           className={cn(
-            "font-display text-lg font-extrabold tracking-tight",
+            "font-display font-extrabold tracking-tight",
+            wordmarkClassName ?? "text-lg",
             onDark ? "text-white" : "text-ink-900",
-            wordmarkClassName,
           )}
         >
           EduAltTech
