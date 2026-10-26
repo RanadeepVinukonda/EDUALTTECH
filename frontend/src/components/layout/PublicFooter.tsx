@@ -30,23 +30,23 @@ const LEGAL_LINKS = [
 
 export default function PublicFooter() {
   return (
-    <footer className="border-t border-slate-200 bg-ink-900 text-slate-300">
+    <footer className="border-t border-slate-200 bg-white text-ink-900">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
             <Link href="/" className="inline-flex items-center gap-2" aria-label="EduAltTech home">
-              <BrandLogo withWordmark onDark />
+              <BrandLogo withWordmark />
             </Link>
           </div>
 
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-white">Quick Links</h3>
+            <h3 className="mb-4 text-lg font-semibold">Quick Links</h3>
             <nav aria-label="Footer" className="space-y-2 text-sm">
               {QUICK_LINKS.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="block text-slate-400 transition-colors hover:text-white"
+                  className="block text-ink-600 transition-colors hover:text-brand-700"
                 >
                   {l.label}
                 </Link>
@@ -55,11 +55,11 @@ export default function PublicFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-white">Contact Us</h3>
-            <address className="space-y-2 text-sm not-italic text-slate-400">
+            <h3 className="mb-4 text-lg font-semibold">Contact Us</h3>
+            <address className="space-y-2 text-sm not-italic text-ink-600">
               <p>
                 Email:{" "}
-                <a href="mailto:info@edualttech.com" className="transition-colors hover:text-white">
+                <a href="mailto:info@edualttech.com" className="transition-colors hover:text-brand-700">
                   info@edualttech.com
                 </a>
               </p>
@@ -68,14 +68,14 @@ export default function PublicFooter() {
           </div>
 
           <div className="relative">
-            <h3 className="mb-4 text-lg font-semibold text-white">Follow Us</h3>
+            <h3 className="mb-4 text-lg font-semibold">Follow Us</h3>
             <div className="flex space-x-4">
               {SOCIAL.map(({ label, href, Icon }) => (
                 <a
                   key={label}
                   href={href}
                   title={`Follow us on ${label}`}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-slate-300 transition hover:border-brand-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/40"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-ink-700 transition hover:border-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
                 >
                   <Icon fontSize="small" />
                   <span className="sr-only">{label}</span>
@@ -85,8 +85,8 @@ export default function PublicFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-center md:flex-row">
-          <p className="text-sm text-slate-400">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-center md:flex-row">
+          <p className="text-sm text-ink-500">
             © {new Date().getFullYear()} EduAltTech (Edu Alt Tech). All rights reserved.
           </p>
           <nav aria-label="Legal" className="flex flex-wrap justify-center gap-4 text-sm">
@@ -94,7 +94,7 @@ export default function PublicFooter() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-slate-400 transition-colors hover:text-white"
+                className="text-ink-600 transition-colors hover:text-brand-700"
               >
                 {l.label}
               </Link>
