@@ -489,10 +489,12 @@ router.post("/", requireAuth, validate({ body: courseBody }), async (req, res) =
 
 // ── Update + lifecycle (admin/creator) ─────────────────────────────
 
-router.patch("/:id", requireAuth, validate({ body: courseBody.partial().extend({
+router.patch("/:id", requireAuth, validate({ body: courseBody.partial().omit({ initialChapters: true }).extend({
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
 }) }), async (req, res) => {
-  const { status, ...patch } = body<z.infer<typeof courseBody> & { status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" }>(req);
+  const { status, ...patch } = body<Omit<z.infer<typeof courseBody>, "initialChapters"> & {
+    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  }>(req);
   const course = await prisma.course.findUnique({ where: { id: req.params.id } });
   if (!course) throw ApiError.notFound("Course not found");
   await assertCourseOwner(course.id, req.user!);

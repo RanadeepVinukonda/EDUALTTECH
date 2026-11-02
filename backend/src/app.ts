@@ -5,6 +5,7 @@ import compression from "compression";
 import morgan from "morgan";
 import { config } from "./config/env.js";
 import { logger } from "./utils/logger.js";
+import { prisma } from "./lib/prisma.js";
 import { requestId } from "./middlewares/request-id.js";
 import { apiLimiter } from "./middlewares/rate-limit.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.js";
@@ -46,8 +47,17 @@ export function createApp() {
   );
   app.use(express.urlencoded({ extended: true }));
 
-  app.get("/health", (_req, res) => {
-    res.json({ success: true, data: { ok: true, env: config.env } });
+  app.get("/health", async (req, res) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      res.json({ success: true, data: { ok: true, env: config.env } });
+    } catch (err) {
+      logger.error("health check failed", { requestId: req.requestId, err: String(err) });
+      res.status(503).json({
+        success: false,
+        error: { code: "UNHEALTHY", message: "Database unavailable", requestId: req.requestId },
+      });
+    }
   });
 
   app.use("/api", apiLimiter);

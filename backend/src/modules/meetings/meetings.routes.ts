@@ -10,9 +10,8 @@ import { getCourseAccess } from "../../lib/course-access.js";
 import { signedUrl, removePrivate, fileExt } from "../../lib/storage.js";
 import { supabaseAdmin } from "../../lib/supabase.js";
 import { config } from "../../config/env.js";
-import { sendEmail, layout } from "../../lib/email.js";
+import { sendEmailBatch, layout, escapeHtml } from "../../lib/email.js";
 import { formatDateTime } from "../../lib/time.js";
-import { logger } from "../../utils/logger.js";
 
 const router = Router();
 
@@ -22,12 +21,8 @@ async function emailCourseLearners(courseId: string, subject: string, title: str
     where: { courseId, role: "LEARNER", status: "ACTIVE" },
     select: { user: { select: { email: true } } },
   });
-  await Promise.allSettled(
-    learners.map((l) =>
-      sendEmail({ to: l.user.email, subject, html: layout(title, intro, "Open course", ctaUrl) }).catch((err) =>
-        logger.warn("meeting email failed", { err: String(err) }),
-      ),
-    ),
+  await sendEmailBatch(
+    learners.map((l) => ({ to: l.user.email, subject, html: layout(title, intro, "Open course", ctaUrl) })),
   );
 }
 
@@ -41,6 +36,59 @@ const meetingBody = z.object({
   topicId: z.string().nullable().optional(),
   lessonId: z.string().nullable().optional(),
 });
+
+/**
+ * A meeting's chapter/topic/lesson must all belong to the meeting's course and
+ * form a valid chain. Without this a mentor could attach a session to another
+ * course's content (or leak that content's existence through the meeting feed).
+ */
+async function assertMeetingLinks(courseId: string, links: {
+  chapterId?: string | null;
+  topicId?: string | null;
+  lessonId?: string | null;
+}): Promise<void> {
+  let chapterId = links.chapterId ?? null;
+
+  if (links.topicId) {
+    const topic = await prisma.topic.findUnique({
+      where: { id: links.topicId },
+      select: { courseId: true, chapterId: true },
+    });
+    if (!topic || topic.courseId !== courseId) {
+      throw ApiError.badRequest("Topic does not belong to this course");
+    }
+    if (chapterId && topic.chapterId !== chapterId) {
+      throw ApiError.badRequest("Topic does not belong to the selected chapter");
+    }
+    chapterId = chapterId ?? topic.chapterId;
+  }
+
+  if (links.lessonId) {
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: links.lessonId },
+      select: { courseId: true, topicId: true, topic: { select: { chapterId: true } } },
+    });
+    if (!lesson || lesson.courseId !== courseId) {
+      throw ApiError.badRequest("Lesson does not belong to this course");
+    }
+    if (links.topicId && lesson.topicId !== links.topicId) {
+      throw ApiError.badRequest("Lesson does not belong to the selected topic");
+    }
+    if (chapterId && lesson.topic.chapterId !== chapterId) {
+      throw ApiError.badRequest("Lesson does not belong to the selected chapter");
+    }
+  }
+
+  if (chapterId) {
+    const chapter = await prisma.chapter.findUnique({
+      where: { id: chapterId },
+      select: { courseId: true },
+    });
+    if (!chapter || chapter.courseId !== courseId) {
+      throw ApiError.badRequest("Chapter does not belong to this course");
+    }
+  }
+}
 
 // List for course members (staff sees all; learners see future by default).
 // Mounted at /api → served as /api/courses/:courseId/meetings.
@@ -75,7 +123,10 @@ router.get("/courses/:courseId/meetings", requireAuth, validate({ query: z.objec
 });
 
 async function meetingCourse(meetingId: string) {
-  const meeting = await prisma.liveMeeting.findUnique({ where: { id: meetingId }, select: { id: true, courseId: true, title: true } });
+  const meeting = await prisma.liveMeeting.findUnique({
+    where: { id: meetingId },
+    select: { id: true, courseId: true, title: true, chapterId: true, topicId: true, lessonId: true },
+  });
   if (!meeting) throw ApiError.notFound("Meeting not found");
   return meeting;
 }
@@ -84,11 +135,7 @@ router.post("/courses/:courseId/meetings", requireAuth, validate({ body: meeting
   const access = await getCourseAccess(req.params.courseId, req.user!);
   if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required");
   const input = body<z.infer<typeof meetingBody>>(req);
-
-  if (input.lessonId) {
-    const lesson = await prisma.lesson.findUnique({ where: { id: input.lessonId }, select: { courseId: true } });
-    if (!lesson || lesson.courseId !== req.params.courseId) throw ApiError.badRequest("Lesson does not belong to this course");
-  }
+  await assertMeetingLinks(req.params.courseId, input);
 
   const meeting = await prisma.liveMeeting.create({
     data: { courseId: req.params.courseId, ...input, createdById: req.user!.id },
@@ -116,7 +163,7 @@ router.post("/courses/:courseId/meetings", requireAuth, validate({ body: meeting
       meeting.courseId,
       `New live session: ${meeting.title}`,
       "A live session is scheduled",
-      `<strong>${meeting.title}</strong> in ${course.title} is scheduled for ${formatDateTime(meeting.scheduledAt)}.`,
+      `<strong>${escapeHtml(meeting.title)}</strong> in ${escapeHtml(course.title)} is scheduled for ${escapeHtml(formatDateTime(meeting.scheduledAt))}.`,
       `${config.appBaseUrl}/dashboard/courses/${course.slug}/meetings`,
     );
   }
@@ -129,7 +176,13 @@ router.patch("/meetings/:id", requireAuth, validate({ body: meetingBody.partial(
   const meeting = await meetingCourse(req.params.id);
   const access = await getCourseAccess(meeting.courseId, req.user!);
   if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required");
-  const updated = await prisma.liveMeeting.update({ where: { id: meeting.id }, data: body<Record<string, unknown>>(req) as never });
+  const patch = body<Partial<z.infer<typeof meetingBody>>>(req);
+  await assertMeetingLinks(meeting.courseId, {
+    chapterId: patch.chapterId !== undefined ? patch.chapterId : meeting.chapterId,
+    topicId: patch.topicId !== undefined ? patch.topicId : meeting.topicId,
+    lessonId: patch.lessonId !== undefined ? patch.lessonId : meeting.lessonId,
+  });
+  const updated = await prisma.liveMeeting.update({ where: { id: meeting.id }, data: patch as never });
   res.json({ success: true, data: { meeting: updated } });
 });
 
@@ -158,7 +211,7 @@ router.post("/meetings/:id/remind", requireAuth, async (req, res) => {
     meeting.courseId,
     `Reminder: ${meeting.title}`,
     "Your live session is coming up",
-    `<strong>${meeting.title}</strong>${course ? ` in ${course.title}` : ""} starts at ${formatDateTime(meeting.scheduledAt)}.`,
+    `<strong>${escapeHtml(meeting.title)}</strong>${course ? ` in ${escapeHtml(course.title)}` : ""} starts at ${escapeHtml(formatDateTime(meeting.scheduledAt))}.`,
     `${config.appBaseUrl}/dashboard/courses/${course?.slug ?? ""}/meetings`,
   );
   audit(req.user!.id, "meeting.reminder.sent", "liveMeeting", meeting.id, { courseId: meeting.courseId });

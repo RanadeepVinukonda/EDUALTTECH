@@ -80,15 +80,30 @@ router.get("/conversations", requireAuth, async (req, res) => {
     },
   });
 
-  const withMeta = await Promise.all(
-    conversations.map(async (c) => {
-      const unread = await prisma.conversationMessage.count({
-        where: { conversationId: c.id, senderId: { not: userId }, readAt: null },
+  // One grouped query instead of a count per conversation (N+1).
+  const unreadRows = conversations.length === 0
+    ? []
+    : await prisma.conversationMessage.groupBy({
+        by: ["conversationId"],
+        where: {
+          conversationId: { in: conversations.map((c) => c.id) },
+          senderId: { not: userId },
+          readAt: null,
+        },
+        _count: { _all: true },
       });
-      const { messages, ...rest } = c;
-      return { ...rest, lastMessage: messages[0] ?? null, unreadCount: unread };
-    }),
+  const unreadByConversation = new Map(
+    unreadRows.map((row) => [row.conversationId, row._count._all]),
   );
+
+  const withMeta = conversations.map((c) => {
+    const { messages, ...rest } = c;
+    return {
+      ...rest,
+      lastMessage: messages[0] ?? null,
+      unreadCount: unreadByConversation.get(c.id) ?? 0,
+    };
+  });
 
   res.json({ success: true, data: { conversations: withMeta } });
 });

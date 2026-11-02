@@ -2,8 +2,8 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { config } from "../../config/env.js";
-import { uploadPrivate, signedUrl, assertUploadable, contentTypeFor } from "../../lib/storage.js";
-import { sendEmail, layout } from "../../lib/email.js";
+import { uploadPrivate, signedUrl, assertUploadable, contentTypeFor, removePrivate } from "../../lib/storage.js";
+import { sendEmail, layout, escapeHtml } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
 import { formatDateTime } from "../../lib/time.js";
 import { requireAuth, requireRole, requireVerifiedMobile } from "../../middlewares/auth.js";
@@ -95,6 +95,13 @@ router.post(
         resumePath,
       },
       include: includeFull,
+    }).catch(async (err: unknown) => {
+      // The upload already landed; don't leave an orphan private object when
+      // the application row is rejected (duplicate, FK, etc.).
+      if (!input.useProfileResume && input.resume) {
+        await removePrivate(resumePath).catch(() => undefined);
+      }
+      throw err;
     });
 
     audit(userId, "application.submitted", "mentorApplication", application.id, { courseId: input.courseId });
@@ -188,20 +195,33 @@ router.post(
     }
 
     // Re-scheduling an already-scheduled interview: same flow, edited time/link.
-    const isReschedule = action === "INTERVIEW_SCHEDULED" && application.status === "INTERVIEW_SCHEDULED";
-
+    let isReschedule = false;
     let mentorParticipantId: string | null = null;
-    if (action === "ACCEPTED") {
-      // Atomic accept: exclusivity (one row per user per course) is the DB constraint.
-      const existing = await prisma.courseParticipant.findUnique({
-        where: { courseId_userId: { courseId: application.courseId, userId: application.userId } },
-        select: { id: true },
-      });
-      if (existing) throw ApiError.conflict("This user already participates in the course", "ALREADY_PARTICIPANT");
 
-      const created = await prisma.$transaction(async (tx) => {
-        await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${application.userId} FOR UPDATE`;
-        const p = await tx.courseParticipant.create({
+    // Lock the application row for the whole transition. Two admins accepting
+    // the same application serialise here: the second re-reads ACCEPTED and is
+    // rejected before it can create a duplicate participant row.
+    await prisma.$transaction(async (tx) => {
+      const locked = await tx.$queryRaw<Array<{ id: string; status: string }>>`
+        SELECT id, status FROM "MentorApplication" WHERE id = ${application.id} FOR UPDATE
+      `;
+      const current = locked[0];
+      if (!current) throw ApiError.notFound("Application not found");
+
+      const allowedNow = TRANSITIONS[current.status] ?? [];
+      if (!allowedNow.includes(action)) {
+        throw ApiError.badRequest(`Cannot move from ${current.status} to ${action}`, "INVALID_TRANSITION");
+      }
+      isReschedule = action === "INTERVIEW_SCHEDULED" && current.status === "INTERVIEW_SCHEDULED";
+
+      if (action === "ACCEPTED") {
+        const existing = await tx.courseParticipant.findUnique({
+          where: { courseId_userId: { courseId: application.courseId, userId: application.userId } },
+          select: { id: true },
+        });
+        if (existing) throw ApiError.conflict("This user already participates in the course", "ALREADY_PARTICIPANT");
+
+        const created = await tx.courseParticipant.create({
           data: {
             courseId: application.courseId,
             userId: application.userId,
@@ -210,20 +230,10 @@ router.post(
             status: "ACTIVE",
           },
         });
-        await tx.mentorApplication.update({
-          where: { id: application.id },
-          data: {
-            status: "ACCEPTED",
-            reviewedById: req.user!.id,
-            reviewedAt: new Date(),
-            reviewNote: note ?? null,
-          },
-        });
-        return p.id;
-      });
-      mentorParticipantId = created;
-    } else {
-      await prisma.mentorApplication.update({
+        mentorParticipantId = created.id;
+      }
+
+      await tx.mentorApplication.update({
         where: { id: application.id },
         data: {
           status: action,
@@ -235,7 +245,7 @@ router.post(
             : {}),
         },
       });
-    }
+    });
 
     await prisma.notification.create({
       data: {
@@ -267,10 +277,10 @@ router.post(
       html: layout(
         interviewEmail ? `Interview ${isReschedule ? "rescheduled" : "scheduled"}` : "Application update",
         interviewEmail
-          ? `Your mentor interview for <strong>${application.course.title}</strong> is ${isReschedule ? "rescheduled" : "scheduled"}${
-              whenInterview ? ` for <strong>${formatDateTime(whenInterview)}</strong>` : ""
+          ? `Your mentor interview for <strong>${escapeHtml(application.course.title)}</strong> is ${isReschedule ? "rescheduled" : "scheduled"}${
+              whenInterview ? ` for <strong>${escapeHtml(formatDateTime(whenInterview))}</strong>` : ""
             }. Join on time using the button below - your interview window opens at the scheduled time.`
-          : `Your mentor application for <strong>${application.course.title}</strong> is now <strong>${action.replace("_", " ").toLowerCase()}</strong>.`,
+          : `Your mentor application for <strong>${escapeHtml(application.course.title)}</strong> is now <strong>${escapeHtml(action.replace("_", " ").toLowerCase())}</strong>.`,
         interviewEmail ? (joinLink ? "Join interview" : "View your application") : "View your applications",
         interviewEmail ? joinLink ?? viewLink : viewLink,
       ),

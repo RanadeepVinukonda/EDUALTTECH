@@ -40,3 +40,12 @@ export const codeLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, error: { code: "RATE_LIMITED", message: "Too many code requests. Please wait a few minutes." } },
 });
+
+/** Anonymous course-poll suggestions create rows, so they get their own bucket. */
+export const pollSuggestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 6,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { success: false, error: { code: "RATE_LIMITED", message: "Too many course suggestions. Please try again later." } },
+});

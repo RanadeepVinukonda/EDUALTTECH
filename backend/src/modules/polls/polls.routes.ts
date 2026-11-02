@@ -5,11 +5,16 @@ import { requireAuth, requireRole, optionalAuth } from "../../middlewares/auth.j
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { audit } from "../../lib/audit.js";
+import { castPollVote } from "../../lib/poll-vote.js";
+import { pollSuggestLimiter } from "../../middlewares/rate-limit.js";
 
 const router = Router();
 
 const slugify = (s: string) =>
   s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+
+/** Hard ceiling for community-suggested options on one poll. */
+const MAX_POLL_OPTIONS = 40;
 
 // ────────────────────────────────────────────────────────────────────
 // Public & Learner Voting Endpoints
@@ -51,11 +56,11 @@ router.get("/active", optionalAuth, async (req, res) => {
     data: {
       poll: {
         ...poll,
-        totalVotes,
+        totalVotes: hideResults ? 0 : totalVotes,
         options: poll.options.map((opt) => ({
           ...opt,
           votes: hideResults ? 0 : opt.voteCount,
-          percentage: totalVotes > 0 ? Math.round((opt.voteCount / totalVotes) * 100) : 0,
+          percentage: hideResults || totalVotes === 0 ? 0 : Math.round((opt.voteCount / totalVotes) * 100),
           voteCount: hideResults ? undefined : opt.voteCount,
         })),
       },
@@ -108,80 +113,18 @@ router.post(
     const pollId = req.params.id;
     const userId = req.user!.id;
 
-    const poll = await prisma.coursePoll.findUnique({
-      where: { id: pollId },
-      include: { options: true },
-    });
+    const result = await castPollVote(pollId, optionId, userId);
 
-    if (!poll || poll.status !== "OPEN") {
-      throw ApiError.badRequest("This course poll is currently closed or not found.");
-    }
-
-    const now = new Date();
-    if (poll.endDate && now > poll.endDate) {
-      throw ApiError.badRequest("This poll has already reached its closing deadline.");
-    }
-
-    const targetOption = poll.options.find((o) => o.id === optionId);
-    if (!targetOption) {
-      throw ApiError.badRequest("The selected proposed course is not part of this poll.");
-    }
-
-    // One vote per user per poll, enforced by @@unique([pollId, userId]).
-    const existingVote = await prisma.pollVote.findUnique({
-      where: { pollId_userId: { pollId, userId } },
-    });
-
-    if (existingVote?.pollOptionId === optionId) {
-      throw ApiError.conflict("You have already voted for this course proposal.");
-    }
-    if (existingVote && !poll.allowVoteChange) {
-      throw ApiError.conflict("You have already voted in this poll and vote changes are disabled.");
-    }
-
-    await prisma.$transaction(async (tx) => {
-      if (existingVote) {
-        // Change vote: decrement previous option, update row, increment new option.
-        await tx.pollOption.update({
-          where: { id: existingVote.pollOptionId },
-          data: { voteCount: { decrement: 1 } },
-        });
-        await tx.pollOption.update({
-          where: { id: optionId },
-          data: { voteCount: { increment: 1 } },
-        });
-        await tx.pollVote.update({
-          where: { id: existingVote.id },
-          data: { pollOptionId: optionId },
-        });
-      } else {
-        await tx.pollVote.create({
-          data: { pollId, pollOptionId: optionId, userId },
-        });
-        await tx.pollOption.update({
-          where: { id: optionId },
-          data: { voteCount: { increment: 1 } },
-        });
-      }
-    });
-
-    audit(userId, "poll.voted", "coursePoll", pollId, { optionId, title: targetOption.title });
-
-    // Return updated totals
-    const updatedOptions = await prisma.pollOption.findMany({
-      where: { pollId },
-      orderBy: { order: "asc" },
-    });
-    const totalVotes = updatedOptions.reduce((acc, opt) => acc + opt.voteCount, 0);
+    audit(userId, "poll.voted", "coursePoll", pollId, { optionId, title: result.optionTitle });
 
     res.json({
       success: true,
       data: {
-        votedOptionId: optionId,
-        totalVotes,
-        options: updatedOptions.map((opt) => ({
+        votedOptionId: result.votedOptionId,
+        totalVotes: result.totalVotes,
+        options: result.options.map((opt) => ({
           ...opt,
-          percentage: totalVotes > 0 ? Math.round((opt.voteCount / totalVotes) * 100) : 0,
+          percentage: result.totalVotes > 0 ? Math.round((opt.voteCount / result.totalVotes) * 100) : 0,
         })),
       },
     });
@@ -191,6 +134,7 @@ router.post(
 /** Learner suggestion for next course / skill */
 router.post(
   "/suggest",
+  pollSuggestLimiter,
   optionalAuth,
   validate({
     body: z.object({
@@ -207,8 +151,21 @@ router.post(
       orderBy: { createdAt: "desc" },
     });
 
-    if (!poll) {
+    if (!poll || (poll.endDate && poll.endDate < new Date())) {
       return res.json({ success: true, data: { message: "Suggestion noted for upcoming polls." } });
+    }
+
+    const existing = await prisma.pollOption.findFirst({
+      where: { pollId: poll.id, title: { equals: title, mode: "insensitive" } },
+      select: { id: true },
+    });
+    if (existing) {
+      return res.json({ success: true, data: { option: { id: existing.id }, duplicate: true } });
+    }
+
+    const optionCount = await prisma.pollOption.count({ where: { pollId: poll.id } });
+    if (optionCount >= MAX_POLL_OPTIONS) {
+      throw ApiError.badRequest("This poll is no longer accepting new suggestions.", "POLL_SUGGESTIONS_CLOSED");
     }
 
     const last = await prisma.pollOption.findFirst({
@@ -217,6 +174,8 @@ router.post(
       select: { order: true },
     });
 
+    // Suggestions start at zero: only an explicit vote adds a vote, and an
+    // anonymous suggestion must never be able to inflate the tally.
     const newOption = await prisma.pollOption.create({
       data: {
         pollId: poll.id,
@@ -225,20 +184,10 @@ router.post(
         category: category ?? "Community Wishlist",
         domain: "Community",
         difficulty: "All Levels",
-        voteCount: 1,
+        voteCount: 0,
         order: (last?.order ?? 0) + 1,
       },
     });
-
-    if (req.user) {
-      await prisma.pollVote.create({
-        data: {
-          pollId: poll.id,
-          pollOptionId: newOption.id,
-          userId: req.user.id,
-        },
-      }).catch(() => undefined);
-    }
 
     res.status(201).json({ success: true, data: { option: newOption } });
   },

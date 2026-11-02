@@ -7,8 +7,21 @@ interface EmailInput {
   html: string;
 }
 
-const escape = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+export function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+export function escapeSubject(s: string): string {
+  // Strip control characters and collapse whitespace to prevent header injection.
+  return s.replace(/[\r\n\t]/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
+}
+
+const escape = escapeHtml;
 
 export function layout(title: string, intro: string, ctaLabel?: string, ctaUrl?: string, footer?: string): string {
   const button = ctaLabel && ctaUrl
@@ -20,7 +33,7 @@ export function layout(title: string, intro: string, ctaLabel?: string, ctaUrl?:
     <h1 style="font-size:20px;margin:8px 0 12px">${escape(title)}</h1>
     <p style="line-height:1.6;color:#334155;margin:0">${intro}</p>
     ${button}
-    <p style="font-size:12px;color:#94a3b8;margin-top:24px">${footer ?? "EduAltTech - a product by Setsuzoku"}</p>
+    <p style="font-size:12px;color:#94a3b8;margin-top:24px">${escape(footer ?? "EduAltTech - a product by Setsuzoku")}</p>
   </div></body></html>`;
 }
 
@@ -29,23 +42,48 @@ export function layout(title: string, intro: string, ctaLabel?: string, ctaUrl?:
  * callers must never let email delivery corrupt a business transaction.
  */
 export async function sendEmail(input: EmailInput): Promise<boolean> {
+  const subject = escapeSubject(input.subject);
   if (!config.email.resendApiKey) {
-    logger.warn("email skipped - RESEND_API_KEY not set", { to: input.to, subject: input.subject });
+    logger.warn("email skipped - RESEND_API_KEY not set", { to: input.to, subject });
     return false;
   }
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${config.email.resendApiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: config.email.from, to: [input.to], subject: input.subject, html: input.html }),
+      body: JSON.stringify({ from: config.email.from, to: [input.to], subject, html: input.html }),
     });
     if (!res.ok) {
-      logger.error("email send failed", { status: res.status, subject: input.subject });
+      logger.error("email send failed", { status: res.status, subject });
       return false;
     }
     return true;
   } catch (err) {
-    logger.error("email send error", { subject: input.subject, err: String(err) });
+    logger.error("email send error", { subject, err: String(err) });
     return false;
   }
+}
+
+/**
+ * Sends a fan-out with a bounded number of concurrent provider calls. A course
+ * with thousands of learners must not open thousands of sockets at once.
+ */
+export async function sendEmailBatch(inputs: EmailInput[], concurrency = 5): Promise<number> {
+  if (inputs.length === 0) return 0;
+  const workers = Math.min(Math.max(1, concurrency), inputs.length);
+  let next = 0;
+  let sent = 0;
+
+  await Promise.all(
+    Array.from({ length: workers }, async () => {
+      for (;;) {
+        const index = next++;
+        const input = inputs[index];
+        if (!input) return;
+        if (await sendEmail(input)) sent += 1;
+      }
+    }),
+  );
+
+  return sent;
 }

@@ -165,6 +165,11 @@ router.post("/users", validate({ body: z.object({
       role: input.role,
       emailVerifiedAt: data.user.email_confirmed_at ? new Date() : null,
     },
+  }).catch(async (err: unknown) => {
+    // Roll back the provider-side invite so a retry is not blocked by an
+    // auth user that has no platform profile.
+    await supabaseAdmin().auth.admin.deleteUser(data.user.id).catch(() => undefined);
+    throw err;
   });
   audit(req.user!.id, "user.invited", "user", user.id, { role: input.role });
   res.status(201).json({ success: true, data: { user } });
@@ -181,7 +186,7 @@ router.patch("/users/:id", validate({ body: z.object({
   if (target.id === req.user!.id) throw ApiError.badRequest("You cannot change your own account here");
 
   const patch = body<Record<string, unknown>>(req);
-  if (patch.role && target.role === "ADMIN" && patch.role === "USER") {
+  if (target.role === "ADMIN" && (patch.role === "USER" || patch.isActive === false)) {
     const admins = await prisma.user.count({ where: { role: "ADMIN", isActive: true } });
     if (admins <= 1) throw ApiError.badRequest("At least one active admin must remain", "LAST_ADMIN");
   }

@@ -1,5 +1,6 @@
 import { Router, raw } from "express";
 import { randomUUID } from "node:crypto";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { config } from "../../config/env.js";
@@ -95,7 +96,18 @@ router.post(
         razorpayOrderId: `pending_${randomUUID()}`,
       },
       include: orderInclude,
+    }).catch(async (err: unknown) => {
+      // Two concurrent checkouts with the same key: the unique constraint is
+      // the real idempotency guarantee. Return the winner instead of a 409/500.
+      if (orderKey && err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        return prisma.order.findUnique({ where: { idempotencyKey: orderKey }, include: orderInclude });
+      }
+      throw err;
     });
+
+    if (!order) {
+      throw ApiError.conflict("Could not create this order, please retry", "ORDER_CONFLICT");
+    }
 
     let rzp: { id: string };
     try {
@@ -206,10 +218,15 @@ router.post("/webhook", async (req, res) => {
   const ok = verifyHmac(rawBody.toString("utf8"), signature, secret);
   if (!ok) throw ApiError.unauthorized("Invalid webhook signature");
 
-  const event = JSON.parse(rawBody.toString("utf8")) as {
+  let event: {
     id: string; event: string;
     payload?: { payment?: { entity?: { id?: string; order_id?: string; method?: string; amount?: number; error?: unknown } } };
   };
+  try {
+    event = JSON.parse(rawBody.toString("utf8")) as typeof event;
+  } catch {
+    throw ApiError.badRequest("Malformed webhook payload");
+  }
   if (!event?.id || !event.event) throw ApiError.badRequest("Malformed webhook payload");
 
   // Store-once: second delivery of the same event id short-circuits below.

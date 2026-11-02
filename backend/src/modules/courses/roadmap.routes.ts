@@ -10,8 +10,7 @@ import { getCourseAccess, assertCourseOwner } from "../../lib/course-access.js";
 import { signedUrl, removePrivate, fileExt } from "../../lib/storage.js";
 import { supabaseAdmin } from "../../lib/supabase.js";
 import { config } from "../../config/env.js";
-import { sendEmail, layout } from "../../lib/email.js";
-import { logger } from "../../utils/logger.js";
+import { sendEmailBatch, layout, escapeHtml } from "../../lib/email.js";
 
 const router = Router();
 
@@ -48,11 +47,23 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res) => {
   });
 
   // Never expose the raw private storage key - surface a boolean flag instead.
+  // A locked (unpublished) lesson's body is also withheld from non-staff: the
+  // roadmap only reveals that the lesson exists, not its text or attached guide.
   const safeChapters = chapters.map((ch) => ({
     ...ch,
     topics: ch.topics.map((t) => ({
       ...t,
-      lessons: t.lessons.map(({ videoPath, ...l }) => ({ ...l, hasVideo: Boolean(videoPath) })),
+      lessons: t.lessons.map(({ videoPath, ...l }) => {
+        const locked = !l.isPublished && !access.isStaff;
+        return {
+          ...l,
+          contentUrl: locked ? null : l.contentUrl,
+          textContent: locked ? null : l.textContent,
+          resourceArticleId: locked ? null : l.resourceArticleId,
+          resourceArticle: locked ? null : l.resourceArticle,
+          hasVideo: Boolean(videoPath),
+        };
+      }),
     })),
   }));
 
@@ -204,19 +215,19 @@ async function notifyLessonUnlocked(courseId: string, lessonTitle: string) {
 
   // Best-effort email - delivery must never break the unlock transaction.
   const url = `${config.appBaseUrl}/dashboard/courses/${course?.slug ?? ""}`;
-  await Promise.allSettled(
-    learners.map((l) =>
-      sendEmail({
-        to: l.user.email,
-        subject: `New lesson unlocked: ${lessonTitle}`,
-        html: layout(
-          "A new lesson is ready",
-          `Hi ${l.user.firstName}, <strong>${lessonTitle}</strong>${course ? ` in ${course.title}` : ""} is now unlocked. Jump back in and keep going.`,
-          "Open course",
-          url,
-        ),
-      }).catch((err) => logger.warn("lesson unlock email failed", { err: String(err) })),
-    ),
+  await sendEmailBatch(
+    learners.map((l) => ({
+      to: l.user.email,
+      subject: `New lesson unlocked: ${lessonTitle}`,
+      html: layout(
+        "A new lesson is ready",
+        `Hi ${escapeHtml(l.user.firstName)}, <strong>${escapeHtml(lessonTitle)}</strong>${
+          course ? ` in ${escapeHtml(course.title)}` : ""
+        } is now unlocked. Jump back in and keep going.`,
+        "Open course",
+        url,
+      ),
+    })),
   );
 }
 

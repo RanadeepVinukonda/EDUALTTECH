@@ -3,11 +3,12 @@ import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { requireAuth } from "../../middlewares/auth.js";
 import { validate, body } from "../../middlewares/validate.js";
+import { booleanQuery } from "../../lib/query.js";
 
 const router = Router();
 
 router.get("/", requireAuth, validate({ query: z.object({
-  unreadOnly: z.coerce.boolean().optional(),
+  unreadOnly: booleanQuery.optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 }) }), async (req, res) => {

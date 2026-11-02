@@ -1,17 +1,31 @@
 import { Router } from "express";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { requireAuth, requireRole } from "../../middlewares/auth.js";
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { audit } from "../../lib/audit.js";
-import { assertUploadable, uploadPublic, contentTypeFor } from "../../lib/storage.js";
-import { config } from "../../config/env.js";
+import { assertPublicImage, uploadPublic, removePublic, contentTypeFor } from "../../lib/storage.js";
 
 const router = Router();
 
 const slugify = (s: string) =>
   s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+
+/**
+ * A title made only of punctuation slugifies to "", and two identical titles
+ * collide. Neither may reach a unique column as-is.
+ */
+async function uniqueSlug(text: string, taken: (slug: string) => Promise<boolean>): Promise<string> {
+  const base = slugify(text) || "item";
+  if (!(await taken(base))) return base;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    const candidate = `${base}-${Date.now().toString(36)}${attempt > 1 ? `-${attempt}` : ""}`;
+    if (!(await taken(candidate))) return candidate;
+  }
+  return `${base}-${randomUUID().slice(0, 8)}`;
+}
 
 // ── Public reads (anonymous visitors) ──────────────────────────────
 
@@ -103,12 +117,14 @@ const uploadBody = z.object({
 admin.post("/media/upload", validate({ body: uploadBody }), async (req, res) => {
   const input = body<z.infer<typeof uploadBody>>(req);
   const bytes = Buffer.from(input.data, "base64");
-  if (bytes.length === 0) throw ApiError.badRequest("Uploaded file is empty");
-  if (bytes.length > config.limits.maxUploadBytes) throw ApiError.badRequest("Image is too large");
-  assertUploadable(input.name, bytes.length);
+  assertPublicImage(input.name, bytes);
   const url = await uploadPublic("cms", input.name, bytes, contentTypeFor(input.name));
   const asset = await prisma.mediaAsset.create({
     data: { url, kind: input.kind, alt: input.alt ?? null, category: input.category ?? null },
+  }).catch(async (err: unknown) => {
+    // The upload is already public; remove it if the metadata row is rejected.
+    await removePublic(url).catch(() => undefined);
+    throw err;
   });
   audit(req.user!.id, "media.uploaded", "mediaAsset", asset.id);
   res.status(201).json({ success: true, data: { asset } });
@@ -152,11 +168,14 @@ admin.get("/work", async (_req, res) => {
 admin.post("/work", validate({ body: workBody }), async (req, res) => {
   const input = body<z.infer<typeof workBody>>(req);
   const isPublished = input.isPublished ?? false;
+  const slug = await uniqueSlug(input.title, async (candidate) =>
+    Boolean(await prisma.workItem.findUnique({ where: { slug: candidate }, select: { id: true } })),
+  );
   const item = await prisma.workItem.create({
     data: {
       ...input,
       mediaIds: input.mediaIds ?? [],
-      slug: slugify(input.title),
+      slug,
       publishedAt: isPublished ? new Date() : null,
     },
   });
@@ -168,13 +187,18 @@ admin.patch("/work/:id", validate({ body: workBody.partial() }), async (req, res
   const existing = await prisma.workItem.findUnique({ where: { id: req.params.id }, select: { isPublished: true, title: true } });
   if (!existing) throw ApiError.notFound("Work item not found");
   const input = body<Partial<z.infer<typeof workBody>>>(req);
+  const nextSlug = input.title && input.title !== existing.title
+    ? await uniqueSlug(input.title, async (candidate) =>
+        Boolean(await prisma.workItem.findFirst({ where: { slug: candidate, id: { not: req.params.id } }, select: { id: true } })),
+      )
+    : undefined;
 
   const item = await prisma.workItem.update({
     where: { id: req.params.id },
     data: {
       ...input,
       ...(input.mediaIds ? { mediaIds: input.mediaIds } : {}),
-      ...(input.title && input.title !== existing.title ? { slug: slugify(input.title) } : {}),
+      ...(nextSlug ? { slug: nextSlug } : {}),
       ...(input.isPublished !== undefined && input.isPublished !== existing.isPublished
         ? { publishedAt: input.isPublished ? new Date() : null }
         : {}),
@@ -210,15 +234,25 @@ admin.get("/organizations", async (_req, res) => {
 
 admin.post("/organizations", validate({ body: orgBody }), async (req, res) => {
   const input = body<z.infer<typeof orgBody>>(req);
-  let slug = slugify(input.name);
-  if (await prisma.organization.findUnique({ where: { slug } })) slug = `${slug}-${Date.now().toString(36)}`;
+  const slug = await uniqueSlug(input.name, async (candidate) =>
+    Boolean(await prisma.organization.findUnique({ where: { slug: candidate }, select: { id: true } })),
+  );
   const org = await prisma.organization.create({ data: { ...input, slug } });
   audit(req.user!.id, "org.created", "organization", org.id);
   res.status(201).json({ success: true, data: { organization: org } });
 });
 
 admin.patch("/organizations/:id", validate({ body: orgBody.partial() }), async (req, res) => {
-  const org = await prisma.organization.update({ where: { id: req.params.id }, data: body<Record<string, unknown>>(req) as never });
+  const input = body<Partial<z.infer<typeof orgBody>>>(req);
+  const slug = input.name
+    ? await uniqueSlug(input.name, async (candidate) =>
+        Boolean(await prisma.organization.findFirst({ where: { slug: candidate, id: { not: req.params.id } }, select: { id: true } })),
+      )
+    : undefined;
+  const org = await prisma.organization.update({
+    where: { id: req.params.id },
+    data: { ...input, ...(slug ? { slug } : {}) },
+  });
   res.json({ success: true, data: { organization: org } });
 });
 
@@ -248,8 +282,9 @@ admin.get("/programs", async (_req, res) => {
 
 admin.post("/programs", validate({ body: programBody }), async (req, res) => {
   const input = body<z.infer<typeof programBody>>(req);
-  let slug = slugify(input.title);
-  if (await prisma.program.findUnique({ where: { slug } })) slug = `${slug}-${Date.now().toString(36)}`;
+  const slug = await uniqueSlug(input.title, async (candidate) =>
+    Boolean(await prisma.program.findUnique({ where: { slug: candidate }, select: { id: true } })),
+  );
   const item = await prisma.program.create({ data: { ...input, slug } });
   audit(req.user!.id, "program.created", "program", item.id);
   res.status(201).json({ success: true, data: { item } });
@@ -259,9 +294,14 @@ admin.patch("/programs/:id", validate({ body: programBody.partial() }), async (r
   const input = body<Partial<z.infer<typeof programBody>>>(req);
   const existing = await prisma.program.findUnique({ where: { id: req.params.id }, select: { title: true } });
   if (!existing) throw ApiError.notFound("Program not found");
+  const slug = input.title && input.title !== existing.title
+    ? await uniqueSlug(input.title, async (candidate) =>
+        Boolean(await prisma.program.findFirst({ where: { slug: candidate, id: { not: req.params.id } }, select: { id: true } })),
+      )
+    : undefined;
   const item = await prisma.program.update({
     where: { id: req.params.id },
-    data: { ...input, ...(input.title && input.title !== existing.title ? { slug: slugify(input.title) } : {}) },
+    data: { ...input, ...(slug ? { slug } : {}) },
   });
   res.json({ success: true, data: { item } });
 });

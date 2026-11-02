@@ -474,10 +474,29 @@ router.patch(
     const existing = await prisma.resourceArticle.findUnique({ where: { id: req.params.id } });
     if (!existing) throw ApiError.notFound("Article not found");
 
-    if (input.title && !input.slug && input.title !== existing.title) {
-      let nextSlug = slugify(input.title as string);
-      const conflict = await prisma.resourceArticle.findUnique({ where: { slug: nextSlug } });
-      if (conflict && conflict.id !== existing.id) nextSlug = `${nextSlug}-${Date.now().toString(36)}`;
+    // An explicit slug is normalised exactly like create: lowercase, hyphenated,
+    // never empty, and never colliding with another article.
+    if (input.slug !== undefined) {
+      const title = typeof input.title === "string" ? input.title : existing.title;
+      const source = typeof input.slug === "string" && input.slug.trim()
+        ? input.slug
+        : title;
+      let nextSlug = slugify(source);
+      if (!nextSlug) nextSlug = `article-${Date.now().toString(36)}`;
+      const conflict = await prisma.resourceArticle.findFirst({
+        where: { slug: nextSlug, id: { not: existing.id } },
+        select: { id: true },
+      });
+      if (conflict) nextSlug = `${nextSlug}-${Date.now().toString(36)}`;
+      input.slug = nextSlug;
+    } else if (typeof input.title === "string" && input.title && input.title !== existing.title) {
+      let nextSlug = slugify(input.title);
+      if (!nextSlug) nextSlug = `article-${Date.now().toString(36)}`;
+      const conflict = await prisma.resourceArticle.findFirst({
+        where: { slug: nextSlug, id: { not: existing.id } },
+        select: { id: true },
+      });
+      if (conflict) nextSlug = `${nextSlug}-${Date.now().toString(36)}`;
       input.slug = nextSlug;
     }
 
@@ -645,6 +664,10 @@ router.post(
     if (input.courseId) {
       const access = await getCourseAccess(input.courseId, req.user!);
       if (!access.isStaff) throw ApiError.forbidden("Mentor or course-owner access required for course resources");
+    } else if (req.user!.role !== "ADMIN") {
+      // Unscoped library resources are public to every signed-in user; only an
+      // admin may add to that shared catalogue.
+      throw ApiError.forbidden("Only admins can publish uncoursed library resources");
     }
 
     let storagePath: string | null = null;
@@ -674,6 +697,9 @@ router.post(
         ownerId: req.user!.id,
       },
       select: resourceSelect,
+    }).catch(async (err: unknown) => {
+      if (storagePath) await removePrivate(storagePath).catch(() => undefined);
+      throw err;
     });
 
     audit(req.user!.id, "resource.created", "resource", resource.id, { courseId: input.courseId ?? null });

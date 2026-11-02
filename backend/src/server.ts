@@ -2,6 +2,7 @@ import "dotenv/config";
 import { createApp, logStartupFailure } from "./app.js";
 import { config } from "./config/env.js";
 import { logger } from "./utils/logger.js";
+import { prisma } from "./lib/prisma.js";
 
 async function main(): Promise<void> {
   // A service_role key pasted as the anon key silently breaks every private-file
@@ -17,9 +18,14 @@ async function main(): Promise<void> {
     logger.info("server listening", { port: config.port, env: config.env });
   });
 
+  let shuttingDown = false;
   const shutdown = (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     logger.info("shutting down", { signal });
-    server.close(() => process.exit(0));
+    server.close(() => {
+      void prisma.$disconnect().finally(() => process.exit(0));
+    });
     setTimeout(() => process.exit(1), 10_000).unref();
   };
   process.on("SIGINT", () => shutdown("SIGINT"));

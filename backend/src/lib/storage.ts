@@ -49,6 +49,58 @@ export function assertUploadable(name: string, sizeBytes: number): void {
   }
 }
 
+// Public-facing images (avatars, CMS media). SVG is deliberately excluded:
+// it can carry script and these objects are served inline from the CDN.
+const PUBLIC_IMAGE_MIME: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+};
+
+function isPng(bytes: Buffer): boolean {
+  return bytes.length >= 8 &&
+    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+    bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a;
+}
+
+function isJpeg(bytes: Buffer): boolean {
+  return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+}
+
+function isGif(bytes: Buffer): boolean {
+  const header = bytes.subarray(0, 6).toString("ascii");
+  return header === "GIF87a" || header === "GIF89a";
+}
+
+function isWebp(bytes: Buffer): boolean {
+  return bytes.length >= 12 &&
+    bytes.subarray(0, 4).toString("ascii") === "RIFF" &&
+    bytes.subarray(8, 12).toString("ascii") === "WEBP";
+}
+
+/**
+ * Validates a raster image before it is written to the public bucket. The
+ * declared client MIME type is ignored; both extension and magic bytes must
+ * agree, so an HTML/SVG payload renamed to .png is rejected.
+ */
+export function assertPublicImage(name: string, bytes: Buffer): void {
+  const ext = fileExt(name);
+  const expected = PUBLIC_IMAGE_MIME[ext];
+  if (!expected) throw ApiError.badRequest("Only PNG, JPEG, WebP, or GIF images are allowed");
+  if (bytes.length === 0) throw ApiError.badRequest("Uploaded file is empty");
+  if (bytes.length > config.limits.maxUploadBytes) {
+    throw ApiError.badRequest(`File exceeds ${Math.round(config.limits.maxUploadBytes / 1024 / 1024)}MB limit`);
+  }
+  const matches =
+    ext === ".png" ? isPng(bytes) :
+    ext === ".gif" ? isGif(bytes) :
+    ext === ".webp" ? isWebp(bytes) :
+    isJpeg(bytes);
+  if (!matches) throw ApiError.badRequest("Image content does not match its file extension");
+}
+
 /** Random object key inside a bucket. Destination is server-chosen, never client-controlled. */
 export function objectKey(prefix: string, name: string): string {
   return `${prefix}/${randomUUID()}-${sanitizeFileName(name)}`;
@@ -83,4 +135,13 @@ export async function signedUrl(key: string, expiresInSec = 3600): Promise<strin
 
 export async function removePrivate(key: string): Promise<void> {
   await supabaseAdmin().storage.from(config.supabase.privateBucket).remove([key]).catch(() => undefined);
+}
+
+/** Removes a public object from the URL returned by uploadPublic. */
+export async function removePublic(url: string): Promise<void> {
+  const marker = `/storage/v1/object/public/${config.supabase.publicBucket}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return;
+  const key = url.slice(index + marker.length);
+  await supabaseAdmin().storage.from(config.supabase.publicBucket).remove([key]).catch(() => undefined);
 }

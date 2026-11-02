@@ -1,4 +1,8 @@
+import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
+import { resolve } from "node:path";
+
+const { combinedEnv } = loadEnvConfig(resolve(process.cwd(), ".."));
 
 const backendOrigin = process.env.BACKEND_ORIGIN ?? "http://localhost:5000";
 
@@ -38,6 +42,10 @@ const securityHeaders: Array<[string, string]> = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: combinedEnv.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: combinedEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },

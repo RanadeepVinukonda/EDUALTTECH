@@ -4,7 +4,7 @@ import { z } from "zod";
 import { config, isProd } from "../../config/env.js";
 import { prisma } from "../../lib/prisma.js";
 import { supabaseAdmin, getUserByToken } from "../../lib/supabase.js";
-import { uploadPublic, uploadPrivate, signedUrl, removePrivate, assertUploadable, contentTypeFor } from "../../lib/storage.js";
+import { uploadPublic, uploadPrivate, signedUrl, removePrivate, assertUploadable, assertPublicImage, contentTypeFor } from "../../lib/storage.js";
 import { sendEmail, layout } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
 import { requireAuth } from "../../middlewares/auth.js";
@@ -136,6 +136,10 @@ router.post(
         lastName: input.lastName,
         emailVerifiedAt: new Date(),
       },
+    }).catch(async (err: unknown) => {
+      // Never leave an orphan Supabase auth user whose Prisma profile failed.
+      await supabaseAdmin().auth.admin.deleteUser(data.user.id).catch(() => undefined);
+      throw err;
     });
 
     await consumeCodes(input.email);
@@ -376,7 +380,7 @@ router.post(
   async (req, res) => {
     const meta = body<{ name: string; type: string; data: string }>(req);
     const bytes = Buffer.from(meta.data, "base64");
-    if (bytes.length > config.limits.maxUploadBytes) throw ApiError.badRequest("Image is too large");
+    assertPublicImage(meta.name, bytes);
     const url = await uploadPublic("avatars", meta.name, bytes, contentTypeFor(meta.name));
     const user = await prisma.user.update({ where: { id: req.user!.id }, data: { avatarUrl: url } });
     res.json({ success: true, data: { avatarUrl: user.avatarUrl } });
@@ -390,6 +394,15 @@ const resumeMeta = z.object({
   type: z.string().regex(/^(application|image|text)\/[\w.+-]+$/),
   data: z.string().min(16),
 });
+
+/**
+ * A profile resume can be shared with mentor applications. Removing the
+ * profile must not leave an application pointing at a deleted object.
+ */
+async function removeResumeIfUnreferenced(path: string): Promise<void> {
+  const references = await prisma.mentorApplication.count({ where: { resumePath: path } });
+  if (references === 0) await removePrivate(path);
+}
 
 router.get("/resume", requireAuth, async (req, res) => {
   const user = await prisma.user.findUnique({
@@ -420,7 +433,7 @@ router.post("/resume", requireAuth, validate({ body: resumeMeta }), async (req, 
     where: { id: req.user!.id },
     data: { resumePath, resumeName: meta.name, resumeUpdatedAt: new Date() },
   });
-  if (previous?.resumePath) await removePrivate(previous.resumePath);
+  if (previous?.resumePath) await removeResumeIfUnreferenced(previous.resumePath);
   audit(req.user!.id, "user.resume_uploaded", "user", req.user!.id);
   res.json({ success: true, data: { resumeName: user.resumeName, resumeUpdatedAt: user.resumeUpdatedAt } });
 });
@@ -430,7 +443,7 @@ router.delete("/resume", requireAuth, async (req, res) => {
     where: { id: req.user!.id },
     select: { resumePath: true },
   });
-  if (user?.resumePath) await removePrivate(user.resumePath);
+  if (user?.resumePath) await removeResumeIfUnreferenced(user.resumePath);
   await prisma.user.update({
     where: { id: req.user!.id },
     data: { resumePath: null, resumeName: null, resumeUpdatedAt: null },
