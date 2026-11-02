@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
+import CalendarMonth from "@mui/icons-material/CalendarMonth";
+import MailOutlined from "@mui/icons-material/MailOutlined";
 import { apiPatch, ApiError } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import AvatarUploader from "./AvatarUploader";

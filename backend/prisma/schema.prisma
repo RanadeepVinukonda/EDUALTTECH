@@ -815,7 +815,6 @@ model CoursePoll {
   status                 PollStatus @default(DRAFT)
   startDate              DateTime?
   endDate                DateTime?
-  allowMultipleVotes     Boolean    @default(false)
   allowVoteChange        Boolean    @default(true)
   hideResultsUntilClosed Boolean    @default(false)
   createdById            String
@@ -864,6 +863,5 @@ model PollVote {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  @@unique([pollId, userId, pollOptionId])
-  @@index([pollId, userId])
+  @@unique([pollId, userId])
 }

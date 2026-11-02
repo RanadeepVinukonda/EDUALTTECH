@@ -15,9 +15,9 @@ const FAQS: FAQItem[] = [
       "We believe learning shouldn't be boxed into standard school syllabi or coding alone. Alongside applied AI, software engineering, and systems, we offer structured courses and roadmaps in music production, audio mixing, classical and modern dance, creative arts, and entrepreneurship. Any skill that empowers you to create and build has a home here.",
   },
   {
-    question: "How does the 24/7 mentorship work in practice?",
+    question: "How does mentor support work in practice?",
     answer:
-      "Every paid course connects you directly with working practitioners. You can submit questions, code reviews, audio mixes, or video practice at any time. Our mentors provide round-the-clock async doubt resolution, weekly scheduled 1-on-1 office hours, and actionable feedback so you never remain blocked.",
+      "Every paid course connects you with a working practitioner for the course you joined. You can post questions and share work for feedback, and your mentor responds asynchronously according to the course's stated response expectation. Scheduled doubt-solving sessions are listed with each course.",
   },
   {
     question: "Are the open notes and roadmaps really 100% free?",
@@ -32,7 +32,7 @@ const FAQS: FAQItem[] = [
   {
     question: "How does the community course voting and wishlist work?",
     answer:
-      "Our roadmap is driven directly by learner demand. You can vote on monthly course candidates or submit any skill you wish to see on the platform. The top-voted topics are prioritized, assigned to vetted expert practitioners, and published to the live catalog.",
+      "Our roadmap is informed by learner demand. You can vote on active course proposals or suggest a skill you want to see. Results help the academic team decide what to develop next; a winning poll option is not published automatically.",
   },
 ];
 
@@ -51,7 +51,7 @@ export default function LandingFAQ() {
             Frequently asked questions
           </h2>
           <p className="mt-3 text-base text-slate-600 max-w-2xl mx-auto">
-            Clear answers about our courses, 24/7 mentors, free open notes, and paid teaching opportunities.
+            Clear answers about our courses, mentor support, free notes, and paid teaching opportunities.
           </p>
         </div>
 

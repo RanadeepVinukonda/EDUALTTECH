@@ -48,16 +48,9 @@ export default async function PollsPage() {
             evaluates syllabus scope, designs project roadmaps, and recruits industry-tested mentors.
           </p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-6 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5 font-semibold text-slate-700">
-              <span className="h-2 w-2 rounded-full bg-brand-600" />
-              1 Vote Per Learner
-            </span>
-            <span>•</span>
-            <span>Duplicate-safe transactional voting</span>
-            <span>•</span>
-            <span>Top proposals converted into live courses</span>
-          </div>
+          <p className="mt-6 max-w-2xl text-sm text-slate-500">
+            One verified vote per account per poll. Results inform which proposals the academic team develops next.
+          </p>
         </div>
       </section>
 
@@ -96,13 +89,13 @@ export default async function PollsPage() {
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-4">
                       <div>
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                          Closed Cycle
+                        <span className="text-xs font-medium text-slate-500">
+                          Closed poll
                         </span>
                         <h3 className="mt-1 font-display text-lg font-semibold text-ink-900">{poll.title}</h3>
                       </div>
-                      <span className="text-xs font-mono text-slate-500">
-                        Total Votes: {totalVotes.toLocaleString()}
+                      <span className="text-xs text-slate-500">
+                        {totalVotes.toLocaleString()} votes
                       </span>
                     </div>
 

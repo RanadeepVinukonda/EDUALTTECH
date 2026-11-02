@@ -288,11 +288,11 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
                   </button>
                 </header>
 
-                {/* 24/7 Asynchronous Mentorship Availability Banner */}
+                {/* Asynchronous mentorship availability */}
                 <div className="border-b border-slate-100 bg-slate-50/70 px-4 py-2 text-xs text-slate-600 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span>24/7 Asynchronous Mentorship · Typical response: within 4–8 hours</span>
+                    <span>Asynchronous questions · Mentor responses depend on availability</span>
                   </div>
                   <span className="text-[11px] text-slate-400">Course-Scoped</span>
                 </div>

@@ -243,7 +243,7 @@ export default function ResourceArticleReader({ article }: Props) {
                     View Complete Course & Syllabus
                   </LinkButton>
                   <span className="text-xs text-slate-500">
-                    Includes live mentor sessions & 24/7 doubt resolution
+                    Includes live mentor sessions and asynchronous doubt support
                   </span>
                 </div>
               </div>

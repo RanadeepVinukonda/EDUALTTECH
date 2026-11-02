@@ -9,8 +9,25 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { api, ApiError } from "@/lib/api";
 
-type Fields = { name: string; email: string; phone: string; subject: string; body: string };
-const EMPTY: Fields = { name: "", email: "", phone: "", subject: "", body: "" };
+type Fields = { name: string; email: string; phone: string; intent: string; subject: string; body: string };
+const EMPTY: Fields = {
+  name: "",
+  email: "",
+  phone: "",
+  intent: "Course or learning enquiry",
+  subject: "",
+  body: "",
+};
+
+const INTENTS = [
+  "Course or learning enquiry",
+  "Looking for tuition",
+  "Offering tuition",
+  "Mentoring a course",
+  "Technology for a school or organization",
+  "Partnership or collaboration",
+  "Something else",
+];
 
 // Matches the backend schema in contact.routes.ts
 function validate(f: Fields): Partial<Record<keyof Fields, string>> {
@@ -37,7 +54,7 @@ export default function InquiryForm() {
     formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
   }, [errors]);
 
-  const set = (k: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+  const set = (k: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setFields((f) => ({ ...f, [k]: e.target.value }));
 
   async function onSubmit(e: React.FormEvent) {
@@ -57,7 +74,7 @@ export default function InquiryForm() {
           name: fields.name.trim(),
           email: fields.email.trim().toLowerCase(),
           phone: fields.phone.trim() || null,
-          subject: fields.subject.trim() || null,
+          subject: `[${fields.intent}]${fields.subject.trim() ? ` ${fields.subject.trim()}` : ""}`.slice(0, 200),
           body: fields.body.trim(),
         },
       });
@@ -139,6 +156,25 @@ export default function InquiryForm() {
         </div>
       </div>
 
+      <div>
+        <label htmlFor="inq-intent" className="mb-1.5 block text-sm font-semibold text-ink-700">
+          What is this about?
+        </label>
+        <select
+          id="inq-intent"
+          name="intent"
+          value={fields.intent}
+          onChange={set("intent")}
+          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-[15px] text-ink-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+        >
+          {INTENTS.map((intent) => (
+            <option key={intent} value={intent}>
+              {intent}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="inq-phone" className="mb-1.5 block text-sm font-semibold text-ink-700">
@@ -164,7 +200,7 @@ export default function InquiryForm() {
         </div>
         <div>
           <label htmlFor="inq-subject" className="mb-1.5 block text-sm font-semibold text-ink-700">
-            Subject <span className="font-normal text-slate-400">(optional)</span>
+            Subject <span className="font-normal text-slate-500">(optional)</span>
           </label>
           <Input
             id="inq-subject"

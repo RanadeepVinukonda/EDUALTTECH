@@ -9,8 +9,9 @@ import Add from "@mui/icons-material/Add";
 import HowToVote from "@mui/icons-material/HowToVote";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import Lock from "@mui/icons-material/Lock";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, ApiError } from "@/lib/api";
 import type { ActivePollResponse, PollOptionItem } from "@/lib/types";
+import { notifyError, notifySuccess } from "@/lib/notify";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/components/app/AuthProvider";
 import Spinner from "@/components/ui/Spinner";
@@ -122,11 +123,10 @@ export default function CommunityCoursePoll() {
       });
       setCustomSkill("");
       setSuggestSuccess(true);
+      notifySuccess("Suggestion submitted for curriculum review.");
       setTimeout(() => setSuggestSuccess(false), 5000);
-    } catch {
-      setCustomSkill("");
-      setSuggestSuccess(true);
-      setTimeout(() => setSuggestSuccess(false), 5000);
+    } catch (err) {
+      notifyError(err instanceof ApiError ? err.message : "Could not submit your suggestion. Please try again.");
     } finally {
       setSuggesting(false);
     }
@@ -184,7 +184,7 @@ export default function CommunityCoursePoll() {
                 Want a specific skill or course?
               </h3>
               <p className="mt-1 text-xs text-slate-600">
-                Submit any technology, academic, or creative art topic to enter it into the upcoming prioritization vote.
+                Send us a technology, academic, or creative topic. Suggestions are reviewed before they appear in a future poll.
               </p>
 
               <form onSubmit={handleSuggest} className="mt-4 flex flex-col sm:flex-row gap-2">
@@ -199,9 +199,9 @@ export default function CommunityCoursePoll() {
                 <button
                   type="submit"
                   disabled={suggesting}
-                  className="inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-brand-700 shrink-0 disabled:opacity-50"
+                  className="inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-700 shrink-0 disabled:opacity-50"
                 >
-                  {suggesting ? "Submitting..." : "Submit Skill"}
+                  {suggesting ? "Submitting…" : "Submit suggestion"}
                 </button>
               </form>
 
@@ -213,12 +213,8 @@ export default function CommunityCoursePoll() {
               )}
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-500">
-              <div className="flex items-center gap-2">
-                <span>Total Community Votes: <strong>{totalVotes.toLocaleString()}</strong></span>
-                <span>•</span>
-                <span>Real-time</span>
-              </div>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
+              <span>Total votes: <strong className="font-semibold text-slate-700">{totalVotes.toLocaleString()}</strong></span>
               <Link
                 href="/polls#past-polls"
                 className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-brand-700 hover:underline"

@@ -98,47 +98,6 @@ export interface ResourceCatalogItem {
   lessonCount: number;
 }
 
-export interface ResourceLesson {
-  id: string;
-  title: string;
-  type: LessonType;
-  textContent: string | null;
-  contentUrl: string | null;
-  order: number;
-}
-
-export interface ResourceTopic {
-  id: string;
-  title: string;
-  summary: string | null;
-  order: number;
-  lessons: ResourceLesson[];
-}
-
-export interface ResourceChapter {
-  id: string;
-  title: string;
-  summary: string | null;
-  order: number;
-  topics: ResourceTopic[];
-}
-
-export interface ResourceTutorial {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  category: string;
-  domain: string;
-  thumbnailUrl: string | null;
-  updatedAt: string;
-  chapters: ResourceChapter[];
-}
-
-export interface ResourceTutorialResponse {
-  resource: ResourceTutorial;
-}
-
 export interface WorkItem {
   id: string;
   slug: string;

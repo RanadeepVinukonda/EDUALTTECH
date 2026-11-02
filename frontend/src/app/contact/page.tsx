@@ -13,8 +13,9 @@ export const metadata: Metadata = {
 };
 
 const ENQUIRY_TYPES = [
+  "Looking for tuition or a mentor",
+  "Offering tuition as an educator",
   "Courses and learning programs",
-  "Mentoring a specific course",
   "Technology for your school or organization",
   "Partnerships and collaborations",
 ];

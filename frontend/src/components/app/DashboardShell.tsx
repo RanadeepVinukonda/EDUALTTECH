@@ -19,6 +19,7 @@ import Insights from "@mui/icons-material/Insights";
 import LibraryBooks from "@mui/icons-material/LibraryBooks";
 import PeopleAlt from "@mui/icons-material/PeopleAlt";
 import HowToReg from "@mui/icons-material/HowToReg";
+import MarkEmailUnread from "@mui/icons-material/MarkEmailUnread";
 import Web from "@mui/icons-material/Web";
 import History from "@mui/icons-material/History";
 import ArrowOutward from "@mui/icons-material/ArrowOutward";
@@ -88,6 +89,7 @@ const ADMIN_GROUPS: NavGroup[] = [
       { href: "/dashboard/admin/users", label: "Users", Icon: PeopleAlt },
       { href: "/dashboard/admin/mentors", label: "Mentors", Icon: CoPresent },
       { href: "/dashboard/admin/applications", label: "Applications", Icon: HowToReg },
+      { href: "/dashboard/admin/inquiries", label: "Tuition inquiries", Icon: MarkEmailUnread },
     ],
   },
   {

@@ -127,50 +127,37 @@ router.post(
       throw ApiError.badRequest("The selected proposed course is not part of this poll.");
     }
 
-    // Existing votes by this user in this poll
-    const existingVotes = await prisma.pollVote.findMany({
-      where: { pollId, userId },
+    // One vote per user per poll, enforced by @@unique([pollId, userId]).
+    const existingVote = await prisma.pollVote.findUnique({
+      where: { pollId_userId: { pollId, userId } },
     });
 
-    const alreadyVotedThisOption = existingVotes.some((v) => v.pollOptionId === optionId);
-    if (alreadyVotedThisOption) {
+    if (existingVote?.pollOptionId === optionId) {
       throw ApiError.conflict("You have already voted for this course proposal.");
+    }
+    if (existingVote && !poll.allowVoteChange) {
+      throw ApiError.conflict("You have already voted in this poll and vote changes are disabled.");
     }
 
     await prisma.$transaction(async (tx) => {
-      if (existingVotes.length > 0 && !poll.allowMultipleVotes) {
-        if (!poll.allowVoteChange) {
-          throw ApiError.conflict("You have already voted in this poll and vote changes are disabled.");
-        }
-
-        // Change vote: decrement previous option, update row, increment new option
-        const prevVote = existingVotes[0];
-        if (prevVote) {
-          await tx.pollOption.update({
-            where: { id: prevVote.pollOptionId },
-            data: { voteCount: { decrement: 1 } },
-          });
-
-          await tx.pollVote.update({
-            where: { id: prevVote.id },
-            data: { pollOptionId: optionId },
-          });
-        }
-
+      if (existingVote) {
+        // Change vote: decrement previous option, update row, increment new option.
+        await tx.pollOption.update({
+          where: { id: existingVote.pollOptionId },
+          data: { voteCount: { decrement: 1 } },
+        });
         await tx.pollOption.update({
           where: { id: optionId },
           data: { voteCount: { increment: 1 } },
         });
-      } else {
-        // New vote
-        await tx.pollVote.create({
-          data: {
-            pollId,
-            pollOptionId: optionId,
-            userId,
-          },
+        await tx.pollVote.update({
+          where: { id: existingVote.id },
+          data: { pollOptionId: optionId },
         });
-
+      } else {
+        await tx.pollVote.create({
+          data: { pollId, pollOptionId: optionId, userId },
+        });
         await tx.pollOption.update({
           where: { id: optionId },
           data: { voteCount: { increment: 1 } },
@@ -293,23 +280,22 @@ const optionInputSchema = z.object({
   outcomes: z.array(z.string().trim().min(1).max(160)).max(10).default([]),
 });
 
+const pollCreateSchema = z.object({
+  title: z.string().trim().min(3).max(160),
+  description: z.string().trim().min(5).max(2000),
+  status: z.enum(["DRAFT", "OPEN", "CLOSED"]).default("DRAFT"),
+  startDate: z.coerce.date().nullable().optional(),
+  endDate: z.coerce.date().nullable().optional(),
+  allowVoteChange: z.boolean().default(true),
+  hideResultsUntilClosed: z.boolean().default(false),
+  options: z.array(optionInputSchema).min(1).max(20),
+});
+
 router.post(
   ["/admin", "/admin/polls"],
-  validate({
-    body: z.object({
-      title: z.string().trim().min(3).max(160),
-      description: z.string().trim().min(5).max(2000),
-      status: z.enum(["DRAFT", "OPEN", "CLOSED"]).default("DRAFT"),
-      startDate: z.coerce.date().nullable().optional(),
-      endDate: z.coerce.date().nullable().optional(),
-      allowMultipleVotes: z.boolean().default(false),
-      allowVoteChange: z.boolean().default(true),
-      hideResultsUntilClosed: z.boolean().default(false),
-      options: z.array(optionInputSchema).min(1).max(20),
-    }),
-  }),
+  validate({ body: pollCreateSchema }),
   async (req, res) => {
-    const { options, ...pollData } = body<z.infer<any>>(req);
+    const { options, ...pollData } = body<z.infer<typeof pollCreateSchema>>(req);
 
     const created = await prisma.$transaction(async (tx) => {
       const poll = await tx.coursePoll.create({
@@ -352,7 +338,6 @@ router.all(
       status: z.enum(["DRAFT", "OPEN", "CLOSED"]).optional(),
       startDate: z.coerce.date().nullable().optional(),
       endDate: z.coerce.date().nullable().optional(),
-      allowMultipleVotes: z.boolean().optional(),
       allowVoteChange: z.boolean().optional(),
       hideResultsUntilClosed: z.boolean().optional(),
     }),

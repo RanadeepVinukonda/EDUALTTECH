@@ -634,3 +634,15 @@ export interface TeamMemberRow {
 
 
 
+
+export interface ContactMessageRow {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  subject: string | null;
+  body: string;
+  isRead: boolean;
+  handledAt: string | null;
+  createdAt: string;
+}

@@ -31,8 +31,8 @@ const SERVICES: Service[] = [
     tag: "Paid role",
   },
   {
-    title: "24/7 mentorship",
-    body: "Every mentored course includes round-the-clock doubt resolution, project feedback, and scheduled 1-on-1 check-ins.",
+    title: "Mentor support",
+    body: "Every mentored course includes asynchronous doubt threads, project feedback, and scheduled doubt-solving sessions, with response expectations set per course.",
     tag: "Included",
   },
   {
