@@ -16,10 +16,11 @@ export default async function SignupPage({
 }) {
   const sp = await searchParams;
   const next = Array.isArray(sp.next) ? sp.next[0] : sp.next;
+  const email = Array.isArray(sp.email) ? sp.email[0] : sp.email;
 
   return (
     <AuthShell title="Create your account" subtitle="Create your account to start learning.">
-      <SignupForm next={next} />
+      <SignupForm next={next} initialEmail={email} />
     </AuthShell>
   );
 }

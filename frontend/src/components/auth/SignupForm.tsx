@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import MailOutlined from "@mui/icons-material/MailOutlined";
 import { apiPost, ApiError } from "@/lib/api";
 import { hasSession, safeNext } from "@/lib/auth";
 import { setSignupEmail } from "@/lib/signup-flow";
@@ -11,9 +10,15 @@ import Button from "@/components/ui/Button";
 import { TextField } from "./Field";
 import OAuthButtons from "./OAuthButtons";
 
-export default function SignupForm({ next }: { next?: string }) {
+export default function SignupForm({
+  next,
+  initialEmail,
+}: {
+  next?: string;
+  initialEmail?: string;
+}) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ text: string; code?: string } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -71,7 +76,6 @@ export default function SignupForm({ next }: { next?: string }) {
           placeholder="you@example.com"
           value={email}
           error={errors.email}
-          icon={<MailOutlined fontSize="small" />}
           onChange={(e) => setEmail(e.target.value)}
         />
         <Button type="submit" className="w-full" loading={pending}>
@@ -83,6 +87,16 @@ export default function SignupForm({ next }: { next?: string }) {
         <div role="alert" className="rounded-xl border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
           <p>{error.text}</p>
           {error.code === "RATE_LIMITED" && <p className="mt-1">Please wait a moment before trying again.</p>}
+          {error.code === "EMAIL_TAKEN" && (
+            <p className="mt-1.5">
+              <Link
+                href={`/login?email=${encodeURIComponent(email.trim())}`}
+                className="font-semibold underline hover:text-danger/90"
+              >
+                Already have an account? Sign in →
+              </Link>
+            </p>
+          )}
         </div>
       )}
 

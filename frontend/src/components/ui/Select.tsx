@@ -13,12 +13,12 @@ export default function Select({
   const field = (
     <select
       className={cn(
-        "w-full appearance-none rounded-xl border bg-white px-4 py-3 pr-10 text-[15px] outline-none transition focus:ring-2",
+        "w-full h-10.5 appearance-none rounded-lg border bg-white px-3.5 pr-10 text-sm text-slate-900 outline-none transition-all duration-150 shadow-2xs focus:ring-3",
         chevron,
-        Boolean(icon) && "pl-11",
+        Boolean(icon) && "pl-10",
         error
-          ? "border-danger focus:border-danger focus:ring-danger/20"
-          : "border-slate-300 focus:border-brand-600 focus:ring-brand-600/20",
+          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15 text-rose-900"
+          : "border-slate-300 focus:border-brand-600 focus:ring-brand-600/15",
         className,
       )}
       aria-invalid={error || undefined}

@@ -52,7 +52,7 @@ export default function AvatarUploader({ avatarUrl, firstName, lastName }: { ava
         // eslint-disable-next-line @next/next/no-img-element
         <img src={avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover" />
       ) : (
-        <span className="grid h-20 w-20 place-items-center rounded-full bg-brand-50 font-display text-xl font-bold text-brand-700">
+        <span className="grid h-20 w-20 place-items-center rounded-full bg-brand-50 font-display text-xl font-semibold text-brand-700">
           {initials(firstName, lastName)}
         </span>
       )}

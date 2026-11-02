@@ -3,7 +3,6 @@
 import { useId, useState } from "react";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import Lock from "@mui/icons-material/Lock";
 import Input from "@/components/ui/Input";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth";
 import { cn } from "@/lib/cn";
@@ -86,7 +85,6 @@ export function PasswordField({
           error={Boolean(error)}
           autoComplete={autoComplete}
           aria-describedby={describedBy || undefined}
-          icon={<Lock fontSize="small" />}
           className="pr-12"
           {...props}
         />
@@ -95,7 +93,7 @@ export function PasswordField({
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? "Hide password" : "Show password"}
           aria-pressed={visible}
-          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-slate-500 hover:text-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-lg text-slate-500 hover:text-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
         >
           {visible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
         </button>

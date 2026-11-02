@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ArrowForward from "@mui/icons-material/ArrowForward";
 import CoverImage from "@/components/ui/CoverImage";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -17,9 +18,7 @@ export interface CourseCardCourse {
 
 /**
  * One course card, used everywhere a course is shown as a tile.
- * The whole card is a single stretched link; the view control uses the shared
- * icon-button primitive (eye opens on card hover). `actions` render above the
- * link for row-level controls.
+ * The whole card is a single stretched link; row-level controls render above it.
  */
 export default function CourseCard({
   course,
@@ -46,18 +45,17 @@ export default function CourseCard({
   unavailable?: boolean;
   className?: string;
 }) {
-  const { slug, title, description, thumbnailUrl, category, domain, features, pricePaise, currency = "INR" } = course;
+  const { slug, title, description, thumbnailUrl, category, domain, pricePaise, currency = "INR" } = course;
   const link = href ?? `/courses/${slug}`;
   const price = priceLabel ?? (typeof pricePaise === "number" ? formatPrice(pricePaise, currency) : null);
-  const chip = domain || category;
-  const featureList = (features ?? []).filter(Boolean).slice(0, 4);
+  const eyebrow = domain || category;
   const showProgress = typeof progressPct === "number";
   const pct = showProgress ? Math.min(100, Math.max(0, progressPct as number)) : 0;
 
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-elev1",
+        "group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition-colors hover:border-slate-300",
         className,
       )}
     >
@@ -65,82 +63,66 @@ export default function CourseCard({
         <Link
           href={link}
           aria-label={`View ${title}`}
-          className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+          className="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
         />
       )}
 
-      <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
         <CoverImage src={thumbnailUrl ?? null} alt="" fallback={category ?? title} className="h-full w-full object-cover" />
         {badge && (
-          <span className="absolute right-3 top-3 rounded-full bg-ink-900/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur">
+          <span className="absolute left-3 top-3 rounded-md bg-white/95 px-2 py-1 text-[11px] font-semibold text-ink-900 backdrop-blur">
             {badge}
           </span>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3.5 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="line-clamp-2 font-display text-base font-bold leading-snug text-ink-900">{title}</h3>
-          {chip && (
-            <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-              <span className="h-px w-4 bg-slate-300" />
-              {chip}
-            </span>
-          )}
-        </div>
+      <div className="flex flex-1 flex-col p-5">
+        {eyebrow && (
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            {eyebrow}
+          </p>
+        )}
+        <h3 className="line-clamp-2 font-display text-base font-semibold leading-snug text-ink-900">
+          {title}
+        </h3>
 
-        {description && <p className="line-clamp-2 text-[13px] leading-relaxed text-ink-600">{description}</p>}
-        {mentor && <p className="text-xs text-slate-500">Mentor · {mentor}</p>}
+        {description && (
+          <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-slate-600">{description}</p>
+        )}
+        {mentor && <p className="mt-3 text-xs text-slate-500">Mentor · {mentor}</p>}
 
         {showProgress ? (
-          <div className="mt-1 space-y-2">
+          <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between text-[11.5px] font-semibold text-slate-500">
               <span>Progress</span>
-              <span className="font-extrabold tabular-nums text-brand-700">{pct}%</span>
+              <span className="tabular-nums text-brand-700">{pct}%</span>
             </div>
-            <div className="relative h-1 rounded-full bg-[#e3eef4]">
-              <span className="absolute inset-y-0 left-0 rounded-full bg-brand-600" style={{ width: `${pct}%` }} />
-              <span className="absolute right-0 top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-slate-500" />
+            <div className="h-1 overflow-hidden rounded-full bg-slate-100">
+              <span className="block h-full rounded-full bg-brand-600" style={{ width: `${pct}%` }} />
             </div>
           </div>
         ) : stats && stats.length > 0 ? (
-          <dl className="grid grid-cols-2 gap-x-3 gap-y-3">
+          <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3">
             {stats.map((s) => (
               <div key={s.label} className="min-w-0">
-                <dt className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">{s.label}</dt>
-                <dd className="mt-0.5 truncate text-[13px] font-bold text-ink-900">{s.value}</dd>
+                <dt className="text-xs text-slate-500">{s.label}</dt>
+                <dd className="mt-0.5 truncate text-[13px] font-semibold text-ink-900">{s.value}</dd>
               </div>
             ))}
           </dl>
-        ) : featureList.length > 0 ? (
-          <ul className="flex flex-wrap gap-1.5">
-            {featureList.map((f) => (
-              <li
-                key={f}
-                className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-ink-700"
-              >
-                {f}
-              </li>
-            ))}
-          </ul>
         ) : null}
 
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
-          <span className="font-display text-base font-bold text-ink-900">{price}</span>
-          <div className="relative z-20 flex items-center gap-2">
+          <span className="font-display text-sm font-semibold text-ink-900">{price}</span>
+          <div className="relative z-20 flex items-center justify-end gap-2">
             {actions}
             {unavailable ? (
-              <span className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-500">
-                Unavailable
-              </span>
+              <span className="text-xs font-medium text-slate-400">Unavailable</span>
             ) : (
-              <Link
-                href={link}
-                aria-label={viewLabel}
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
-              >
-                View
-              </Link>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-ink-700 transition group-hover:text-brand-700">
+                {viewLabel}
+                <ArrowForward sx={{ fontSize: 14 }} aria-hidden />
+              </span>
             )}
           </div>
         </div>

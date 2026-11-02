@@ -32,7 +32,9 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
   const bare = (
     <>
       <OfflineBanner />
-      {children}
+      <div id="main" className="flex-1 flex flex-col">
+        {children}
+      </div>
     </>
   );
 
@@ -59,7 +61,9 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
     <>
       <OfflineBanner />
       <PublicHeader />
-      {children}
+      <main id="main" className="flex-1">
+        {children}
+      </main>
       <PublicFooter />
     </>
   );

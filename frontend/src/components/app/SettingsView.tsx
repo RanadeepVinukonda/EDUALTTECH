@@ -54,14 +54,14 @@ export default function SettingsView() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="font-display text-3xl font-bold text-ink-900">Account settings</h1>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">Account settings</h1>
         <p className="mt-1 text-[15px] text-slate-500">
           Manage your contact details and account status. Your learning profile lives on your profile page.
         </p>
       </header>
 
-      <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
-        <h2 className="font-display text-lg font-bold text-ink-900">Account</h2>
+      <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="font-display text-lg font-semibold text-ink-900">Account</h2>
         <dl className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
             <dt className="text-sm font-semibold text-ink-700">Email</dt>
@@ -81,16 +81,16 @@ export default function SettingsView() {
         </p>
       </section>
 
-      <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
-        <h2 className="font-display text-lg font-bold text-ink-900">Mobile number</h2>
+      <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="font-display text-lg font-semibold text-ink-900">Mobile number</h2>
         <p className="mb-4 mt-1 text-sm text-slate-500">
           Required to purchase paid courses or apply as a mentor. We only ask when you need it.
         </p>
         <MobileVerification />
       </section>
 
-      <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
-        <h2 className="font-display text-lg font-bold text-ink-900">Account status</h2>
+      <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="font-display text-lg font-semibold text-ink-900">Account status</h2>
 
         {archived ? (
           <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">

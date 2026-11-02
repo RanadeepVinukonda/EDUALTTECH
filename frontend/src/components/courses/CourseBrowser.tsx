@@ -4,9 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Search from "@mui/icons-material/Search";
 import Close from "@mui/icons-material/Close";
-import Category from "@mui/icons-material/Category";
-import School from "@mui/icons-material/School";
-import Sort from "@mui/icons-material/Sort";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { api, ApiError } from "@/lib/api";
@@ -136,90 +133,89 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
   return (
     <div>
       {/* Search + filters */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-        <div className="flex-1">
-          <label htmlFor="course-search" className="mb-1.5 block text-sm font-semibold text-ink-700">
-            Search courses
-          </label>
-          <div className="relative">
-            <Search
-              fontSize="small"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              id="course-search"
-              type="search"
-              value={term}
-              onChange={(e) => setTerm(e.target.value)}
-              placeholder="Search by title or description"
-              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-10 text-[15px] text-ink-900 placeholder:text-slate-400 focus-visible:border-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
-            />
-            {term && (
-              <button
-                type="button"
-                onClick={() => setTerm("")}
-                aria-label="Clear search"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
-              >
-                <Close fontSize="small" />
-              </button>
-            )}
+      <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+          <div className="flex-1">
+            <label htmlFor="course-search" className="mb-1.5 block text-xs font-semibold text-slate-600">
+              Search
+            </label>
+            <div className="relative">
+              <Search
+                fontSize="small"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                id="course-search"
+                type="search"
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                placeholder="Course, topic, or skill"
+                className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-10 text-sm text-ink-900 placeholder:text-slate-400 focus-visible:border-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/20"
+              />
+              {term && (
+                <button
+                  type="button"
+                  onClick={() => setTerm("")}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+                >
+                  <Close fontSize="small" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className="lg:w-52">
-          <label htmlFor="course-type" className="mb-1.5 block text-sm font-semibold text-ink-700">
-            Type
-          </label>
-          <Select
-            id="course-type"
-            value={type}
-            icon={<School fontSize="small" />}
-            onChange={(e) => replaceParams({ type: e.target.value || undefined, page: undefined })}
-          >
-            <option value="">All types</option>
-            <option value="EDUCATION">Education</option>
-            <option value="ALTERNATIVE_EDUCATION">Alternative education</option>
-          </Select>
-        </div>
-
-        {categories.length > 0 && (
-          <div className="lg:w-56">
-            <label htmlFor="course-category" className="mb-1.5 block text-sm font-semibold text-ink-700">
-              Category
+          <div className="lg:w-44">
+            <label htmlFor="course-type" className="mb-1.5 block text-xs font-semibold text-slate-600">
+              Type
             </label>
             <Select
-              id="course-category"
-              value={category}
-              icon={<Category fontSize="small" />}
-              onChange={(e) => replaceParams({ category: e.target.value || undefined, page: undefined })}
+              id="course-type"
+              value={type}
+              onChange={(e) => replaceParams({ type: e.target.value || undefined, page: undefined })}
             >
-              <option value="">All categories</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+              <option value="">All types</option>
+              <option value="EDUCATION">Education</option>
+              <option value="ALTERNATIVE_EDUCATION">Alternative education</option>
+            </Select>
+          </div>
+
+          {categories.length > 0 && (
+            <div className="lg:w-48">
+              <label htmlFor="course-category" className="mb-1.5 block text-xs font-semibold text-slate-600">
+                Category
+              </label>
+              <Select
+                id="course-category"
+                value={category}
+                onChange={(e) => replaceParams({ category: e.target.value || undefined, page: undefined })}
+              >
+                <option value="">All categories</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+
+          <div className="lg:w-48">
+            <label htmlFor="course-sort" className="mb-1.5 block text-xs font-semibold text-slate-600">
+              Sort
+            </label>
+            <Select
+              id="course-sort"
+              value={sort}
+              onChange={(e) => replaceParams({ sort: e.target.value === "newest" ? undefined : e.target.value, page: undefined })}
+            >
+              {SORTS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
                 </option>
               ))}
             </Select>
           </div>
-        )}
-
-        <div className="lg:w-56">
-          <label htmlFor="course-sort" className="mb-1.5 block text-sm font-semibold text-ink-700">
-            Sort by
-          </label>
-          <Select
-            id="course-sort"
-            value={sort}
-            icon={<Sort fontSize="small" />}
-            onChange={(e) => replaceParams({ sort: e.target.value === "newest" ? undefined : e.target.value, page: undefined })}
-          >
-            {SORTS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </Select>
         </div>
       </div>
 
@@ -245,7 +241,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
           <SkeletonGrid />
         ) : error ? (
           <div role="alert" className="rounded-2xl border border-danger/30 bg-danger/5 p-8 text-center">
-            <h2 className="font-display text-lg font-bold text-ink-900">Something went wrong</h2>
+            <h2 className="font-display text-lg font-semibold text-ink-900">Something went wrong</h2>
             <p className="mx-auto mt-2 max-w-md text-ink-600">{error}</p>
             <button
               type="button"
@@ -257,7 +253,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
           </div>
         ) : showNoResults ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-            <h2 className="font-display text-lg font-bold text-ink-900">No courses match your search</h2>
+            <h2 className="font-display text-lg font-semibold text-ink-900">No courses match your search</h2>
             <p className="mx-auto mt-2 max-w-md text-ink-600">
               Try different keywords or remove the filters you have applied.
             </p>
@@ -271,7 +267,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
           </div>
         ) : showEmpty ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-            <h2 className="font-display text-lg font-bold text-ink-900">Courses are being published</h2>
+            <h2 className="font-display text-lg font-semibold text-ink-900">Courses are being published</h2>
             <p className="mx-auto mt-2 max-w-md text-ink-600">
               Our catalogue is being prepared. Check back soon, or get in touch to hear about upcoming programs.
             </p>

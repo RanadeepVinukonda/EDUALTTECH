@@ -255,8 +255,8 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
   return (
     <div className="flex flex-col gap-6">
       {!readOnly && (
-        <section aria-labelledby="new-meeting-h" className="rounded-[20px] border border-slate-200 bg-white p-5">
-        <h3 id="new-meeting-h" className="font-display text-lg font-bold text-ink-900">
+        <section aria-labelledby="new-meeting-h" className="rounded-xl border border-slate-200 bg-white p-5">
+        <h3 id="new-meeting-h" className="font-display text-lg font-semibold text-ink-900">
           Schedule a meeting
         </h3>
         <form onSubmit={create} className="mt-4 flex flex-col gap-3">
@@ -327,7 +327,7 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
 
       <section aria-labelledby="meetings-h">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 id="meetings-h" className="font-display text-lg font-bold text-ink-900">
+          <h3 id="meetings-h" className="font-display text-lg font-semibold text-ink-900">
             Meetings
           </h3>
           <div role="group" aria-label="Meeting scope" className="flex gap-1">
@@ -359,7 +359,7 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
             <EmptyState title={`No ${scope} meetings`} description="Scheduled sessions will appear here." />
           </div>
         ) : (
-          <ul className="mt-3 flex flex-col divide-y divide-slate-200 rounded-[20px] border border-slate-200 bg-white">
+          <ul className="mt-3 flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
             {meetings.map((m) => {
               const start = new Date(m.scheduledAt).getTime();
               const end = start + m.durationMin * 60_000;

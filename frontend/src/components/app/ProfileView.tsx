@@ -2,14 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Edit from "@mui/icons-material/Edit";
-import Close from "@mui/icons-material/Close";
-import PersonOutlined from "@mui/icons-material/PersonOutlined";
-import MailOutlined from "@mui/icons-material/MailOutlined";
-import CalendarMonth from "@mui/icons-material/CalendarMonth";
-import { apiPatch } from "@/lib/api";
+import { apiPatch, ApiError } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import AvatarUploader from "./AvatarUploader";
+import ResumeUploader from "./ResumeUploader";
 import LearningProfileCard from "./LearningProfileCard";
 import { notifyError, notifySuccess } from "@/lib/notify";
 import { formatDate } from "@/lib/format";
@@ -21,8 +17,8 @@ import type { Me } from "@/lib/app-types";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+    <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
       <div className="mt-1 text-[15px] font-medium text-ink-900">{value}</div>
     </div>
   );
@@ -33,7 +29,10 @@ export default function ProfileView() {
   const [editing, setEditing] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
+  const [mobile, setMobile] = useState("");
   const [bio, setBio] = useState("");
+  const [experience, setExperience] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -41,7 +40,10 @@ export default function ProfileView() {
     if (!user) return;
     setFirstName(user.firstName);
     setLastName(user.lastName);
+    setUsername(user.username ?? "");
+    setMobile(user.mobile ?? "");
     setBio(user.bio ?? "");
+    setExperience(user.experience ?? "");
     setDateOfBirth(user.dateOfBirth ? user.dateOfBirth.slice(0, 10) : "");
   }, [user]);
 
@@ -57,14 +59,21 @@ export default function ProfileView() {
       await apiPatch<{ user: Me }>("/auth/me", {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
+        username: username.trim() ? username.trim() : null,
+        mobile: mobile.trim() ? mobile.trim() : null,
         bio: bio.trim() ? bio.trim() : null,
+        experience: experience.trim() ? experience.trim() : null,
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth).toISOString() : null,
       });
       await refresh();
       notifySuccess("Profile updated.");
       setEditing(false);
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : "Could not save your profile.");
+      if (err instanceof ApiError && err.code === "USERNAME_TAKEN") {
+        notifyError("That username is already taken. Try another.");
+      } else {
+        notifyError(err instanceof Error ? err.message : "Could not save your profile.");
+      }
     } finally {
       setSaving(false);
     }
@@ -74,39 +83,40 @@ export default function ProfileView() {
     <div className="space-y-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold text-ink-900">Profile</h1>
+          <h1 className="font-display text-3xl font-semibold text-ink-900">Profile</h1>
           <p className="mt-1 text-[15px] text-slate-500">Your details across EduAltTech.</p>
         </div>
         {!editing && (
           <Button variant="secondary" onClick={() => setEditing(true)}>
-            <Edit fontSize="small" />
             Edit profile
           </Button>
         )}
         {editing && (
           <Button variant="ghost" onClick={() => setEditing(false)}>
-            <Close fontSize="small" />
             Cancel
           </Button>
         )}
       </header>
 
-      <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1 sm:p-8">
+      {/* Identity Card */}
+      <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
         <div className="flex flex-wrap items-center gap-6">
           <AvatarUploader avatarUrl={user.avatarUrl} firstName={user.firstName} lastName={user.lastName} />
           <div className="min-w-0">
-            <p className="font-display text-2xl font-bold text-ink-900">{user.name}</p>
+            <p className="font-display text-2xl font-semibold text-ink-900">{user.name}</p>
+            {user.username && <p className="text-sm font-mono text-brand-700">@{user.username}</p>}
             <p className="text-sm text-slate-500">{user.email}</p>
-            <p className="mt-1 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-ink-700">
+            <p className="mt-1 inline-flex items-center text-xs font-medium text-slate-500">
               {user.role === "ADMIN" ? "Administrator" : "Member"}
             </p>
           </div>
         </div>
       </section>
 
+      {/* Details Card */}
       {editing ? (
-        <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1 sm:p-8">
-          <h2 className="font-display text-lg font-bold text-ink-900">Edit details</h2>
+        <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+          <h2 className="font-display text-lg font-semibold text-ink-900">Edit details</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="pf-first" className="mb-1 block text-sm font-semibold text-ink-700">
@@ -121,6 +131,30 @@ export default function ProfileView() {
               <Input id="pf-last" value={lastName} maxLength={80} icon={<PersonOutlined fontSize="small" />} onChange={(e) => setLastName(e.target.value)} />
             </div>
             <div>
+              <label htmlFor="pf-username" className="mb-1 block text-sm font-semibold text-ink-700">
+                Username (optional)
+              </label>
+              <Input
+                id="pf-username"
+                value={username}
+                maxLength={30}
+                placeholder="e.g. rohan_v"
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ""))}
+              />
+            </div>
+            <div>
+              <label htmlFor="pf-mobile" className="mb-1 block text-sm font-semibold text-ink-700">
+                Mobile number (optional)
+              </label>
+              <Input
+                id="pf-mobile"
+                value={mobile}
+                maxLength={20}
+                placeholder="+91 98765 43210"
+                onChange={(e) => setMobile(e.target.value)}
+              />
+            </div>
+            <div>
               <label htmlFor="pf-dob" className="mb-1 block text-sm font-semibold text-ink-700">
                 Date of birth
               </label>
@@ -133,6 +167,7 @@ export default function ProfileView() {
               <Input id="pf-email" value={user.email} readOnly disabled icon={<MailOutlined fontSize="small" />} />
             </div>
           </div>
+
           <div className="mt-4">
             <label htmlFor="pf-bio" className="mb-1 block text-sm font-semibold text-ink-700">
               About you
@@ -141,13 +176,30 @@ export default function ProfileView() {
               id="pf-bio"
               value={bio}
               maxLength={1000}
-              rows={4}
+              rows={3}
               onChange={(e) => setBio(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
               placeholder="A short bio (optional)…"
             />
             <p className="mt-1 text-right text-xs text-slate-400">{bio.length}/1000</p>
           </div>
+
+          <div className="mt-4">
+            <label htmlFor="pf-experience" className="mb-1 block text-sm font-semibold text-ink-700">
+              Experience &amp; Background
+            </label>
+            <textarea
+              id="pf-experience"
+              value={experience}
+              maxLength={3000}
+              rows={4}
+              onChange={(e) => setExperience(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+              placeholder="Your work, engineering, creative arts, or teaching experience…"
+            />
+            <p className="mt-1 text-right text-xs text-slate-400">{experience.length}/3000</p>
+          </div>
+
           <div className="mt-5 flex gap-3">
             <Button onClick={() => void save()} loading={saving}>
               Save changes
@@ -158,9 +210,10 @@ export default function ProfileView() {
           </div>
         </section>
       ) : (
-        <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1 sm:p-8">
-          <h2 className="font-display text-lg font-bold text-ink-900">Your details</h2>
+        <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+          <h2 className="font-display text-lg font-semibold text-ink-900">Your details</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Field label="Username" value={user.username ? `@${user.username}` : "Not set"} />
             <Field label="Email" value={user.email} />
             <Field
               label="Mobile"
@@ -168,22 +221,30 @@ export default function ProfileView() {
             />
             <Field label="Date of birth" value={user.dateOfBirth ? formatDate(user.dateOfBirth, { dateStyle: "medium" }) : "Not set"} />
             <Field label="Joined" value={formatDate(user.createdAt, { dateStyle: "medium" })} />
-            <Field label="Member since" value={`${new Date(user.createdAt).getFullYear()}`} />
             <Field
               label="Email status"
               value={
-                <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold", user.emailVerifiedAt ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700")}>
+                <span className={cn("inline-flex text-xs font-medium", user.emailVerifiedAt ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700")}>
                   {user.emailVerifiedAt ? "Verified" : "Not verified"}
                 </span>
               }
             />
           </div>
+
           {user.bio && (
-            <div className="mt-4">
+            <div className="mt-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">About you</p>
-              <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-700">{user.bio}</p>
+              <p className="mt-1.5 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-700">{user.bio}</p>
             </div>
           )}
+
+          {user.experience && (
+            <div className="mt-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Experience &amp; Background</p>
+              <p className="mt-1.5 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-700">{user.experience}</p>
+            </div>
+          )}
+
           {user.mobileVerifiedAt === false && (
             <p className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
               Want to buy courses or apply as a mentor?{" "}
@@ -193,6 +254,15 @@ export default function ProfileView() {
               .
             </p>
           )}
+
+          {/* Profile Resume */}
+          <div className="mt-6 border-t border-slate-100 pt-6">
+            <h3 className="text-sm font-semibold text-ink-900 mb-2">Resume / Curriculum Vitae</h3>
+            <p className="text-xs text-slate-500 mb-3">
+              Keep an up-to-date resume here to streamline your applications when applying to mentor any course.
+            </p>
+            <ResumeUploader resumeName={user.resumeName} resumeUpdatedAt={user.resumeUpdatedAt} />
+          </div>
         </section>
       )}
 

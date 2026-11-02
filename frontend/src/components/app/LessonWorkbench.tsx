@@ -12,6 +12,7 @@ import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
 import Dropzone from "@/components/ui/Dropzone";
 import Select from "@/components/ui/Select";
+import MarkdownEditor from "@/components/ui/MarkdownEditor";
 import Add from "@mui/icons-material/Add";
 import Title from "@mui/icons-material/Title";
 import LinkIcon from "@mui/icons-material/Link";
@@ -20,10 +21,11 @@ import MenuBook from "@mui/icons-material/MenuBook";
 import Event from "@mui/icons-material/Event";
 import Movie from "@mui/icons-material/Movie";
 import Article from "@mui/icons-material/Article";
+import School from "@mui/icons-material/School";
 
 const RES_ACCEPT = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.png,.jpg,.jpeg,.webp,.gif,.svg,.mp4,.webm";
 const MAX_BYTES = 5 * 1024 * 1024;
-type Panel = "meeting" | "recording" | "resource" | "text";
+type Panel = "meeting" | "recording" | "resource" | "text" | "article";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -184,14 +186,7 @@ function TextForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; onClo
 
   return (
     <form onSubmit={submit} className="mt-3 flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={5}
-        aria-label="Lesson text"
-        placeholder="Lesson text content…"
-        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
-      />
+      <MarkdownEditor value={text} onChange={setText} ariaLabel="Lesson text" rows={10} />
       <div className="flex gap-2">
         <Button type="submit" size="sm" loading={busy}>Save text</Button>
         <Button type="button" size="sm" variant="ghost" onClick={onClose}>Cancel</Button>
@@ -266,6 +261,72 @@ function ResourceForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; o
       {err && <p className="text-sm text-danger">{err}</p>}
       <div className="flex gap-2">
         <Button type="submit" size="sm" loading={busy}>Post resource</Button>
+        <Button type="button" size="sm" variant="ghost" onClick={onClose}>Cancel</Button>
+      </div>
+    </form>
+  );
+}
+
+function ArticleForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; onClose: () => void }) {
+  const [articles, setArticles] = useState<{ id: string; title: string; category?: { name: string }; estimatedMinutes: number }[]>([]);
+  const [selectedId, setSelectedId] = useState(lesson.resourceArticleId ?? "");
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    apiGet<{ articles: { id: string; title: string; category?: { name: string }; estimatedMinutes: number }[] }>("/resources/library?limit=50")
+      .then((res) => {
+        if (alive) setArticles(res.articles || []);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => { alive = false; };
+  }, []);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await apiPatch(`/courses/lessons/${lesson.id}`, {
+        resourceArticleId: selectedId || null,
+      });
+      notifySuccess("Supplementary guide linked.");
+      ctx.onChanged();
+      onClose();
+    } catch (e) {
+      notifyError(describeError(e, "Could not link knowledge guide."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-3 flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <p className="text-xs font-semibold text-slate-700">Link Supplementary Knowledge Guide</p>
+      <p className="text-[11px] text-slate-500">
+        Connect an open tutorial from the Resource Library for learners to read alongside this lesson.
+      </p>
+      {loading ? (
+        <p className="text-xs text-slate-400">Loading tutorials...</p>
+      ) : (
+        <select
+          value={selectedId}
+          onChange={(e) => setSelectedId(e.target.value)}
+          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
+        >
+          <option value="">No guide linked (None)</option>
+          {articles.map((art) => (
+            <option key={art.id} value={art.id}>
+              {art.title} ({art.category?.name || "General"} · {art.estimatedMinutes} min read)
+            </option>
+          ))}
+        </select>
+      )}
+      <div className="flex gap-2 pt-1">
+        <Button type="submit" size="sm" loading={busy}>Save guide</Button>
         <Button type="button" size="sm" variant="ghost" onClick={onClose}>Cancel</Button>
       </div>
     </form>
@@ -390,6 +451,11 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
                 )}
                 {lesson.hasVideo && <span className="inline-flex items-center gap-1 text-slate-500"><Movie fontSize="inherit" aria-hidden /> uploaded</span>}
                 {resCount > 0 && <span className="inline-flex items-center gap-1"><MenuBook fontSize="inherit" aria-hidden /> {resCount} {resCount === 1 ? "resource" : "resources"}</span>}
+                {lesson.resourceArticle && (
+                  <span className="inline-flex items-center gap-1 text-xs text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md font-semibold">
+                    <School fontSize="inherit" aria-hidden /> Guide: {lesson.resourceArticle.title}
+                  </span>
+                )}
                 {lesson.isPublished && (
                   <>
                     <span aria-hidden>·</span>
@@ -421,9 +487,10 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
               <Add fontSize="small" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+              <div className="absolute right-0 top-full z-10 mt-1 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
                 {[
                   { kind: "text" as Panel, label: "Lesson text", icon: <Article fontSize="small" /> },
+                  { kind: "article" as Panel, label: "Link Knowledge Guide", icon: <School fontSize="small" /> },
                   { kind: "resource" as Panel, label: "Add resource", icon: <MenuBook fontSize="small" /> },
                   { kind: "meeting" as Panel, label: "Schedule meeting", icon: <Event fontSize="small" /> },
                   { kind: "recording" as Panel, label: "Recording (link/file)", icon: <Movie fontSize="small" /> },
@@ -450,6 +517,7 @@ function LessonRow({ lesson, index, siblings, ctx }: { lesson: LessonRow; index:
       {panel === "recording" && <RecordingForm lesson={lesson} ctx={ctx} onClose={() => setPanel(null)} />}
       {panel === "resource" && <ResourceForm lesson={lesson} ctx={ctx} onClose={() => setPanel(null)} />}
       {panel === "text" && <TextForm lesson={lesson} ctx={ctx} onClose={() => setPanel(null)} />}
+      {panel === "article" && <ArticleForm lesson={lesson} ctx={ctx} onClose={() => setPanel(null)} />}
     </li>
   );
 }
@@ -530,7 +598,7 @@ export default function LessonWorkbench({
 
       {roadmap.chapters.map((chapter: ChapterRow) => (
         <section key={chapter.id} aria-labelledby={`wb-ch-${chapter.id}`}>
-          <h3 id={`wb-ch-${chapter.id}`} className="font-display text-lg font-bold text-ink-900">{chapter.title}</h3>
+          <h3 id={`wb-ch-${chapter.id}`} className="font-display text-lg font-semibold text-ink-900">{chapter.title}</h3>
           <div className="mt-3 flex flex-col gap-4">
             {chapter.topics.map((topic: TopicRow) => (
               <div key={topic.id} className="rounded-xl border border-slate-200 p-4">

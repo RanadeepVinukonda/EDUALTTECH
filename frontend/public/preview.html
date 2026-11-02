@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduAltTech - Premium Pre-Login UI Prototype</title>
+  <title>EduAltTech — Interactive Unified Design Prototype (All Pages)</title>
   
-  <!-- Typography from Google Fonts matching the exact design system: Sora (Display) + Inter (Body) + JetBrains Mono -->
+  <!-- Strict typography according to THEME.md: Sora (Display) + Inter (Body) + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..700;1,14..32,400..700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
-    /* ─── DESIGN TOKENS (Strict adherence to THEME.md) ─────────────────────────── */
+    /* ════════════════════════════════════════════════════════════════════════════
+       DESIGN TOKENS (Strict Source of Truth: THEME.md)
+       ════════════════════════════════════════════════════════════════════════════ */
     :root {
       /* Brand Green Scale */
       --color-brand-50:  #f0fff5;
@@ -20,25 +22,24 @@
       --color-brand-300: #82d5a0;
       --color-brand-400: #4fbc75;
       --color-brand-500: #27a354;
-      --color-brand-600: #038c3e;  /* Primary brand */
+      --color-brand-600: #038c3e;  /* Primary brand action */
       --color-brand-700: #026b2f;  /* Primary hover */
       --color-brand-800: #034f25;
       --color-brand-900: #023a1c;
-      --color-brand-950: #012312;
 
-      /* Ink Scale */
+      /* Ink Scale (Deep editorial authority) */
       --color-ink-100: #e3eef4;
       --color-ink-200: #bcd5e3;
       --color-ink-300: #8fb5cc;
       --color-ink-400: #5c8da8;
       --color-ink-500: #2f6a8b;
       --color-ink-600: #124a72;
-      --color-ink-700: #024059;  /* Headings / Accent */
+      --color-ink-700: #024059;  /* Headings / Dark Accents / Nav */
       --color-ink-800: #022d41;
-      --color-ink-900: #011c2b;
+      --color-ink-900: #011c2b;  /* Deepest Ink Background */
       --color-ink-950: #010b11;
 
-      /* Slate Neutrals */
+      /* Neutrals & Slate */
       --color-slate-50:  #f8fafc;
       --color-slate-100: #f1f5f9;
       --color-slate-200: #e2e8f0;
@@ -50,1629 +51,1968 @@
       --color-slate-800: #1e293b;
       --color-slate-900: #0f172a;
 
+      /* Semantics */
+      --color-success: #038c3e;
+      --color-danger:  #ef4444;
+      --color-warning: #f59e0b;
+      --color-surface: #ffffff;
+
       /* Radii */
+      --radius-xs: 0.25rem;  /* 4px */
       --radius-sm: 0.5rem;   /* 8px */
       --radius-md: 0.75rem;  /* 12px */
       --radius-lg: 1rem;     /* 16px */
-      --radius-xl: 1.5rem;   /* 24px */
-      --radius-2xl: 1.75rem; /* 28px */
+      --radius-xl: 1.25rem;  /* 20px */
+      --radius-2xl: 1.75rem; /* 28px - cards */
       --radius-full: 9999px;
 
-      /* Ink-tinted Elevations */
+      /* Ink-Tinted Elevations (Never pure harsh black) */
       --shadow-elev1: 0 1px 2px rgba(2, 64, 89, 0.05), 0 1px 3px rgba(2, 64, 89, 0.08);
-      --shadow-elev2: 0 3px 8px rgba(2, 64, 89, 0.06), 0 8px 20px rgba(2, 64, 89, 0.08);
-      --shadow-elev3: 0 6px 16px rgba(2, 64, 89, 0.08), 0 16px 36px rgba(2, 64, 89, 0.12);
-      --shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.03);
+      --shadow-elev2: 0 3px 6px rgba(2, 64, 89, 0.06), 0 6px 16px rgba(2, 64, 89, 0.08);
+      --shadow-elev3: 0 6px 14px rgba(2, 64, 89, 0.07), 0 14px 32px rgba(2, 64, 89, 0.10);
+      --shadow-glow:  0 0 20px rgba(3, 140, 62, 0.22);
 
       /* Typography */
-      --font-display: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font-display: 'Sora', system-ui, sans-serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    /* ════════════════════════════════════════════════════════════════════════════
+       BASE RESET & UNIVERSAL UTILITIES
+       ════════════════════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
     body {
       font-family: var(--font-body);
       background-color: var(--color-slate-50);
       color: var(--color-slate-800);
-      line-height: 1.6;
+      line-height: 1.55;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    /* ─── PROTOTYPE VIEW CONTROLLER BAR (Top Bar) ────────────────────────── */
-    .proto-bar {
+    h1, h2, h3, h4, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+    .font-mono { font-family: var(--font-mono); }
+    .container { max-width: 80rem; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       STICKY TOP PROTOTYPE CONTROLLER BAR
+       ════════════════════════════════════════════════════════════════════════════ */
+    .proto-ctrl-bar {
       position: sticky;
       top: 0;
-      z-index: 100;
-      background: #0f172a;
+      z-index: 1000;
+      background: var(--color-ink-900);
       color: #fff;
-      padding: 10px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.625rem 1.25rem;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      font-size: 13px;
+      gap: 0.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     }
-    .proto-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-    .proto-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #4ade80;
-      box-shadow: 0 0 10px #4ade80;
-    }
-    .proto-tabs {
+    .proto-brand-lockup {
       display: flex;
-      gap: 6px;
+      align-items: center;
+      gap: 0.625rem;
+    }
+    .proto-tag {
+      background: rgba(3, 140, 62, 0.25);
+      color: var(--color-brand-300);
+      border: 1px solid rgba(79, 188, 117, 0.4);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .proto-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
       background: rgba(255, 255, 255, 0.08);
-      padding: 4px;
-      border-radius: var(--radius-sm);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .proto-group-label {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--color-ink-300);
+      padding: 0 8px;
     }
     .proto-btn {
       background: transparent;
       border: none;
-      color: #94a3b8;
-      padding: 5px 14px;
+      color: #cbd5e1;
+      padding: 5px 11px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
+    .proto-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
     .proto-btn.active {
       background: var(--color-brand-600);
       color: #fff;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
-    .proto-btn:hover:not(.active) {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.06);
-    }
 
-    /* ─── REFINED ARCHITECTURAL BACKGROUNDS ──────────────────────────────── */
-    .bg-grid-subtle {
-      background-image: radial-gradient(rgba(2, 64, 89, 0.07) 1px, transparent 1px);
-      background-size: 24px 24px;
-      background-position: center;
-    }
-
-    .bg-hero-glow {
-      background: radial-gradient(70% 60% at 50% 0%, rgba(3, 140, 62, 0.06) 0%, rgba(2, 64, 89, 0.04) 50%, transparent 100%);
-    }
-
-    /* ─── TYPOGRAPHY & UTILITIES ─────────────────────────────────────────── */
-    h1, h2, h3, h4, .font-display {
-      font-family: var(--font-display);
-      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    }
-    .font-mono {
-      font-family: var(--font-mono);
-    }
-    .max-w-7xl {
-      max-width: 80rem;
-      margin-left: auto;
-      margin-right: auto;
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-
-    /* ─── HEADER / NAVIGATION ────────────────────────────────────────────── */
-    .site-header {
-      position: sticky;
-      top: 45px; /* below prototype bar */
-      z-index: 40;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-      transition: all 0.25s ease;
-    }
-    .header-inner {
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 2rem;
-    }
-    .brand-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--color-ink-900);
-    }
-    .brand-logo-img {
-      height: 34px;
-      width: auto;
-      border-radius: 6px;
-    }
-    .brand-title {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: var(--color-ink-900);
-    }
-    .brand-title span {
-      color: var(--color-brand-600);
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      list-style: none;
-    }
-    .nav-link {
-      text-decoration: none;
-      color: var(--color-slate-600);
-      font-weight: 500;
-      font-size: 0.925rem;
-      padding: 8px 14px;
-      border-radius: 8px;
-      transition: all 0.15s ease;
-    }
-    .nav-link:hover {
-      color: var(--color-ink-900);
-      background: var(--color-slate-100);
-    }
-    .nav-link.active {
-      color: var(--color-brand-700);
-      background: var(--color-brand-50);
-      font-weight: 600;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    /* ─── BUTTON SYSTEM (Canon from THEME.md + Elevated Micro-craft) ───────── */
+    /* ════════════════════════════════════════════════════════════════════════════
+       UI ATOMS: BUTTONS, INPUTS, BADGES, CARDS
+       ════════════════════════════════════════════════════════════════════════════ */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      font-family: var(--font-body);
-      font-size: 0.9375rem;
+      gap: 0.5rem;
       font-weight: 600;
+      font-size: 0.9375rem;
+      padding: 0.6875rem 1.25rem;
       border-radius: var(--radius-md);
-      padding: 10px 18px;
+      border: 1px solid transparent;
       cursor: pointer;
       text-decoration: none;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      border: 1px solid transparent;
       line-height: 1.2;
     }
-    .btn-sm {
-      padding: 7px 14px;
-      font-size: 0.875rem;
-      border-radius: 10px;
-    }
-    .btn-lg {
-      padding: 13px 24px;
-      font-size: 1rem;
-      border-radius: 14px;
-    }
-
+    .btn-sm { font-size: 0.8125rem; padding: 0.4375rem 0.875rem; border-radius: var(--radius-sm); }
+    .btn-lg { font-size: 1rem; padding: 0.875rem 1.75rem; border-radius: var(--radius-lg); }
     .btn-primary {
-      background: var(--color-brand-600);
+      background-color: var(--color-brand-600);
       color: #fff;
-      box-shadow: 0 1px 2px rgba(2, 64, 89, 0.1), 0 2px 4px rgba(3, 140, 62, 0.25);
+      box-shadow: var(--shadow-elev1);
     }
     .btn-primary:hover {
-      background: var(--color-brand-700);
+      background-color: var(--color-brand-700);
+      box-shadow: var(--shadow-elev2);
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(3, 140, 62, 0.3);
     }
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
     .btn-secondary {
-      background: #fff;
+      background-color: #fff;
       color: var(--color-ink-700);
-      border-color: var(--color-slate-200);
-      box-shadow: var(--shadow-subtle);
+      border-color: var(--color-slate-300);
+      box-shadow: var(--shadow-elev1);
     }
     .btn-secondary:hover {
-      background: var(--color-slate-50);
-      border-color: var(--color-slate-300);
-      color: var(--color-ink-900);
-      transform: translateY(-1px);
+      background-color: var(--color-slate-100);
+      border-color: var(--color-slate-400);
     }
+    .btn-dark {
+      background-color: var(--color-ink-900);
+      color: #fff;
+    }
+    .btn-dark:hover { background-color: var(--color-ink-800); }
+    .btn-ghost { background: transparent; color: var(--color-slate-600); }
+    .btn-ghost:hover { background: var(--color-slate-100); color: var(--color-ink-900); }
 
-    .btn-ghost {
-      background: transparent;
-      color: var(--color-ink-700);
-    }
-    .btn-ghost:hover {
-      background: var(--color-slate-100);
-      color: var(--color-ink-900);
-    }
-
-    /* ─── HERO SECTION ───────────────────────────────────────────────────── */
-    .hero-section {
-      position: relative;
-      padding: 4.5rem 0 3.5rem;
-      overflow: hidden;
-    }
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      align-items: center;
-      gap: 3.5rem;
-    }
-    .eyebrow-pill {
+    .badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 5px 14px;
+      gap: 5px;
+      padding: 3px 9px;
       border-radius: var(--radius-full);
-      background: var(--color-brand-50);
-      border: 1px solid var(--color-brand-200);
-      color: var(--color-brand-700);
-      font-size: 0.8125rem;
-      font-weight: 600;
-      margin-bottom: 1.25rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
     }
-    .eyebrow-pill .pulsing-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--color-brand-600);
-      box-shadow: 0 0 0 3px rgba(3, 140, 62, 0.2);
-    }
-    .hero-headline {
-      font-size: 3.25rem;
-      line-height: 1.1;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--color-ink-900);
-      margin-bottom: 1.25rem;
-    }
-    .hero-headline em {
-      font-style: normal;
-      color: var(--color-brand-600);
-      position: relative;
-    }
-    .hero-subhead {
-      font-size: 1.125rem;
-      line-height: 1.65;
-      color: var(--color-slate-600);
-      max-width: 540px;
-      margin-bottom: 2rem;
-    }
-    .hero-cta-group {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 2rem;
-    }
-    .hero-feature-tags {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      font-size: 0.8125rem;
-      color: var(--color-slate-500);
-    }
-    .hero-feature-tags span {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .check-icon {
-      color: var(--color-brand-600);
-      font-weight: bold;
-    }
+    .badge-brand   { background: var(--color-brand-100); color: var(--color-brand-800); border: 1px solid var(--color-brand-200); }
+    .badge-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-danger  { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-neutral { background: var(--color-slate-100); color: var(--color-slate-700); border: 1px solid var(--color-slate-200); }
+    .badge-ink     { background: var(--color-ink-100); color: var(--color-ink-800); border: 1px solid var(--color-ink-200); }
 
-    /* Hero Visual Card */
-    .hero-media-wrapper {
-      position: relative;
-    }
-    .hero-main-card {
-      position: relative;
-      border-radius: var(--radius-2xl);
-      overflow: hidden;
-      border: 1px solid rgba(2, 64, 89, 0.12);
-      box-shadow: var(--shadow-elev3);
-      background: #fff;
-    }
-    .hero-img {
+    .input-field {
       width: 100%;
-      height: 380px;
-      object-fit: cover;
-      display: block;
-    }
-    .hero-floating-card {
-      position: absolute;
-      bottom: -20px;
-      left: -24px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--color-slate-200);
-      border-radius: var(--radius-lg);
-      padding: 16px 20px;
-      box-shadow: var(--shadow-elev2);
-      max-width: 270px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      animation: floatWidget 4s ease-in-out infinite;
-    }
-    @keyframes floatWidget {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
-    .floating-icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: var(--color-brand-50);
-      color: var(--color-brand-600);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-    .floating-title {
-      font-size: 0.875rem;
-      font-weight: 700;
-      color: var(--color-ink-900);
-    }
-    .floating-desc {
-      font-size: 0.75rem;
-      color: var(--color-slate-500);
-    }
-    .floating-badge {
-      display: inline-block;
-      margin-top: 4px;
-      font-size: 0.6875rem;
-      font-weight: 600;
-      color: var(--color-brand-700);
-      background: var(--color-brand-100);
-      padding: 2px 8px;
-      border-radius: 9999px;
-    }
-
-    /* ─── PARTNERS & TRUST LOGO BAR ───────────────────────────────────────── */
-    .partners-section {
-      padding: 2.25rem 0;
-      border-top: 1px solid var(--color-slate-200);
-      border-bottom: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-slate-300);
+      padding: 0.625rem 0.875rem;
+      font-size: 0.9375rem;
       background: #fff;
+      color: var(--color-slate-900);
+      font-family: inherit;
+      outline: none;
+      transition: all 0.18s ease;
     }
-    .partners-header {
-      text-align: center;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-slate-500);
-      margin-bottom: 1.25rem;
-    }
-    .partners-logo-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3.5rem;
-      flex-wrap: wrap;
-    }
-    .partner-logo-item {
-      height: 38px;
-      max-width: 140px;
-      object-fit: contain;
-      filter: grayscale(100%);
-      opacity: 0.7;
-      transition: all 0.25s ease;
-    }
-    .partner-logo-item:hover {
-      filter: grayscale(0%);
-      opacity: 1;
-      transform: scale(1.04);
+    .input-field:focus {
+      border-color: var(--color-brand-600);
+      box-shadow: 0 0 0 3px rgba(3, 140, 62, 0.16);
     }
 
-    /* ─── METRICS STRIP ──────────────────────────────────────────────────── */
-    .metrics-section {
-      background: var(--color-ink-900);
-      color: #fff;
-      padding: 3rem 0;
-    }
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-      text-align: center;
-    }
-    .metric-item {
-      position: relative;
-    }
-    .metric-item:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      right: -1rem;
-      top: 20%;
-      height: 60%;
-      width: 1px;
-      background: rgba(255, 255, 255, 0.12);
-    }
-    .metric-value {
-      font-family: var(--font-display);
-      font-size: 2.25rem;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.02em;
-    }
-    .metric-value em {
-      font-style: normal;
-      color: var(--color-brand-400);
-    }
-    .metric-label {
-      margin-top: 4px;
-      font-size: 0.875rem;
-      color: var(--color-ink-200);
-      font-weight: 500;
-    }
-
-    /* ─── SECTION HEADINGS ───────────────────────────────────────────────── */
-    .section-eyebrow {
-      display: inline-block;
-      font-size: 0.8125rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-brand-700);
-      margin-bottom: 8px;
-    }
-    .section-title {
-      font-size: 2.25rem;
-      font-weight: 800;
-      letter-spacing: -0.025em;
-      color: var(--color-ink-900);
-      margin-bottom: 12px;
-    }
-    .section-lead {
-      font-size: 1.0625rem;
-      color: var(--color-slate-600);
-      max-width: 600px;
-    }
-
-    /* ─── OFFERINGS GRID ─────────────────────────────────────────────────── */
-    .offerings-section {
-      padding: 5rem 0;
-      background: var(--color-slate-50);
-    }
-    .offerings-grid {
-      margin-top: 3rem;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
-    .offering-card {
+    .card {
       background: #fff;
       border: 1px solid var(--color-slate-200);
       border-radius: var(--radius-xl);
-      padding: 2.25rem;
-      transition: all 0.25s ease;
-      display: flex;
-      flex-direction: column;
-      position: relative;
+      box-shadow: var(--shadow-elev1);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .offering-card:hover {
-      border-color: var(--color-brand-300);
+    .card:hover {
       box-shadow: var(--shadow-elev2);
-      transform: translateY(-2px);
+      border-color: var(--color-slate-300);
     }
-    .offering-card-top {
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       APP & PUBLIC CHROME HEADERS
+       ════════════════════════════════════════════════════════════════════════════ */
+    .public-nav-header {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-slate-200);
+      padding: 0.75rem 0;
+    }
+    .nav-flex {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 1.5rem;
     }
-    .offering-icon-wrap {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: var(--color-brand-50);
-      color: var(--color-brand-700);
+    .logo-link {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 22px;
-    }
-    .offering-index {
-      font-family: var(--font-mono);
-      font-size: 0.875rem;
-      color: var(--color-slate-400);
-      font-weight: 600;
-    }
-    .offering-card-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--color-ink-900);
-      margin-bottom: 8px;
-    }
-    .offering-card-desc {
-      font-size: 0.9375rem;
-      color: var(--color-slate-600);
-      line-height: 1.6;
-      flex-grow: 1;
-      margin-bottom: 1.5rem;
-    }
-    .offering-card-action {
-      font-size: 0.875rem;
-      font-weight: 700;
-      color: var(--color-brand-700);
+      gap: 0.625rem;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      color: var(--color-ink-900);
     }
-    .offering-card-action:hover {
-      color: var(--color-brand-800);
-      gap: 9px;
-    }
-
-    /* ─── FEATURED COURSES SECTION ───────────────────────────────────────── */
-    .courses-section {
-      padding: 5rem 0;
-      background: #fff;
-    }
-    .courses-grid {
-      margin-top: 3rem;
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--color-brand-600);
+      color: #fff;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.125rem;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.75rem;
+      place-items: center;
+      box-shadow: 0 2px 6px rgba(3, 140, 62, 0.3);
     }
-    .course-card {
-      background: #fff;
-      border: 1px solid var(--color-slate-200);
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-      box-shadow: var(--shadow-elev1);
+    .logo-text {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.125rem;
+      letter-spacing: -0.03em;
+    }
+    .public-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .public-links a {
+      text-decoration: none;
+      color: var(--color-slate-600);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      transition: color 0.15s ease;
+    }
+    .public-links a:hover, .public-links a.active { color: var(--color-brand-700); }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       CANONICAL COURSE CARD (Used in Catalog & Landing)
+       ════════════════════════════════════════════════════════════════════════════ */
+    .course-card-canonical {
       display: flex;
       flex-direction: column;
-      transition: all 0.25s ease;
-      text-decoration: none;
-      color: inherit;
-    }
-    .course-card:hover {
-      border-color: var(--color-brand-300);
-      box-shadow: var(--shadow-elev3);
-      transform: translateY(-3px);
-    }
-    .course-thumb-wrap {
-      position: relative;
-      height: 190px;
       overflow: hidden;
-      background: var(--color-slate-100);
+      border-radius: var(--radius-xl);
+      background: #fff;
+      border: 1px solid var(--color-slate-200);
+      box-shadow: var(--shadow-elev1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+    }
+    .course-card-canonical:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-elev3);
+      border-color: var(--color-brand-300);
+    }
+    .course-thumb-box {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, var(--color-ink-800), var(--color-ink-950));
+      overflow: hidden;
     }
     .course-thumb-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s ease;
+      opacity: 0.88;
+      transition: transform 0.3s ease;
     }
-    .course-card:hover .course-thumb-img {
-      transform: scale(1.04);
-    }
-    .course-category-tag {
+    .course-card-canonical:hover .course-thumb-img { transform: scale(1.04); }
+    .thumb-badge-top-left {
       position: absolute;
-      top: 12px;
-      left: 12px;
-      background: rgba(255, 255, 255, 0.96);
+      top: 10px;
+      left: 10px;
+      background: rgba(1, 28, 43, 0.85);
+      color: #fff;
       backdrop-filter: blur(8px);
-      padding: 3px 10px;
-      border-radius: var(--radius-full);
       font-size: 0.6875rem;
       font-weight: 700;
-      color: var(--color-brand-700);
-      letter-spacing: 0.02em;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
-    .course-grade-tag {
+    .thumb-badge-top-right {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(1, 28, 43, 0.85);
-      backdrop-filter: blur(8px);
-      padding: 3px 10px;
-      border-radius: var(--radius-full);
-      font-size: 0.6875rem;
-      font-weight: 600;
+      top: 10px;
+      right: 10px;
+      background: var(--color-brand-600);
       color: #fff;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
     }
     .course-card-body {
-      padding: 1.5rem;
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
-      flex-grow: 1;
+      flex: 1;
     }
-    .course-title {
-      font-size: 1.125rem;
+    .course-card-title {
+      font-family: var(--font-display);
+      font-size: 1.0625rem;
       font-weight: 700;
       color: var(--color-ink-900);
       line-height: 1.35;
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
     }
-    .course-desc {
-      font-size: 0.875rem;
+    .course-card-desc {
+      font-size: 0.8125rem;
       color: var(--color-slate-600);
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin-bottom: 1.25rem;
+      line-height: 1.45;
+      margin-bottom: 1rem;
+      flex: 1;
     }
-    .course-mentor-row {
+    .course-meta-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-top: auto;
-      padding-top: 12px;
-      border-top: 1px solid var(--color-slate-100);
-      font-size: 0.8125rem;
+      gap: 0.75rem;
+      font-size: 0.75rem;
       color: var(--color-slate-500);
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--color-slate-100);
+      margin-bottom: 0.875rem;
     }
-    .mentor-avatar {
-      width: 28px;
-      height: 28px;
+    .mentor-avatar-micro {
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: var(--color-brand-100);
       color: var(--color-brand-800);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      place-items: center;
       font-weight: 700;
-      font-size: 11px;
+      font-size: 0.625rem;
     }
-    .course-footer-row {
+    .course-card-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 12px;
     }
-    .course-price {
+    .course-price-text {
       font-family: var(--font-display);
       font-size: 1.125rem;
       font-weight: 800;
       color: var(--color-ink-900);
     }
 
-    /* ─── TWO PATHWAYS (Learner vs Mentor) ────────────────────────────────── */
-    .pathway-section {
-      padding: 5rem 0;
-      background: var(--color-slate-50);
+    /* ════════════════════════════════════════════════════════════════════════════
+       VIEW CONTAINERS (Tab switching controller)
+       ════════════════════════════════════════════════════════════════════════════ */
+    .view-pane { display: none; }
+    .view-pane.active-view { display: block; animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       VIEW 1: LANDING PAGE SPECIFIC
+       ════════════════════════════════════════════════════════════════════════════ */
+    .hero-section {
+      padding: 4.5rem 0 3.5rem;
+      background: radial-gradient(80% 60% at 50% 0%, rgba(3, 140, 62, 0.08) 0%, rgba(2, 64, 89, 0.04) 60%, transparent 100%);
+      border-bottom: 1px solid var(--color-slate-200);
     }
-    .pathway-grid {
-      margin-top: 3rem;
+    .hero-split-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 3rem;
+      align-items: center;
     }
-    .pathway-card {
+    .hero-headline {
+      font-size: 3.125rem;
+      line-height: 1.1;
+      font-weight: 800;
+      color: var(--color-ink-900);
+      margin-bottom: 1.25rem;
+    }
+    .hero-lead {
+      font-size: 1.125rem;
+      color: var(--color-slate-600);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .hero-interactive-window {
+      background: var(--color-ink-900);
       border-radius: var(--radius-2xl);
-      padding: 2.5rem;
+      border: 1px solid var(--color-ink-700);
+      box-shadow: var(--shadow-elev3);
+      overflow: hidden;
+      color: #fff;
+    }
+    .window-header {
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .window-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .window-body { padding: 1.25rem; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.7; }
+
+    .partner-bar {
+      padding: 2.5rem 0;
+      background: #fff;
+      border-bottom: 1px solid var(--color-slate-200);
+    }
+    .partner-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .partner-logo-box {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--color-slate-500);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       VIEW 2: CATALOG LAYOUT
+       ════════════════════════════════════════════════════════════════════════════ */
+    .catalog-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2.5rem;
+      padding: 2.5rem 0 4rem;
+    }
+    .sidebar-filter-pane {
+      position: sticky;
+      top: 5rem;
+      height: fit-content;
       display: flex;
       flex-direction: column;
+      gap: 1.5rem;
     }
-    .pathway-card-learner {
+    .filter-group-title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-ink-700);
+      margin-bottom: 0.625rem;
+    }
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--color-slate-600);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       VIEW 3: COURSE DETAIL & SYLLABUS LAYOUT
+       ════════════════════════════════════════════════════════════════════════════ */
+    .detail-split-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 3rem;
+      padding: 2.5rem 0 4rem;
+      align-items: start;
+    }
+    .sticky-enroll-card {
+      position: sticky;
+      top: 5rem;
       background: #fff;
       border: 1px solid var(--color-slate-200);
-      box-shadow: var(--shadow-elev1);
-    }
-    .pathway-card-mentor {
-      background: var(--color-ink-900);
-      color: #fff;
-      border: 1px solid var(--color-ink-800);
+      border-radius: var(--radius-2xl);
+      padding: 1.5rem;
       box-shadow: var(--shadow-elev2);
     }
-    .pathway-card-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 12px;
-    }
-    .pathway-card-mentor .pathway-card-title {
-      color: #fff;
-    }
-    .pathway-card-learner .pathway-card-title {
-      color: var(--color-ink-900);
-    }
-    .pathway-steps {
-      list-style: none;
-      margin: 1.5rem 0 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .pathway-step-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      font-size: 0.9375rem;
-    }
-    .step-num {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--color-brand-600);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .step-dot-mentor {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--color-brand-400);
-      flex-shrink: 0;
-      margin-top: 8px;
-    }
-
-    /* ─── FINAL CALL TO ACTION (Brand Green) ─────────────────────────────── */
-    .cta-banner {
-      padding: 5rem 0;
-      background: linear-gradient(135deg, var(--color-brand-700) 0%, var(--color-brand-800) 100%);
-      color: #fff;
-      text-align: center;
-      position: relative;
-    }
-    .cta-banner::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
-      background-size: 20px 20px;
-      opacity: 0.4;
-    }
-    .cta-content {
-      position: relative;
-      max-width: 680px;
-      margin: 0 auto;
-    }
-    .cta-title {
-      font-size: 2.5rem;
-      font-weight: 800;
-      letter-spacing: -0.025em;
-      margin-bottom: 1rem;
-    }
-    .cta-lead {
-      font-size: 1.125rem;
-      color: var(--color-brand-100);
-      line-height: 1.6;
-      margin-bottom: 2rem;
-    }
-
-    /* ─── FOOTER ─────────────────────────────────────────────────────────── */
-    .site-footer {
-      background: var(--color-ink-950);
-      color: var(--color-slate-400);
-      padding: 4.5rem 0 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 0.875rem;
-    }
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 1.6fr 1fr 1fr 1fr;
-      gap: 3rem;
-      margin-bottom: 3.5rem;
-    }
-    .footer-brand-desc {
-      margin-top: 1rem;
-      max-width: 280px;
-      line-height: 1.6;
-      color: var(--color-slate-400);
-      font-size: 0.875rem;
-    }
-    .footer-heading {
-      color: #fff;
-      font-size: 0.875rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      letter-spacing: 0.02em;
-    }
-    .footer-links {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .footer-links a {
-      color: var(--color-slate-400);
-      text-decoration: none;
-      transition: color 0.15s ease;
-    }
-    .footer-links a:hover {
-      color: #fff;
-    }
-    .footer-bottom {
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding-top: 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      font-size: 0.8125rem;
-    }
-
-    /* ─── SPLIT AUTH VIEW PROTOTYPE (Modern Institutional Showcase) ─────── */
-    #auth-view {
-      display: none; /* toggled via JS */
-      min-height: calc(100vh - 45px);
+    .syllabus-chapter {
+      border: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-lg);
       background: #fff;
-    }
-    .auth-split-wrapper {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: calc(100vh - 45px);
-    }
-    /* Left: Institutional Showcase */
-    .auth-showcase-pane {
-      background: linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-950) 100%);
-      color: #fff;
-      padding: 4rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
+      margin-bottom: 0.875rem;
       overflow: hidden;
     }
-    .auth-showcase-pane::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(rgba(3, 140, 62, 0.15) 1px, transparent 1px);
-      background-size: 24px 24px;
-      opacity: 0.5;
-    }
-    .auth-showcase-content {
-      position: relative;
-      z-index: 2;
-    }
-    .auth-quote-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius-xl);
-      padding: 2rem;
-      backdrop-filter: blur(10px);
-      margin: 2.5rem 0;
-    }
-    .auth-quote-text {
-      font-size: 1.125rem;
-      line-height: 1.6;
-      color: #fff;
-      font-style: italic;
-      margin-bottom: 1.25rem;
-    }
-    .auth-quote-author {
+    .syllabus-header {
+      padding: 1rem 1.25rem;
+      background: var(--color-slate-50);
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      cursor: pointer;
+      font-weight: 700;
     }
-    .author-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--color-brand-600);
+    .syllabus-lesson-list {
+      padding: 0.5rem 1.25rem;
+      list-style: none;
+    }
+    .syllabus-lesson-item {
+      padding: 0.625rem 0;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-weight: 700;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--color-slate-100);
     }
-    .author-name {
-      font-weight: 700;
-      color: #fff;
-      font-size: 0.9375rem;
-    }
-    .author-role {
-      font-size: 0.8125rem;
-      color: var(--color-slate-400);
-    }
+    .syllabus-lesson-item:last-child { border-bottom: none; }
 
-    /* Right: Interactive Form Pane */
-    .auth-form-pane {
-      padding: 4rem;
+    /* ════════════════════════════════════════════════════════════════════════════
+       VIEW 4: SPLIT EDITORIAL AUTH
+       ════════════════════════════════════════════════════════════════════════════ */
+    .split-auth-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 48px);
+    }
+    .auth-editorial-side {
+      background: var(--color-ink-900);
+      color: #fff;
+      padding: 4rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .auth-form-side {
+      background: #fff;
+      padding: 4rem 3.5rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      max-width: 520px;
-      margin: 0 auto;
-      width: 100%;
+      align-items: center;
     }
-    .form-switch-tabs {
-      display: flex;
-      border-bottom: 2px solid var(--color-slate-200);
+    .auth-form-box { width: 100%; max-width: 420px; }
+    .pin-row { display: flex; gap: 8px; justify-content: center; margin: 1.25rem 0; }
+    .pin-input {
+      width: 44px;
+      height: 48px;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-slate-300);
+      font-family: var(--font-mono);
+      outline: none;
+    }
+    .pin-input:focus { border-color: var(--color-brand-600); box-shadow: 0 0 0 3px rgba(3, 140, 62, 0.16); }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       VIEW 5 & 6: LEARNER DASHBOARD & THEATER LESSON PLAYER
+       ════════════════════════════════════════════════════════════════════════════ */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      padding: 2rem 0;
+    }
+    .resume-hero-card {
+      background: linear-gradient(135deg, var(--color-ink-900), var(--color-ink-800));
+      color: #fff;
+      border-radius: var(--radius-2xl);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
       margin-bottom: 2rem;
     }
-    .form-switch-btn {
-      flex: 1;
-      padding: 12px;
-      background: none;
-      border: none;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--color-slate-500);
-      cursor: pointer;
-      position: relative;
+    .progress-bar-bg {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin: 1rem 0;
     }
-    .form-switch-btn.active {
-      color: var(--color-brand-700);
-    }
-    .form-switch-btn.active::after {
-      content: "";
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--color-brand-600);
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--color-brand-400);
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease;
     }
 
-    .oauth-btn {
-      width: 100%;
+    /* Theater Lesson Player */
+    .lesson-theater-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: calc(100vh - 48px);
+      background: var(--color-slate-100);
+    }
+    .lesson-sidebar-tree {
+      background: #fff;
+      border-right: 1px solid var(--color-slate-200);
+      overflow-y: auto;
+      height: 100%;
+    }
+    .lesson-video-stage {
+      background: #000;
+      position: relative;
+      aspect-ratio: 16/9;
+      max-height: 520px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      padding: 12px;
-      border: 1px solid var(--color-slate-300);
-      border-radius: var(--radius-md);
+      color: #fff;
+    }
+    .lesson-workbench-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--color-slate-200);
       background: #fff;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: var(--color-slate-700);
+      padding: 0 1.5rem;
+    }
+    .workbench-tab-btn {
+      padding: 1rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--color-slate-600);
+      border-bottom: 2px solid transparent;
       cursor: pointer;
-      transition: all 0.2s ease;
-      margin-bottom: 10px;
     }
-    .oauth-btn:hover {
+    .workbench-tab-btn.active { color: var(--color-brand-700); border-bottom-color: var(--color-brand-600); }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       VIEW 7, 8, 9, 10: ADMIN SUITE STYLES
+       ════════════════════════════════════════════════════════════════════════════ */
+    .admin-layout-shell {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 48px);
       background: var(--color-slate-50);
-      border-color: var(--color-slate-400);
     }
-    .oauth-divider {
+    .admin-sidebar {
+      background: #fff;
+      border-right: 1px solid var(--color-slate-200);
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .admin-nav-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin: 1.5rem 0;
-      color: var(--color-slate-400);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-    .oauth-divider::before, .oauth-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--color-slate-200);
-    }
-
-    .form-field {
-      margin-bottom: 1.25rem;
-    }
-    .form-label {
-      display: block;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-md);
       font-size: 0.875rem;
       font-weight: 600;
-      color: var(--color-ink-900);
-      margin-bottom: 6px;
+      color: var(--color-slate-700);
+      text-decoration: none;
+      cursor: pointer;
     }
-    .form-input {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid var(--color-slate-300);
-      border-radius: var(--radius-md);
-      font-size: 0.9375rem;
-      font-family: inherit;
-      outline: none;
-      transition: all 0.2s ease;
-      background: #fff;
+    .admin-nav-item:hover, .admin-nav-item.active {
+      background: var(--color-brand-50);
+      color: var(--color-brand-800);
     }
-    .form-input:focus {
-      border-color: var(--color-brand-600);
-      box-shadow: 0 0 0 3px rgba(3, 140, 62, 0.15);
-    }
-    .pin-input-group {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin: 1.5rem 0;
-    }
-    .pin-box {
-      width: 48px;
-      height: 56px;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      border: 1.5px solid var(--color-slate-300);
-      border-radius: 12px;
-      outline: none;
-    }
-    .pin-box:focus {
-      border-color: var(--color-brand-600);
-      box-shadow: 0 0 0 3px rgba(3, 140, 62, 0.15);
+    .admin-main-stage {
+      padding: 2rem;
+      overflow-y: auto;
     }
 
-    /* ─── RESPONSIVE RULES ───────────────────────────────────────────────── */
-    @media (max-width: 1024px) {
-      .hero-grid { grid-template-columns: 1fr; }
-      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-      .courses-grid { grid-template-columns: 1fr; }
-      .footer-grid { grid-template-columns: 1fr 1fr; }
-      .auth-split-wrapper { grid-template-columns: 1fr; }
-      .auth-showcase-pane { display: none; }
+    /* Studio Course Builder (Two-pane) */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+      align-items: start;
     }
-    @media (max-width: 768px) {
-      .offerings-grid, .pathway-grid { grid-template-columns: 1fr; }
-      .nav-links { display: none; }
-      .hero-headline { font-size: 2.25rem; }
+    .tree-card {
+      background: #fff;
+      border: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-elev1);
+    }
+    .tree-node-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      background: var(--color-slate-50);
+      border: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.5rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+    .tree-node-item.selected {
+      border-color: var(--color-brand-600);
+      background: var(--color-brand-50);
+    }
+
+    /* Data Table Universal */
+    .data-table-container {
+      background: #fff;
+      border: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-elev1);
+      overflow: hidden;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+    .data-table th {
+      padding: 0.75rem 1rem;
+      background: var(--color-slate-50);
+      border-bottom: 1px solid var(--color-slate-200);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-slate-500);
+    }
+    .data-table td {
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--color-slate-100);
+      color: var(--color-slate-800);
+    }
+    .data-table tr:hover td { background: var(--color-slate-50); }
+
+    /* Responsive Queries */
+    @media (max-width: 1024px) {
+      .hero-split-grid, .catalog-layout, .detail-split-layout, .split-auth-layout, .dashboard-grid, .lesson-theater-layout, .admin-layout-shell, .studio-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .sidebar-filter-pane, .sticky-enroll-card { position: static !important; }
+      .admin-sidebar { border-right: none; border-bottom: 1px solid var(--color-slate-200); }
     }
   </style>
 </head>
 <body>
 
-  <!-- ─── PROTOTYPE DEMO BAR ─── -->
-  <div class="proto-bar">
-    <div class="proto-badge">
-      <span class="proto-dot"></span>
-      EduAltTech - Interactive Pre-Login UI Specification
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       STICKY CONTROLLER TOOLBAR (Switch between all requested pages)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <aside class="proto-ctrl-bar" aria-label="Prototype Navigation Switcher">
+    <div class="proto-brand-lockup">
+      <span class="logo-mark" style="width:26px; height:26px; font-size:0.875rem;">E</span>
+      <strong style="font-family:var(--font-display); font-size:0.875rem;">EduAltTech Layouts</strong>
+      <span class="proto-tag">Live System Preview</span>
     </div>
-    <div class="proto-tabs">
-      <button class="proto-btn active" id="tab-landing" onclick="switchView('landing')">1. Modern Landing Page</button>
-      <button class="proto-btn" id="tab-auth" onclick="switchView('auth')">2. High-Craft Auth Split-Screen</button>
+
+    <div class="proto-nav-group">
+      <span class="proto-group-label">Pre-Login:</span>
+      <button class="proto-btn active" id="btn-view-landing" onclick="switchView('landing')">1. Landing (Home)</button>
+      <button class="proto-btn" id="btn-view-catalog" onclick="switchView('catalog')">2. Catalog & Filters</button>
+      <button class="proto-btn" id="btn-view-detail" onclick="switchView('detail')">3. Course Details & Syllabus</button>
+      <button class="proto-btn" id="btn-view-auth" onclick="switchView('auth')">4. Split Auth</button>
     </div>
-  </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════════════════
-       VIEW 1: MODERN LANDING PAGE
-  ════════════════════════════════════════════════════════════════════════════ -->
-  <div id="landing-view">
+    <div class="proto-nav-group">
+      <span class="proto-group-label">Learner:</span>
+      <button class="proto-btn" id="btn-view-learner-dash" onclick="switchView('learner-dash')">5. Dashboard</button>
+      <button class="proto-btn" id="btn-view-lesson-player" onclick="switchView('lesson-player')">6. Theater Player</button>
+    </div>
 
-    <!-- Header Navigation -->
-    <header class="site-header">
-      <div class="max-w-7xl header-inner">
-        <a href="#landing" class="brand-link">
-          <img src="/media/brand/logo.png" alt="EduAltTech Logo" class="brand-logo-img" onerror="this.src='https://placehold.co/40x40/038c3e/ffffff?text=EAT'" />
-          <span class="brand-title">EduAlt<span>Tech</span></span>
+    <div class="proto-nav-group">
+      <span class="proto-group-label">Admin:</span>
+      <button class="proto-btn" id="btn-view-admin-overview" onclick="switchView('admin-overview')">7. Command & Analytics</button>
+      <button class="proto-btn" id="btn-view-admin-studio" onclick="switchView('admin-studio')">8. Course Studio</button>
+      <button class="proto-btn" id="btn-view-admin-mentors" onclick="switchView('admin-mentors')">9. Mentor Pipeline</button>
+      <button class="proto-btn" id="btn-view-admin-users" onclick="switchView('admin-users')">10. Users & Orders</button>
+    </div>
+  </aside>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 1: MODERN LANDING PAGE (Pre-Login)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-landing" class="view-pane active-view">
+    <header class="public-nav-header">
+      <div class="container nav-flex">
+        <a href="#landing" class="logo-link">
+          <div class="logo-mark">E</div>
+          <span class="logo-text">EduAltTech</span>
         </a>
-
-        <ul class="nav-links">
-          <li><a href="#courses" class="nav-link">Courses</a></li>
-          <li><a href="#offerings" class="nav-link">Offerings</a></li>
-          <li><a href="#pathway" class="nav-link">Learners & Mentors</a></li>
-          <li><a href="#about" class="nav-link">About</a></li>
-          <li><a href="#contact" class="nav-link">Contact</a></li>
-        </ul>
-
-        <div class="header-actions">
+        <nav>
+          <ul class="public-links">
+            <li><a href="#catalog" onclick="switchView('catalog')" class="active">Courses</a></li>
+            <li><a href="#services">Services & Schools</a></li>
+            <li><a href="#mentors">Become a Mentor</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </nav>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
           <button class="btn btn-ghost btn-sm" onclick="switchView('auth')">Sign in</button>
-          <button class="btn btn-primary btn-sm" onclick="switchView('auth')">Get started</button>
+          <button class="btn btn-primary btn-sm" onclick="switchView('auth')">Get Started</button>
         </div>
       </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section bg-grid-subtle bg-hero-glow">
-      <div class="max-w-7xl">
-        <div class="hero-grid">
+    <div class="hero-section">
+      <div class="container">
+        <div class="hero-split-grid">
           <div>
-            <div class="eyebrow-pill">
-              <span class="pulsing-dot"></span>
-              Learning beyond syllabus · Built with partner schools
+            <div style="margin-bottom:1rem;">
+              <span class="badge badge-brand">🚀 Practical Tech & Alternative Education</span>
             </div>
             <h1 class="hero-headline">
-              Practical AI, entrepreneurship & tech - <em>taught for outcomes</em>
+              Master real engineering with working practitioners.
             </h1>
-            <p class="hero-subhead">
-              EduAltTech connects ambitious learners with practicing mentors through structured roadmaps. Alongside learning, we engineer working software deployed inside real schools.
+            <p class="hero-lead">
+              EduAltTech connects ambitious students with vetted mentors. Build autonomous AI agents, fullstack platforms, and real software deployed for genuine institutions.
             </p>
-            <div class="hero-cta-group">
-              <a href="#courses" class="btn btn-primary btn-lg">Explore courses</a>
-              <button class="btn btn-secondary btn-lg" onclick="switchView('auth')">Join as mentor</button>
+            <div style="display:flex; gap:0.875rem; flex-wrap:wrap;">
+              <button class="btn btn-primary btn-lg" onclick="switchView('catalog')">Explore 40+ Courses →</button>
+              <button class="btn btn-secondary btn-lg" onclick="switchView('detail')">View Deep Learning Syllabus</button>
             </div>
-            <div class="hero-feature-tags">
-              <span><span class="check-icon">✓</span> Verified Mentors</span>
-              <span><span class="check-icon">✓</span> Structured Chapters</span>
-              <span><span class="check-icon">✓</span> School Certified</span>
+            <div style="margin-top:2rem; display:flex; align-items:center; gap:1.25rem; font-size:0.8125rem; color:var(--color-slate-500);">
+              <span>✔ 1:1 Mentor Guidance</span>
+              <span>✔ Zero Passive Video Slop</span>
+              <span>✔ Deployed Portfolio Projects</span>
             </div>
           </div>
 
-          <div class="hero-media-wrapper">
-            <div class="hero-main-card">
-              <img src="/media/photos/EAT3.jpg" alt="EduAltTech Class Collaboration" class="hero-img" onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80'" />
+          <!-- Interactive Code/Product Preview Stage -->
+          <div class="hero-interactive-window">
+            <div class="window-header">
+              <span class="window-dot" style="background:#ef4444;"></span>
+              <span class="window-dot" style="background:#f59e0b;"></span>
+              <span class="window-dot" style="background:#22c55e;"></span>
+              <span style="font-size:0.75rem; color:var(--color-slate-400); margin-left:0.5rem;">autonomous_agent_lab.py — Python 3.12</span>
             </div>
-            <!-- Floating interactive widget -->
-            <div class="hero-floating-card">
-              <div class="floating-icon-box">⚡</div>
-              <div>
-                <div class="floating-title">AI & Systems Lab</div>
-                <div class="floating-desc">Chapter 04 · Hands-on sprint</div>
-                <span class="floating-badge">Live with Mentor</span>
+            <div class="window-body">
+              <p style="color:#64748b;"># Chapter 03: Function Calling with Tool Execution</p>
+              <p><span style="color:#4fbc75;">from</span> edualttech.agents <span style="color:#4fbc75;">import</span> PractitionerAgent, tool</p>
+              <br />
+              <p><span style="color:#38bdf8;">@tool</span></p>
+              <p><span style="color:#4fbc75;">def</span> <span style="color:#fde047;">audit_smart_contract</span>(address: <span style="color:#a78bfa;">str</span>) -> <span style="color:#a78bfa;">dict</span>:</p>
+              <p>&nbsp;&nbsp;"""Analyzes deployed bytecode for security vulnerabilities."""</p>
+              <p>&nbsp;&nbsp;<span style="color:#4fbc75;">return</span> security_engine.verify_bytecode(address)</p>
+              <br />
+              <div style="background:rgba(3,140,62,0.18); border-left:3px solid var(--color-brand-400); padding:8px 12px; border-radius:4px; font-size:0.75rem;">
+                <span style="color:#86efac; font-weight:700;">LIVE SESSION ACTIVE:</span> Mentor Ranadeep V. reviewing students in Discord Lab.
               </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Institutional Partners Bar -->
-    <section class="partners-section">
-      <div class="max-w-7xl">
-        <p class="partners-header">Trusted & Deployed in Collaboration With Educational Institutions</p>
-        <div class="partners-logo-row">
-          <img src="/media/logos/genesis.png" alt="Genesis Global School" class="partner-logo-item" onerror="this.alt='Genesis'" />
-          <img src="/media/logos/mamasparsh.png" alt="Mamasparsh" class="partner-logo-item" onerror="this.alt='Mamasparsh'" />
-          <img src="/media/logos/new_era.jpg" alt="New Era" class="partner-logo-item" onerror="this.alt='New Era'" />
-          <img src="/media/logos/sharada_vidhyalaya.jpeg" alt="Sharada Vidhyalaya" class="partner-logo-item" onerror="this.alt='Sharada Vidhyalaya'" />
+    <!-- Partner Strip -->
+    <div class="partner-bar">
+      <div class="container">
+        <p style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-slate-400); margin-bottom:1.25rem; text-align:center;">
+          Trusted & Deployed in Collaboration with Educational Institutions
+        </p>
+        <div class="partner-row">
+          <div class="partner-logo-box">🏫 Genesis Global School</div>
+          <div class="partner-logo-box">🏛️ Sharada Vidhyalaya</div>
+          <div class="partner-logo-box">🎓 New Era Academy</div>
+          <div class="partner-logo-box">🤝 Mamasparsh Foundation</div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Impact Metrics Ribbon -->
-    <section class="metrics-section">
-      <div class="max-w-7xl">
-        <div class="metrics-grid">
-          <div class="metric-item">
-            <div class="metric-value">100<em>%</em></div>
-            <div class="metric-label">Project-Driven Practice</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-value">1-on-1</div>
-            <div class="metric-label">Course Mentor Guidance</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-value">4<em>+</em></div>
-            <div class="metric-label">Partner Institutions</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-value">Zero</div>
-            <div class="metric-label">Passive Lecture Slop</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Offerings Section -->
-    <section id="offerings" class="offerings-section">
-      <div class="max-w-7xl">
-        <div>
-          <span class="section-eyebrow">What We Offer</span>
-          <h2 class="section-title">Four core pillars of EduAltTech</h2>
-          <p class="section-lead">A learning platform and a technology partner - bridging real classroom capability with real-world industry skills.</p>
+    <!-- 4 Pillars Section -->
+    <div style="padding:4.5rem 0; background:var(--color-slate-50);">
+      <div class="container">
+        <div style="text-align:center; max-width:680px; margin:0 auto 3rem;">
+          <span class="badge badge-ink" style="margin-bottom:0.75rem;">Core Methodology</span>
+          <h2 style="font-size:2.25rem; font-weight:800; color:var(--color-ink-900);">Why EduAltTech is genuinely different</h2>
+          <p style="color:var(--color-slate-600); margin-top:0.5rem;">Designed from first principles to eliminate superficial certificates and replace them with verified engineering skill.</p>
         </div>
 
-        <div class="offerings-grid">
-          <div class="offering-card">
-            <div class="offering-card-top">
-              <div class="offering-icon-wrap">📖</div>
-              <span class="offering-index">01</span>
-            </div>
-            <h3 class="offering-card-title">Curated Tech & AI Courses</h3>
-            <p class="offering-card-desc">Organized into concrete chapters, topics, and interactive lessons. Build genuine applications instead of memorizing definitions.</p>
-            <a href="#courses" class="offering-card-action">Browse catalog →</a>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem;">
+          <div class="card" style="padding:1.75rem;">
+            <div style="font-size:1.5rem; margin-bottom:1rem;">🧩</div>
+            <h3 style="font-size:1.125rem; font-weight:700; color:var(--color-ink-900); margin-bottom:0.5rem;">Project-First Curriculum</h3>
+            <p style="font-size:0.875rem; color:var(--color-slate-600);">No endless video slides. Every chapter ends with runnable software that you commit to your GitHub portfolio.</p>
           </div>
-
-          <div class="offering-card">
-            <div class="offering-card-top">
-              <div class="offering-icon-wrap">👥</div>
-              <span class="offering-index">02</span>
-            </div>
-            <h3 class="offering-card-title">Direct Mentor Guidance</h3>
-            <p class="offering-card-desc">Every course is run by vetted practitioners who maintain the material and schedule live check-ins for active learners.</p>
-            <a href="#pathway" class="offering-card-action">Meet mentors →</a>
+          <div class="card" style="padding:1.75rem;">
+            <div style="font-size:1.5rem; margin-bottom:1rem;">👥</div>
+            <h3 style="font-size:1.125rem; font-weight:700; color:var(--color-ink-900); margin-bottom:0.5rem;">Vetted Industry Mentors</h3>
+            <p style="font-size:0.875rem; color:var(--color-slate-600);">Learn directly from practicing engineers who schedule weekly live code reviews and unblock you in chat.</p>
           </div>
-
-          <div class="offering-card">
-            <div class="offering-card-top">
-              <div class="offering-icon-wrap">🏫</div>
-              <span class="offering-index">03</span>
-            </div>
-            <h3 class="offering-card-title">Custom Software for Partner Schools</h3>
-            <p class="offering-card-desc">We build digital solutions that reduce admin fatigue and empower school faculty - the exact systems our students learn to design.</p>
-            <a href="#contact" class="offering-card-action">Explore solutions →</a>
+          <div class="card" style="padding:1.75rem;">
+            <div style="font-size:1.5rem; margin-bottom:1rem;">🏫</div>
+            <h3 style="font-size:1.125rem; font-weight:700; color:var(--color-ink-900); margin-bottom:0.5rem;">Institutional Software</h3>
+            <p style="font-size:0.875rem; color:var(--color-slate-600);">We build customized software for partner schools — the exact real-world systems our top students help architect.</p>
           </div>
-
-          <div class="offering-card">
-            <div class="offering-card-top">
-              <div class="offering-icon-wrap">🚀</div>
-              <span class="offering-index">04</span>
-            </div>
-            <h3 class="offering-card-title">Entrepreneurship & Execution</h3>
-            <p class="offering-card-desc">Connecting raw code with product thinking, go-to-market roadmaps, and presentation readiness for ambitious youth.</p>
-            <a href="#courses" class="offering-card-action">See outcomes →</a>
+          <div class="card" style="padding:1.75rem;">
+            <div style="font-size:1.5rem; margin-bottom:1rem;">📈</div>
+            <h3 style="font-size:1.125rem; font-weight:700; color:var(--color-ink-900); margin-bottom:0.5rem;">Verified Career Paths</h3>
+            <p style="font-size:0.875rem; color:var(--color-slate-600);">Earn credential badges anchored to your actual code submissions, vetted directly by senior technical mentors.</p>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Featured Courses Showcase -->
-    <section id="courses" class="courses-section">
-      <div class="max-w-7xl">
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 2: COURSE CATALOG & FACETED FILTERS (Pre-Login)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-catalog" class="view-pane">
+    <header class="public-nav-header">
+      <div class="container nav-flex">
+        <a href="#landing" class="logo-link" onclick="switchView('landing')">
+          <div class="logo-mark">E</div>
+          <span class="logo-text">EduAltTech</span>
+        </a>
+        <div style="font-size:0.875rem; font-weight:700; color:var(--color-ink-700);">Course Catalog</div>
+        <button class="btn btn-secondary btn-sm" onclick="switchView('landing')">← Back to Home</button>
+      </div>
+    </header>
+
+    <div class="container catalog-layout">
+      <!-- Sticky Sidebar Filters -->
+      <aside class="sidebar-filter-pane">
+        <div class="card" style="padding:1.25rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <span style="font-weight:700; font-size:0.9375rem; color:var(--color-ink-900);">Filters</span>
+            <span style="font-size:0.75rem; color:var(--color-brand-700); cursor:pointer; font-weight:600;">Reset all</span>
+          </div>
+
+          <!-- Category -->
+          <div style="margin-bottom:1.5rem;">
+            <div class="filter-group-title">Specialization</div>
+            <label class="filter-option"><input type="checkbox" checked /> Applied AI & Agents (14)</label>
+            <label class="filter-option"><input type="checkbox" checked /> Systems & Architecture (10)</label>
+            <label class="filter-option"><input type="checkbox" /> Web & Mobile (8)</label>
+            <label class="filter-option"><input type="checkbox" /> Alternative Education (6)</label>
+          </div>
+
+          <!-- Level -->
+          <div style="margin-bottom:1.5rem;">
+            <div class="filter-group-title">Experience Level</div>
+            <label class="filter-option"><input type="checkbox" /> High School (Grades 9-12)</label>
+            <label class="filter-option"><input type="checkbox" checked /> College / Engineering Prep</label>
+            <label class="filter-option"><input type="checkbox" /> Professional Advanced</label>
+          </div>
+
+          <!-- Pricing -->
           <div>
-            <span class="section-eyebrow">Course Discovery</span>
-            <h2 class="section-title">Start with something you can build</h2>
-            <p class="section-lead">A sample of current courses with mentor availability.</p>
+            <div class="filter-group-title">Pricing</div>
+            <label class="filter-option"><input type="checkbox" checked /> Paid (With 1:1 Mentorship)</label>
+            <label class="filter-option"><input type="checkbox" /> Free Open Lessons</label>
           </div>
-          <button class="btn btn-secondary" onclick="alert('Navigating to full course catalog')">View all courses →</button>
+        </div>
+      </aside>
+
+      <!-- Main Course Grid -->
+      <main>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+          <div>
+            <h1 style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900);">Explore Curated Courses</h1>
+            <p style="font-size:0.875rem; color:var(--color-slate-500);">Showing 24 courses with active mentor availability</p>
+          </div>
+          <div style="display:flex; gap:0.75rem;">
+            <input type="search" placeholder="Search by topic, language, mentor..." class="input-field" style="width:240px; font-size:0.8125rem;" />
+            <select class="input-field" style="width:auto; font-size:0.8125rem;">
+              <option>Sort: Most Popular</option>
+              <option>Sort: Newest</option>
+              <option>Sort: Price: Low to High</option>
+            </select>
+          </div>
         </div>
 
-        <div class="courses-grid">
-          <!-- Course Card 1 -->
-          <article class="course-card">
-            <div class="course-thumb-wrap">
-              <img src="/media/photos/EAT2.jpg" alt="AI Course" class="course-thumb-img" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80'" />
-              <span class="course-category-tag">Applied AI</span>
-              <span class="course-grade-tag">Grades 9–12</span>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1.5rem;">
+          <!-- Canonical Course Card 1 -->
+          <article class="course-card-canonical" onclick="switchView('detail')">
+            <div class="course-thumb-box">
+              <div class="thumb-badge-top-left">Applied AI</div>
+              <div class="thumb-badge-top-right">Mentor: Ranadeep V.</div>
+              <div style="width:100%; height:100%; background:linear-gradient(135deg, #024059, #038c3e); display:grid; place-items:center; color:#fff; font-size:2.5rem;">🤖</div>
             </div>
             <div class="course-card-body">
-              <h3 class="course-title">Building Autonomous AI Agents with Python</h3>
-              <p class="course-desc">Understand tool calling, API integration, and memory buffers by creating working conversational assistants.</p>
-              <div class="course-mentor-row">
-                <div class="mentor-avatar">RV</div>
-                <span>Mentor: Ranadeep V. · 8 Chapters</span>
+              <h3 class="course-card-title">Building Autonomous AI Agents with Python</h3>
+              <p class="course-card-desc">Master tool calling, vector memory databases, and autonomous task loops with LangChain and LlamaIndex.</p>
+              <div class="course-meta-row">
+                <span class="mentor-avatar-micro">RV</span>
+                <span>8 Chapters · 32 Lessons</span>
+                <span style="margin-left:auto; color:var(--color-brand-600); font-weight:700;">Live Office Hours</span>
               </div>
-              <div class="course-footer-row">
-                <span class="course-price">₹2,499</span>
-                <span class="btn btn-primary btn-sm">Enroll now</span>
+              <div class="course-card-footer">
+                <span class="course-price-text">₹2,499</span>
+                <button class="btn btn-primary btn-sm">View Syllabus →</button>
               </div>
             </div>
           </article>
 
-          <!-- Course Card 2 -->
-          <article class="course-card">
-            <div class="course-thumb-wrap">
-              <img src="/media/photos/EAT4.jpg" alt="Web Dev Course" class="course-thumb-img" onerror="this.src='https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80'" />
-              <span class="course-category-tag">Systems</span>
-              <span class="course-grade-tag">College / Prep</span>
+          <!-- Canonical Course Card 2 -->
+          <article class="course-card-canonical" onclick="switchView('detail')">
+            <div class="course-thumb-box">
+              <div class="thumb-badge-top-left">Deep Learning</div>
+              <div class="thumb-badge-top-right">Mentor: Arvind S.</div>
+              <div style="width:100%; height:100%; background:linear-gradient(135deg, #0f172a, #024059); display:grid; place-items:center; color:#fff; font-size:2.5rem;">⚡</div>
             </div>
             <div class="course-card-body">
-              <h3 class="course-title">Fullstack Application Engineering</h3>
-              <p class="course-desc">Ship database schemas, serverless endpoints, and high-performance frontends from wireframe to deployment.</p>
-              <div class="course-mentor-row">
-                <div class="mentor-avatar">SK</div>
-                <span>Mentor: Senior Architect · 12 Chapters</span>
+              <h3 class="course-card-title">Production Deep Learning with PyTorch</h3>
+              <p class="course-card-desc">From raw tensor backprop to multi-GPU fine-tuning of vision and transformer architectures.</p>
+              <div class="course-meta-row">
+                <span class="mentor-avatar-micro">AS</span>
+                <span>10 Chapters · 44 Lessons</span>
+                <span style="margin-left:auto; color:var(--color-brand-600); font-weight:700;">Includes GPU Cloud</span>
               </div>
-              <div class="course-footer-row">
-                <span class="course-price">Free</span>
-                <span class="btn btn-primary btn-sm">Start course</span>
+              <div class="course-card-footer">
+                <span class="course-price-text">₹3,499</span>
+                <button class="btn btn-primary btn-sm">View Syllabus →</button>
               </div>
             </div>
           </article>
 
-          <!-- Course Card 3 -->
-          <article class="course-card">
-            <div class="course-thumb-wrap">
-              <img src="/media/photos/og-image.jpg" alt="Venture Course" class="course-thumb-img" onerror="this.src='https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&auto=format&fit=crop&q=80'" />
-              <span class="course-category-tag">Entrepreneurship</span>
-              <span class="course-grade-tag">All Ages</span>
+          <!-- Canonical Course Card 3 -->
+          <article class="course-card-canonical">
+            <div class="course-thumb-box">
+              <div class="thumb-badge-top-left">Systems</div>
+              <div class="thumb-badge-top-right">Mentor: Neha K.</div>
+              <div style="width:100%; height:100%; background:linear-gradient(135deg, #1e293b, #15803d); display:grid; place-items:center; color:#fff; font-size:2.5rem;">🌐</div>
             </div>
             <div class="course-card-body">
-              <h3 class="course-title">From Prototype to Venture Launch</h3>
-              <p class="course-desc">User research, pricing mechanics, customer validation, and structuring sustainable software offerings.</p>
-              <div class="course-mentor-row">
-                <div class="mentor-avatar">AT</div>
-                <span>Mentor: Venture Lead · 6 Chapters</span>
+              <h3 class="course-card-title">Distributed Systems & Rust Foundations</h3>
+              <p class="course-card-desc">Write high-performance microservices, raft consensus protocols, and concurrent networking tools.</p>
+              <div class="course-meta-row">
+                <span class="mentor-avatar-micro">NK</span>
+                <span>6 Chapters · 24 Lessons</span>
+                <span style="margin-left:auto;">Code Reviews</span>
               </div>
-              <div class="course-footer-row">
-                <span class="course-price">₹1,999</span>
-                <span class="btn btn-primary btn-sm">Enroll now</span>
+              <div class="course-card-footer">
+                <span class="course-price-text">₹2,199</span>
+                <button class="btn btn-secondary btn-sm">View Syllabus →</button>
               </div>
             </div>
           </article>
         </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 3: COURSE DETAILS & SYLLABUS ACCORDION (Pre-Login)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-detail" class="view-pane">
+    <header class="public-nav-header">
+      <div class="container nav-flex">
+        <a href="#catalog" class="logo-link" onclick="switchView('catalog')">
+          <div class="logo-mark">E</div>
+          <span class="logo-text">EduAltTech</span>
+        </a>
+        <span style="font-size:0.875rem; color:var(--color-slate-500);">Courses / Applied AI / Autonomous Agents</span>
+        <button class="btn btn-secondary btn-sm" onclick="switchView('catalog')">← Back to Catalog</button>
       </div>
-    </section>
+    </header>
 
-    <!-- Two Pathways Section -->
-    <section id="pathway" class="pathway-section">
-      <div class="max-w-7xl">
-        <span class="section-eyebrow">Participation Model</span>
-        <h2 class="section-title">Two distinct, dedicated paths</h2>
-        <p class="section-lead">Mentorship is verified per course after technical review. Learner access and mentor privileges remain cleanly separated.</p>
-
-        <div class="pathway-grid">
-          <div class="pathway-card pathway-card-learner">
-            <h3 class="pathway-card-title">Join as a Learner</h3>
-            <p style="color:var(--color-slate-600)">Work through structured lessons, complete practical checkpoints, and ask mentors for guidance when stuck.</p>
-            <ul class="pathway-steps">
-              <li class="pathway-step-item"><span class="step-num">1</span> Create your verified learner profile</li>
-              <li class="pathway-step-item"><span class="step-num">2</span> Select a course roadmap matching your goal</li>
-              <li class="pathway-step-item"><span class="step-num">3</span> Build working deliverables each chapter</li>
-            </ul>
-            <div style="margin-top:auto;">
-              <button class="btn btn-primary" onclick="switchView('auth')">Start learning today</button>
-            </div>
-          </div>
-
-          <div class="pathway-card pathway-card-mentor">
-            <h3 class="pathway-card-title">Apply to Mentor a Course</h3>
-            <p style="color:var(--color-slate-300)">Practicing engineers and educators apply to lead specific courses. Approved mentors receive a dedicated authoring workspace.</p>
-            <ul class="pathway-steps" style="color:var(--color-slate-200)">
-              <li class="pathway-step-item"><span class="step-dot-mentor"></span> Submit your practical background & resume</li>
-              <li class="pathway-step-item"><span class="step-dot-mentor"></span> Short technical verification interview</li>
-              <li class="pathway-step-item"><span class="step-dot-mentor"></span> Publish sessions, chapter notes & guides</li>
-            </ul>
-            <div style="margin-top:auto;">
-              <button class="btn btn-secondary" style="background:#fff; color:var(--color-ink-900)" onclick="switchView('auth')">Submit mentor application</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Call to Action Banner -->
-    <section class="cta-banner">
-      <div class="max-w-7xl cta-content">
-        <h2 class="cta-title">Bring genuine technology learning to your learners</h2>
-        <p class="cta-lead">Whether you are a student ready to build, a mentor with real experience, or a school looking for a verified tech partner.</p>
-        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-          <a href="#courses" class="btn btn-secondary btn-lg" style="background:#fff; color:var(--color-brand-700)">Explore all courses</a>
-          <button class="btn btn-primary btn-lg" style="border:1px solid rgba(255,255,255,0.4)" onclick="switchView('auth')">Create free account</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="site-footer">
-      <div class="max-w-7xl footer-grid">
-        <div>
-          <a href="#landing" class="brand-link" style="color:#fff">
-            <img src="/media/brand/logo.png" alt="EduAltTech" class="brand-logo-img" style="filter: brightness(0) invert(1);" />
-            <span class="brand-title" style="color:#fff">EduAlt<span style="color:var(--color-brand-400)">Tech</span></span>
-          </a>
-          <p class="footer-brand-desc">
-            Practical AI, entrepreneurship, and applied engineering. A product by <strong>Setsuzoku</strong>.
+    <div class="container detail-split-layout">
+      <!-- Left Column: Syllabus & Content -->
+      <div>
+        <div style="margin-bottom:1.5rem;">
+          <span class="badge badge-brand" style="margin-bottom:0.75rem;">Verified Engineering Track</span>
+          <h1 style="font-size:2.5rem; font-weight:800; color:var(--color-ink-900); line-height:1.15;">
+            Building Autonomous AI Agents with Python
+          </h1>
+          <p style="font-size:1.125rem; color:var(--color-slate-600); margin-top:0.75rem; line-height:1.6;">
+            A rigorous 8-week engineering sprint where you construct multi-agent coordination systems, function-calling pipelines, and autonomous coding assistants.
           </p>
         </div>
 
-        <div>
-          <h4 class="footer-heading">Learning</h4>
-          <ul class="footer-links">
-            <li><a href="#courses">Course Catalog</a></li>
-            <li><a href="#offerings">Programs & Roadmaps</a></li>
-            <li><a href="#pathway">Become a Mentor</a></li>
+        <div style="display:flex; gap:1.5rem; padding:1rem 0; border-top:1px solid var(--color-slate-200); border-bottom:1px solid var(--color-slate-200); margin-bottom:2rem; font-size:0.875rem; color:var(--color-slate-600);">
+          <div><strong>Mentor:</strong> Ranadeep V.</div>
+          <div><strong>Duration:</strong> 8 Weeks (Self-paced)</div>
+          <div><strong>Access:</strong> Lifetime + Updates</div>
+          <div><strong>Level:</strong> Intermediate Python</div>
+        </div>
+
+        <!-- Syllabus Accordion -->
+        <h2 style="font-size:1.5rem; font-weight:800; color:var(--color-ink-900); margin-bottom:1.25rem;">
+          Curriculum Syllabus (8 Chapters · 32 Lessons)
+        </h2>
+
+        <div class="syllabus-chapter">
+          <div class="syllabus-header">
+            <span>Chapter 01: Foundations & Tool Calling Architecture</span>
+            <span class="badge badge-brand">4 Lessons · 1 Free Preview</span>
+          </div>
+          <ul class="syllabus-lesson-list">
+            <li class="syllabus-lesson-item">
+              <span>▶ Lesson 1.1: Structured Outputs & Function Calling Schemas</span>
+              <span class="badge badge-success" style="cursor:pointer;" onclick="switchView('lesson-player')">Free Preview (12m)</span>
+            </li>
+            <li class="syllabus-lesson-item">
+              <span>▶ Lesson 1.2: Tool Execution Loops & Error Feedback</span>
+              <span style="color:var(--color-slate-400);">🔒 Enrolled only (18m)</span>
+            </li>
+            <li class="syllabus-lesson-item">
+              <span>▶ Lesson 1.3: Context Windows & Memory Token Budgets</span>
+              <span style="color:var(--color-slate-400);">🔒 Enrolled only (22m)</span>
+            </li>
+            <li class="syllabus-lesson-item">
+              <span>📖 Lesson 1.4: Hands-on Lab: Build a Calculator & API Agent</span>
+              <span style="color:var(--color-slate-400);">🔒 Code Project</span>
+            </li>
           </ul>
         </div>
 
-        <div>
-          <h4 class="footer-heading">Company</h4>
-          <ul class="footer-links">
-            <li><a href="#about">About EduAltTech</a></li>
-            <li><a href="#partners">Partner Schools</a></li>
-            <li><a href="#contact">Contact & Inquiry</a></li>
+        <div class="syllabus-chapter">
+          <div class="syllabus-header">
+            <span>Chapter 02: Vector Stores & RAG Memory Pipelines</span>
+            <span class="badge badge-neutral">5 Lessons</span>
+          </div>
+          <ul class="syllabus-lesson-list">
+            <li class="syllabus-lesson-item">
+              <span>▶ Lesson 2.1: Chunking Strategies for Code and Markdown</span>
+              <span style="color:var(--color-slate-400);">🔒 (15m)</span>
+            </li>
+            <li class="syllabus-lesson-item">
+              <span>▶ Lesson 2.2: Embedding Generation and Distance Metrics</span>
+              <span style="color:var(--color-slate-400);">🔒 (24m)</span>
+            </li>
           </ul>
         </div>
 
-        <div>
-          <h4 class="footer-heading">Legal & Trust</h4>
-          <ul class="footer-links">
-            <li><a href="#privacy">Privacy Policy</a></li>
-            <li><a href="#terms">Terms of Service</a></li>
-            <li><a href="#refund">Refund Policy</a></li>
-            <li><a href="mailto:info@edualttech.com">info@edualttech.com</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="max-w-7xl footer-bottom">
-        <p>© 2026 EduAltTech. All rights reserved. A product by Setsuzoku.</p>
-        <p style="color:var(--color-slate-500)">Design Standard: Sleek · Human · High-Performance</p>
-      </div>
-    </footer>
-  </div>
-
-
-  <!-- ═══════════════════════════════════════════════════════════════════════════
-       VIEW 2: HIGH-CRAFT AUTH SPLIT-SCREEN PROTOTYPE
-  ════════════════════════════════════════════════════════════════════════════ -->
-  <div id="auth-view">
-    <div class="auth-split-wrapper">
-      
-      <!-- Left: Institutional Showcase & Social Proof -->
-      <div class="auth-showcase-pane">
-        <div class="auth-showcase-content">
-          <a href="#landing" class="brand-link" style="color:#fff" onclick="switchView('landing')">
-            <img src="/media/brand/logo.png" alt="EduAltTech" class="brand-logo-img" style="filter: brightness(0) invert(1);" />
-            <span class="brand-title" style="color:#fff">EduAlt<span style="color:var(--color-brand-400)">Tech</span></span>
-          </a>
-
-          <div style="margin-top: 4rem;">
-            <span style="background: rgba(3,140,62,0.2); color: var(--color-brand-300); font-size: 0.75rem; font-weight:700; padding:4px 12px; border-radius:9999px; text-transform:uppercase; letter-spacing:0.05em;">Institutional Trust</span>
-            <h2 style="font-size: 2.25rem; font-weight:800; line-height:1.2; margin-top:1rem; color:#fff;">
-              "The shift from passive textbook study to shipping real software."
-            </h2>
-          </div>
-
-          <div class="auth-quote-card">
-            <p class="auth-quote-text">
-              "EduAltTech brought our students face to face with practical mentors. They didn't just learn AI theory-they built deployed applications that our school now relies on."
-            </p>
-            <div class="auth-quote-author">
-              <div class="author-avatar">SV</div>
-              <div>
-                <div class="author-name">Principal & Academic Lead</div>
-                <div class="author-role">Partner Institution · Sharada Vidhyalaya</div>
-              </div>
+        <!-- Mentor Spotlight -->
+        <div class="card" style="padding:1.75rem; margin-top:2.5rem;">
+          <h3 style="font-size:1.25rem; font-weight:800; color:var(--color-ink-900); margin-bottom:1rem;">Your Course Mentor</h3>
+          <div style="display:flex; gap:1.25rem; align-items:flex-start;">
+            <div style="width:54px; height:54px; border-radius:50%; background:var(--color-brand-100); color:var(--color-brand-800); font-weight:800; font-size:1.25rem; display:grid; place-items:center; flex-shrink:0;">RV</div>
+            <div>
+              <div style="font-weight:700; font-size:1.125rem; color:var(--color-ink-900);">Ranadeep Vinukonda</div>
+              <div style="font-size:0.875rem; color:var(--color-slate-500); margin-bottom:0.75rem;">Lead Architect at Setsuzoku · AI Systems Practitioner</div>
+              <p style="font-size:0.875rem; color:var(--color-slate-600); line-height:1.5;">
+                "I host weekly office hours for this cohort. We don't do mock projects; you will write production-grade code that executes real API calls and handles network failures."
+              </p>
             </div>
           </div>
         </div>
-
-        <div style="font-size:0.8125rem; color:var(--color-slate-400); display:flex; justify-content:space-between; align-items:center;">
-          <span>© EduAltTech · A product by Setsuzoku</span>
-          <span>Encrypted Auth</span>
-        </div>
       </div>
 
-      <!-- Right: Interactive Form Pane -->
-      <div class="auth-form-pane">
-        <div style="margin-bottom: 2rem;">
-          <h2 style="font-size: 1.875rem; font-weight:800; color:var(--color-ink-900); margin-bottom:6px;" id="auth-form-title">
-            Sign in to EduAltTech
-          </h2>
-          <p style="font-size: 0.9375rem; color:var(--color-slate-600);" id="auth-form-subtitle">
-            Enter your credentials to access your courses and roadmap.
-          </p>
+      <!-- Right Column: Sticky Checkout Card -->
+      <aside class="sticky-enroll-card">
+        <div style="position:relative; aspect-ratio:16/9; background:#000; border-radius:var(--radius-lg); overflow:hidden; margin-bottom:1.25rem; display:grid; place-items:center; color:#fff;">
+          <span style="font-size:2.5rem; cursor:pointer;" onclick="switchView('lesson-player')">▶</span>
+          <span style="position:absolute; bottom:8px; font-size:0.75rem; background:rgba(0,0,0,0.7); padding:2px 8px; border-radius:4px;">Watch Course Trailer (2m)</span>
         </div>
 
-        <!-- Form Mode Switcher -->
-        <div class="form-switch-tabs">
-          <button class="form-switch-btn active" id="btn-login-mode" onclick="setAuthMode('login')">Sign In</button>
-          <button class="form-switch-btn" id="btn-signup-mode" onclick="setAuthMode('signup')">Create Account</button>
-          <button class="form-switch-btn" id="btn-verify-mode" onclick="setAuthMode('verify')">Verify Code</button>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:1rem;">
+          <span style="font-size:2rem; font-weight:800; color:var(--color-ink-900);">₹2,499</span>
+          <span style="font-size:1rem; color:var(--color-slate-400); text-decoration:line-through;">₹4,999</span>
+          <span class="badge badge-success" style="margin-left:auto;">50% Launch Discount</span>
         </div>
 
-        <!-- OAuth Buttons -->
-        <div id="oauth-group">
-          <button class="oauth-btn" type="button">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.26 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-            Continue with Google
-          </button>
-          <button class="oauth-btn" type="button">
-            <svg width="18" height="18" viewBox="0 0 23 23"><path fill="#f35325" d="M1 1h10v10H1z"/><path fill="#81bc06" d="M12 1h10v10H12z"/><path fill="#05a6f0" d="M1 12h10v10H1z"/><path fill="#ffba08" d="M12 12h10v10H12z"/></svg>
-            Continue with Microsoft
-          </button>
-          <div class="oauth-divider">or continue with email</div>
-        </div>
+        <button class="btn btn-primary btn-lg" style="width:100%; margin-bottom:0.75rem;" onclick="switchView('auth')">
+          Enroll Now — Instant Access
+        </button>
 
-        <!-- Form fields container -->
-        <form id="active-auth-form" onsubmit="event.preventDefault(); alert('Demo prototype submission');">
-          <div id="email-field-wrap" class="form-field">
-            <label class="form-label" for="inp-email">Email address</label>
-            <input class="form-input" id="inp-email" type="email" placeholder="you@school.org" required />
-          </div>
-
-          <div id="password-field-wrap" class="form-field">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label class="form-label" for="inp-pass" style="margin-bottom:0">Password</label>
-              <a href="#" style="font-size:0.8125rem; color:var(--color-brand-700); text-decoration:none; font-weight:600;">Forgot?</a>
-            </div>
-            <input class="form-input" id="inp-pass" type="password" placeholder="••••••••••••" />
-          </div>
-
-          <!-- PIN Verification UI (Shown in verify mode) -->
-          <div id="pin-field-wrap" style="display:none; text-align:center;">
-            <p style="font-size:0.875rem; color:var(--color-slate-600); margin-bottom:1rem;">
-              We sent a 6-digit verification code to your email. Enter it below:
-            </p>
-            <div class="pin-input-group">
-              <input class="pin-box" maxlength="1" value="7" />
-              <input class="pin-box" maxlength="1" value="2" />
-              <input class="pin-box" maxlength="1" value="9" />
-              <input class="pin-box" maxlength="1" placeholder="•" />
-              <input class="pin-box" maxlength="1" placeholder="•" />
-              <input class="pin-box" maxlength="1" placeholder="•" />
-            </div>
-          </div>
-
-          <button class="btn btn-primary btn-lg" type="submit" style="width:100%; margin-top:0.5rem;" id="auth-submit-btn">
-            Sign In
-          </button>
-        </form>
-
-        <p style="margin-top: 1.5rem; text-align:center; font-size: 0.8125rem; color: var(--color-slate-500);">
-          Protected by Setsuzoku Security. By continuing you agree to our 
-          <a href="#terms" style="color:var(--color-brand-700); font-weight:600;">Terms</a> & 
-          <a href="#privacy" style="color:var(--color-brand-700); font-weight:600;">Privacy</a>.
+        <p style="font-size:0.75rem; color:var(--color-slate-500); text-align:center; margin-bottom:1.5rem;">
+          Secured by Razorpay. 100% Refund within 7 days if unsatisfied.
         </p>
 
-        <div style="margin-top:1.5rem; text-align:center;">
-          <button class="btn btn-ghost btn-sm" onclick="switchView('landing')">← Back to website</button>
+        <div style="border-top:1px solid var(--color-slate-100); padding-top:1rem; font-size:0.8125rem; color:var(--color-slate-700); display:flex; flex-direction:column; gap:0.625rem;">
+          <div>✔ <strong>32 Lessons</strong> with full source code repository</div>
+          <div>✔ <strong>Weekly 1:1 check-ins</strong> with mentor Ranadeep</div>
+          <div>✔ <strong>Private Discord Lab</strong> for asynchronous help</div>
+          <div>✔ <strong>Verified Certificate</strong> upon passing capstone audit</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 4: SPLIT EDITORIAL AUTH (Pre-Login)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-auth" class="view-pane">
+    <div class="split-auth-layout">
+      <!-- Left Editorial Pane -->
+      <div class="auth-editorial-side">
+        <div>
+          <div class="logo-link" style="color:#fff; margin-bottom:3rem;">
+            <div class="logo-mark">E</div>
+            <span class="logo-text">EduAltTech</span>
+          </div>
+
+          <span class="badge badge-brand" style="margin-bottom:1.25rem;">Institutional Grade Education</span>
+          <h2 style="font-size:2.25rem; font-weight:800; line-height:1.2; margin-bottom:1.5rem;">
+            "We replaced passive tutorial video watching with shipped code."
+          </h2>
+
+          <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:var(--radius-xl); padding:1.5rem; margin-top:2rem;">
+            <p style="font-size:0.9375rem; color:#cbd5e1; line-height:1.6; margin-bottom:1rem;">
+              "EduAltTech brought our students face-to-face with practical engineering mentors. They didn't just learn AI definitions — they deployed working software our school now uses daily."
+            </p>
+            <div style="font-size:0.8125rem;">
+              <strong style="color:#fff; display:block;">Academic Director</strong>
+              <span style="color:var(--color-brand-300);">Sharada Vidhyalaya Partner Campus</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:0.8125rem; color:var(--color-slate-400); display:flex; justify-content:space-between;">
+          <span>© EduAltTech · A Setsuzoku Product</span>
+          <span>End-to-End Encrypted Auth</span>
         </div>
       </div>
 
+      <!-- Right Form Pane -->
+      <div class="auth-form-side">
+        <div class="auth-form-box">
+          <div style="margin-bottom:2rem;">
+            <h2 style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900);">Welcome to EduAltTech</h2>
+            <p style="font-size:0.875rem; color:var(--color-slate-500); margin-top:0.25rem;">
+              Sign in to resume your active learning roadmap.
+            </p>
+          </div>
+
+          <!-- OAuth Row -->
+          <div style="display:flex; flex-direction:column; gap:0.625rem; margin-bottom:1.5rem;">
+            <button class="btn btn-secondary" style="width:100%; justify-content:center;" onclick="switchView('learner-dash')">
+              Continue with Google Workspace
+            </button>
+            <button class="btn btn-secondary" style="width:100%; justify-content:center;" onclick="switchView('learner-dash')">
+              Continue with Microsoft School Account
+            </button>
+          </div>
+
+          <div style="text-align:center; position:relative; margin:1.5rem 0; font-size:0.75rem; color:var(--color-slate-400);">
+            <span style="background:#fff; padding:0 12px; position:relative; z-index:2;">OR CONTINUE WITH EMAIL</span>
+            <div style="position:absolute; top:50%; left:0; right:0; height:1px; background:var(--color-slate-200);"></div>
+          </div>
+
+          <form onsubmit="event.preventDefault(); switchView('learner-dash');">
+            <div style="margin-bottom:1rem;">
+              <label style="display:block; font-size:0.8125rem; font-weight:600; color:var(--color-ink-900); margin-bottom:4px;">Email address</label>
+              <input type="email" class="input-field" placeholder="student@school.org" value="learner@edualttech.com" required />
+            </div>
+
+            <div style="margin-bottom:1.25rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label style="font-size:0.8125rem; font-weight:600; color:var(--color-ink-900);">Password</label>
+                <a href="#" style="font-size:0.75rem; color:var(--color-brand-700); text-decoration:none; font-weight:600;">Forgot password?</a>
+              </div>
+              <input type="password" class="input-field" value="••••••••••••" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+              Sign In to Workspace →
+            </button>
+          </form>
+
+          <!-- PIN Verification Demo -->
+          <div style="margin-top:2rem; padding:1.25rem; background:var(--color-slate-50); border:1px dashed var(--color-slate-300); border-radius:var(--radius-lg); text-align:center;">
+            <span style="font-size:0.75rem; font-weight:700; color:var(--color-slate-600); text-transform:uppercase;">One-Time Email Code Mode (Mobile Responsive)</span>
+            <div class="pin-row">
+              <input class="pin-input" value="4" maxlength="1" />
+              <input class="pin-input" value="8" maxlength="1" />
+              <input class="pin-input" value="2" maxlength="1" />
+              <input class="pin-input" value="9" maxlength="1" />
+              <input class="pin-input" value="1" maxlength="1" />
+              <input class="pin-input" value="5" maxlength="1" />
+            </div>
+            <p style="font-size:0.6875rem; color:var(--color-slate-400);">Automatically shifts focus and adapts without horizontal overflow</p>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- ─── INTERACTIVE CONTROLLER SCRIPT ─── -->
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 5: LEARNER DASHBOARD (Post-Login User)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-learner-dash" class="view-pane">
+    <header class="public-nav-header">
+      <div class="container nav-flex">
+        <a href="#landing" class="logo-link">
+          <div class="logo-mark">E</div>
+          <span class="logo-text">EduAltTech</span>
+        </a>
+        <div style="display:flex; align-items:center; gap:1.25rem;">
+          <span style="font-size:0.875rem; font-weight:600; color:var(--color-slate-700);">My Learning</span>
+          <span style="font-size:0.875rem; font-weight:600; color:var(--color-slate-500);">Live Calendar</span>
+          <span style="font-size:0.875rem; font-weight:600; color:var(--color-slate-500);">Mentor Chat (1)</span>
+          <div style="width:34px; height:34px; border-radius:50%; background:var(--color-brand-100); color:var(--color-brand-800); display:grid; place-items:center; font-weight:700; font-size:0.8125rem;">RV</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container dashboard-grid">
+      <!-- Left Main Column -->
+      <main>
+        <!-- Hero "Resume Active Learning" Card -->
+        <div class="resume-hero-card">
+          <span class="badge badge-brand" style="margin-bottom:0.75rem;">Active Roadmap</span>
+          <h2 style="font-size:1.75rem; font-weight:800;">Building Autonomous AI Agents with Python</h2>
+          <p style="font-size:0.875rem; color:#cbd5e1; margin-top:0.25rem;">Next: Chapter 03 · Lesson 3.2 — Implementing ReAct Prompt Buffers</p>
+          
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:65%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8125rem;">
+            <span>65% Completed (21 of 32 Lessons finished)</span>
+            <button class="btn btn-primary btn-sm" onclick="switchView('lesson-player')">▶ Resume Lesson (15m)</button>
+          </div>
+        </div>
+
+        <!-- Weekly Activity & Enrolled Shelf -->
+        <h3 style="font-size:1.25rem; font-weight:800; color:var(--color-ink-900); margin-bottom:1rem;">Your Enrolled Roadmaps</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:2rem;">
+          <div class="card" style="padding:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+              <span class="badge badge-neutral">Grades 11-12</span>
+              <span style="font-size:0.75rem; font-weight:700; color:var(--color-brand-600);">In Progress</span>
+            </div>
+            <h4 style="font-size:1rem; font-weight:700; color:var(--color-ink-900);">Deep Learning Foundations</h4>
+            <p style="font-size:0.75rem; color:var(--color-slate-500); margin-top:4px;">Mentor: Arvind S. · PyTorch</p>
+            <div class="progress-bar-bg" style="margin:0.75rem 0 0.5rem;">
+              <div class="progress-bar-fill" style="width:40%;"></div>
+            </div>
+            <span style="font-size:0.6875rem; color:var(--color-slate-400);">40% finished</span>
+          </div>
+
+          <div class="card" style="padding:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+              <span class="badge badge-success">Completed</span>
+              <span style="font-size:0.75rem; font-weight:700; color:var(--color-brand-600);">Certificate Issued</span>
+            </div>
+            <h4 style="font-size:1rem; font-weight:700; color:var(--color-ink-900);">Web Systems & APIs</h4>
+            <p style="font-size:0.75rem; color:var(--color-slate-500); margin-top:4px;">Mentor: Ranadeep V. · Next.js</p>
+            <div class="progress-bar-bg" style="margin:0.75rem 0 0.5rem;">
+              <div class="progress-bar-fill" style="width:100%; background:var(--color-brand-600);"></div>
+            </div>
+            <span style="font-size:0.6875rem; color:var(--color-brand-700); font-weight:700;">View Certificate 🏅</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Column: Live Mentorship Sessions & DMs -->
+      <aside>
+        <!-- Live Countdown Alert Card -->
+        <div class="card" style="padding:1.25rem; border-left:4px solid var(--color-brand-600); margin-bottom:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="badge badge-brand">⚡ Live Session Imminent</span>
+            <span style="font-size:0.75rem; font-weight:700; color:var(--color-brand-700);">In 42 mins</span>
+          </div>
+          <h4 style="font-size:1rem; font-weight:700; color:var(--color-ink-900); margin:0.75rem 0 0.25rem;">
+            Autonomous Agent Lab Review
+          </h4>
+          <p style="font-size:0.8125rem; color:var(--color-slate-600); margin-bottom:1rem;">
+            Mentor Ranadeep is reviewing Chapter 03 code pull requests on Google Meet.
+          </p>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-primary btn-sm" style="flex:1;">Join Meeting Room</button>
+            <button class="btn btn-secondary btn-sm">+ Calendar</button>
+          </div>
+        </div>
+
+        <!-- 7-Day Consistency Streak -->
+        <div class="card" style="padding:1.25rem;">
+          <h4 style="font-size:0.875rem; font-weight:700; color:var(--color-ink-900); margin-bottom:0.75rem;">
+            Weekly Consistency Tracker
+          </h4>
+          <div style="display:flex; justify-content:space-between; align-items:center; text-align:center;">
+            <div><div style="width:28px; height:28px; border-radius:50%; background:var(--color-brand-600); color:#fff; display:grid; place-items:center; font-size:0.75rem; font-weight:700;">M</div><span style="font-size:0.625rem; color:var(--color-slate-400);">Mon</span></div>
+            <div><div style="width:28px; height:28px; border-radius:50%; background:var(--color-brand-600); color:#fff; display:grid; place-items:center; font-size:0.75rem; font-weight:700;">T</div><span style="font-size:0.625rem; color:var(--color-slate-400);">Tue</span></div>
+            <div><div style="width:28px; height:28px; border-radius:50%; background:var(--color-brand-600); color:#fff; display:grid; place-items:center; font-size:0.75rem; font-weight:700;">W</div><span style="font-size:0.625rem; color:var(--color-slate-400);">Wed</span></div>
+            <div><div style="width:28px; height:28px; border-radius:50%; background:var(--color-brand-600); color:#fff; display:grid; place-items:center; font-size:0.75rem; font-weight:700;">T</div><span style="font-size:0.625rem; color:var(--color-slate-400);">Thu</span></div>
+            <div><div style="width:28px; height:28px; border-radius:50%; background:var(--color-slate-200); color:var(--color-slate-500); display:grid; place-items:center; font-size:0.75rem;">F</div><span style="font-size:0.625rem; color:var(--color-slate-400);">Today</span></div>
+            <div><div style="width:28px; height:28px; border-radius:50%; background:var(--color-slate-100); color:var(--color-slate-400); display:grid; place-items:center; font-size:0.75rem;">S</div><span style="font-size:0.625rem; color:var(--color-slate-400);">Sat</span></div>
+            <div><div style="width:28px; height:28px; border-radius:50%; background:var(--color-slate-100); color:var(--color-slate-400); display:grid; place-items:center; font-size:0.75rem;">S</div><span style="font-size:0.625rem; color:var(--color-slate-400);">Sun</span></div>
+          </div>
+          <p style="font-size:0.75rem; color:var(--color-slate-500); margin-top:0.75rem; text-align:center;">
+            🔥 4-day streak! You are 2 lessons away from completing Chapter 3.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 6: THEATER LESSON PLAYER WORKBENCH (Learner Core Value)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-lesson-player" class="view-pane">
+    <div style="background:var(--color-ink-900); color:#fff; padding:0.625rem 1.25rem; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="btn btn-ghost btn-sm" style="color:#fff;" onclick="switchView('learner-dash')">← Back to Dashboard</button>
+        <span style="color:var(--color-ink-400);">|</span>
+        <strong style="font-size:0.875rem;">Building Autonomous Agents · Lesson 3.2: Tool Buffers</strong>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.875rem;">
+        <span style="font-size:0.75rem; color:var(--color-ink-200);">Course Progress: 21/32 Lessons</span>
+        <button class="btn btn-primary btn-sm">Mark Complete & Next →</button>
+      </div>
+    </div>
+
+    <div class="lesson-theater-layout">
+      <!-- Collapsible Curriculum Tree -->
+      <aside class="lesson-sidebar-tree">
+        <div style="padding:1rem; border-bottom:1px solid var(--color-slate-200); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.8125rem; font-weight:800; color:var(--color-ink-900); text-transform:uppercase;">Curriculum Tree</span>
+          <span class="badge badge-brand">65% Done</span>
+        </div>
+
+        <div style="padding:0.75rem;">
+          <div style="font-size:0.75rem; font-weight:800; color:var(--color-slate-400); text-transform:uppercase; margin-bottom:0.5rem;">
+            Chapter 01: Foundations (4/4 Done)
+          </div>
+          <div style="font-size:0.8125rem; padding:6px 8px; color:var(--color-brand-800); font-weight:600;">✔ 1.1 Tool Calling Schemas</div>
+          <div style="font-size:0.8125rem; padding:6px 8px; color:var(--color-brand-800); font-weight:600;">✔ 1.2 Execution Loops</div>
+          
+          <div style="font-size:0.75rem; font-weight:800; color:var(--color-slate-400); text-transform:uppercase; margin:1rem 0 0.5rem;">
+            Chapter 03: ReAct Reasoning (Current)
+          </div>
+          <div style="font-size:0.8125rem; padding:6px 8px; color:var(--color-brand-800); font-weight:600;">✔ 3.1 Prompt Ingestion</div>
+          <div style="font-size:0.8125rem; padding:8px 10px; background:var(--color-brand-50); border-left:3px solid var(--color-brand-600); color:var(--color-brand-900); font-weight:700;">
+            ▶ 3.2 Tool Buffers (Playing)
+          </div>
+          <div style="font-size:0.8125rem; padding:6px 8px; color:var(--color-slate-500);">🔒 3.3 Autonomous Loops</div>
+        </div>
+      </aside>
+
+      <!-- Main Stage -->
+      <main style="display:flex; flex-direction:column; overflow-y:auto;">
+        <!-- Video Player Stage -->
+        <div class="lesson-video-stage">
+          <div style="text-align:center;">
+            <div style="width:64px; height:64px; border-radius:50%; background:var(--color-brand-600); display:grid; place-items:center; font-size:1.75rem; margin:0 auto 1rem; cursor:pointer;">▶</div>
+            <p style="font-size:1rem; font-weight:700;">Lesson 3.2: Buffering Stateful API Results in LangGraph</p>
+            <p style="font-size:0.75rem; color:var(--color-slate-400);">14:20 · 1080p Stream via CloudFront · Mentor: Ranadeep V.</p>
+          </div>
+        </div>
+
+        <!-- Workbench Tabs -->
+        <div class="lesson-workbench-tabs">
+          <button class="workbench-tab-btn active">Lesson Notes & Code</button>
+          <button class="workbench-tab-btn">Downloadable Assets (2)</button>
+          <button class="workbench-tab-btn">Mentor Q&A Thread (3)</button>
+        </div>
+
+        <div style="padding:2rem; max-width:820px;">
+          <h2 style="font-size:1.5rem; font-weight:800; color:var(--color-ink-900); margin-bottom:1rem;">
+            Architecture Breakdown: Managing Buffer Overflows
+          </h2>
+          <p style="font-size:0.9375rem; color:var(--color-slate-700); line-height:1.7; margin-bottom:1.25rem;">
+            When invoking recursive tools, language models will exhaust their context limits if raw JSON payloads are fed directly into the message history without summarization. In this lesson, we construct a custom pruning buffer that compresses intermediate function results.
+          </p>
+
+          <div style="background:var(--color-ink-900); color:#e2e8f0; padding:1.25rem; border-radius:var(--radius-lg); font-family:var(--font-mono); font-size:0.8125rem; line-height:1.6; margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; color:var(--color-slate-400); font-size:0.75rem;">
+              <span>buffer_controller.py</span>
+              <span style="cursor:pointer; color:var(--color-brand-300);">Copy Code</span>
+            </div>
+            <p><span style="color:#4fbc75;">class</span> <span style="color:#fde047;">PruningBufferManager</span>:</p>
+            <p>&nbsp;&nbsp;<span style="color:#4fbc75;">def</span> <span style="color:#38bdf8;">__init__</span>(self, max_tokens: <span style="color:#a78bfa;">int</span> = 4096):</p>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;self.max_tokens = max_tokens</p>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;self.history = []</p>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; padding-top:1.5rem; border-top:1px solid var(--color-slate-200);">
+            <button class="btn btn-secondary btn-sm">← Previous: 3.1 Prompt Ingestion</button>
+            <button class="btn btn-primary btn-sm">Next Lesson: 3.3 Autonomous Loops →</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 7: ADMIN COMMAND & ANALYTICS (Post-Login Admin)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-admin-overview" class="view-pane">
+    <div class="admin-layout-shell">
+      <!-- Admin Sidebar -->
+      <aside class="admin-sidebar">
+        <div>
+          <div class="logo-link" style="margin-bottom:1.5rem;">
+            <div class="logo-mark">E</div>
+            <div>
+              <div class="logo-text" style="font-size:1rem;">EduAltTech</div>
+              <span class="badge badge-ink" style="font-size:0.625rem;">Super Admin</span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.25rem;">
+            <div class="admin-nav-item active" onclick="switchView('admin-overview')">📊 Overview & KPIs</div>
+            <div class="admin-nav-item" onclick="switchView('admin-studio')">📚 Course Studio (Builder)</div>
+            <div class="admin-nav-item" onclick="switchView('admin-mentors')">
+              <span>📝 Applications</span>
+              <span class="badge badge-brand" style="font-size:0.625rem;">4 Pending</span>
+            </div>
+            <div class="admin-nav-item" onclick="switchView('admin-users')">👥 Users & Orders</div>
+            <div class="admin-nav-item">🛡️ System Audit Log</div>
+          </div>
+        </div>
+
+        <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--color-slate-200); font-size:0.75rem; color:var(--color-slate-500);">
+          <span>Logged in as <strong>Ranadeep V.</strong></span>
+        </div>
+      </aside>
+
+      <!-- Main Stage -->
+      <main class="admin-main-stage">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+          <div>
+            <h1 style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900);">Platform Executive Overview</h1>
+            <p style="font-size:0.875rem; color:var(--color-slate-500);">Real-time performance metrics across admissions, courses, and revenue.</p>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="switchView('admin-studio')">+ New Course</button>
+            <button class="btn btn-primary btn-sm">Export Financials (CSV)</button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards -->
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1.25rem; margin-bottom:2rem;">
+          <div class="card" style="padding:1.25rem;">
+            <span style="font-size:0.75rem; font-weight:700; color:var(--color-slate-500); text-transform:uppercase;">Gross Revenue</span>
+            <div style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900); margin:0.25rem 0;">₹4,82,500</div>
+            <span class="badge badge-success">↑ 14.2% vs last month</span>
+          </div>
+          <div class="card" style="padding:1.25rem;">
+            <span style="font-size:0.75rem; font-weight:700; color:var(--color-slate-500); text-transform:uppercase;">Enrolled Learners</span>
+            <div style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900); margin:0.25rem 0;">1,248</div>
+            <span class="badge badge-success">↑ 8.1% organic</span>
+          </div>
+          <div class="card" style="padding:1.25rem;">
+            <span style="font-size:0.75rem; font-weight:700; color:var(--color-slate-500); text-transform:uppercase;">Active Mentors</span>
+            <div style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900); margin:0.25rem 0;">18 Staff</div>
+            <span class="badge badge-warning">4 applications waiting</span>
+          </div>
+          <div class="card" style="padding:1.25rem;">
+            <span style="font-size:0.75rem; font-weight:700; color:var(--color-slate-500); text-transform:uppercase;">Completion Rate</span>
+            <div style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900); margin:0.25rem 0;">72.4%</div>
+            <span class="badge badge-success">↑ 3.8% quality score</span>
+          </div>
+        </div>
+
+        <!-- Interactive SVG Area Chart -->
+        <div class="card" style="padding:1.5rem; margin-bottom:2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <div>
+              <h3 style="font-size:1.125rem; font-weight:700; color:var(--color-ink-900);">Monthly Paid Revenue Ingestion</h3>
+              <p style="font-size:0.75rem; color:var(--color-slate-500);">30-day bucketed revenue across Razorpay orders</p>
+            </div>
+            <div style="font-size:0.8125rem; font-weight:700; color:var(--color-brand-700);">Peak: ₹38,400 on Oct 21</div>
+          </div>
+
+          <svg viewBox="0 0 800 200" style="width:100%; height:180px; overflow:visible;">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#038c3e" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#038c3e" stop-opacity="0.0" />
+              </linearGradient>
+            </defs>
+            <!-- Gridlines -->
+            <line x1="0" y1="40" x2="800" y2="40" stroke="#e2e8f0" stroke-dasharray="4" />
+            <line x1="0" y1="100" x2="800" y2="100" stroke="#e2e8f0" stroke-dasharray="4" />
+            <line x1="0" y1="160" x2="800" y2="160" stroke="#e2e8f0" stroke-dasharray="4" />
+            <!-- Area Fill -->
+            <polygon points="0,170 50,150 120,160 180,120 250,130 320,90 400,105 480,70 560,85 640,40 720,50 800,25 800,180 0,180" fill="url(#chartGrad)" />
+            <!-- Line Stroke -->
+            <polyline points="0,170 50,150 120,160 180,120 250,130 320,90 400,105 480,70 560,85 640,40 720,50 800,25" fill="none" stroke="#038c3e" stroke-width="3" stroke-linecap="round" />
+            <!-- Peak Point Marker -->
+            <circle cx="640" cy="40" r="5" fill="#038c3e" stroke="#fff" stroke-width="2" />
+          </svg>
+          <div style="display:flex; justify-content:space-between; font-size:0.6875rem; color:var(--color-slate-400); margin-top:0.5rem;">
+            <span>Oct 01</span>
+            <span>Oct 08</span>
+            <span>Oct 15</span>
+            <span>Oct 22 (Peak)</span>
+            <span>Today</span>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 8: TWO-PANE COURSE BUILDER STUDIO (Post-Login Admin)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-admin-studio" class="view-pane">
+    <div class="admin-layout-shell">
+      <aside class="admin-sidebar">
+        <div class="logo-link" style="margin-bottom:1.5rem;">
+          <div class="logo-mark">E</div>
+          <span class="logo-text" style="font-size:1rem;">EduAltTech</span>
+        </div>
+        <div class="admin-nav-item" onclick="switchView('admin-overview')">← Back to Overview</div>
+        <div class="admin-nav-item active">📚 Studio: Autonomous Agents</div>
+        <div class="admin-nav-item" onclick="switchView('admin-mentors')">📝 Applications</div>
+      </aside>
+
+      <main class="admin-main-stage">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <div>
+            <span class="badge badge-success">Status: Published</span>
+            <h1 style="font-size:1.5rem; font-weight:800; color:var(--color-ink-900); margin-top:0.25rem;">
+              Editing: Building Autonomous AI Agents with Python
+            </h1>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="switchView('detail')">Preview Student Page</button>
+            <button class="btn btn-primary btn-sm">Save & Deploy Changes</button>
+          </div>
+        </div>
+
+        <!-- Studio Grid (Tree Left, Inspector Right) -->
+        <div class="studio-grid">
+          <!-- Left: Curriculum Hierarchy Tree -->
+          <div class="tree-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <span style="font-size:0.8125rem; font-weight:800; color:var(--color-ink-900);">Curriculum Structure</span>
+              <button class="btn btn-secondary btn-sm" style="font-size:0.6875rem;">+ Add Chapter</button>
+            </div>
+
+            <!-- Chapter 1 -->
+            <div style="margin-bottom:1.25rem;">
+              <div style="font-size:0.75rem; font-weight:800; color:var(--color-slate-500); margin-bottom:0.5rem; display:flex; justify-content:space-between;">
+                <span>CHAPTER 1: FOUNDATIONS</span>
+                <span style="color:var(--color-brand-700); cursor:pointer;">+ Lesson</span>
+              </div>
+              <div class="tree-node-item selected">
+                <span>⋮⋮ 1.1 Tool Calling Schemas</span>
+                <span class="badge badge-brand">Video</span>
+              </div>
+              <div class="tree-node-item">
+                <span>⋮⋮ 1.2 Execution Loops</span>
+                <span class="badge badge-brand">Video</span>
+              </div>
+              <div class="tree-node-item">
+                <span>⋮⋮ 1.3 Hands-on Lab</span>
+                <span class="badge badge-neutral">Reading</span>
+              </div>
+            </div>
+
+            <!-- Chapter 2 -->
+            <div>
+              <div style="font-size:0.75rem; font-weight:800; color:var(--color-slate-500); margin-bottom:0.5rem; display:flex; justify-content:space-between;">
+                <span>CHAPTER 2: MEMORY PIPELINES</span>
+                <span style="color:var(--color-brand-700); cursor:pointer;">+ Lesson</span>
+              </div>
+              <div class="tree-node-item">
+                <span>⋮⋮ 2.1 Vector Stores</span>
+                <span class="badge badge-brand">Video</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Lesson Content Inspector -->
+          <div class="card" style="padding:1.5rem;">
+            <h3 style="font-size:1.125rem; font-weight:800; color:var(--color-ink-900); margin-bottom:1.25rem;">
+              Lesson Inspector: 1.1 Tool Calling Schemas
+            </h3>
+
+            <div style="display:grid; grid-template-columns:2fr 1fr; gap:1rem; margin-bottom:1rem;">
+              <div>
+                <label style="display:block; font-size:0.75rem; font-weight:700; margin-bottom:4px;">Lesson Title</label>
+                <input class="input-field" value="Tool Calling Schemas & Schema Validation" />
+              </div>
+              <div>
+                <label style="display:block; font-size:0.75rem; font-weight:700; margin-bottom:4px;">Content Type</label>
+                <select class="input-field">
+                  <option selected>Video Stream (MP4)</option>
+                  <option>Markdown Article</option>
+                  <option>Interactive Quiz</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Video File Dropzone -->
+            <div style="border:2px dashed var(--color-slate-300); border-radius:var(--radius-lg); padding:1.5rem; text-align:center; background:var(--color-slate-50); margin-bottom:1.25rem;">
+              <div style="font-size:1.5rem; margin-bottom:0.25rem;">📹</div>
+              <strong style="font-size:0.875rem; color:var(--color-ink-900);">tool_schemas_v2.mp4 (42.4 MB)</strong>
+              <p style="font-size:0.75rem; color:var(--color-slate-500); margin-top:2px;">Transcoded to 1080p · Signed streaming token active</p>
+              <button class="btn btn-secondary btn-sm" style="margin-top:0.75rem;">Replace Video File</button>
+            </div>
+
+            <!-- Gating Checkboxes -->
+            <div style="border-top:1px solid var(--color-slate-200); padding-top:1rem; margin-bottom:1rem;">
+              <span style="font-size:0.75rem; font-weight:700; color:var(--color-slate-500); text-transform:uppercase;">Release & Access Gating</span>
+              <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem; font-size:0.8125rem;">
+                <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" checked /> Allow Free Preview without account registration</label>
+                <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" /> Gated by prerequisite: Must complete Lesson 1.0</label>
+                <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" /> Drip release: Release 3 days after student enrollment</label>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-sm">Save Lesson Details</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 9: MENTOR APPLICATION PIPELINE (Post-Login Admin)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-admin-mentors" class="view-pane">
+    <div class="admin-layout-shell">
+      <aside class="admin-sidebar">
+        <div class="logo-link" style="margin-bottom:1.5rem;">
+          <div class="logo-mark">E</div>
+          <span class="logo-text" style="font-size:1rem;">EduAltTech</span>
+        </div>
+        <div class="admin-nav-item" onclick="switchView('admin-overview')">← Overview</div>
+        <div class="admin-nav-item active">📝 Applications (4 Pending)</div>
+        <div class="admin-nav-item" onclick="switchView('admin-users')">👥 Users & Orders</div>
+      </aside>
+
+      <main class="admin-main-stage">
+        <div style="margin-bottom:1.5rem;">
+          <h1 style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900);">Mentor Vetting Pipeline</h1>
+          <p style="font-size:0.875rem; color:var(--color-slate-500);">Review practitioner applications, inspect portfolios, and schedule interviews.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:360px 1fr; gap:1.5rem; align-items:start;">
+          <!-- Queue List -->
+          <div class="card" style="overflow:hidden;">
+            <div style="padding:0.875rem 1rem; background:var(--color-slate-50); border-bottom:1px solid var(--color-slate-200); font-size:0.75rem; font-weight:700; color:var(--color-slate-500);">
+              SUBMITTED CANDIDATES (4)
+            </div>
+            <div style="padding:1rem; border-bottom:1px solid var(--color-slate-100); background:var(--color-brand-50); border-left:3px solid var(--color-brand-600); cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:var(--color-ink-900); font-size:0.9375rem;">Saurabh Mehta</strong>
+                <span class="badge badge-brand">Applied</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--color-slate-600); margin-top:2px;">Course: Production Deep Learning</p>
+              <span style="font-size:0.6875rem; color:var(--color-slate-400);">Applied 3 hours ago · Bangalore, IN</span>
+            </div>
+            <div style="padding:1rem; border-bottom:1px solid var(--color-slate-100); cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:var(--color-ink-900); font-size:0.9375rem;">Pooja Raman</strong>
+                <span class="badge badge-warning">Under Review</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--color-slate-600); margin-top:2px;">Course: Autonomous Agents with Python</p>
+              <span style="font-size:0.6875rem; color:var(--color-slate-400);">Applied yesterday · Hyderabad, IN</span>
+            </div>
+          </div>
+
+          <!-- Candidate Dossier Detail -->
+          <div class="card" style="padding:1.75rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+              <div>
+                <h3 style="font-size:1.375rem; font-weight:800; color:var(--color-ink-900);">Saurabh Mehta</h3>
+                <p style="font-size:0.875rem; color:var(--color-slate-500);">Senior ML Engineer at Fractal Analytics · 6 Years Experience</p>
+              </div>
+              <span class="badge badge-brand">SUBMITTED</span>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; font-size:0.8125rem;">
+              <div><strong>Requested Course:</strong> Production Deep Learning</div>
+              <div><strong>Available Hours:</strong> 8-10 hrs / week</div>
+              <div><strong>GitHub Profile:</strong> <a href="#" style="color:var(--color-brand-700);">github.com/saurabh-ml</a></div>
+              <div><strong>Demo Recording:</strong> <a href="#" style="color:var(--color-brand-700);">loom.com/share/demo-pytorch</a></div>
+            </div>
+
+            <div style="margin-bottom:1.5rem;">
+              <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--color-slate-500); text-transform:uppercase; margin-bottom:4px;">Statement & Motivation</label>
+              <p style="font-size:0.875rem; color:var(--color-slate-700); background:var(--color-slate-50); padding:1rem; border-radius:var(--radius-md); line-height:1.5;">
+                "I've mentored college students in PyTorch for 2 years. Most traditional computer science classes teach abstract math without ever having students debug memory leaks on CUDA. I want to run code-review sessions for EduAltTech cohorts."
+              </p>
+            </div>
+
+            <div style="display:flex; gap:0.75rem; border-top:1px solid var(--color-slate-200); padding-top:1.25rem;">
+              <button class="btn btn-primary btn-sm">Schedule 15m Video Interview</button>
+              <button class="btn btn-secondary btn-sm">Accept & Assign Course</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--color-danger); margin-left:auto;">Reject Candidate</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       VIEW 10: USERS & FINANCIAL ORDERS TABLE (Post-Login Admin)
+       ════════════════════════════════════════════════════════════════════════════ -->
+  <section id="view-admin-users" class="view-pane">
+    <div class="admin-layout-shell">
+      <aside class="admin-sidebar">
+        <div class="logo-link" style="margin-bottom:1.5rem;">
+          <div class="logo-mark">E</div>
+          <span class="logo-text" style="font-size:1rem;">EduAltTech</span>
+        </div>
+        <div class="admin-nav-item" onclick="switchView('admin-overview')">← Overview</div>
+        <div class="admin-nav-item" onclick="switchView('admin-mentors')">📝 Applications</div>
+        <div class="admin-nav-item active">👥 Users & Orders</div>
+      </aside>
+
+      <main class="admin-main-stage">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <div>
+            <h1 style="font-size:1.75rem; font-weight:800; color:var(--color-ink-900);">Global Users & Orders</h1>
+            <p style="font-size:0.875rem; color:var(--color-slate-500);">Accounts, role permissions, and Razorpay financial transactions.</p>
+          </div>
+          <button class="btn btn-primary btn-sm">+ Invite User</button>
+        </div>
+
+        <!-- Filter bar -->
+        <div style="display:flex; gap:0.75rem; margin-bottom:1rem; align-items:center;">
+          <input class="input-field" placeholder="Search by name, email, order ID..." style="max-width:320px;" />
+          <select class="input-field" style="width:auto;">
+            <option>All Roles (Learner, Mentor, Admin)</option>
+            <option>Learners only</option>
+            <option>Staff Mentors</option>
+          </select>
+          <select class="input-field" style="width:auto;">
+            <option>All Orders (Paid, Pending, Failed)</option>
+            <option>Paid Only</option>
+          </select>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User / Purchaser</th>
+                <th>Platform Role</th>
+                <th>Enrolled Courses</th>
+                <th>Last Order</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="mentor-avatar-micro" style="width:28px; height:28px;">AK</div>
+                    <div>
+                      <strong>Aditi Kulkarni</strong>
+                      <div style="font-size:0.75rem; color:var(--color-slate-500);">aditi.k@sharada.edu</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge badge-neutral">LEARNER</span></td>
+                <td>2 Active Roadmaps</td>
+                <td>Autonomous Agents with Python</td>
+                <td><strong>₹2,499</strong></td>
+                <td><span class="badge badge-success">PAID</span></td>
+                <td><button class="btn btn-ghost btn-sm" style="font-size:0.75rem;">View Profile</button></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="mentor-avatar-micro" style="width:28px; height:28px; background:var(--color-ink-100); color:var(--color-ink-900);">AS</div>
+                    <div>
+                      <strong>Arvind Swaminathan</strong>
+                      <div style="font-size:0.75rem; color:var(--color-slate-500);">arvind@edualttech.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge badge-ink">MENTOR (STAFF)</span></td>
+                <td>Deep Learning (Instructor)</td>
+                <td>Staff Direct Access</td>
+                <td><strong>₹0</strong></td>
+                <td><span class="badge badge-neutral">STAFF</span></td>
+                <td><button class="btn btn-ghost btn-sm" style="font-size:0.75rem;">Manage</button></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="mentor-avatar-micro" style="width:28px; height:28px;">VR</div>
+                    <div>
+                      <strong>Vikram Roy</strong>
+                      <div style="font-size:0.75rem; color:var(--color-slate-500);">vikram.roy@genesis.org</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge badge-neutral">LEARNER</span></td>
+                <td>1 Active Roadmap</td>
+                <td>Production Deep Learning with PyTorch</td>
+                <td><strong>₹3,499</strong></td>
+                <td><span class="badge badge-success">PAID</span></td>
+                <td><button class="btn btn-ghost btn-sm" style="font-size:0.75rem;">View Profile</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="padding:0.75rem 1rem; background:var(--color-slate-50); border-top:1px solid var(--color-slate-200); display:flex; justify-content:space-between; align-items:center; font-size:0.8125rem; color:var(--color-slate-500);">
+            <span>Showing 3 of 1,248 accounts</span>
+            <div style="display:flex; gap:0.5rem;">
+              <button class="btn btn-secondary btn-sm" disabled>Previous</button>
+              <button class="btn btn-secondary btn-sm">Next</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════
+       INTERACTIVE CONTROLLER JAVASCRIPT
+       ════════════════════════════════════════════════════════════════════════════ -->
   <script>
-    function switchView(viewName) {
-      const landing = document.getElementById('landing-view');
-      const auth = document.getElementById('auth-view');
-      const tabLanding = document.getElementById('tab-landing');
-      const tabAuth = document.getElementById('tab-auth');
+    function switchView(viewKey) {
+      // Hide all view panes
+      const panes = document.querySelectorAll('.view-pane');
+      panes.forEach(p => p.classList.remove('active-view'));
 
-      if (viewName === 'landing') {
-        landing.style.display = 'block';
-        auth.style.display = 'none';
-        tabLanding.classList.add('active');
-        tabAuth.classList.remove('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        landing.style.display = 'none';
-        auth.style.display = 'block';
-        tabLanding.classList.remove('active');
-        tabAuth.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Remove active from all nav buttons
+      const navButtons = document.querySelectorAll('.proto-btn');
+      navButtons.forEach(b => b.classList.remove('active'));
+
+      // Show selected pane
+      const targetPane = document.getElementById('view-' + viewKey);
+      if (targetPane) {
+        targetPane.classList.add('active-view');
       }
+
+      // Set active button
+      const targetBtn = document.getElementById('btn-view-' + viewKey);
+      if (targetBtn) {
+        targetBtn.classList.add('active');
+      }
+
+      // Smooth scroll to top of viewport
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function setAuthMode(mode) {
-      const btnLogin = document.getElementById('btn-login-mode');
-      const btnSignup = document.getElementById('btn-signup-mode');
-      const btnVerify = document.getElementById('btn-verify-mode');
+    // Keyboard shortcut support: Press numbers 1-9 or 0 for instant layout jumping
+    document.addEventListener('keydown', (e) => {
+      // Don't trigger if user is typing in an input
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-      const title = document.getElementById('auth-form-title');
-      const subtitle = document.getElementById('auth-form-subtitle');
-      const submitBtn = document.getElementById('auth-submit-btn');
+      const keyMap = {
+        '1': 'landing',
+        '2': 'catalog',
+        '3': 'detail',
+        '4': 'auth',
+        '5': 'learner-dash',
+        '6': 'lesson-player',
+        '7': 'admin-overview',
+        '8': 'admin-studio',
+        '9': 'admin-mentors',
+        '0': 'admin-users'
+      };
 
-      const oauthGroup = document.getElementById('oauth-group');
-      const emailWrap = document.getElementById('email-field-wrap');
-      const passWrap = document.getElementById('password-field-wrap');
-      const pinWrap = document.getElementById('pin-field-wrap');
-
-      [btnLogin, btnSignup, btnVerify].forEach(b => b.classList.remove('active'));
-
-      if (mode === 'login') {
-        btnLogin.classList.add('active');
-        title.innerText = "Sign in to EduAltTech";
-        subtitle.innerText = "Enter your credentials to access your courses and roadmap.";
-        submitBtn.innerText = "Sign In";
-        oauthGroup.style.display = "block";
-        emailWrap.style.display = "block";
-        passWrap.style.display = "block";
-        pinWrap.style.display = "none";
-      } else if (mode === 'signup') {
-        btnSignup.classList.add('active');
-        title.innerText = "Create your account";
-        subtitle.innerText = "Start learning with structured roadmaps and real mentors.";
-        submitBtn.innerText = "Continue with Email";
-        oauthGroup.style.display = "block";
-        emailWrap.style.display = "block";
-        passWrap.style.display = "none";
-        pinWrap.style.display = "none";
-      } else if (mode === 'verify') {
-        btnVerify.classList.add('active');
-        title.innerText = "Verify your email";
-        subtitle.innerText = "Confirm your address to complete your account security.";
-        submitBtn.innerText = "Confirm & Finish Registration";
-        oauthGroup.style.display = "none";
-        emailWrap.style.display = "none";
-        passWrap.style.display = "none";
-        pinWrap.style.display = "block";
+      if (keyMap[e.key]) {
+        switchView(keyMap[e.key]);
       }
-    }
+    });
   </script>
 </body>
 </html>

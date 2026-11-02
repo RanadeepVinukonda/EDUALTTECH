@@ -1,5 +1,7 @@
 export type Role = "USER" | "ADMIN";
 
+export type LessonType = "VIDEO" | "READING" | "PROJECT";
+
 export interface Me {
   id: string;
   email: string;
@@ -31,6 +33,10 @@ export interface Me {
   skills: string | null;
   certifications: string | null;
   onboardingDone: boolean;
+  username?: string | null;
+  experience?: string | null;
+  resumeName?: string | null;
+  resumeUpdatedAt?: string | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -132,10 +138,12 @@ export interface LessonRow {
   id: string;
   topicId: string;
   title: string;
-  type: "VIDEO" | "READING";
+  type: LessonType;
   contentUrl: string | null;
   textContent: string | null;
   hasVideo?: boolean;
+  resourceArticleId?: string | null;
+  resourceArticle?: { id: string; slug: string; title: string; difficulty: string; estimatedMinutes: number } | null;
   order: number;
   isPublished: boolean;
   createdAt: string;
@@ -191,13 +199,21 @@ export interface CourseOverview {
   currency: string;
   thumbnailUrl: string | null;
   status: string;
+  roadmapTitle: string | null;
+  roadmapSummary: string | null;
   createdBy: { id: string; firstName: string; lastName: string; avatarUrl: string | null; bio: string | null };
   chapters: {
     id: string;
     title: string;
     summary: string | null;
     order: number;
-    topics: { id: string; title: string; order: number; _count: { lessons: number } }[];
+    topics: {
+      id: string;
+      title: string;
+      order: number;
+      _count: { lessons: number };
+      lessons: { id: string; title: string; type: LessonType; order: number }[];
+    }[];
   }[];
   mentors: { user: MentorMini & { bio: string | null }; capacity: number | null; free: number }[];
   enrolledCount: number;
@@ -408,7 +424,11 @@ export interface AdminCourseSummary {
   id: string;
   slug: string;
   title: string;
+  description: string;
   category: string;
+  domain: string;
+  thumbnailUrl: string | null;
+  features: string[];
   type: "EDUCATION" | "ALTERNATIVE_EDUCATION";
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   pricePaise: number;

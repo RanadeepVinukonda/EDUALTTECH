@@ -24,8 +24,7 @@ const responsibilities = [
 export default function MentorPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-14 sm:px-6 lg:px-8">
-      <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">Teach and earn with EduAltTech</p>
-      <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl">
+      <h1 className="font-display text-4xl font-semibold tracking-tight text-ink-900 sm:text-5xl">
         Turn your skills into paid teaching
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-slate-600">
@@ -43,7 +42,7 @@ export default function MentorPage() {
       </div>
 
       <section className="mt-14">
-        <h2 className="font-display text-2xl font-extrabold text-ink-900">What mentors do</h2>
+        <h2 className="font-display text-2xl font-semibold text-ink-900">What mentors do</h2>
         <ul className="mt-4 flex flex-col gap-2 text-slate-700">
           {responsibilities.map((r) => (
             <li key={r} className="flex gap-3">
@@ -55,12 +54,12 @@ export default function MentorPage() {
       </section>
 
       <section className="mt-14">
-        <h2 className="font-display text-2xl font-extrabold text-ink-900">How the process works</h2>
+        <h2 className="font-display text-2xl font-semibold text-ink-900">How the process works</h2>
         <ol className="mt-6 grid gap-6 sm:grid-cols-2">
           {steps.map((s) => (
             <li key={s.n} className="border-t border-slate-200 pt-4">
               <p className="font-mono text-sm text-brand-700">Step {s.n}</p>
-              <p className="mt-1 font-display text-lg font-bold text-ink-900">{s.t}</p>
+              <p className="mt-1 font-display text-lg font-semibold text-ink-900">{s.t}</p>
               <p className="mt-1 text-sm text-slate-600">{s.d}</p>
             </li>
           ))}
@@ -68,7 +67,7 @@ export default function MentorPage() {
       </section>
 
       <section className="mt-14">
-        <h2 className="font-display text-2xl font-extrabold text-ink-900">What to prepare</h2>
+        <h2 className="font-display text-2xl font-semibold text-ink-900">What to prepare</h2>
         <ul className="mt-4 flex flex-col gap-2 text-slate-700">
           <li>Choose the course you want to teach.</li>
           <li>Write a qualification summary describing your relevant expertise.</li>
@@ -76,8 +75,8 @@ export default function MentorPage() {
         </ul>
       </section>
 
-      <section className="mt-14 rounded-[20px] border border-slate-200 bg-white p-6">
-        <h2 className="font-display text-xl font-extrabold text-ink-900">Applying and tracking status</h2>
+      <section className="mt-14 rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="font-display text-xl font-semibold text-ink-900">Applying and tracking status</h2>
         <p className="mt-2 text-slate-600">
           Applying requires an account. After you sign in, you can submit an application and track
           its real status at any time from your mentor dashboard.

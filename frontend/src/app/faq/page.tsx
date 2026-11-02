@@ -189,7 +189,7 @@ export default function FaqPage() {
           <FaqBrowser items={items} />
 
           <div className="mt-14 rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
-            <h2 className="font-display text-xl font-bold text-ink-900">Still need help?</h2>
+            <h2 className="font-display text-xl font-semibold text-ink-900">Still need help?</h2>
             <p className="mx-auto mt-2 max-w-xl text-ink-600">
               Send us your question and we will get back to you by email.
             </p>

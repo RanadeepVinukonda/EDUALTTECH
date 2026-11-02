@@ -120,7 +120,7 @@ export default function NotificationsView() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-ink-900">Notifications</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink-900">Notifications</h1>
           <p className="mt-1 text-sm text-slate-500">
             {unread > 0 ? `${unread} unread` : "You're all caught up."}
           </p>
@@ -157,7 +157,7 @@ export default function NotificationsView() {
         />
       ) : (
         <>
-          <ul className="flex flex-col divide-y divide-slate-200 rounded-[20px] border border-slate-200 bg-white">
+          <ul className="flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
             {items.map((n) => {
               const unreadItem = !n.readAt;
               const body = (
@@ -165,7 +165,7 @@ export default function NotificationsView() {
                   <p className="flex items-center gap-2 font-semibold text-ink-900">
                     {n.title}
                     {unreadItem && (
-                      <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[11px] font-bold text-brand-700">
+                      <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[11px] font-semibold text-brand-700">
                         Unread
                       </span>
                     )}

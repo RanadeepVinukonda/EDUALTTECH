@@ -11,6 +11,8 @@ import { mentorCapacityDefault } from "../../lib/settings.js";
 
 const router = Router();
 
+const RESOURCE_FEATURE = "100% Free Resource";
+
 const slugify = (s: string) =>
   s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
 
@@ -35,6 +37,7 @@ router.get("/", optionalAuth, validate({ query: z.object({
 
   const where = {
     status: "PUBLISHED" as const,
+    NOT: { features: { has: RESOURCE_FEATURE } },
     ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" as const } }, { description: { contains: q, mode: "insensitive" as const } }] } : {}),
     ...(category ? { category } : {}),
     ...(type ? { type: type as never } : {}),
@@ -75,7 +78,7 @@ router.get("/", optionalAuth, validate({ query: z.object({
 
 router.get("/categories", async (_req, res) => {
   const rows = await prisma.course.findMany({
-    where: { status: "PUBLISHED", category: { not: "" } },
+    where: { status: "PUBLISHED", category: { not: "" }, NOT: { features: { has: RESOURCE_FEATURE } } },
     distinct: ["category"],
     select: { category: true },
     orderBy: { category: "asc" },
@@ -167,7 +170,18 @@ router.get("/:slug", optionalAuth, async (req, res) => {
         orderBy: { order: "asc" },
         select: {
           id: true, title: true, summary: true, order: true,
-          topics: { orderBy: { order: "asc" }, select: { id: true, title: true, order: true, _count: { select: { lessons: true } } } },
+          topics: {
+            orderBy: { order: "asc" },
+            select: {
+              id: true, title: true, order: true,
+              _count: { select: { lessons: true } },
+              lessons: {
+                where: { isPublished: true },
+                orderBy: { order: "asc" },
+                select: { id: true, title: true, type: true, order: true },
+              },
+            },
+          },
         },
       },
       participants: {
@@ -179,6 +193,11 @@ router.get("/:slug", optionalAuth, async (req, res) => {
         orderBy: { scheduledAt: "asc" },
         take: 5,
         select: { id: true, title: true, scheduledAt: true, durationMin: true, meetingUrl: true },
+      },
+      recommendedResources: {
+        where: { isPublished: true },
+        take: 6,
+        select: { id: true, slug: true, title: true, difficulty: true, estimatedMinutes: true, coverUrl: true },
       },
       _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE" } } } },
     },
@@ -364,32 +383,106 @@ router.get("/:slug/analytics", requireAuth, async (req, res) => {
   });
 });
 
+const nestedLessonSchema = z.object({
+  title: z.string().trim().min(1).max(160),
+  type: z.enum(["VIDEO", "READING", "PROJECT"]).default("READING"),
+  textContent: z.string().max(100_000).nullable().optional(),
+  contentUrl: z.string().url().nullable().optional(),
+});
+
+const nestedTopicSchema = z.object({
+  title: z.string().trim().min(1).max(160),
+  summary: z.string().trim().max(2000).nullable().optional(),
+  lessons: z.array(nestedLessonSchema).optional(),
+});
+
+const nestedChapterSchema = z.object({
+  title: z.string().trim().min(1).max(160),
+  summary: z.string().trim().max(2000).nullable().optional(),
+  topics: z.array(nestedTopicSchema).optional(),
+});
+
 const courseBody = z.object({
   title: z.string().trim().min(3).max(160),
   description: z.string().trim().min(10).max(8000),
   type: z.enum(["EDUCATION", "ALTERNATIVE_EDUCATION"]).default("EDUCATION"),
-  category: z.string().trim().max(60).default("General"),
-  domain: z.string().trim().min(1).max(60),
+  category: z.string().trim().max(80).default("General"),
+  domain: z.string().trim().min(1).max(80),
   gradeLevel: z.string().trim().max(40).nullable().optional(),
-  level: z.enum(["Beginner", "Intermediate", "Advanced"]).nullable().optional(),
-  tags: z.array(z.string().trim().min(1).max(30)).max(20).optional(),
-  features: z.array(z.string().trim().min(1).max(40)).max(4),
+  level: z.string().trim().max(40).nullable().optional(),
+  tags: z.array(z.string().trim().min(1).max(40)).max(30).optional(),
+  features: z.array(z.string().trim().min(1).max(60)).max(10).optional().default([]),
+  prerequisites: z.array(z.string().trim().min(1).max(200)).max(20).optional().default([]),
+  learningOutcomes: z.array(z.string().trim().min(1).max(200)).max(20).optional().default([]),
+  targetAudience: z.array(z.string().trim().min(1).max(200)).max(20).optional().default([]),
+  durationHours: z.number().int().min(1).max(1000).nullable().optional(),
   pricePaise: z.number().int().min(0).max(10_000_000).default(0),
   thumbnailUrl: z.string().url().nullable().optional(),
   roadmapTitle: z.string().trim().max(160).nullable().optional(),
   roadmapSummary: z.string().trim().max(2000).nullable().optional(),
+  initialChapters: z.array(nestedChapterSchema).optional(),
 });
 
 router.post("/", requireAuth, validate({ body: courseBody }), async (req, res) => {
   if (req.user!.role !== "ADMIN") throw ApiError.forbidden("Only admins can create courses");
-  const input = body<z.infer<typeof courseBody>>(req);
+  const { initialChapters, ...courseData } = body<z.infer<typeof courseBody>>(req);
 
-  let slug = slugify(input.title);
+  let slug = slugify(courseData.title);
   if (await prisma.course.findUnique({ where: { slug } })) slug = `${slug}-${Date.now().toString(36)}`;
 
-  const course = await prisma.course.create({
-    data: { ...input, slug, createdById: req.user!.id },
+  const course = await prisma.$transaction(async (tx) => {
+    const created = await tx.course.create({
+      data: { ...courseData, slug, createdById: req.user!.id },
+    });
+
+    if (initialChapters && initialChapters.length > 0) {
+      for (const [chIdx, ch] of initialChapters.entries()) {
+        const chapter = await tx.chapter.create({
+          data: {
+            courseId: created.id,
+            title: ch.title,
+            summary: ch.summary ?? null,
+            order: chIdx + 1,
+          },
+        });
+
+        if (ch.topics && ch.topics.length > 0) {
+          for (const [tIdx, t] of ch.topics.entries()) {
+            const topic = await tx.topic.create({
+              data: {
+                courseId: created.id,
+                chapterId: chapter.id,
+                title: t.title,
+                summary: t.summary ?? null,
+                order: tIdx + 1,
+              },
+            });
+
+            if (t.lessons && t.lessons.length > 0) {
+              for (const [lIdx, l] of t.lessons.entries()) {
+                await tx.lesson.create({
+                  data: {
+                    courseId: created.id,
+                    topicId: topic.id,
+                    title: l.title,
+                    type: l.type ?? "READING",
+                    textContent: l.textContent ?? null,
+                    contentUrl: l.contentUrl ?? null,
+                    order: lIdx + 1,
+                    createdById: req.user!.id,
+                    isPublished: true,
+                  },
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return created;
   });
+
   audit(req.user!.id, "course.created", "course", course.id, { title: course.title });
   res.status(201).json({ success: true, data: { course } });
 });

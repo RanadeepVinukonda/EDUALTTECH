@@ -14,7 +14,7 @@ export default function PhotoBand() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">Inside our classrooms</p>
-          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+          <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
             Real rooms, real mentors, real students
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink-600">

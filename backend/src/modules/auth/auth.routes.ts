@@ -4,7 +4,7 @@ import { z } from "zod";
 import { config, isProd } from "../../config/env.js";
 import { prisma } from "../../lib/prisma.js";
 import { supabaseAdmin, getUserByToken } from "../../lib/supabase.js";
-import { uploadPublic, contentTypeFor } from "../../lib/storage.js";
+import { uploadPublic, uploadPrivate, signedUrl, removePrivate, assertUploadable, contentTypeFor } from "../../lib/storage.js";
 import { sendEmail, layout } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
 import { requireAuth } from "../../middlewares/auth.js";
@@ -29,6 +29,7 @@ function shape(user: NonNullable<Profile>) {
     name: `${user.firstName} ${user.lastName}`.trim(),
     role: user.role,
     avatarUrl: user.avatarUrl,
+    username: user.username,
     mobile: user.mobile,
     mobileVerifiedAt: Boolean(user.mobileVerifiedAt),
     emailVerifiedAt: Boolean(user.emailVerifiedAt),
@@ -38,6 +39,9 @@ function shape(user: NonNullable<Profile>) {
     institution: user.institution,
     fieldOfStudy: user.fieldOfStudy,
     gradYear: user.gradYear,
+    experience: user.experience,
+    resumeName: user.resumeName,
+    resumeUpdatedAt: user.resumeUpdatedAt,
     deactivationScheduledAt: user.deactivationScheduledAt,
     deactivatedAt: user.deactivatedAt,
     learningGoals: user.learningGoals,
@@ -65,6 +69,13 @@ router.post(
   validate({ body: z.object({ email: emailSchema }) }),
   async (req, res) => {
     const { email } = body<{ email: string }>(req);
+    const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (existing) {
+      throw ApiError.conflict(
+        "An account with this email already exists. Sign in instead.",
+        "EMAIL_TAKEN",
+      );
+    }
     const out = await sendEmailCode(email);
     // devCode only ever returned when AUTH_SKIP_OTP is on (never in production).
     res.json({ success: true, data: out });
@@ -167,6 +178,13 @@ router.post(
   validate({ body: z.object({ email: emailSchema, password: z.string().min(1) }) }),
   async (req, res) => {
     const { email, password } = body<{ email: string; password: string }>(req);
+    const known = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (!known) {
+      throw ApiError.notFound(
+        "No account found for this email. Create one to get started.",
+        "USER_NOT_FOUND",
+      );
+    }
     const tokens = await signIn(email, password);
     const authUser = await getUserByToken(tokens.accessToken);
     const found = authUser ? await prisma.user.findUnique({ where: { id: authUser.id } }) : null;
@@ -243,9 +261,17 @@ router.get("/me", requireAuth, async (req, res) => {
   res.json({ success: true, data: { user: shape(user) } });
 });
 
+const usernameSchema = z
+  .string()
+  .trim()
+  .min(3, "At least 3 characters")
+  .max(30, "At most 30 characters")
+  .regex(/^[a-zA-Z0-9_.]+$/, "Letters, numbers, underscores and dots only");
+
 const profileSchema = z.object({
   firstName: z.string().trim().min(1).max(80).optional(),
   lastName: z.string().trim().min(1).max(80).optional(),
+  username: usernameSchema.nullable().optional(),
   mobile: z.string().trim().min(5).max(20).nullable().optional(),
   dateOfBirth: z.coerce.date().nullable().optional(),
   bio: z.string().trim().max(1000).nullable().optional(),
@@ -253,6 +279,7 @@ const profileSchema = z.object({
   institution: z.string().trim().max(160).nullable().optional(),
   fieldOfStudy: z.string().trim().max(160).nullable().optional(),
   gradYear: z.number().int().min(1950).max(2100).nullable().optional(),
+  experience: z.string().trim().max(3000).nullable().optional(),
   onboardingDone: z.boolean().optional(),
   learningGoals: z.string().trim().max(2000).nullable().optional(),
   shortTermGoals: z.string().trim().max(1000).nullable().optional(),
@@ -269,6 +296,13 @@ const profileSchema = z.object({
 
 router.patch("/me", requireAuth, validate({ body: profileSchema }), async (req, res) => {
   const patch = body<Record<string, unknown>>(req);
+  if (typeof patch.username === "string") {
+    const taken = await prisma.user.findFirst({
+      where: { username: { equals: patch.username, mode: "insensitive" }, NOT: { id: req.user!.id } },
+      select: { id: true },
+    });
+    if (taken) throw ApiError.conflict("That username is taken. Try another.", "USERNAME_TAKEN");
+  }
   const user = await prisma.user.update({ where: { id: req.user!.id }, data: patch });
   res.json({ success: true, data: { user: shape(user) } });
 });
@@ -348,6 +382,62 @@ router.post(
     res.json({ success: true, data: { avatarUrl: user.avatarUrl } });
   },
 );
+
+// ── Profile resume - private, reusable when applying to mentor ────
+
+const resumeMeta = z.object({
+  name: z.string().min(1).max(200),
+  type: z.string().regex(/^(application|image|text)\/[\w.+-]+$/),
+  data: z.string().min(16),
+});
+
+router.get("/resume", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.user!.id },
+    select: { resumePath: true, resumeName: true, resumeUpdatedAt: true },
+  });
+  if (!user?.resumePath) throw ApiError.notFound("No resume uploaded", "RESUME_MISSING");
+  res.json({
+    success: true,
+    data: {
+      name: user.resumeName,
+      updatedAt: user.resumeUpdatedAt,
+      url: await signedUrl(user.resumePath, 600),
+    },
+  });
+});
+
+router.post("/resume", requireAuth, validate({ body: resumeMeta }), async (req, res) => {
+  const meta = body<{ name: string; type: string; data: string }>(req);
+  const bytes = Buffer.from(meta.data, "base64");
+  assertUploadable(meta.name, bytes.length);
+  const previous = await prisma.user.findUnique({
+    where: { id: req.user!.id },
+    select: { resumePath: true },
+  });
+  const resumePath = await uploadPrivate(`resumes/${req.user!.id}`, meta.name, bytes, contentTypeFor(meta.name));
+  const user = await prisma.user.update({
+    where: { id: req.user!.id },
+    data: { resumePath, resumeName: meta.name, resumeUpdatedAt: new Date() },
+  });
+  if (previous?.resumePath) await removePrivate(previous.resumePath);
+  audit(req.user!.id, "user.resume_uploaded", "user", req.user!.id);
+  res.json({ success: true, data: { resumeName: user.resumeName, resumeUpdatedAt: user.resumeUpdatedAt } });
+});
+
+router.delete("/resume", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.user!.id },
+    select: { resumePath: true },
+  });
+  if (user?.resumePath) await removePrivate(user.resumePath);
+  await prisma.user.update({
+    where: { id: req.user!.id },
+    data: { resumePath: null, resumeName: null, resumeUpdatedAt: null },
+  });
+  audit(req.user!.id, "user.resume_removed", "user", req.user!.id);
+  res.json({ success: true, data: { ok: true } });
+});
 
 // ── Mobile verification (lazy - purchase / application trigger) ────
 

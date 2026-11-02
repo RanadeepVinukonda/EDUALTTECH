@@ -89,16 +89,15 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   // session and route to sign-in exactly once, preserving the intended destination.
   useEffect(() => {
     const onExpired = async () => {
+      const here = pathname || "/dashboard";
+      if (here.startsWith("/login") || here.startsWith("/signup")) return;
       if (handlingExpiry.current) return;
       handlingExpiry.current = true;
       try {
         await getSupabase().auth.signOut();
         setUser(null);
         setMemberships(new Map());
-        const here = pathname || "/dashboard";
-        if (!here.startsWith("/login")) {
-          router.replace(`/login?next=${encodeURIComponent(safeNext(here))}&expired=1`);
-        }
+        router.replace(`/login?next=${encodeURIComponent(safeNext(here))}&expired=1`);
       } finally {
         // Re-arm after the redirect settles so a later expiry is handled too.
         window.setTimeout(() => {

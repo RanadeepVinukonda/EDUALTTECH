@@ -23,10 +23,10 @@ function RoadmapSkeleton() {
   return (
     <div className="space-y-6" role="status" aria-live="polite">
       <span className="sr-only">Loading the roadmap…</span>
-      <Skeleton className="h-44 rounded-3xl" />
+      <Skeleton className="h-44 rounded-xl" />
       <div className="space-y-4" aria-hidden>
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div key={i} className="rounded-xl border border-slate-200 bg-white p-5">
             <Skeleton className="h-5 w-1/3" />
             <Skeleton className="mt-3 h-4 w-1/2" />
           </div>
@@ -82,7 +82,7 @@ export default function RoadmapView({ slug }: { slug: string }) {
       </Link>
 
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-ink-900 p-6 text-white shadow-elev2 sm:p-9">
+      <section className="relative overflow-hidden rounded-xl bg-ink-900 p-6 text-white sm:p-9">
         <span aria-hidden className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full border border-white/10" />
         <span aria-hidden className="pointer-events-none absolute -right-12 -top-24 h-60 w-60 rounded-full border border-white/10" />
         <div className="relative flex items-start justify-between gap-6">
@@ -90,7 +90,7 @@ export default function RoadmapView({ slug }: { slug: string }) {
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-brand-200">
               <Insights fontSize="inherit" aria-hidden /> {detail.course.category}
             </span>
-            <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{detail.course.title}</h1>
+            <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{detail.course.title}</h1>
             {detail.course.description && (
               <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-ink-100">{detail.course.description}</p>
             )}
@@ -108,7 +108,7 @@ export default function RoadmapView({ slug }: { slug: string }) {
           </div>
           <div
             aria-hidden
-            className="hidden h-32 w-32 shrink-0 place-items-center rounded-3xl border border-brand-200/25 bg-brand-200/10 font-mono text-4xl text-brand-200 sm:grid"
+            className="hidden h-32 w-32 shrink-0 place-items-center rounded-xl border border-brand-200/25 bg-brand-200/10 font-mono text-4xl text-brand-200 sm:grid"
           >
             &lt;/&gt;
           </div>
@@ -118,16 +118,16 @@ export default function RoadmapView({ slug }: { slug: string }) {
       {/* Roadmap head + progress */}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
             <Insights aria-hidden />
           </span>
           <div>
-            <h2 className="font-display text-xl font-bold text-ink-900">Your Roadmap</h2>
+            <h2 className="font-display text-xl font-semibold text-ink-900">Your Roadmap</h2>
             <p className="text-sm text-slate-500">Complete each chapter in order. One step at a time.</p>
           </div>
         </div>
         <div className="w-full sm:w-56">
-          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wide text-slate-500">
+          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-500">
             <span>Your progress</span>
             <span className="text-brand-700">{percent}%</span>
           </div>
@@ -165,17 +165,17 @@ export default function RoadmapView({ slug }: { slug: string }) {
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute left-0 top-2.5 grid h-10 w-10 place-items-center rounded-full border-[3px] border-white font-display text-sm font-bold shadow-elev1",
+                    "absolute left-0 top-2.5 grid h-10 w-10 place-items-center rounded-full border-[3px] border-white font-display text-sm font-semibold",
                     complete ? "bg-emerald-500 text-white" : "bg-brand-600 text-white",
                   )}
                 >
                   {complete ? "✓" : index + 1}
                 </span>
 
-                <details className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-elev1" open={index === 0}>
+                <details className="group overflow-hidden rounded-xl border border-slate-200 bg-white" open={index === 0}>
                   <summary className="flex cursor-pointer list-none items-center gap-4 px-4 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 sm:px-5 [&::-webkit-details-marker]:hidden">
                     <span className="min-w-0 flex-1">
-                      <span className="block font-display font-bold text-ink-900">{chapter.title}</span>
+                      <span className="block font-display font-semibold text-ink-900">{chapter.title}</span>
                       <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
                         <span>{chapterTotal} {chapterTotal === 1 ? "lesson" : "lessons"}</span>
                         <span aria-hidden className="text-slate-300">·</span>
@@ -244,9 +244,9 @@ export default function RoadmapView({ slug }: { slug: string }) {
       )}
 
       {/* Bottom CTA */}
-      <section className="flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <section className="flex flex-col gap-4 rounded-xl border border-brand-100 bg-brand-50 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-display font-bold text-ink-900">
+          <p className="font-display font-semibold text-ink-900">
             {allDone ? "Course completed. Excellent work!" : "Keep building your skills."}
           </p>
           <p className="mt-0.5 text-sm text-slate-500">

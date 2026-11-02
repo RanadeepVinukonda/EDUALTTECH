@@ -95,10 +95,10 @@ export default function InviteUserDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="invite-title"
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-6 shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="invite-title" className="font-display text-xl font-bold text-ink-900">
+        <h2 id="invite-title" className="font-display text-xl font-semibold text-ink-900">
           Invite a user
         </h2>
         <p className="mt-1 text-sm text-slate-500">

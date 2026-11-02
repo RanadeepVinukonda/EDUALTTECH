@@ -12,9 +12,9 @@ export default function ErrorState({
   return (
     <div
       role="alert"
-      className="flex flex-col items-center justify-center gap-3 rounded-[20px] border border-red-200 bg-red-50 px-6 py-14 text-center"
+      className="flex flex-col items-center justify-center gap-3 rounded-xl border border-red-200 bg-red-50 px-6 py-14 text-center"
     >
-      <p className="font-display text-lg font-bold text-red-700">{title}</p>
+      <p className="font-display text-lg font-semibold text-red-700">{title}</p>
       {message && <p className="max-w-sm text-sm text-red-600">{message}</p>}
       {onRetry && (
         <Button variant="secondary" size="sm" onClick={onRetry}>

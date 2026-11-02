@@ -68,7 +68,7 @@ function UserLoader({ id, email }: { id: string; email: string }) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-10 w-64 rounded-xl" />
-        <Skeleton className="h-72 rounded-[20px]" />
+        <Skeleton className="h-72 rounded-xl" />
       </div>
     );
   }

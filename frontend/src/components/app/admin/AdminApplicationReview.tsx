@@ -117,7 +117,7 @@ export default function AdminApplicationReview({ id }: { id: string }) {
   }
 
   if (app.error) return <ErrorState message={app.error} onRetry={app.reload} />;
-  if (app.loading && !application) return <Skeleton className="h-96 rounded-[20px]" />;
+  if (app.loading && !application) return <Skeleton className="h-96 rounded-xl" />;
   if (!application) return <EmptyState title="Application not found" description="This application may have been removed." />;
 
   const next = TRANSITIONS[application.status];
@@ -154,7 +154,7 @@ export default function AdminApplicationReview({ id }: { id: string }) {
             <Field label="Submitted" value={formatDate(application.createdAt)} />
           </dl>
           <div className="w-full shrink-0 sm:w-56">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Course</p>
+            <p className="text-xs font-medium text-slate-500">Course</p>
             <Link href={`/courses/${application.course.slug}`} className="mt-1 block overflow-hidden rounded-xl border border-slate-200">
               <CoverImage
                 src={application.course.thumbnailUrl}
@@ -312,7 +312,7 @@ export default function AdminApplicationReview({ id }: { id: string }) {
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</dt>
+      <dt className="text-xs font-medium text-slate-500">{label}</dt>
       <dd className="mt-0.5 text-[15px] text-ink-900">{value}</dd>
     </div>
   );

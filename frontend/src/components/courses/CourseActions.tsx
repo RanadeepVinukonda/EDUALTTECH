@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import Favorite from "@mui/icons-material/Favorite";
-import Lock from "@mui/icons-material/Lock";
-import CheckCircle from "@mui/icons-material/CheckCircle";
 import Button from "@/components/ui/Button";
 import LinkButton from "@/components/ui/LinkButton";
 import PayButton from "@/components/ui/PayButton";
@@ -108,8 +105,8 @@ export default function CourseActions({
   const isPaid = pricePaise > 0;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-elev1">
-      <p className="font-display text-3xl font-bold text-ink-900">{formatPrice(pricePaise, currency)}</p>
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <p className="font-display text-2xl font-semibold text-ink-900">{formatPrice(pricePaise, currency)}</p>
       <p className="mt-1 text-sm text-ink-600">{isPaid ? "One-time payment" : "No payment required"}</p>
 
       <div className="mt-5 space-y-3">
@@ -119,12 +116,11 @@ export default function CourseActions({
           </Button>
         ) : isLearner ? (
           <LinkButton href={`/dashboard/courses/${slug}`} className="w-full">
-            <CheckCircle fontSize="small" />
             Continue learning
           </LinkButton>
         ) : isMentor ? (
           <>
-            <p className="rounded-xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-800">
+            <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-ink-700">
               You mentor this course.
             </p>
             <LinkButton href={`/dashboard/mentor/courses/${slug}`} variant="secondary" className="w-full">
@@ -132,11 +128,11 @@ export default function CourseActions({
             </LinkButton>
           </>
         ) : application && application.status !== "REJECTED" ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-amber-700">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-medium text-ink-500">
               Mentor application
             </p>
-            <p className="mt-1.5 text-sm font-bold text-ink-900">
+            <p className="mt-1 text-sm font-semibold text-ink-900">
               {application.status === "INTERVIEW_SCHEDULED"
                 ? "Interview scheduled"
                 : application.status === "ACCEPTED"
@@ -160,7 +156,7 @@ export default function CourseActions({
                     href={application.interviewUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
                   >
                     Join interview
                   </a>
@@ -174,7 +170,6 @@ export default function CourseActions({
           </div>
         ) : !authed ? (
           <LinkButton href={loginHref} className="w-full">
-            <Lock fontSize="small" />
             Sign in to enrol
           </LinkButton>
         ) : isPaid ? (
@@ -199,7 +194,7 @@ export default function CourseActions({
           disabled={wishPending || !ready}
           aria-pressed={wishlist}
           className={cn(
-            "inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-[15px] font-semibold text-ink-700 transition hover:bg-slate-50",
+            "inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-[15px] font-semibold text-ink-700 transition hover:bg-slate-50",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 disabled:opacity-50",
           )}
         >
@@ -216,10 +211,7 @@ export default function CourseActions({
 
       {!authed && ready && (
         <p className="mt-4 text-center text-xs text-slate-500">
-          Already have an account?{" "}
-          <Link href={loginHref} className="font-semibold text-brand-700 hover:text-brand-800">
-            Sign in
-          </Link>
+          Instant access upon enrolment · Lifetime curriculum updates
         </p>
       )}
     </div>

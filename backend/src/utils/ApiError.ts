@@ -20,8 +20,8 @@ export class ApiError extends Error {
   static forbidden(message = "Insufficient permissions", code?: string) {
     return new ApiError(403, message, code);
   }
-  static notFound(message = "Not found") {
-    return new ApiError(404, message, "NOT_FOUND");
+  static notFound(message = "Not found", code?: string) {
+    return new ApiError(404, message, code ?? "NOT_FOUND");
   }
   static conflict(message: string, code?: string) {
     return new ApiError(409, message, code);

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import Mail from "@mui/icons-material/Mail";
 import SectionHeading from "@/components/landing/SectionHeading";
 import InquiryForm from "@/components/contact/InquiryForm";
 
@@ -52,22 +51,21 @@ export default function ContactPage() {
       <section className="py-16 sm:py-20">
         <div className={`${wrap} grid gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16`}>
           <div>
-            <h2 className="font-display text-xl font-bold text-ink-900">What we can help with</h2>
+            <h2 className="font-display text-xl font-semibold text-ink-900">What we can help with</h2>
             <ul className="mt-4 space-y-3">
               {ENQUIRY_TYPES.map((t) => (
                 <li key={t} className="flex items-start gap-3 text-ink-700">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600" />
+                  <span className="mt-2.5 h-px w-3 shrink-0 bg-slate-300" />
                   {t}
                 </li>
               ))}
             </ul>
 
-            <h2 className="mt-10 font-display text-xl font-bold text-ink-900">Email</h2>
+            <h2 className="mt-10 font-display text-xl font-semibold text-ink-900">Email</h2>
             <a
               href="mailto:info@edualttech.com"
-              className="mt-3 inline-flex items-center gap-2 font-semibold text-brand-700 hover:text-brand-800"
+              className="mt-3 inline-flex font-semibold text-brand-700 hover:text-brand-800"
             >
-              <Mail fontSize="small" />
               info@edualttech.com
             </a>
 
@@ -80,7 +78,7 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-elev1 sm:p-8">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
             <InquiryForm />
           </div>
         </div>

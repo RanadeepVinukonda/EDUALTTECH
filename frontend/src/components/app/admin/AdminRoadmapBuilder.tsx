@@ -8,10 +8,25 @@ import { notifySuccess } from "@/lib/notify";
 import Button from "@/components/ui/Button";
 import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Title from "@mui/icons-material/Title";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminHeader, Panel, Skeleton, useAsync } from "./admin-ui";
+import PlayCircleOutlined from "@mui/icons-material/PlayCircleOutlined";
+import ArticleOutlined from "@mui/icons-material/ArticleOutlined";
+import AssignmentOutlined from "@mui/icons-material/AssignmentOutlined";
+
+type LessonType = LessonRow["type"];
+
+const NEXT_TYPE: Record<LessonType, LessonType> = { VIDEO: "READING", READING: "PROJECT", PROJECT: "VIDEO" };
+const TYPE_LABEL: Record<LessonType, string> = { VIDEO: "Video", READING: "Reading", PROJECT: "Project" };
+
+function LessonTypeIcon({ type }: { type: LessonType }) {
+  if (type === "VIDEO") return <PlayCircleOutlined fontSize="small" aria-hidden className="shrink-0 text-brand-600" />;
+  if (type === "PROJECT") return <AssignmentOutlined fontSize="small" aria-hidden className="shrink-0 text-amber-600" />;
+  return <ArticleOutlined fontSize="small" aria-hidden className="shrink-0 text-slate-400" />;
+}
 
 function rmError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
@@ -61,8 +76,8 @@ export default function AdminRoadmapBuilder({
         <ErrorState message={rmError(error, "Could not load the roadmap.")} onRetry={reload} />
       ) : loading && !data ? (
         <div className="space-y-3">
-          <Skeleton className="h-40 rounded-[20px]" />
-          <Skeleton className="h-40 rounded-[20px]" />
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
         </div>
       ) : (
         <>
@@ -164,8 +179,13 @@ function ChapterCard({
       ) : (
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="font-display text-lg font-bold text-ink-900">{chapter.title}</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-brand-700">Module {index + 1}</p>
+            <h2 className="font-display text-lg font-semibold text-ink-900">{chapter.title}</h2>
             {chapter.summary && <p className="mt-0.5 text-sm text-slate-500">{chapter.summary}</p>}
+            <p className="mt-1 text-xs text-slate-500">
+              {chapter.topics.length} {chapter.topics.length === 1 ? "section" : "sections"} ·{" "}
+              {chapter.topics.reduce((n, t) => n + t.lessons.length, 0)} items
+            </p>
             {error && <p role="alert" className="mt-1 text-sm text-red-700">{error}</p>}
           </div>
           <div className="flex flex-wrap items-center gap-1">
@@ -351,6 +371,10 @@ function LessonCard({
     await run(() => apiPatch(`/courses/lessons/${lesson.id}`, { title: title.trim() })).then(() => setEditing(false));
   }
 
+  async function toggleType() {
+    await run(() => apiPatch(`/courses/lessons/${lesson.id}`, { type: NEXT_TYPE[lesson.type] }));
+  }
+
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3">
       {editing ? (
@@ -369,7 +393,24 @@ function LessonCard({
         </form>
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="min-w-0 truncate text-sm font-medium text-ink-900">{lesson.title}</span>
+          <div className="flex min-w-0 items-center gap-2">
+            <LessonTypeIcon type={lesson.type} />
+            <span className="min-w-0 truncate text-sm font-medium text-ink-900">{lesson.title}</span>
+            {!lesson.isPublished && (
+              <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+                Draft
+              </span>
+            )}
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void toggleType()}
+              title={`Switch to ${TYPE_LABEL[NEXT_TYPE[lesson.type]].toLowerCase()}`}
+              className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
+            >
+              {TYPE_LABEL[lesson.type]}
+            </button>
+          </div>
           <div className="flex flex-wrap items-center gap-1">
             <Button variant="ghost" size="sm" disabled={busy || index === 0} onClick={() => reorder(-1)} aria-label={`Move ${lesson.title} up`}>↑</Button>
             <Button variant="ghost" size="sm" disabled={busy || index === count - 1} onClick={() => reorder(1)} aria-label={`Move ${lesson.title} down`}>↓</Button>
@@ -467,6 +508,7 @@ function AddTopicForm({ chapterId, onChanged }: { chapterId: string; onChanged: 
 
 function AddLessonForm({ topicId, onChanged }: { topicId: string; onChanged: () => void }) {
   const [title, setTitle] = useState("");
+  const [type, setType] = useState<LessonType>("READING");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -476,8 +518,9 @@ function AddLessonForm({ topicId, onChanged }: { topicId: string; onChanged: () 
     setBusy(true);
     setError(null);
     try {
-      await apiPost(`/courses/topics/${topicId}/lessons`, { title: title.trim(), isPublished: false });
+      await apiPost(`/courses/topics/${topicId}/lessons`, { title: title.trim(), type, isPublished: false });
       setTitle("");
+      setType("READING");
       notifySuccess("Lesson added");
       onChanged();
     } catch (err) {
@@ -489,15 +532,20 @@ function AddLessonForm({ topicId, onChanged }: { topicId: string; onChanged: () 
 
   return (
     <details className="rounded-lg border border-dashed border-slate-300 bg-white p-3">
-      <summary className="cursor-pointer text-sm font-semibold text-brand-700">Add lesson</summary>
+      <summary className="cursor-pointer text-sm font-semibold text-brand-700">Add item</summary>
       <p className="mt-2 text-xs text-slate-500">
-        Add the lesson title only. The mentor chooses whether it is a reading or a video and fills in the content.
+        Pick video, reading or project, then add the title. Content is filled in from the teaching workspace.
       </p>
       <form onSubmit={submit} className="mt-3 flex flex-wrap items-end gap-2" noValidate>
         <div className="min-w-[200px] flex-1">
           <Input aria-label="New lesson title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Lesson title" required />
         </div>
-        <Button type="submit" size="sm" loading={busy} disabled={title.trim().length < 2}>Add lesson</Button>
+        <Select value={type} onChange={(e) => setType(e.target.value as LessonType)} aria-label="Item type" className="w-36">
+          <option value="READING">Reading</option>
+          <option value="VIDEO">Video</option>
+          <option value="PROJECT">Project</option>
+        </Select>
+        <Button type="submit" size="sm" loading={busy} disabled={title.trim().length < 2}>Add item</Button>
         {error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}
       </form>
     </details>

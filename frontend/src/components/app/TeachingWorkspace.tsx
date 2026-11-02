@@ -58,15 +58,15 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
       </nav>
 
       <header>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{course.category}</p>
-        <h1 className="font-display text-2xl font-extrabold text-ink-900">{course.title}</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900">{course.title}</h1>
+        <p className="mt-1 text-xs font-medium text-slate-500">{course.category}</p>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-w-0 flex-col gap-6">
-          <details className="group rounded-2xl border border-slate-200 bg-white">
+          <details className="group rounded-xl border border-slate-200 bg-white">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
-              <span className="font-display text-lg font-bold text-ink-900">Student analytics</span>
+              <span className="font-display text-lg font-semibold text-ink-900">Student analytics</span>
               <span aria-hidden className="text-slate-400 transition group-open:rotate-180">▾</span>
             </summary>
             <div className="border-t border-slate-100 p-5">
@@ -85,8 +85,8 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
           aria-label="Messages"
           className={cn("flex flex-col gap-3 lg:sticky lg:top-6 lg:self-start")}
         >
-          <h2 className="font-display text-lg font-bold text-ink-900">Messages</h2>
-          <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <h2 className="font-display text-lg font-semibold text-ink-900">Messages</h2>
+          <div className="rounded-xl border border-slate-200 bg-white p-3">
             <ChatView courseId={course.id} title={course.title} compact roster={roster ?? undefined} />
           </div>
         </aside>

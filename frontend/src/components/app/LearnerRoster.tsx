@@ -42,14 +42,14 @@ export default function LearnerRoster({ slug }: { slug: string }) {
   }
 
   return (
-    <ul className="flex flex-col divide-y divide-slate-200 rounded-[20px] border border-slate-200 bg-white">
+    <ul className="flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
       {learners.map((l) => (
         <li key={l.id} className="flex flex-wrap items-center gap-4 p-4 sm:p-5">
           {l.user.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={l.user.avatarUrl} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
           ) : (
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-sm font-bold text-brand-700">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-sm font-semibold text-brand-700">
               {initials(l.user.firstName, l.user.lastName)}
             </span>
           )}

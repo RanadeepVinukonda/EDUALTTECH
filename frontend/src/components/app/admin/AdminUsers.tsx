@@ -174,7 +174,7 @@ function AdminUsersView() {
           <>
             <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-slate-500">
+                <thead className="border-b border-slate-200 text-xs font-semibold text-slate-500">
                   <tr>
                     <th scope="col" className="py-2 pr-4 font-semibold">User</th>
                     <th scope="col" className="py-2 pr-4 font-semibold">Role</th>

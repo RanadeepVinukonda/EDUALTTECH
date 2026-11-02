@@ -1,6 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/cn";
 
 const BIN_TOP =
@@ -22,22 +23,18 @@ export function BinIcon() {
   );
 }
 
-export function EyeIcon() {
+export function EyeIcon({ className }: { className?: string } = {}) {
   return (
-    <>
-      <svg className="eye-closed" viewBox="0 0 24 24" aria-hidden>
-        <path d="M2 12H22" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" />
-      </svg>
-      <svg className="eye-open" viewBox="0 0 24 24" aria-hidden>
-        <path
-          d="M12 5.5C7.3 5.5 3.2 8.4 1.5 12c1.7 3.6 5.8 6.5 10.5 6.5s8.8-2.9 10.5-6.5C20.8 8.4 16.7 5.5 12 5.5Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.8}
-        />
-        <circle cx="12" cy="12" r="2.6" fill="currentColor" />
-      </svg>
-    </>
+    <svg className={cn("eye-open", className)} viewBox="0 0 24 24" aria-hidden fill="none">
+      <path
+        d="M12 5.5C7.3 5.5 3.2 8.4 1.5 12c1.7 3.6 5.8 6.5 10.5 6.5s8.8-2.9 10.5-6.5C20.8 8.4 16.7 5.5 12 5.5Z"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="2.6" fill="currentColor" />
+    </svg>
   );
 }
 
@@ -65,6 +62,40 @@ export function DeleteButton(props: Omit<IconActionButtonProps, "icon" | "label"
   return <IconActionButton icon="delete" label="Delete" {...props} />;
 }
 
-export function ViewButton(props: Omit<IconActionButtonProps, "icon" | "label">) {
-  return <IconActionButton icon="view" label="View" {...props} />;
+export function ViewButton({
+  href,
+  label = "View",
+  className,
+  ...props
+}: {
+  href?: string;
+  label?: string;
+  className?: string;
+} & ButtonHTMLAttributes<HTMLButtonElement> & Record<string, unknown>) {
+  const ariaLabel = (props["aria-label"] as string) ?? label;
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cn("hv-btn hv-btn--view", className)}
+        aria-label={ariaLabel}
+        title={ariaLabel}
+      >
+        <EyeIcon />
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={cn("hv-btn hv-btn--view", className)}
+      aria-label={ariaLabel}
+      title={ariaLabel}
+      {...props}
+    >
+      <EyeIcon />
+    </button>
+  );
 }

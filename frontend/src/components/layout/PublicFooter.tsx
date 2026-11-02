@@ -1,21 +1,20 @@
 import Link from "next/link";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import InstagramIcon from "@mui/icons-material/Instagram";
+
+
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import XIcon from "@mui/icons-material/X";
+
 import BrandLogo from "@/components/brand/BrandLogo";
 
-// ponytail: social hrefs empty until real links provided — renders as placeholder "#"
+// ponytail: only the verified company profile is linked; add others when confirmed.
 const SOCIAL = [
-  { label: "Facebook", href: "#", Icon: FacebookIcon },
-  { label: "Twitter", href: "#", Icon: XIcon },
-  { label: "Instagram", href: "#", Icon: InstagramIcon },
-  { label: "LinkedIn", href: "#", Icon: LinkedInIcon },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/edu-alt-tech", Icon: LinkedInIcon },
 ];
 
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
+  { href: "/resources", label: "Free Resources" },
+  { href: "/services#course-demand", label: "Course Demand & Voting" },
   { href: "/services", label: "Services & Programs" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -30,18 +29,21 @@ const LEGAL_LINKS = [
 
 export default function PublicFooter() {
   return (
-    <footer className="border-t border-slate-200 bg-white text-ink-900">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <footer className="border-t border-slate-200 bg-white text-ink-600">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
-          <div className="relative">
+          <div className="space-y-4">
             <Link href="/" className="inline-flex items-center gap-2" aria-label="EduAltTech home">
-              <BrandLogo withWordmark />
+              <BrandLogo withWordmark wordmarkClassName="text-lg" />
             </Link>
+            <p className="text-sm leading-relaxed text-ink-600 max-w-xs">
+              Practical courses in applied AI, engineering systems, and tuition — mentored by skilled practitioners. A product by Setsuzoku.
+            </p>
           </div>
 
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Quick Links</h3>
-            <nav aria-label="Footer" className="space-y-2 text-sm">
+            <h3 className="mb-4 font-display text-sm font-semibold text-ink-900">Quick links</h3>
+            <nav aria-label="Footer" className="space-y-2.5 text-sm">
               {QUICK_LINKS.map((l) => (
                 <Link
                   key={l.href}
@@ -55,46 +57,52 @@ export default function PublicFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Contact Us</h3>
-            <address className="space-y-2 text-sm not-italic text-ink-600">
+            <h3 className="mb-4 font-display text-sm font-semibold text-ink-900">Contact &amp; campus</h3>
+            <address className="space-y-2.5 text-sm not-italic text-ink-600">
               <p>
                 Email:{" "}
-                <a href="mailto:info@edualttech.com" className="transition-colors hover:text-brand-700">
+                <a href="mailto:info@edualttech.com" className="transition-colors text-brand-700 hover:text-brand-800 underline underline-offset-4 font-medium">
                   info@edualttech.com
                 </a>
               </p>
-              <p>A product by Setsuzoku.</p>
+              <p className="text-xs text-slate-500">
+                School Partnerships: Genesis, Sharada Vidhyalaya, New Era, MamaSparsh.
+              </p>
+              <p className="text-xs text-slate-500">A product by Setsuzoku.</p>
             </address>
           </div>
 
-          <div className="relative">
-            <h3 className="mb-4 text-lg font-semibold">Follow Us</h3>
-            <div className="flex space-x-4">
+          <div>
+            <h3 className="mb-4 font-display text-sm font-semibold text-ink-900">Community</h3>
+            <div className="flex space-x-3">
               {SOCIAL.map(({ label, href, Icon }) => (
                 <a
                   key={label}
                   href={href}
                   title={`Follow us on ${label}`}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-ink-700 transition hover:border-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-ink-600 transition hover:border-brand-600 hover:text-white hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
                 >
                   <Icon fontSize="small" />
                   <span className="sr-only">{label}</span>
                 </a>
               ))}
             </div>
+            <p className="mt-4 text-xs text-slate-500">
+              Updates on courses, mentoring, and school programs.
+            </p>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-center md:flex-row">
-          <p className="text-sm text-ink-500">
-            © {new Date().getFullYear()} EduAltTech (Edu Alt Tech). All rights reserved.
+          <p className="text-xs text-slate-500">
+            © {new Date().getFullYear()} EduAltTech (Edu Alt Tech). All rights reserved. Powered by Setsuzoku.
           </p>
-          <nav aria-label="Legal" className="flex flex-wrap justify-center gap-4 text-sm">
+          <nav aria-label="Legal" className="flex flex-wrap justify-center gap-5 text-xs">
             {LEGAL_LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-ink-600 transition-colors hover:text-brand-700"
+                className="text-ink-600 transition-colors hover:text-ink-900"
               >
                 {l.label}
               </Link>

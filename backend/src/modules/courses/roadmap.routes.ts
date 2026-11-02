@@ -36,7 +36,11 @@ router.get("/:courseId/roadmap", requireAuth, async (req, res) => {
             // Learners see every lesson; locked (unpublished) ones render with a
             // lock and open only once the mentor unlocks them.
             orderBy: { order: "asc" },
-            select: { id: true, topicId: true, title: true, type: true, contentUrl: true, textContent: true, videoPath: true, order: true, isPublished: true, createdAt: true },
+            select: {
+              id: true, topicId: true, title: true, type: true, contentUrl: true, textContent: true, videoPath: true,
+              order: true, isPublished: true, createdAt: true, resourceArticleId: true,
+              resourceArticle: { select: { id: true, slug: true, title: true, difficulty: true, estimatedMinutes: true } },
+            },
           },
         },
       },
@@ -163,9 +167,10 @@ router.delete("/topics/:id", requireAuth, async (req, res) => {
 
 const lessonBody = z.object({
   title: z.string().trim().min(2).max(160),
-  type: z.enum(["VIDEO", "READING"]).default("READING"),
+  type: z.enum(["VIDEO", "READING", "PROJECT"]).default("READING"),
   contentUrl: z.string().url().nullable().optional(),
   textContent: z.string().max(100_000).nullable().optional(),
+  resourceArticleId: z.string().nullable().optional(),
   isPublished: z.boolean().optional(),
 });
 

@@ -29,37 +29,37 @@ export default function PartnerStrip({
       aria-label="Schools and organizations we work with"
       className={cn("bg-slate-50", divider && "border-y border-slate-200", className)}
     >
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-          Schools &amp; organizations we work with
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+          Trusted &amp; deployed in collaboration with educational institutions
         </p>
 
         {scroll ? (
-          <div className="marquee mt-8">
+          <div className="marquee mt-6">
             <ul className="marquee-track list-none">
-              {[...PARTNERS, ...PARTNERS].map((p, i) => (
+              {[...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS].map((p, i) => (
                 <li
                   key={`${p.name}-${i}`}
                   aria-hidden={i >= PARTNERS.length || undefined}
-                  className="flex h-40 w-96 shrink-0 items-center justify-center px-10"
+                  className="flex h-28 w-64 shrink-0 items-center justify-center px-6 sm:h-32 sm:w-80 sm:px-8"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={p.src}
                     alt={p.name}
                     loading="lazy"
-                    className="max-h-28 w-auto max-w-full object-contain"
+                    className="max-h-16 sm:max-h-20 w-auto max-w-full object-contain opacity-95 transition duration-300 hover:opacity-100 hover:scale-105"
                   />
                 </li>
               ))}
             </ul>
           </div>
         ) : (
-          <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {PARTNERS.map((p) => (
               <li
                 key={p.name}
-                className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-elev1"
+                className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-6 transition hover:border-slate-300 "
               >
                 <div className="flex h-20 items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -67,19 +67,19 @@ export default function PartnerStrip({
                     src={p.src}
                     alt={p.name}
                     loading="lazy"
-                    className="max-h-16 w-auto max-w-full object-contain"
+                    className="max-h-16 w-auto max-w-full object-contain opacity-95 transition duration-300 hover:opacity-100"
                   />
                 </div>
-                <span className="text-center text-sm font-semibold text-ink-800">{p.name}</span>
+                <span className="text-center text-xs font-semibold uppercase tracking-wider text-ink-800">{p.name}</span>
               </li>
             ))}
           </ul>
         )}
 
         {showAll && (
-          <p className="mt-6 text-center text-sm text-slate-500">
-            <Link href="/partners" className="font-semibold text-brand-700 hover:text-brand-800">
-              See all partners &amp; organizations
+          <p className="mt-6 text-center text-xs font-semibold text-slate-500">
+            <Link href="/partners" className="text-brand-700 hover:text-brand-800 hover:underline">
+              View all partner schools &amp; programs →
             </Link>
           </p>
         )}

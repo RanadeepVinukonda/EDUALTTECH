@@ -231,10 +231,10 @@ function WebhookEvents() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="wh-title"
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-6 shadow-elev3"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="wh-title" className="font-display text-lg font-bold text-ink-900">
+            <h2 id="wh-title" className="font-display text-lg font-semibold text-ink-900">
               Event detail
             </h2>
             <dl className="mt-3 grid gap-3 text-sm">

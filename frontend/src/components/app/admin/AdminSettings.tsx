@@ -51,7 +51,7 @@ export default function AdminSettings() {
       {settings.error ? (
         <ErrorState message={settings.error} onRetry={settings.reload} />
       ) : settings.loading && !settings.data ? (
-        <Skeleton className="h-40 rounded-[20px]" />
+        <Skeleton className="h-40 rounded-xl" />
       ) : (
         <Panel
           title="Mentor capacity"

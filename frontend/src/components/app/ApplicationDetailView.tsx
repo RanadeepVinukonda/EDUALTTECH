@@ -102,19 +102,19 @@ export default function ApplicationDetailView({ id }: { id: string }) {
       </nav>
 
       <header>
-        <h1 className="font-display text-2xl font-extrabold text-ink-900">{application.course.title}</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900">{application.course.title}</h1>
         <p className="mt-1 text-sm text-slate-500">Mentor application</p>
       </header>
 
-      <section className="rounded-[20px] border border-slate-200 bg-white p-5">
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Status</p>
-        <p className={`mt-1 font-display text-lg font-bold ${meta.tone}`}>{meta.label}</p>
+        <p className={`mt-1 font-display text-lg font-semibold ${meta.tone}`}>{meta.label}</p>
         <p className="mt-2 text-sm text-slate-600">{meta.next}</p>
       </section>
 
       {application.status === "INTERVIEW_SCHEDULED" && (application.interviewAt || application.interviewUrl) && (
-        <section className="rounded-[20px] border border-indigo-200 bg-indigo-50 p-5 text-sm">
-          <h2 className="font-display font-bold text-indigo-900">Interview details</h2>
+        <section className="rounded-xl border border-indigo-200 bg-indigo-50 p-5 text-sm">
+          <h2 className="font-display font-semibold text-indigo-900">Interview details</h2>
           {application.interviewAt && (
             <p className="mt-2 text-indigo-800">Scheduled for {formatDate(application.interviewAt)}</p>
           )}
@@ -150,7 +150,7 @@ export default function ApplicationDetailView({ id }: { id: string }) {
         </section>
       )}
 
-      <dl className="flex flex-col gap-4 rounded-[20px] border border-slate-200 bg-white p-5 text-sm">
+      <dl className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 text-sm">
         <div>
           <dt className="font-semibold text-ink-700">Reference</dt>
           <dd className="mt-0.5 font-mono text-slate-600">{application.id}</dd>

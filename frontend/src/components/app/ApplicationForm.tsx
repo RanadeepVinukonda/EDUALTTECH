@@ -52,12 +52,19 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
   const [qualification, setQualification] = useState("");
   const [message, setMessage] = useState("");
   const [resume, setResume] = useState<File | null>(null);
+  const [useProfileResume, setUseProfileResume] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [needsMobile, setNeedsMobile] = useState(false);
   const [busy, setBusy] = useState(false);
   const submitted = useRef(false);
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (user?.resumeName) {
+      setUseProfileResume(true);
+    }
+  }, [user?.resumeName]);
 
   const load = useCallback(async () => {
     setLoadError(null);
@@ -96,28 +103,44 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
     const q = qualification.trim();
     if (q.length < 10) errs.qualification = "Describe your qualification (at least 10 characters).";
     else if (q.length > 3000) errs.qualification = "Keep this under 3000 characters.";
-    if (!resume) errs.resume = "Attach your resume.";
-    else if (!ALLOWED_TYPE.test(resume.type)) errs.resume = "Use a PDF, DOC, DOCX, TXT, or image file.";
-    else if (resume.size > MAX_BYTES) errs.resume = "File must be 5 MB or smaller.";
+    if (!useProfileResume) {
+      if (!resume) errs.resume = "Attach your resume.";
+      else if (!ALLOWED_TYPE.test(resume.type)) errs.resume = "Use a PDF, DOC, DOCX, TXT, or image file.";
+      else if (resume.size > MAX_BYTES) errs.resume = "File must be 5 MB or smaller.";
+    }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (busy || !validate() || !resume) return;
+    if (busy || !validate()) return;
+    if (!useProfileResume && !resume) return;
 
     setBusy(true);
     setSubmitError(null);
     setNeedsMobile(false);
     try {
-      const data = await fileToBase64(resume);
-      const { application } = await apiPost<{ application: Application }>("/applications", {
+      const payload: {
+        courseId: string;
+        qualification: string;
+        message: string | null;
+        useProfileResume?: boolean;
+        resume?: { name: string; type: string; data: string };
+      } = {
         courseId,
         qualification: qualification.trim(),
         message: message.trim() ? message.trim() : null,
-        resume: { name: resume.name, type: resume.type, data },
-      });
+      };
+
+      if (useProfileResume) {
+        payload.useProfileResume = true;
+      } else if (resume) {
+        const data = await fileToBase64(resume);
+        payload.resume = { name: resume.name, type: resume.type, data };
+      }
+
+      const { application } = await apiPost<{ application: Application }>("/applications", payload);
       submitted.current = true;
       const slug = available.find((c) => c.id === courseId)?.slug;
       router.push(slug ? `/courses/${slug}` : `/dashboard/mentor/applications/${application.id}`);
@@ -130,6 +153,9 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
           setCourseId("");
           setResume(null);
           await load();
+        } else if (err.code === "RESUME_MISSING") {
+          setSubmitError("Profile resume not found. Please upload a file below or update your profile.");
+          setUseProfileResume(false);
         } else if (err.code === "VALIDATION_ERROR" && err.details) {
           setSubmitError(err.message);
         } else {
@@ -149,20 +175,20 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
     return (
       <div className="flex max-w-2xl flex-col gap-6">
         <header>
-          <h1 className="font-display text-2xl font-extrabold text-ink-900">Apply to mentor</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink-900">Apply to mentor</h1>
           <p className="mt-1 text-sm text-slate-500">
             Choose a course and tell us about your expertise. Submission does not grant teaching
             access — a reviewer assesses every application.
           </p>
         </header>
-        <div className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
           <p className="font-semibold text-amber-900">Verify your mobile number to continue</p>
           <p className="mt-1 text-sm text-amber-800">
             We ask for a verified mobile number before you can apply to mentor. The application form
             unlocks automatically as soon as your number is verified.
           </p>
         </div>
-        <div className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-elev1">
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
           <MobileVerification />
         </div>
       </div>
@@ -172,7 +198,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
   return (
     <div className="flex max-w-2xl flex-col gap-6">
       <header>
-        <h1 className="font-display text-2xl font-extrabold text-ink-900">Apply to mentor</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900">Apply to mentor</h1>
         <p className="mt-1 text-sm text-slate-500">
           Choose a course and tell us about your expertise. Submission does not grant teaching
           access — a reviewer assesses every application.
@@ -255,21 +281,60 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="resume" className="text-sm font-semibold text-ink-700">
-              Resume <span className="text-danger">*</span>
-            </label>
-            <Dropzone
-              id="resume"
-              name="resume"
-              accept={ACCEPT}
-              error={!!fieldErrors.resume}
-              icon={<AttachFile fontSize="small" />}
-              file={resume}
-              hint="PDF, DOC, DOCX, TXT or image · up to 5 MB"
-              onFile={setResume}
-            />
-            {fieldErrors.resume && <p className="text-sm text-danger">{fieldErrors.resume}</p>}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label htmlFor="resume" className="text-sm font-semibold text-ink-700">
+                Resume <span className="text-danger">*</span>
+              </label>
+              <Link href="/dashboard/profile" className="text-xs text-brand-600 hover:underline">
+                Manage profile resume
+              </Link>
+            </div>
+
+            {user?.resumeName && (
+              <label className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-sm text-slate-700 cursor-pointer hover:bg-slate-50 transition">
+                <input
+                  type="checkbox"
+                  checked={useProfileResume}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setUseProfileResume(checked);
+                    if (checked) {
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.resume;
+                        return next;
+                      });
+                    }
+                  }}
+                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                />
+                <span>
+                  Use resume from profile (<strong>{user.resumeName}</strong>)
+                </span>
+              </label>
+            )}
+
+            {useProfileResume ? (
+              <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-800">
+                <AttachFile fontSize="small" className="text-emerald-600" />
+                <span>Your profile resume will be attached to this application automatically.</span>
+              </div>
+            ) : (
+              <>
+                <Dropzone
+                  id="resume"
+                  name="resume"
+                  accept={ACCEPT}
+                  error={!!fieldErrors.resume}
+                  icon={<AttachFile fontSize="small" />}
+                  file={resume}
+                  hint="PDF, DOC, DOCX, TXT or image · up to 5 MB"
+                  onFile={setResume}
+                />
+                {fieldErrors.resume && <p className="text-sm text-danger">{fieldErrors.resume}</p>}
+              </>
+            )}
           </div>
 
           {submitError && (

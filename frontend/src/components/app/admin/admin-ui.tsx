@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
-import Button from "@/components/ui/Button";
+import Button, { buttonClass } from "@/components/ui/Button";
 import { useFocusTrap } from "@/components/ui/useFocusTrap";
 
 export { default as Skeleton } from "@/components/ui/Skeleton";
@@ -60,10 +60,12 @@ export function AdminHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <header className="flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900 sm:text-3xl">{title}</h1>
-        {description && <p className="mt-1 max-w-2xl text-[15px] text-slate-500">{description}</p>}
+    <header className="flex flex-wrap items-end justify-between gap-4 pb-4">
+      <div className="min-w-0">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink-900 sm:text-[30px]">
+          {title}
+        </h1>
+        {description && <p className="mt-1.5 max-w-2xl text-[15px] leading-relaxed text-slate-500">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
@@ -85,21 +87,35 @@ export function MetricCard({
 }) {
   const inner = (
     <>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+        {href && (
+          <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-brand-600">
+            <path d="M4 12 12 4M6 4h6v6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </div>
       <p
         className={cn(
-          "mt-2 font-display text-2xl font-bold tabular-nums",
+          "mt-3 font-display text-[28px] font-semibold leading-none tracking-tight tabular-nums",
           tone === "warn" ? "text-amber-700" : tone === "danger" ? "text-red-700" : "text-ink-900",
         )}
       >
         {value}
       </p>
-      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
+      {hint && <p className="mt-2.5 text-xs leading-snug text-slate-500">{hint}</p>}
     </>
   );
-  const cls = "rounded-[20px] border border-slate-200 bg-white p-5 shadow-elev1";
+  const cls = cn(
+    "group border-t-2 bg-white px-4 py-4",
+    tone === "warn"
+      ? "border-amber-400"
+      : tone === "danger"
+        ? "border-red-400"
+        : "border-slate-300",
+  );
   return href ? (
-    <Link href={href} className={cn(cls, "transition hover:border-brand-300")}>
+    <Link href={href} className={cn(cls, "transition hover:border-brand-500")}>
       {inner}
     </Link>
   ) : (
@@ -119,14 +135,14 @@ export function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[20px] border border-slate-200 bg-white shadow-elev1">
+    <section className="rounded-xl border border-slate-200 bg-white">
       {(title || actions) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
-          <div>
-            {title && <h2 className="font-display text-lg font-bold text-ink-900">{title}</h2>}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
+          <div className="min-w-0">
+            {title && <h2 className="font-display text-base font-semibold tracking-tight text-ink-900">{title}</h2>}
             {description && <p className="mt-0.5 text-sm text-slate-500">{description}</p>}
           </div>
-          {actions}
+          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
       )}
       <div className="p-5">{children}</div>
@@ -144,7 +160,12 @@ const TONE: Record<string, string> = {
 
 export function StatusPill({ tone = "neutral", children }: { tone?: keyof typeof TONE; children: React.ReactNode }) {
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold", TONE[tone] ?? TONE.neutral)}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize",
+        TONE[tone] ?? TONE.neutral,
+      )}
+    >
       {children}
     </span>
   );
@@ -202,20 +223,47 @@ export function Pagination({
   if (pages <= 1) {
     return total > 0 ? <p className="text-sm text-slate-500">{total} result{total === 1 ? "" : "s"}</p> : null;
   }
+  const items: (number | "gap")[] = [];
+  for (let p = 1; p <= pages; p++) {
+    if (p === 1 || p === pages || Math.abs(p - page) <= 1) items.push(p);
+    else if (items[items.length - 1] !== "gap") items.push("gap");
+  }
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
+    <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-4">
       <p className="text-sm text-slate-500">
         Page {page} of {pages} · {total} result{total === 1 ? "" : "s"}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <Button variant="secondary" size="sm" disabled={busy || page <= 1} onClick={() => onChange(page - 1)}>
           Previous
         </Button>
+        {items.map((item, i) =>
+          item === "gap" ? (
+            <span key={`gap-${i}`} className="px-1 text-sm text-slate-400" aria-hidden>
+              …
+            </span>
+          ) : item === page ? (
+            <span key={item} aria-current="page" className={buttonClass("primary", "sm", "min-w-9 pointer-events-none text-center tabular-nums")}>
+              {item}
+            </span>
+          ) : (
+            <Button
+              key={item}
+              variant="ghost"
+              size="sm"
+              className="min-w-9 tabular-nums"
+              disabled={busy}
+              onClick={() => onChange(item)}
+            >
+              {item}
+            </Button>
+          ),
+        )}
         <Button variant="secondary" size="sm" disabled={busy || !hasMore} onClick={() => onChange(page + 1)}>
           Next
         </Button>
       </div>
-    </div>
+    </nav>
   );
 }
 
@@ -252,10 +300,10 @@ export function ConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev3"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-6 shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="confirm-title" className="font-display text-lg font-bold text-ink-900">
+        <h2 id="confirm-title" className="font-display text-lg font-semibold text-ink-900">
           {title}
         </h2>
         <div className="mt-2 text-sm text-slate-600">{children}</div>
@@ -299,7 +347,7 @@ export function FilterSelect({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`cursor-pointer appearance-none rounded-full border border-slate-300 bg-white py-1.5 pr-7 text-xs font-semibold text-ink-900 transition hover:border-brand-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 ${
+          className={`h-9 cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white pr-8 text-xs font-semibold text-ink-900 transition hover:border-brand-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 ${
             icon ? "pl-8" : "pl-3"
           }`}
         >

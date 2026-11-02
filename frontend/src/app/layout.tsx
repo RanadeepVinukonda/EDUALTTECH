@@ -141,7 +141,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" suppressHydrationWarning className={`${sora.variable} ${inter.variable} ${jetbrains.variable}`}>
-      <body className="flex min-h-dvh flex-col font-sans">
+      <body suppressHydrationWarning className="flex min-h-dvh flex-col font-sans">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <AuthProvider>
           <a
@@ -150,11 +150,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           >
             Skip to content
           </a>
-          <Chrome>
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-          </Chrome>
+          <Chrome>{children}</Chrome>
           <Toaster />
         </AuthProvider>
       </body>

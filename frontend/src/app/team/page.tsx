@@ -49,11 +49,11 @@ export default function TeamPage() {
           <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {TEAM.map((m) => (
               <li key={m.name} className="flex gap-4">
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100">
                   <CoverImage src={m.image} alt={`Portrait of ${m.name}`} fallback={initialsFromName(m.name)} />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="font-display text-lg font-bold text-ink-900">{m.name}</h2>
+                  <h2 className="font-display text-lg font-semibold text-ink-900">{m.name}</h2>
                   <p className="text-sm font-medium text-brand-700">{m.title}</p>
                 </div>
               </li>
@@ -64,7 +64,7 @@ export default function TeamPage() {
 
       <section className="bg-slate-50 py-16 sm:py-20">
         <div className={`${wrap} text-center`}>
-          <h2 className="mx-auto max-w-2xl font-display text-3xl font-bold text-ink-900">Want to work with us?</h2>
+          <h2 className="mx-auto max-w-2xl font-display text-3xl font-semibold text-ink-900">Want to work with us?</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-ink-600">
             Explore our courses or get in touch.
           </p>

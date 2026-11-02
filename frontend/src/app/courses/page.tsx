@@ -31,7 +31,7 @@ export default function CoursesPage() {
               </li>
             </ol>
           </nav>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
             Explore our courses
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink-600">

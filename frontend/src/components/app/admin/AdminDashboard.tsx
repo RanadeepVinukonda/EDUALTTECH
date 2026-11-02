@@ -1,17 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import Insights from "@mui/icons-material/Insights";
+import MenuBook from "@mui/icons-material/MenuBook";
+import PeopleAlt from "@mui/icons-material/PeopleAlt";
 import { apiGet } from "@/lib/api";
 import type { AdminApplicationRow, AdminStats } from "@/lib/app-types";
 import { formatDate, formatMoney } from "@/lib/format";
 import { buttonClass } from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
 import ErrorState from "@/components/ui/ErrorState";
+import { useAuth } from "../AuthProvider";
 import { AdminHeader, MetricCard, Panel, Skeleton, StatusPill, statusTone, useAsync, userName } from "./admin-ui";
 
 const PENDING = ["SUBMITTED", "UNDER_REVIEW", "INTERVIEW_SCHEDULED"];
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const stats = useAsync(() => apiGet<AdminStats>("/admin/stats"), []);
   const apps = useAsync(
     () => apiGet<{ applications: AdminApplicationRow[]; total: number }>("/applications", { status: "SUBMITTED", limit: 5 }),
@@ -24,8 +29,8 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <AdminHeader
-        title="Admin overview"
-        description="Your platform at a glance."
+        title={`Welcome back${user?.firstName ? `, ${user.firstName}` : ""}`}
+        description={`Platform pulse for ${new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}.`}
         actions={
           <>
             <Link href="/dashboard/admin/courses/new" className={buttonClass("primary", "sm")}>
@@ -43,7 +48,7 @@ export default function AdminDashboard() {
       ) : stats.loading || !stats.data ? (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-[110px] rounded-[20px]" />
+            <Skeleton key={i} className="h-[110px] rounded-xl" />
           ))}
         </div>
       ) : (
@@ -54,8 +59,8 @@ export default function AdminDashboard() {
         title="Mentor applications awaiting review"
         description="Applications that need your decision."
         actions={
-          <span className="text-sm font-semibold text-slate-500">
-            {apps.loading ? "…" : `${apps.data?.total ?? 0} total`}
+          <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">
+            {apps.loading ? "…" : `${apps.data?.total ?? 0} pending`}
           </span>
         }
       >
@@ -64,28 +69,30 @@ export default function AdminDashboard() {
         ) : apps.loading && !apps.data ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-14 rounded-xl" />
+              <Skeleton key={i} className="h-16 rounded-xl" />
             ))}
           </div>
         ) : apps.data && apps.data.applications.length > 0 ? (
-          <ul className="divide-y divide-slate-100">
+          <ul className="-my-2 divide-y divide-slate-100">
             {apps.data.applications.map((a) => (
-              <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
+              <li key={a.id} className="flex flex-wrap items-center gap-3 py-3.5">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700">
+                  {(a.user?.firstName?.[0] ?? "").toUpperCase()}
+                  {(a.user?.lastName?.[0] ?? "").toUpperCase()}
+                </span>
+                <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold text-ink-900">{userName(a.user)}</p>
                   <p className="truncate text-sm text-slate-500">
-                    {a.course.title} · applied {formatDate(a.createdAt)}
+                    {a.course.title} · {formatDate(a.createdAt, { dateStyle: "medium" })}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <StatusPill tone={statusTone(a.status)}>{a.status.replace(/_/g, " ").toLowerCase()}</StatusPill>
-                  <Link
-                    href={`/dashboard/admin/courses/${a.course.id}`}
-                    className="text-sm font-semibold text-brand-700 hover:underline"
-                  >
-                    Open course
-                  </Link>
-                </div>
+                <StatusPill tone={statusTone(a.status)}>{a.status.replace(/_/g, " ").toLowerCase()}</StatusPill>
+                <Link
+                  href={`/dashboard/admin/applications/${a.id}`}
+                  className="text-sm font-semibold text-brand-700 hover:underline"
+                >
+                  Review
+                </Link>
               </li>
             ))}
           </ul>
@@ -94,11 +101,28 @@ export default function AdminDashboard() {
         )}
       </Panel>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <QuickLink href="/dashboard/admin/analytics" title="Analytics" body="Platform trends and revenue." />
-        <QuickLink href="/dashboard/admin/users" title="User management" body="Accounts, roles and invites." />
-        <QuickLink href="/dashboard/admin/courses" title="Course management" body="Draft and publish courses." />
-      </div>
+      <Panel title="Workspace" description="Jump to the areas you use most.">
+        <div className="grid gap-2 sm:grid-cols-3">
+          <WorkspaceLink
+            href="/dashboard/admin/analytics"
+            title="Analytics"
+            body="Trends and revenue"
+            icon={<Insights fontSize="small" aria-hidden />}
+          />
+          <WorkspaceLink
+            href="/dashboard/admin/users"
+            title="Users"
+            body="Accounts and roles"
+            icon={<PeopleAlt fontSize="small" aria-hidden />}
+          />
+          <WorkspaceLink
+            href="/dashboard/admin/courses"
+            title="Courses"
+            body="Draft and publish"
+            icon={<MenuBook fontSize="small" aria-hidden />}
+          />
+        </div>
+      </Panel>
     </div>
   );
 }
@@ -136,14 +160,32 @@ function StatsGrid({ s, pendingApps }: { s: AdminStats; pendingApps: number }) {
   );
 }
 
-function QuickLink({ href, title, body }: { href: string; title: string; body: string }) {
+function WorkspaceLink({
+  href,
+  title,
+  body,
+  icon,
+}: {
+  href: string;
+  title: string;
+  body: string;
+  icon: React.ReactNode;
+}) {
   return (
     <Link
       href={href}
-      className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-elev1 transition hover:border-brand-300"
+      className="group flex items-center gap-3 rounded-xl border border-slate-200 px-3.5 py-3 transition hover:border-brand-300 hover:bg-brand-50/40"
     >
-      <p className="font-display font-bold text-ink-900">{title}</p>
-      <p className="mt-1 text-sm text-slate-500">{body}</p>
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600 transition group-hover:bg-brand-100 group-hover:text-brand-700">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-ink-900">{title}</span>
+        <span className="block truncate text-xs text-slate-500">{body}</span>
+      </span>
+      <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0 text-slate-400 transition group-hover:text-brand-600">
+        <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     </Link>
   );
 }

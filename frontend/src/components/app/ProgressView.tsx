@@ -72,7 +72,7 @@ export default function ProgressView({ compact = false }: { compact?: boolean })
     <div className={compact ? "space-y-6" : "space-y-8"}>
       {!compact && (
         <header>
-          <h1 className="font-display text-3xl font-bold text-ink-900">Progress</h1>
+          <h1 className="font-display text-3xl font-semibold text-ink-900">Progress</h1>
           <p className="mt-1 text-[15px] text-slate-500">Your learning across enrolled courses.</p>
         </header>
       )}
@@ -99,12 +99,12 @@ export default function ProgressView({ compact = false }: { compact?: boolean })
             {rows.map((r) => {
               const complete = r.totalLessons !== null && r.totalLessons > 0 && r.completedLessons === r.totalLessons;
               return (
-                <li key={r.id} className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-elev1">
+                <li key={r.id} className="rounded-xl border border-slate-200 bg-white p-5">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="flex min-w-0 gap-4">
                       <CoverImage src={r.thumbnailUrl} alt="" fallback={r.title} className="h-16 w-24 shrink-0 rounded-xl" />
                       <div className="min-w-0">
-                        <h2 className="truncate font-display font-bold text-ink-900">{r.title}</h2>
+                        <h2 className="truncate font-display font-semibold text-ink-900">{r.title}</h2>
                         <p className="mt-0.5 text-xs text-slate-500">{r.category}</p>
                         <p className="mt-1 text-sm text-slate-600">
                           {r.totalLessons === null
@@ -145,8 +145,8 @@ export default function ProgressView({ compact = false }: { compact?: boolean })
 
 function Summary({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-elev1">
-      <p className="font-display text-3xl font-bold text-ink-900">{value}</p>
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <p className="font-display text-3xl font-semibold text-ink-900">{value}</p>
       <p className="mt-1 text-sm text-slate-500">{label}</p>
     </div>
   );

@@ -9,7 +9,7 @@ export default function AdminLoading() {
           <Skeleton key={i} className="h-9 w-28" />
         ))}
       </div>
-      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
         <Skeleton className="h-11 w-full rounded-none" />
         {[0, 1, 2, 3, 4, 5, 6].map((i) => (
           <Skeleton key={i} className="h-14 w-full rounded-none border-t border-slate-100" />

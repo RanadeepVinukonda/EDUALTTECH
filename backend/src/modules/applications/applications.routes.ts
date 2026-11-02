@@ -34,11 +34,18 @@ router.post(
       courseId: z.string().min(1),
       qualification: z.string().trim().min(10).max(3000),
       message: z.string().trim().max(3000).nullable().optional(),
-      resume: fileMeta,
+      resume: fileMeta.optional(),
+      useProfileResume: z.boolean().optional(),
     }),
   }),
   async (req, res) => {
-    const input = body<{ courseId: string; qualification: string; message?: string | null; resume: z.infer<typeof fileMeta> }>(req);
+    const input = body<{
+      courseId: string;
+      qualification: string;
+      message?: string | null;
+      resume?: z.infer<typeof fileMeta>;
+      useProfileResume?: boolean;
+    }>(req);
     const userId = req.user!.id;
 
     const course = await prisma.course.findUnique({ where: { id: input.courseId } });
@@ -56,9 +63,28 @@ router.post(
     });
     if (open) throw ApiError.conflict("You already have an application for this course", "APPLICATION_EXISTS");
 
-    const bytes = Buffer.from(input.resume.data, "base64");
-    assertUploadable(input.resume.name, bytes.length);
-    const resumePath = await uploadPrivate(`applications/${input.courseId}`, input.resume.name, bytes, contentTypeFor(input.resume.name));
+    let resumePath: string;
+    if (input.useProfileResume) {
+      const profile = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { resumePath: true },
+      });
+      if (!profile?.resumePath) {
+        throw ApiError.badRequest("Upload a resume in your profile first", "RESUME_MISSING");
+      }
+      resumePath = profile.resumePath;
+    } else if (input.resume) {
+      const bytes = Buffer.from(input.resume.data, "base64");
+      assertUploadable(input.resume.name, bytes.length);
+      resumePath = await uploadPrivate(
+        `applications/${input.courseId}`,
+        input.resume.name,
+        bytes,
+        contentTypeFor(input.resume.name),
+      );
+    } else {
+      throw ApiError.badRequest("Attach a resume or use the one in your profile");
+    }
 
     const application = await prisma.mentorApplication.create({
       data: {

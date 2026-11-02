@@ -125,10 +125,10 @@ export default function LearningProfileCard() {
   }
 
   return (
-    <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
+    <section className="rounded-xl border border-slate-200 bg-white p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-display text-lg font-bold text-ink-900">Learning profile</h2>
+          <h2 className="font-display text-lg font-semibold text-ink-900">Learning profile</h2>
           <p className="mt-1 text-sm text-slate-500">
             Helps us recommend courses, learning paths, and mentors that fit you.
           </p>

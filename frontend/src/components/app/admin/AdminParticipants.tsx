@@ -12,7 +12,7 @@ export default function AdminParticipants({ courseId, embedded = false }: { cour
   const detail = useAsync(() => apiGet<CourseDetailResponse>(`/courses/${courseId}`), [courseId]);
 
   if (detail.error) return <ErrorState message={detail.error} onRetry={detail.reload} />;
-  if (detail.loading && !detail.data) return <Skeleton className="h-96 rounded-[20px]" />;
+  if (detail.loading && !detail.data) return <Skeleton className="h-96 rounded-xl" />;
   if (!detail.data) return <EmptyState title="Course not found" description="This course may have been removed." />;
 
   const course = detail.data.course;
@@ -74,7 +74,7 @@ export default function AdminParticipants({ courseId, embedded = false }: { cour
         )}
       </Panel>
 
-      <div className="flex items-start gap-3 rounded-[20px] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
         <StatusPill tone="warn">gap</StatusPill>
         <p>
           The backend exposes <span className="font-semibold">no learner roster</span> and no endpoints to add, remove,

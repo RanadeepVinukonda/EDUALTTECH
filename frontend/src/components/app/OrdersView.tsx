@@ -50,7 +50,7 @@ export default function OrdersView() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-extrabold text-ink-900">Orders</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900">Orders</h1>
         <p className="text-sm text-slate-500">Your purchases and their payment status.</p>
       </header>
 
@@ -65,7 +65,7 @@ export default function OrdersView() {
           }
         />
       ) : (
-        <ol className="flex flex-col divide-y divide-slate-200 rounded-[20px] border border-slate-200 bg-white">
+        <ol className="flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
           {orders.map((o) => {
             const isOpen = open === o.id;
             const payment = o.payments?.[0] ?? null;

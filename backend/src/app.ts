@@ -23,6 +23,7 @@ import wishlistRoutes from "./modules/wishlist/wishlist.routes.js";
 import contactRoutes from "./modules/contact/contact.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
 import cmsRoutes from "./modules/cms/cms.routes.js";
+import pollsRoutes from "./modules/polls/polls.routes.js";
 
 export function createApp() {
   const app = express();
@@ -65,6 +66,7 @@ export function createApp() {
   app.use("/api/contact", contactRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/cms", cmsRoutes);
+  app.use("/api/polls", pollsRoutes);
   app.use("/api/auth", authRoutes);
   // Mounted at /api: course-scoped meeting routes are /courses/:courseId/meetings,
   // item routes are /meetings/:id - matching the frontend's apiGet paths.

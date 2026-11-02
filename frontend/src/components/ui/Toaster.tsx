@@ -38,7 +38,7 @@ export default function Toaster() {
             key={t.id}
             role="status"
             className={cn(
-              "pointer-events-auto flex w-full max-w-sm items-start gap-2 rounded-xl border px-4 py-3 text-sm shadow-elev2",
+              "pointer-events-auto flex w-full max-w-sm items-start gap-2 rounded-xl border px-4 py-3 text-sm",
               t.tone === "success" && "border-green-300 bg-green-50 text-green-900",
               t.tone === "error" && "border-danger/30 bg-white text-danger",
               t.tone === "info" && "border-slate-200 bg-white text-ink-800",

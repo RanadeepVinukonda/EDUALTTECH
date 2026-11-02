@@ -33,7 +33,7 @@ export default function MyLearningView() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold text-ink-900">My Learning</h1>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">My Learning</h1>
         <p className="mt-1 text-[15px] text-slate-500">Everything you&apos;re enrolled in.</p>
       </header>
 

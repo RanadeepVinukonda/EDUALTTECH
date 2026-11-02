@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import ChevronRight from "@mui/icons-material/ChevronRight";
-import Lightbulb from "@mui/icons-material/Lightbulb";
-import Build from "@mui/icons-material/Build";
-import Storefront from "@mui/icons-material/Storefront";
-import Flag from "@mui/icons-material/Flag";
-import SectionHeading from "@/components/landing/SectionHeading";
-import LinkButton from "@/components/ui/LinkButton";
+import ArrowForward from "@mui/icons-material/ArrowForward";
 import CoverImage from "@/components/ui/CoverImage";
+import LinkButton from "@/components/ui/LinkButton";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 import { initialsFromName } from "@/lib/name";
 import { TEAM } from "@/lib/team";
 
@@ -20,26 +16,37 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
+const COMMITMENTS = [
+  {
+    title: "Education and alternate education",
+    body: "Students get structured courses and, where the standard path does not fit, alternate learning routes to the same practical outcomes.",
+  },
+  {
+    title: "Tuition facilities",
+    body: "Guided tuition and coaching alongside our courses: subject support, doubt sessions, and hands-on practice, in person and online.",
+  },
+  {
+    title: "Employment for skilled people",
+    body: "We recruit skilled people who are out of work, train them as mentors and tutors, and pay them to teach.",
+  },
+];
+
 const APPROACH = [
   {
-    icon: Build,
     title: "Learn by building",
     body: "Skills are formed by making things, not by reading about them. Every course is organised around practical work you carry out yourself.",
   },
   {
-    icon: Lightbulb,
     title: "Understand the problem first",
-    body: "Before choosing a tool, we teach learners to understand the real problem in front of them — the same discipline we apply to our own projects.",
+    body: "Before choosing a tool, we teach learners to understand the real problem in front of them. It is the same discipline we apply to our own projects.",
   },
   {
-    icon: Storefront,
     title: "Connect technology with entrepreneurship",
     body: "Building something useful and making it sustainable are different skills. We treat both as part of the same capability.",
   },
   {
-    icon: Flag,
     title: "Aim beyond theory",
-    body: "The goal is a working outcome — a prototype, a small venture, or a tool that solves a problem around you.",
+    body: "The goal is a working outcome: a prototype, a small venture, or a tool that solves a problem around you.",
   },
 ];
 
@@ -49,10 +56,10 @@ export default function AboutPage() {
       {/* Intro */}
       <section className="border-b border-slate-200 bg-slate-50">
         <div className={`${wrap} py-10 sm:py-14`}>
-          <nav aria-label="Breadcrumb" className="mb-6">
+          <nav aria-label="Breadcrumb" className="mb-8">
             <ol className="flex items-center gap-1.5 text-sm text-ink-600">
               <li>
-                <Link href="/" className="hover:text-ink-900">
+                <Link href="/" className="transition-colors hover:text-ink-900">
                   Home
                 </Link>
               </li>
@@ -64,65 +71,77 @@ export default function AboutPage() {
               </li>
             </ol>
           </nav>
-          <SectionHeading
-            as="h1"
-            eyebrow="About EduAltTech"
-            title="Practical learning, and work for the people who teach it"
-            lead="EduAltTech does two connected things. We help students learn practical skills in AI, entrepreneurship, and technology — through courses, alternate education, and tuition — and we employ skilled people who were out of work as the mentors who teach them."
-          />
+
+          <h1 className="max-w-4xl font-display text-4xl font-semibold tracking-tight text-ink-900 sm:text-5xl sm:leading-[1.06]">
+            Practical learning, and work for the people who teach it.
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-600 sm:text-lg">
+            Students learn skills in AI, entrepreneurship, and technology. The mentors who teach them are
+            skilled professionals we train and employ.
+          </p>
+
+          <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-200 pt-6 text-xs font-semibold text-slate-600">
+            <li>Courses</li>
+            <li aria-hidden className="h-1 w-1 rounded-full bg-slate-300" />
+            <li>Alternate education</li>
+            <li aria-hidden className="h-1 w-1 rounded-full bg-slate-300" />
+            <li>Tuition</li>
+            <li aria-hidden className="h-1 w-1 rounded-full bg-slate-300" />
+            <li>Paid mentoring</li>
+          </ul>
         </div>
       </section>
 
-      {/* Mission and philosophy */}
-      <section className="py-16 sm:py-20">
-        <div className={wrap}>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-            <h2 className="font-display text-3xl font-bold tracking-tight text-ink-900 text-balance sm:text-4xl">
-              Why practical learning
+      {/* Why practical learning */}
+      <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
+        <div className={`${wrap} grid items-center gap-10 lg:grid-cols-12 lg:gap-16`}>
+          <figure className="lg:col-span-5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/media/photos/EAT4.jpg"
+              alt="Students working with a mentor during a classroom session"
+              className="aspect-[4/3] w-full rounded-xl object-cover"
+              loading="lazy"
+            />
+            <figcaption className="mt-3 text-xs text-slate-500">
+              Classroom session, Kakinada
+            </figcaption>
+          </figure>
+
+          <div className="lg:col-span-7">
+            <h2 className="max-w-lg font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+              Practical learning, not syllabus completion.
             </h2>
-            <div className="max-w-prose space-y-5 text-lg leading-relaxed text-ink-700">
+            <div className="mt-5 max-w-prose space-y-5 text-base leading-relaxed text-ink-600 sm:text-lg">
               <p>
-                The skills that matter most — building software, solving a real problem, turning an idea
-                into something people can use — are learned by doing. A syllabus alone rarely produces
+                The skills that matter most are learned by doing: building software, solving a real
+                problem, turning an idea into something people can use. A syllabus alone rarely produces
                 them.
               </p>
               <p>
                 EduAltTech exists to close that gap. We build structured courses where learners work
-                through real, practical tasks with mentors, and we keep the focus on outcomes rather than
-                theory.
+                through real tasks with mentors, and we keep the focus on outcomes rather than theory.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Learning and livelihood */}
-      <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
+      {/* Commitments */}
+      <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
         <div className={wrap}>
-          <SectionHeading
-            eyebrow="Education and employment"
-            title="Learning and livelihood, together"
-            lead="Three commitments sit behind everything we run. They are practical, and each one has to be real to count."
-          />
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {[
-              {
-                title: "Education and alternate education",
-                body: "Students get structured courses and, where the standard path does not fit, alternate learning routes to the same practical outcomes.",
-              },
-              {
-                title: "Tuition facilities",
-                body: "Guided tuition and coaching alongside our courses — subject support, doubt sessions, and hands-on practice, in person and online.",
-              },
-              {
-                title: "Employment for skilled people",
-                body: "We recruit skilled people who are out of work, train them as mentors and tutors, and employ them to teach. This is paid work, not volunteering.",
-              },
-            ].map((c, i) => (
-              <div key={c.title} className="rounded-2xl border border-slate-200 bg-white p-8">
-                <span className="font-mono text-sm text-slate-400">{String(i + 1).padStart(2, "0")}</span>
-                <h3 className="mt-3 font-display text-xl font-bold text-ink-900">{c.title}</h3>
-                <p className="mt-3 leading-relaxed text-ink-600">{c.body}</p>
+          <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+            Learning and livelihood, together.
+          </h2>
+          <p className="mt-3 max-w-md text-base leading-relaxed text-ink-600">
+            Three commitments sit behind everything we run. Each one has to be real to count.
+          </p>
+
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            {COMMITMENTS.map((c) => (
+              <div key={c.title} className="rounded-xl border border-slate-200 bg-slate-50/50 p-6">
+                <h3 className="font-display text-base font-semibold text-ink-900">{c.title}</h3>
+                <p className="mt-2.5 text-sm leading-relaxed text-ink-600">{c.body}</p>
               </div>
             ))}
           </div>
@@ -130,26 +149,21 @@ export default function AboutPage() {
       </section>
 
       {/* Approach */}
-      <section className="bg-slate-50 py-16 sm:py-20">
+      <section className="border-b border-slate-200 bg-slate-50 py-16 sm:py-24">
         <div className={wrap}>
-          <SectionHeading
-            eyebrow="Our approach"
-            title="Four ideas we work from"
-            lead="These principles guide both how we teach and what we build."
-          />
-          <div className="mt-12 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+          <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+            Four ideas we work from.
+          </h2>
+          <p className="mt-3 max-w-md text-base leading-relaxed text-ink-600">
+            These principles guide both how we teach and what we build.
+          </p>
+
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
             {APPROACH.map((item, i) => (
-              <div key={item.title} className="grid gap-4 p-6 sm:grid-cols-[auto_1fr] sm:gap-8 sm:p-8">
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-sm text-slate-400">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-                    <item.icon />
-                  </span>
-                </div>
-                <div className="max-w-2xl">
-                  <h3 className="font-display text-xl font-bold text-ink-900">{item.title}</h3>
-                  <p className="mt-2 leading-relaxed text-ink-600">{item.body}</p>
-                </div>
+              <div key={item.title} className="rounded-xl border border-slate-200 bg-white p-6">
+                <span className="font-mono text-xs text-slate-400">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="mt-4 font-display text-lg font-semibold text-ink-900">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-600">{item.body}</p>
               </div>
             ))}
           </div>
@@ -157,25 +171,25 @@ export default function AboutPage() {
       </section>
 
       {/* Team */}
-      <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
+      <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
         <div className={wrap}>
-          <SectionHeading
-            eyebrow="Our team"
-            title="The people behind EduAltTech"
-            lead="The educators, builders, and mentors who make our courses work."
-          />
-          <ul className="mx-auto mt-12 grid max-w-xl grid-cols-1 gap-8 min-[500px]:grid-cols-2 md:max-w-3xl md:grid-cols-3 lg:max-w-full lg:grid-cols-5">
+          <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+            The people behind EduAltTech.
+          </h2>
+          <p className="mt-3 max-w-md text-base leading-relaxed text-ink-600">
+            The educators, builders, and mentors who make our courses work.
+          </p>
+
+          <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
             {TEAM.map((m) => (
-              <li key={m.name} className="group text-center">
-                <div className="mx-auto mb-6 h-40 w-40 overflow-hidden rounded-full border border-solid border-transparent transition-colors duration-500 group-hover:border-brand-600">
+              <li key={m.name} className="group">
+                <div className="mb-4 h-32 w-32 overflow-hidden rounded-xl border border-slate-200 sm:h-36 sm:w-36">
                   <CoverImage src={m.image} alt={`Portrait of ${m.name}`} fallback={initialsFromName(m.name)} />
                 </div>
-                <h3 className="mb-2 font-display text-xl font-semibold capitalize text-ink-900 transition-colors duration-500 group-hover:text-brand-700">
-                  {m.name}
-                </h3>
-                <span className="block text-slate-500 transition-colors duration-500 group-hover:text-ink-900">
+                <h3 className="font-display text-base font-semibold capitalize text-ink-900">{m.name}</h3>
+                <p className="mt-1 text-xs text-slate-500">
                   {m.title}
-                </span>
+                </p>
               </li>
             ))}
           </ul>
@@ -183,44 +197,37 @@ export default function AboutPage() {
       </section>
 
       {/* Setsuzoku */}
-      <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
+      <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
         <div className={wrap}>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-            <SectionHeading
-              eyebrow="Parent company"
-              title="A product by Setsuzoku"
-              lead="EduAltTech is built and run by Setsuzoku — the team behind our product, engineering, and design work."
-            />
-            <div className="max-w-prose space-y-5 text-lg leading-relaxed text-ink-700">
-              <p>
-                Setsuzoku is the parent company behind EduAltTech. Everything on this platform — the
-                courses, the platform itself, and the programs we run — comes from the same team.
-              </p>
-              <div className="flex flex-wrap gap-3 pt-2">
-                <LinkButton href="https://setsuzoku.in">Visit setsuzoku.in</LinkButton>
-              </div>
-            </div>
-          </div>
+          <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+            A product by Setsuzoku.
+          </h2>
+          <p className="mt-3 max-w-prose text-base leading-relaxed text-ink-600 sm:text-lg">
+            Setsuzoku is the parent company behind EduAltTech. Everything here, from the courses to the
+            programs we run, comes from the same team.
+          </p>
+          <Link
+            href="https://setsuzoku.in"
+            className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 underline decoration-brand-300 underline-offset-4 transition hover:text-brand-800"
+          >
+            Visit setsuzoku.in
+            <ArrowForward fontSize="small" />
+          </Link>
         </div>
       </section>
 
-      {/* Closing action */}
-      <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
-        <div className={`${wrap} text-center`}>
-          <h2 className="mx-auto max-w-2xl font-display text-3xl font-bold text-ink-900 sm:text-4xl">
+      {/* Closing */}
+      <section className="bg-white py-16 sm:py-24">
+        <div className={wrap}>
+          <h2 className="max-w-xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
             Where would you like to start?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-ink-600">
+          <p className="mt-3 max-w-md text-base text-ink-600">
             Learn something practical, or talk to us about your school.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <LinkButton href="/courses" size="lg">
-              Explore courses
-            </LinkButton>
-            <LinkButton href="/services" variant="secondary" size="lg">
-              Services & programs
-            </LinkButton>
-            <LinkButton href="/contact" variant="secondary" size="lg">
+          <div className="mt-8 flex flex-wrap gap-3">
+            <LinkButton href="/courses">Explore courses</LinkButton>
+            <LinkButton href="/contact" variant="secondary">
               Contact us
             </LinkButton>
           </div>

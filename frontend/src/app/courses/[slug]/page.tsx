@@ -1,14 +1,12 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import WorkspacePremium from "@mui/icons-material/WorkspacePremium";
 import { publicFetchStrict } from "@/lib/server-api";
 import { siteUrl } from "@/lib/site";
 import type { CourseDetailResponse } from "@/lib/types";
 import CoverImage from "@/components/ui/CoverImage";
-import FeatureIcon from "@/components/ui/FeatureIcon";
 import LinkButton from "@/components/ui/LinkButton";
 import TapLoader from "@/components/ui/TapLoader";
 import CourseActions from "@/components/courses/CourseActions";
@@ -59,8 +57,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   if (error) {
     return (
       <div className={`${wrap} py-24`}>
-        <div role="alert" className="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="font-display text-xl font-bold text-ink-900">We couldn&apos;t load this course</h1>
+        <div role="alert" className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center">
+          <h1 className="font-display text-xl font-semibold text-ink-900">We couldn&apos;t load this course</h1>
           <p className="mt-2 text-ink-600">There was a problem reaching the server. Please try again.</p>
           <div className="mt-6 flex justify-center gap-3">
             <LinkButton href={`/courses/${slug}`}>Try again</LinkButton>
@@ -75,6 +73,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
   if (!data?.course) notFound();
   const course = data.course;
+  if (course.features.includes("100% Free Resource")) redirect(`/resources/${course.slug}`);
   const lessonsTotal = course.chapters.reduce(
     (sum, ch) => sum + ch.topics.reduce((s, t) => s + t._count.lessons, 0),
     0,
@@ -82,7 +81,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   const typeLabel = TYPE_LABEL[course.type] ?? "Course";
 
   const base = await siteUrl();
-  // ponytail: one lesson ≈ one hour; drop courseWorkload if real durations land in the data.
+  // ponytail: one lesson G�� one hour; drop courseWorkload if real durations land in the data.
+  const outcomeLines = (course.roadmapSummary ?? "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const outcomes = outcomeLines.length > 1 ? outcomeLines : [];
+  const skills = Array.from(new Set([...course.features, ...course.tags]));
+
   const workload = lessonsTotal > 0 ? `PT${lessonsTotal}H` : undefined;
   const courseJsonLd = {
     "@context": "https://schema.org",
@@ -148,196 +154,337 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
         </nav>
       </div>
 
-      <div className={`${wrap} grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14`}>
-        <div className="min-w-0">
-          {/* Hero — translucent thumbnail with title + tags on it */}
-          <div className="relative flex min-h-[240px] items-end overflow-hidden rounded-[20px] bg-slate-900 shadow-elev2">
-            {course.thumbnailUrl && (
-              <div className="absolute inset-0">
-                <CoverImage src={course.thumbnailUrl} alt="" fallback="" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
-            <div className="relative z-10 w-full p-6 text-white sm:p-7">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/80">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-px w-4 bg-white/40" />
-                  {typeLabel}
-                </span>
-                {course.domain && <span className="text-white/60">{course.domain}</span>}
-              </div>
-              <h1 className="mt-3.5 max-w-[660px] font-display text-2xl font-extrabold tracking-tight text-balance break-words sm:text-[27px]">
-                {course.title}
-              </h1>
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-brand-100">
-                {course.chapters.length > 0 && (
-                  <span>
-                    {course.chapters.length} {course.chapters.length === 1 ? "chapter" : "chapters"}
-                  </span>
-                )}
-                {lessonsTotal > 0 && <span>{lessonsTotal} lessons</span>}
-                {course.level && <span>{course.level}</span>}
-                {course.enrolledCount > 0 && <span>{course.enrolledCount} enrolled</span>}
-              </div>
-            </div>
-          </div>
+      {/* Course header */}
+      <header className={`${wrap} pb-6 pt-5`}>
+        <h1 className="max-w-[820px] font-display text-[30px] font-semibold leading-[1.14] tracking-tight text-ink-900 break-words sm:text-[42px]">
+          {course.title}
+        </h1>
+        <p className="mt-2 text-[13px] font-medium uppercase tracking-wider text-ink-500">
+          {typeLabel}
+          {course.domain && <span className="text-ink-500"> · {course.domain}</span>}
+        </p>
+        <p className="mt-3 max-w-3xl text-[15.5px] leading-7 text-ink-600">{course.description}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-500">
+          <span>Self-paced</span>
+          {course.level && (
+            <>
+              <span aria-hidden>·</span>
+              <span>{course.level}</span>
+            </>
+          )}
+          {course.enrolledCount > 0 && (
+            <>
+              <span aria-hidden>·</span>
+              <span>{course.enrolledCount.toLocaleString()} learners enrolled</span>
+            </>
+          )}
+        </div>
+      </header>
 
-          {/* About */}
-          <section aria-labelledby="about-heading" className="mt-8">
-            <h2 id="about-heading" className="font-display text-lg font-bold text-ink-900">
-              About this course
+      {/* Section tabs */}
+      <nav aria-label="Course sections" className="border-y border-slate-200">
+        <div className={`${wrap} -mb-px flex gap-6 overflow-x-auto`}>
+          <a href="#about" className="whitespace-nowrap border-b-2 border-ink-900 py-3.5 text-[14px] font-medium text-ink-900">
+            Overview
+          </a>
+          <a href="#syllabus" className="whitespace-nowrap border-b-2 border-transparent py-3.5 text-[14px] font-medium text-ink-500 hover:border-slate-300 hover:text-ink-900">
+            Syllabus
+          </a>
+          <a href="#instructors" className="whitespace-nowrap border-b-2 border-transparent py-3.5 text-[14px] font-medium text-ink-500 hover:border-slate-300 hover:text-ink-900">
+            Instructors
+          </a>
+          <a href="#mentors" className="whitespace-nowrap border-b-2 border-transparent py-3.5 text-[14px] font-medium text-ink-500 hover:border-slate-300 hover:text-ink-900">
+            Mentors
+          </a>
+        </div>
+      </nav>
+
+      <div className={`${wrap} grid gap-12 py-10 lg:grid-cols-[minmax(0,1fr)_360px]`}>
+        <main className="min-w-0">
+          {/* What you'll learn + skills */}
+          <section id="about" aria-labelledby="learn-heading" className="scroll-mt-24">
+            <h2 id="learn-heading" className="font-display text-[22px] font-semibold text-ink-900 sm:text-[26px]">
+              {course.roadmapTitle?.trim() || "What you'll learn"}
             </h2>
-            <p className="mt-2.5 whitespace-pre-line leading-relaxed break-words text-ink-700">
-              {course.roadmapSummary?.trim() || course.description}
-            </p>
-          </section>
-
-          {/* Features */}
-          {course.features.length > 0 && (
-            <section aria-labelledby="features-heading" className="mt-8">
-              <h2 id="features-heading" className="font-display text-lg font-bold text-ink-900">
-                What you&apos;ll get
-              </h2>
-              <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-                {course.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-ink-700">
-                    <FeatureIcon feature={f} className="shrink-0 text-brand-600" />
-                    {f}
+            {course.learningOutcomes && course.learningOutcomes.length > 0 ? (
+              <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
+                {course.learningOutcomes.map((o) => (
+                  <li key={o} className="flex items-start gap-2.5 text-[15px] leading-relaxed text-ink-700">
+                    <span aria-hidden className="mt-2.5 h-px w-3 shrink-0 bg-slate-400" />
+                    <span>{o}</span>
                   </li>
                 ))}
               </ul>
-            </section>
-          )}
-
-          {/* Curriculum */}
-          <section aria-labelledby="curriculum-heading" className="mt-8">
-            <h2 id="curriculum-heading" className="font-display text-lg font-bold text-ink-900">
-              Curriculum
-            </h2>
-            {course.chapters.length > 0 ? (
-              <>
-                <p className="mt-0.5 text-xs text-ink-500">
-                  {course.chapters.length} {course.chapters.length === 1 ? "chapter" : "chapters"}
-                  {lessonsTotal > 0 && ` · ${lessonsTotal} lessons`}
-                </p>
-                <ol className="mt-3.5 flex flex-col gap-2.5">
-                  {course.chapters.map((ch, index) => {
-                    const chapterLessons = ch.topics.reduce((s, t) => s + t._count.lessons, 0);
-                    return (
-                      <li key={ch.id}>
-                        <details className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-elev1" open={index === 0}>
-                          <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
-                            <span className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-lg bg-brand-50 text-[13px] font-extrabold text-brand-700">
-                              {index + 1}
-                            </span>
-                            <span className="min-w-0 font-bold text-ink-900">{ch.title}</span>
-                            <span className="ml-auto shrink-0 text-xs text-ink-500">
-                              {chapterLessons} {chapterLessons === 1 ? "lesson" : "lessons"}
-                            </span>
-                            <ExpandMore
-                              fontSize="small"
-                              className="shrink-0 text-ink-500 transition-transform group-open:rotate-180"
-                            />
-                          </summary>
-                          {ch.summary && (
-                            <p className="border-t border-slate-100 px-4 py-3 text-sm whitespace-pre-line break-words text-ink-600">
-                              {ch.summary}
-                            </p>
-                          )}
-                          {ch.topics.length > 0 ? (
-                            <div className="border-t border-slate-100">
-                              {ch.topics.map((t) => (
-                                <div key={t.id} className="flex items-center gap-2.5 border-t border-slate-100 px-4 py-2.5 text-[13.5px] text-ink-700 first:border-t-0">
-                                  <span className="min-w-0">{t.title}</span>
-                                  <span className="ml-auto shrink-0 text-[11px] tabular-nums text-ink-500">
-                                    {t._count.lessons} {t._count.lessons === 1 ? "lesson" : "lessons"}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="border-t border-slate-100 px-4 py-3 text-sm text-ink-500">Lessons are being added.</p>
-                          )}
-                        </details>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </>
+            ) : outcomes.length > 0 ? (
+              <ul className="mt-4 space-y-2.5">
+                {outcomes.map((o) => (
+                  <li key={o} className="flex gap-2.5 text-[15.5px] leading-7 text-ink-700">
+                    <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600" />
+                    {o}
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <p className="mt-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-ink-600">
+              <p className="mt-3 whitespace-pre-line text-[15.5px] leading-7 text-ink-700 break-words">
+                {course.roadmapSummary?.trim() || course.description}
+              </p>
+            )}
+
+            {/* Prerequisites & Target Audience */}
+            {(Boolean(course.prerequisites?.length) || Boolean(course.targetAudience)) && (
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                {course.prerequisites && course.prerequisites.length > 0 && (
+                  <div className="rounded-xl border border-slate-200 bg-white p-5">
+                    <h3 className="font-display text-sm font-semibold text-ink-900">
+                      Prerequisites
+                    </h3>
+                    <ul className="mt-3 space-y-1.5">
+                      {course.prerequisites.map((p) => (
+                        <li key={p} className="flex items-start gap-2 text-xs text-slate-700">
+                          <span aria-hidden className="mt-2 h-px w-3 shrink-0 bg-slate-300" />
+                          <span>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {course.targetAudience && (
+                  <div className="rounded-xl border border-slate-200 bg-white p-5">
+                    <h3 className="font-display text-sm font-semibold text-ink-900">
+                      Target Audience
+                    </h3>
+                    <p className="mt-3 text-xs leading-relaxed text-slate-700">
+                      {course.targetAudience}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {skills.length > 0 && (
+              <>
+                <h3 className="mt-8 font-display text-[18px] font-semibold text-ink-900">Skills you&apos;ll gain</h3>
+                <p className="mt-2 text-[14.5px] leading-7 text-ink-700">
+                  {skills.join(" · ")}
+                </p>
+              </>
+            )}
+
+            {outcomes.length > 0 && (
+              <>
+                <h3 className="mt-8 font-display text-[18px] font-semibold text-ink-900">About this course</h3>
+                <p className="mt-2 whitespace-pre-line text-[15.5px] leading-7 text-ink-700 break-words">{course.description}</p>
+              </>
+            )}
+
+            {/* Bridge: Courses -> Free Supplementary Resources */}
+            <div className="mt-10 border-t border-slate-200 pt-6">
+              <h3 className="font-display text-base font-semibold text-ink-900">
+                Free supplementary guides
+              </h3>
+              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-600">
+                Study the concepts independently before or alongside this course in our open knowledge library.
+              </p>
+              <Link href="/resources" className="mt-3 inline-flex text-sm font-semibold text-brand-700 hover:text-brand-800">
+                Explore free resources →
+              </Link>
+            </div>
+          </section>
+
+          {/* Syllabus */}
+          <section id="syllabus" aria-labelledby="syllabus-heading" className="mt-12 scroll-mt-24">
+            <h2 id="syllabus-heading" className="font-display text-[22px] font-semibold text-ink-900 sm:text-[26px]">
+              Syllabus
+            </h2>
+            <p className="mt-1 text-[13px] text-ink-500">
+              {course.chapters.length} {course.chapters.length === 1 ? "module" : "modules"}
+              {lessonsTotal > 0 && ` · ${lessonsTotal} lessons`} · Self-paced
+            </p>
+            {course.chapters.length > 0 ? (
+              <div className="mt-2 divide-y divide-slate-200 border-b border-slate-200">
+                {course.chapters.map((ch, index) => {
+                  const published = ch.topics.flatMap((t) => t.lessons);
+                  const chapterLessons = ch.topics.reduce((s, t) => s + t._count.lessons, 0);
+                  const hasMultipleTopics = ch.topics.length > 1;
+                  return (
+                    <details key={ch.id} className="group" open={index === 0}>
+                      <summary className="flex cursor-pointer list-none items-start gap-4 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
+                        <span aria-hidden className="mt-0.5 w-6 shrink-0 font-mono text-[12px] text-slate-400">
+                          {index + 1}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[16.5px] font-semibold leading-6 text-ink-900">{ch.title}</span>
+                          <span className="mt-0.5 block text-[13px] text-ink-500">
+                            {chapterLessons} {chapterLessons === 1 ? "lesson" : "lessons"}
+                            {published.length > 0 && published.length < chapterLessons && ` · ${published.length} available now`}
+                          </span>
+                        </span>
+                        <ExpandMore
+                          fontSize="small"
+                          className="mt-1 shrink-0 text-ink-500 transition-transform group-open:rotate-180"
+                        />
+                      </summary>
+
+                      <div className="pb-5 pl-12">
+                        {ch.summary && (
+                          <p className="mb-4 text-[14.5px] leading-6 text-ink-600 whitespace-pre-line break-words">{ch.summary}</p>
+                        )}
+                        {ch.topics.length > 0 ? (
+                          ch.topics.map((t) => (
+                            <div key={t.id} className="mt-3 first:mt-0">
+                              {hasMultipleTopics && (
+                                <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-wider text-ink-500">{t.title}</p>
+                              )}
+                              {t.lessons.length > 0 ? (
+                                <ul>
+                                  {t.lessons.map((l) => (
+                                    <li key={l.id} className="flex items-center gap-3 py-2 text-[14.5px] text-ink-700">
+                                      <span className="min-w-0 flex-1">{l.title}</span>
+                                      <span className="shrink-0 text-[12.5px] font-medium text-ink-500">
+                                        {l.type === "VIDEO" ? "Video" : "Reading"}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="py-1.5 text-[14px] text-ink-500">Lessons are being added.</p>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-[14px] text-ink-500">Lessons are being added.</p>
+                        )}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-[15px] text-ink-600">
                 The curriculum for this course is being finalised.
               </p>
             )}
           </section>
 
+          {/* Instructors */}
+          <section id="instructors" aria-labelledby="instructors-heading" className="mt-12 scroll-mt-24">
+            <h2 id="instructors-heading" className="font-display text-[22px] font-semibold text-ink-900 sm:text-[26px]">
+              Instructor
+            </h2>
+            <div className="mt-4 flex gap-4 rounded-xl border border-slate-200 p-5">
+              <div className="grid h-[72px] w-[72px] shrink-0 place-items-center overflow-hidden rounded-xl bg-slate-100 text-xl font-semibold text-ink-700">
+                {course.createdBy ? (
+                  <CoverImage
+                    src={course.createdBy.avatarUrl}
+                    alt=""
+                    fallback={`${course.createdBy.firstName[0] ?? ""}${course.createdBy.lastName[0] ?? ""}`.toUpperCase()}
+                  />
+                ) : (
+                  <span>EA</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-[17px] font-semibold text-ink-900">
+                  {course.createdBy ? `${course.createdBy.firstName} ${course.createdBy.lastName}` : "EduAltTech"}
+                </h3>
+                <p className="text-[13px] text-ink-500">
+                  {course.createdBy ? "Course instructor" : "Offered by EduAltTech"}
+                </p>
+                <p className="mt-1.5 text-[14px] leading-6 text-ink-600">
+                  {course.createdBy?.bio || "Leads this course and its curriculum."}
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Mentors */}
-          <section aria-labelledby="mentors-heading" className="mt-8">
-            <h2 id="mentors-heading" className="font-display text-lg font-bold text-ink-900">
-              Mentors
+          <section id="mentors" aria-labelledby="mentors-heading" className="mt-12 scroll-mt-24">
+            <h2 id="mentors-heading" className="font-display text-[22px] font-semibold text-ink-900 sm:text-[26px]">
+              Course mentors
             </h2>
             {course.mentors.length > 0 ? (
-              <ul className="mt-3.5 flex flex-col gap-3.5">
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2">
                 {course.mentors.map((m) => {
                   const initials = `${m.user.firstName[0] ?? ""}${m.user.lastName[0] ?? ""}`.toUpperCase();
                   const cap = m.capacity && m.capacity > 0 ? m.capacity : null;
-                  const pct = cap ? Math.max(0, Math.min(100, Math.round((m.free / cap) * 100))) : null;
                   return (
-                    <li key={m.user.id} className="flex gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 shadow-elev1">
-                      <div className="grid h-[52px] w-[52px] shrink-0 place-items-center overflow-hidden rounded-[14px] bg-brand-100 text-lg font-extrabold text-brand-700">
+                    <li key={m.user.id} className="flex gap-3 rounded-xl border border-slate-200 p-4">
+                      <div className="grid h-[52px] w-[52px] shrink-0 place-items-center overflow-hidden rounded-xl bg-slate-100 text-base font-semibold text-ink-700">
                         <CoverImage src={m.user.avatarUrl} alt="" fallback={initials} />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-[15px] font-extrabold text-ink-900">
+                      <div className="min-w-0">
+                        <h3 className="text-[15px] font-semibold text-ink-900">
                           {m.user.firstName} {m.user.lastName}
                         </h3>
-                        {m.user.bio ? (
-                          <p className="mt-1 text-xs leading-relaxed text-ink-600">{m.user.bio}</p>
-                        ) : (
-                          <p className="mt-1 text-xs text-ink-600">Course mentor</p>
-                        )}
+                        <p className="mt-0.5 text-[13px] leading-5 text-ink-600">{m.user.bio || "Course mentor"}</p>
+                        <p className="mt-1.5 text-[12px] text-ink-500">
+                          {cap ? `${m.free} of ${cap} seats left` : "Open seats"}
+                        </p>
                       </div>
-                      {cap ? (
-                        <div className="shrink-0 text-right">
-                          <div className="text-[21px] font-extrabold leading-none text-brand-700">{m.free}</div>
-                          <div className="mt-1 text-[11px] text-ink-500">seats left</div>
-                          <div className="mt-2 h-[5px] w-[74px] overflow-hidden rounded-full bg-slate-100">
-                            <span aria-hidden="true" className="block h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="shrink-0 self-center text-right text-[11px] font-semibold text-brand-700">
-                          Open seats
-                        </div>
-                      )}
                     </li>
                   );
                 })}
               </ul>
             ) : (
-              <div className="mt-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+              <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
                 <div className="mx-auto w-fit pl-20">
                   <TapLoader />
                 </div>
-                <p className="mt-5 font-display text-base font-bold text-ink-900">Waiting for a mentor</p>
+                <p className="mt-5 font-display text-base font-semibold text-ink-900">Waiting for a mentor</p>
                 <p className="mx-auto mt-1 max-w-md text-sm text-ink-600">
                   No mentor is assigned to this course yet. Check back soon — you can still apply to mentor below.
                 </p>
               </div>
             )}
           </section>
-        </div>
+        </main>
 
-        {/* Enrolment rail — before enrolment / application */}
+        {/* Enrolment rail */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <CourseActions
-            courseId={course.id}
-            slug={course.slug}
-            pricePaise={course.pricePaise}
-            currency={course.currency}
-          />
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+            <div className="relative aspect-video">
+              {course.thumbnailUrl ? (
+                <CoverImage src={course.thumbnailUrl} alt={course.title} fallback="" />
+              ) : (
+                <div className="grid h-full w-full place-items-center bg-brand-700">
+                  <span className="px-6 text-center font-display text-lg font-semibold text-white">{course.title}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <CourseActions courseId={course.id} slug={course.slug} pricePaise={course.pricePaise} currency={course.currency} />
+          </div>
+
+          <dl className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 px-5 text-[13.5px]">
+            {course.enrolledCount > 0 && (
+              <div className="flex items-center justify-between gap-4 py-3">
+                <dt className="text-ink-600">Learners enrolled</dt>
+                <dd className="font-semibold text-ink-900">{course.enrolledCount.toLocaleString()}</dd>
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-4 py-3">
+              <dt className="text-ink-600">Modules</dt>
+              <dd className="font-semibold text-ink-900">{course.chapters.length}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-4 py-3">
+              <dt className="text-ink-600">Lessons</dt>
+              <dd className="font-semibold text-ink-900">{lessonsTotal}</dd>
+            </div>
+            {course.level && (
+              <div className="flex items-center justify-between gap-4 py-3">
+                <dt className="text-ink-600">Level</dt>
+                <dd className="font-semibold text-ink-900">{course.level}</dd>
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-4 py-3">
+              <dt className="text-ink-600">Schedule</dt>
+              <dd className="font-semibold text-ink-900">Self-paced</dd>
+            </div>
+          </dl>
+
           <p className="mt-3 text-[11.5px] leading-relaxed text-ink-500">
-            <WorkspacePremium className="mr-1 align-text-bottom text-slate-400" style={{ fontSize: 15 }} />
             Seats are limited. Learning content unlocks only after confirmed enrolment.
           </p>
           <div className="mt-5 flex flex-col gap-2 text-sm">

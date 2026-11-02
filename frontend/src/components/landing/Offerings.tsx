@@ -1,63 +1,71 @@
 import Link from "next/link";
-import School from "@mui/icons-material/School";
-import AutoStories from "@mui/icons-material/AutoStories";
-import CoPresent from "@mui/icons-material/CoPresent";
 import ArrowForward from "@mui/icons-material/ArrowForward";
-import SectionHeading from "./SectionHeading";
 
-const OFFERINGS = [
+const TRACKS = [
   {
-    icon: School,
-    title: "Education and alternate education",
-    body: "Structured courses in AI, entrepreneurship, and applied technology, plus alternate learning for students who need a path beyond the standard syllabus — organised into clear chapters, topics, and lessons.",
-    href: "/courses",
-    cta: "Browse courses",
+    id: "education",
+    number: "01",
+    title: "Technology & professional education",
+    description:
+      "Career-focused learning built on structured roadmaps, live code reviews, and industry mentors.",
+    tags: ["Applied AI & ML", "Software Engineering", "Tech Entrepreneurship"],
+    courseCount: "Structured cohorts",
+    href: "/courses?type=EDUCATION",
   },
   {
-    icon: AutoStories,
-    title: "Tuition facilities",
-    body: "Guided tuition and coaching that sits alongside our courses — subject support, doubt sessions, and hands-on practice, in person and online.",
-    href: "/services",
-    cta: "See tuition",
-  },
-  {
-    icon: CoPresent,
-    title: "Employment for skilled people",
-    body: "We recruit skilled people who are out of work, train them as mentors and tutors, and employ them to teach. Teaching with us is real work, not volunteering.",
-    href: "/mentor",
-    cta: "Teach with us",
+    id: "alternate",
+    number: "02",
+    title: "Creative & alternate arts",
+    description:
+      "Fine arts and performance disciplines taught with the same rigour, feedback, and working mentors.",
+    tags: ["Carnatic & Western Music", "Classical Dance", "Creative Production"],
+    courseCount: "Masterclasses",
+    href: "/courses?type=ALTERNATIVE_EDUCATION",
   },
 ];
 
 export default function Offerings() {
   return (
-    <section className="bg-slate-50 py-16 sm:py-20">
+    <section className="border-b border-slate-200 bg-slate-50 py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeading
-          eyebrow="What we offer"
-          title="Three things EduAltTech does"
-          lead="Education for students and work for the people who teach them — the two halves feed each other."
-        />
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+          <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl lg:col-span-7">
+            Education and alternate education, under one roof.
+          </h2>
+          <p className="text-base leading-relaxed text-slate-600 lg:col-span-5">
+            Two tracks with the same standard: a structured curriculum, hands-on projects, and a
+            dedicated working mentor.
+          </p>
+        </div>
 
-        <div className="mt-12 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
-          {OFFERINGS.map((o, i) => (
-            <div key={o.title} className="grid gap-6 p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-8 sm:p-8">
-              <div className="flex items-center gap-4">
-                <span className="font-mono text-sm text-slate-400">{String(i + 1).padStart(2, "0")}</span>
-                <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-                  <o.icon />
-                </span>
+        <div className="mt-12 grid border-t border-slate-200 sm:grid-cols-2">
+          {TRACKS.map((track) => (
+            <div
+              key={track.id}
+              className="group flex flex-col border-b border-slate-200 py-8 sm:px-8 sm:py-10 sm:first:pl-0 sm:last:border-l sm:last:pr-0"
+            >
+              <div className="flex items-baseline justify-between gap-4">
+                <span className="font-mono text-xs text-slate-400">{track.number}</span>
+                <span className="text-xs font-medium text-slate-500">{track.courseCount}</span>
               </div>
-              <div>
-                <h3 className="font-display text-xl font-bold text-ink-900">{o.title}</h3>
-                <p className="mt-2 max-w-2xl text-ink-600">{o.body}</p>
-              </div>
+
+              <h3 className="mt-8 max-w-sm font-display text-2xl font-semibold leading-snug text-ink-900">
+                {track.title}
+              </h3>
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-600">{track.description}</p>
+
+              <ul className="mt-6 space-y-1.5 text-sm text-ink-700">
+                {track.tags.map((tag) => (
+                  <li key={tag}>{tag}</li>
+                ))}
+              </ul>
+
               <Link
-                href={o.href}
-                className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-brand-700 hover:text-brand-800"
+                href={track.href}
+                className="mt-8 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-ink-900 transition hover:text-brand-700"
               >
-                {o.cta}
-                <ArrowForward fontSize="small" />
+                Browse courses
+                <ArrowForward fontSize="inherit" aria-hidden />
               </Link>
             </div>
           ))}

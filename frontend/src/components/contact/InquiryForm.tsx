@@ -78,7 +78,7 @@ export default function InquiryForm() {
   if (status === "success") {
     return (
       <div role="status" className="rounded-2xl border border-brand-200 bg-brand-50 p-8 text-center">
-        <h3 className="font-display text-xl font-bold text-ink-900">Message sent</h3>
+        <h3 className="font-display text-xl font-semibold text-ink-900">Message sent</h3>
         <p className="mx-auto mt-2 max-w-md text-ink-600">
           Thank you — we have received your inquiry and will get back to you by email.
         </p>

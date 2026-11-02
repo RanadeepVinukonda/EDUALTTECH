@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
 import { ApiError, apiGet, apiPatch } from "@/lib/api";
 import type { AdminCourseSummary } from "@/lib/app-types";
-import { formatDate, formatMoney } from "@/lib/format";
-import { notifySuccess } from "@/lib/notify";
+import { formatMoney } from "@/lib/format";
+import { notifyError, notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
-import { ViewButton } from "@/components/ui/IconActionButton";
+
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
@@ -16,16 +16,14 @@ import Select from "@/components/ui/Select";
 import Search from "@mui/icons-material/Search";
 import School from "@mui/icons-material/School";
 import Flag from "@mui/icons-material/Flag";
-import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync, useDebouncedValue } from "./admin-ui";
+import Article from "@mui/icons-material/Article";
+import LandingCourseCard from "@/components/landing/CourseCard";
+import { AdminHeader, ConfirmDialog, Pagination, Panel, Skeleton, useAsync, useDebouncedValue } from "./admin-ui";
 
-const LIMIT = 20;
+const LIMIT = 5;
 type Status = "" | "DRAFT" | "PUBLISHED" | "ARCHIVED";
 type TypeFilter = "" | "EDUCATION" | "ALTERNATIVE_EDUCATION";
-
-const COURSE_TYPES: Record<"EDUCATION" | "ALTERNATIVE_EDUCATION", string> = {
-  EDUCATION: "Education",
-  ALTERNATIVE_EDUCATION: "Alternative education",
-};
+type OfferingFilter = "" | "RESOURCE" | "COURSE";
 
 interface CoursesResponse {
   courses: AdminCourseSummary[];
@@ -52,12 +50,13 @@ export default function AdminCourses() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<Status>("");
   const [type, setType] = useState<TypeFilter>("");
+  const [offering, setOffering] = useState<OfferingFilter>("");
   const [page, setPage] = useState(1);
   const debouncedQuery = useDebouncedValue(query, 300);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedQuery, status, type]);
+  }, [debouncedQuery, status, type, offering]);
 
   const { data, error, loading, reload } = useAsync(
     () =>
@@ -65,13 +64,14 @@ export default function AdminCourses() {
         ...(debouncedQuery.trim() ? { q: debouncedQuery.trim() } : {}),
         ...(status ? { status } : {}),
         ...(type ? { type } : {}),
+        ...(offering ? { kind: offering } : {}),
         page,
         limit: LIMIT,
       }),
-    [debouncedQuery, status, type, page],
+    [debouncedQuery, status, type, offering, page],
   );
 
-  const filtersActive = query.trim().length > 0 || status !== "" || type !== "";
+  const filtersActive = query.trim().length > 0 || status !== "" || type !== "" || offering !== "";
 
   return (
     <div className="space-y-6">
@@ -107,6 +107,20 @@ export default function AdminCourses() {
             </Select>
           </div>
           <div>
+            <label htmlFor="course-offering" className="mb-1 block text-sm font-semibold text-ink-700">Offering</label>
+            <Select
+              id="course-offering"
+              value={offering}
+              icon={<Article fontSize="small" />}
+              className="w-auto"
+              onChange={(e) => setOffering(e.target.value as OfferingFilter)}
+            >
+              <option value="">All offerings</option>
+              <option value="COURSE">Courses</option>
+              <option value="RESOURCE">Resources</option>
+            </Select>
+          </div>
+          <div>
             <label htmlFor="course-type" className="mb-1 block text-sm font-semibold text-ink-700">Type</label>
             <Select
               id="course-type"
@@ -121,7 +135,7 @@ export default function AdminCourses() {
             </Select>
           </div>
           {filtersActive && (
-            <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setStatus(""); setType(""); }}>
+            <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setStatus(""); setType(""); setOffering(""); }}>
               Clear filters
             </Button>
           )}
@@ -131,20 +145,13 @@ export default function AdminCourses() {
       <Panel
         title="Catalogue"
         description={data ? `${data.total} course${data.total === 1 ? "" : "s"}${filtersActive ? " matching filters" : ""}` : undefined}
-        actions={
-          data && (
-            <span className="text-sm text-slate-500">
-              Page {data.page} of {Math.max(1, Math.ceil(data.total / LIMIT))}
-            </span>
-          )
-        }
       >
         {error ? (
           <ErrorState message={courseError(error, "Could not load courses.")} onRetry={reload} />
         ) : loading && !data ? (
-          <div className="space-y-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 rounded-xl" />
+          <div className="grid gap-5 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-72 rounded-xl" />
             ))}
           </div>
         ) : data && data.courses.length === 0 ? (
@@ -161,18 +168,13 @@ export default function AdminCourses() {
           />
         ) : data ? (
           <>
-            <ul className="divide-y divide-slate-100">
+            <ul className="grid gap-5 md:grid-cols-2">
               {data.courses.map((c) => (
-                <CourseRow key={c.id} course={c} onChanged={reload} />
+                <CourseCard key={c.id} course={c} onChanged={reload} />
               ))}
             </ul>
-            <div className="mt-4 flex items-center justify-between">
-              <Button variant="secondary" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1 || loading}>
-                Previous
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => setPage((p) => p + 1)} disabled={!data.hasMore || loading}>
-                Next
-              </Button>
+            <div className="mt-6">
+              <Pagination page={data.page} total={data.total} limit={LIMIT} hasMore={data.hasMore} busy={loading} onChange={setPage} />
             </div>
           </>
         ) : null}
@@ -181,22 +183,19 @@ export default function AdminCourses() {
   );
 }
 
-function CourseRow({ course, onChanged }: { course: AdminCourseSummary; onChanged: () => void }) {
-  const router = useRouter();
+function CourseCard({ course, onChanged }: { course: AdminCourseSummary; onChanged: () => void }) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<null | { status: "PUBLISHED" | "DRAFT" | "ARCHIVED"; label: string; detail: string }>(null);
 
   async function apply(next: "PUBLISHED" | "DRAFT" | "ARCHIVED") {
     setBusy(true);
-    setError(null);
     try {
       await apiPatch(`/courses/${course.id}`, { status: next });
       notifySuccess(`Course moved to ${next.toLowerCase()}`);
       setConfirm(null);
       onChanged();
     } catch (err) {
-      setError(courseError(err, "Could not update the course."));
+      notifyError(courseError(err, "Could not update the course."));
     } finally {
       setBusy(false);
     }
@@ -213,63 +212,47 @@ function CourseRow({ course, onChanged }: { course: AdminCourseSummary; onChange
             { label: "Unpublish", next: "DRAFT", confirm: { detail: "It will be hidden from the catalogue until republished." } },
             { label: "Archive", next: "ARCHIVED", confirm: { detail: "It stays in the system but is hidden from learners." } },
           ]
-        : [{ label: "Restore to draft", next: "DRAFT" }];
+        : [{ label: "Restore", next: "DRAFT" }];
 
   return (
-    <li className="py-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link href={`/dashboard/admin/courses/${course.id}`} className="block truncate font-semibold text-ink-900 hover:text-brand-700">
-              {course.title}
-            </Link>
-            <StatusPill tone={statusTone(course.status)}>{course.status.toLowerCase()}</StatusPill>
-          </div>
-          <p className="mt-1 text-xs text-slate-500">
-            {COURSE_TYPES[course.type] ?? course.type} · {course.category} · {course.pricePaise > 0 ? formatMoney(course.pricePaise, course.currency) : "Free"} ·{" "}
-            {course._count.participants} learner{course._count.participants === 1 ? "" : "s"} · {course._count.chapters} chapter
-            {course._count.chapters === 1 ? "" : "s"}
-            {course.createdBy ? ` · by ${course.createdBy.firstName} ${course.createdBy.lastName}` : ""} ·{" "}
-            {formatDate(course.createdAt, { dateStyle: "medium" })}
-          </p>
-          {error && (
-            <p role="alert" className="mt-2 text-sm text-red-700">
-              {error}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <ViewButton
-            onClick={() => router.push(`/dashboard/admin/courses/${course.id}`)}
-            aria-label={`View course: ${course.title}`}
-          />
-          {actions.map((a) =>
-            a.confirm ? (
-              <Button key={a.label} variant="ghost" size="sm" disabled={busy} onClick={() => setConfirm({ status: a.next, label: a.label, detail: a.confirm!.detail })}>
+    <>
+      <LandingCourseCard
+        course={course}
+        href={`/dashboard/admin/courses/${course.id}`}
+        badge={`${course.features.includes("100% Free Resource") ? "resource" : "course"} · ${course.status.toLowerCase()}`}
+        priceLabel={course.pricePaise > 0 ? formatMoney(course.pricePaise, course.currency) : "Free"}
+        stats={[
+          { label: "Learners", value: String(course._count.participants) },
+          { label: "Chapters", value: String(course._count.chapters) },
+        ]}
+        actions={
+          <>
+            {actions.map((a) => (
+              <Button
+                key={a.label}
+                variant="ghost"
+                size="sm"
+                disabled={busy}
+                onClick={() => (a.confirm ? setConfirm({ status: a.next, label: a.label, detail: a.confirm.detail }) : void apply(a.next))}
+              >
                 {a.label}
               </Button>
-            ) : (
-              <Button key={a.label} variant="ghost" size="sm" loading={busy} onClick={() => apply(a.next)}>
-                {a.label}
-              </Button>
-            ),
-          )}
-        </div>
-      </div>
-
-      {confirm && (
-        <div role="alertdialog" aria-modal="true" aria-label={`Confirm ${confirm.label}`} className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <p className="text-sm text-amber-900">{confirm.detail}</p>
-          <div className="mt-2 flex gap-2">
-            <Button size="sm" autoFocus loading={busy} onClick={() => apply(confirm.status)}>
-              Confirm {confirm.label.toLowerCase()}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setConfirm(null)} disabled={busy}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      )}
-    </li>
+            ))}
+          </>
+        }
+        viewLabel={`Open ${course.title}`}
+      />
+      <ConfirmDialog
+        open={Boolean(confirm)}
+        title={`${confirm?.label ?? "Update"} course`}
+        confirmLabel={confirm?.label ?? "Confirm"}
+        tone={confirm?.status === "ARCHIVED" ? "danger" : "primary"}
+        busy={busy}
+        onClose={() => setConfirm(null)}
+        onConfirm={() => confirm && void apply(confirm.status)}
+      >
+        {confirm?.detail}
+      </ConfirmDialog>
+    </>
   );
 }

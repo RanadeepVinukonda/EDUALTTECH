@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import MailOutlined from "@mui/icons-material/MailOutlined";
 import { apiPost, ApiError } from "@/lib/api";
 import { hasSession, safeNext, setSessionFromTokens, type AuthTokens } from "@/lib/auth";
 import Button from "@/components/ui/Button";
@@ -11,12 +10,31 @@ import { PasswordField, TextField } from "./Field";
 import OAuthButtons from "./OAuthButtons";
 
 interface LoginResult extends AuthTokens {
-  user: { id: string; email: string; role: string; emailVerifiedAt: boolean; isActive: boolean };
+  user: {
+    id: string;
+    email: string;
+    role: string;
+    emailVerifiedAt: boolean;
+    isActive: boolean;
+    onboardingDone?: boolean;
+    username?: string | null;
+    experience?: string | null;
+    resumeName?: string | null;
+    resumeUpdatedAt?: string | null;
+  };
 }
 
-export default function LoginForm({ next, notice }: { next?: string; notice?: string }) {
+export default function LoginForm({
+  next,
+  notice,
+  initialEmail,
+}: {
+  next?: string;
+  notice?: string;
+  initialEmail?: string;
+}) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ text: string; code?: string } | null>(null);
@@ -59,7 +77,9 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
         return;
       }
       await setSessionFromTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken });
-      const dest = safeNext(next, "/dashboard");
+      // If profile incomplete, send to onboarding first
+      const defaultDest = data.user.role === "ADMIN" ? "/dashboard/admin" : "/dashboard";
+      const dest = data.user.onboardingDone ? safeNext(next, defaultDest) : "/onboarding";
       router.replace(
         data.user.role !== "ADMIN" && dest.startsWith("/dashboard/admin") ? "/dashboard" : dest,
       );
@@ -91,7 +111,6 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
           placeholder="you@example.com"
           value={email}
           error={errors.email}
-          icon={<MailOutlined fontSize="small" />}
           onChange={(e) => setEmail(e.target.value)}
         />
         <div>
@@ -121,6 +140,16 @@ export default function LoginForm({ next, notice }: { next?: string; notice?: st
             <p className="mt-1">
               <Link href="/signup" className="font-semibold underline">
                 Finish creating your account
+              </Link>
+            </p>
+          )}
+          {error.code === "USER_NOT_FOUND" && (
+            <p className="mt-1">
+              <Link
+                href={`/signup?email=${encodeURIComponent(email.trim())}`}
+                className="font-semibold underline hover:text-danger/90"
+              >
+                No account – sign up →
               </Link>
             </p>
           )}

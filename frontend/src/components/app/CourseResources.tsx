@@ -238,7 +238,7 @@ export default function CourseResources({ slug }: { slug: string }) {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl font-extrabold text-ink-900">Resources</h2>
+          <h2 className="font-display text-xl font-semibold text-ink-900">Resources</h2>
           <p className="mt-1 text-sm text-slate-500">
             {isStaff ? "Post files and links for this course. Attach them to a topic in the roadmap." : "Files and links shared for this course."}
           </p>
@@ -246,8 +246,8 @@ export default function CourseResources({ slug }: { slug: string }) {
       </header>
 
       {isStaff && (
-        <section aria-labelledby="post-resource-h" className="rounded-[20px] border border-slate-200 bg-white p-5">
-          <h3 id="post-resource-h" className="font-display text-lg font-bold text-ink-900">
+        <section aria-labelledby="post-resource-h" className="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 id="post-resource-h" className="font-display text-lg font-semibold text-ink-900">
             Post a resource
           </h3>
           <form onSubmit={create} className="mt-4 flex flex-col gap-3">
@@ -315,7 +315,7 @@ export default function CourseResources({ slug }: { slug: string }) {
       )}
 
       <section aria-labelledby="course-resources-h">
-        <h3 id="course-resources-h" className="font-display text-lg font-bold text-ink-900">
+        <h3 id="course-resources-h" className="font-display text-lg font-semibold text-ink-900">
           {isStaff ? "Course resources" : "Shared with you"}
         </h3>
 
@@ -336,12 +336,12 @@ export default function CourseResources({ slug }: { slug: string }) {
           <div className="mt-3 space-y-6">
             {groups.map(([topicId, items]) => (
               <div key={topicId ?? "general"}>
-                <h4 className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   {topicId ? topicLabels.get(topicId) : "Course-wide"}
                 </h4>
                 <ul className="mt-2 grid gap-4 sm:grid-cols-2">
                   {items.map((r) => (
-                    <li key={r.id} className="rounded-[20px] border border-slate-200 bg-white p-5">
+                    <li key={r.id} className="rounded-xl border border-slate-200 bg-white p-5">
                       {editingId === r.id ? (
                         <div className="flex flex-col gap-3">
                           <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} aria-label="Resource title" />
@@ -368,7 +368,7 @@ export default function CourseResources({ slug }: { slug: string }) {
                       ) : (
                         <div className="flex h-full flex-col">
                           <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{r.kind}</span>
-                          <span className="mt-1 line-clamp-2 font-display text-lg font-bold text-ink-900">{r.title}</span>
+                          <span className="mt-1 line-clamp-2 font-display text-lg font-semibold text-ink-900">{r.title}</span>
                           {r.description && <span className="mt-1 line-clamp-2 text-sm text-slate-600">{r.description}</span>}
                           <span className="mt-2 text-sm text-slate-500">
                             {r.storagePath ? "File" : r.url ? "Link" : "Resource"}

@@ -11,6 +11,7 @@ import { DeleteButton } from "@/components/ui/IconActionButton";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
 import Dropzone from "@/components/ui/Dropzone";
+import MarkdownEditor from "@/components/ui/MarkdownEditor";
 import Title from "@mui/icons-material/Title";
 import LinkIcon from "@mui/icons-material/Link";
 import Category from "@mui/icons-material/Category";
@@ -19,7 +20,7 @@ import LockOpen from "@mui/icons-material/LockOpen";
 import Movie from "@mui/icons-material/Movie";
 import Select from "@/components/ui/Select";
 
-type LessonType = "VIDEO" | "READING";
+type LessonType = "VIDEO" | "READING" | "PROJECT";
 
 interface Draft {
   title: string;
@@ -140,13 +141,12 @@ function LessonForm({
           </p>
         </div>
       ) : (
-        <textarea
+        <MarkdownEditor
           value={draft.textContent}
-          onChange={(e) => setDraft({ ...draft, textContent: e.target.value })}
-          rows={4}
-          placeholder="Lesson text content…"
-          aria-label="Lesson text"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+          onChange={(v) => setDraft({ ...draft, textContent: v })}
+          ariaLabel="Lesson text"
+          rows={8}
+          minHeightClass="min-h-[12rem]"
         />
       )}
       {err && <p className="text-sm text-danger">{err}</p>}
@@ -418,7 +418,7 @@ export default function LessonManager({
 
       {roadmap.chapters.map((chapter: ChapterRow) => (
         <section key={chapter.id} aria-labelledby={`ch-${chapter.id}`}>
-          <h3 id={`ch-${chapter.id}`} className="font-display text-lg font-bold text-ink-900">
+          <h3 id={`ch-${chapter.id}`} className="font-display text-lg font-semibold text-ink-900">
             {chapter.title}
           </h3>
           <div className="mt-3 flex flex-col gap-4">

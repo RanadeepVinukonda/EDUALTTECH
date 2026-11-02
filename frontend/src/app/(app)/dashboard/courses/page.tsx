@@ -9,14 +9,14 @@ export default function LearnerCoursesPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Courses</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900">Courses</h1>
         <p className="mt-1 text-sm text-slate-500">Browse the catalogue and enroll to start learning.</p>
       </header>
       <Suspense
         fallback={
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="overflow-hidden rounded-2xl border border-slate-200">
+              <div key={i} className="overflow-hidden rounded-xl border border-slate-200">
                 <Skeleton className="aspect-[16/10] w-full rounded-none" />
                 <div className="space-y-3 p-5">
                   <Skeleton className="h-4 w-1/3" />

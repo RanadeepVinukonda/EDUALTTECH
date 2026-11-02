@@ -9,12 +9,12 @@ export default function Input({
   const field = (
     <input
       className={cn(
-        "w-full rounded-xl border px-4 py-3 text-[15px] bg-white placeholder:text-slate-400 outline-none transition",
-        "focus:ring-2",
-        Boolean(icon) && "pl-11",
+        "w-full h-10.5 rounded-lg border px-3.5 text-sm bg-white text-slate-900 placeholder:text-slate-400 outline-none transition-all duration-150 shadow-2xs",
+        "focus:ring-3",
+        Boolean(icon) && "pl-10",
         error
-          ? "border-danger focus:border-danger focus:ring-danger/20"
-          : "border-slate-300 focus:border-brand-600 focus:ring-brand-600/20",
+          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15 text-rose-900"
+          : "border-slate-300 focus:border-brand-600 focus:ring-brand-600/15",
         className,
       )}
       aria-invalid={error || undefined}

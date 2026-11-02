@@ -56,7 +56,7 @@ export default function WishlistView() {
   if (items.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="font-display text-3xl font-bold text-ink-900">Wishlist</h1>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">Wishlist</h1>
         <EmptyState
           title="Your wishlist is empty"
           description="Save courses you're interested in and find them here later."
@@ -73,7 +73,7 @@ export default function WishlistView() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold text-ink-900">Wishlist</h1>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">Wishlist</h1>
         <p className="mt-1 text-[15px] text-slate-500">Saved courses. Saving does not enroll you — that happens at checkout.</p>
       </header>
 

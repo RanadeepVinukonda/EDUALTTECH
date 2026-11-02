@@ -5,24 +5,33 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Menu from "@mui/icons-material/Menu";
 import Close from "@mui/icons-material/Close";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { cn } from "@/lib/cn";
 import { hasSession } from "@/lib/auth";
 import LinkButton from "@/components/ui/LinkButton";
 import BrandLogo from "@/components/brand/BrandLogo";
+import ResourcesCategoryMenu, { useResourceTopics } from "@/components/layout/ResourcesCategoryMenu";
 
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
-  { href: "/services", label: "Services & Programs" },
+  { href: "/resources", label: "Resources" },
+  { href: "/services", label: "Services" },
   { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export default function PublicHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [resourcesMobileOpen, setResourcesMobileOpen] = useState(false);
+  const topics = useResourceTopics();
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
+  useEffect(() => {
+    setResourcesMobileOpen(false);
+    setOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     let active = true;
@@ -46,31 +55,47 @@ export default function PublicHeader() {
         </Link>
 
         <nav aria-label="Primary" className="ml-auto hidden items-center gap-1 lg:flex">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={isActive(item.href) ? "page" : undefined}
-              className={cn(
-                "rounded-lg px-3 py-2 text-sm font-medium transition",
-                isActive(item.href) ? "text-brand-700" : "text-ink-600 hover:text-ink-900 hover:bg-slate-100",
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV.map((item) =>
+            item.href === "/resources" ? (
+              <ResourcesCategoryMenu
+                key={item.href}
+                align="left"
+                triggerClassName={cn(
+                  "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition",
+                  isActive(item.href) ? "text-brand-700" : "text-ink-600 hover:text-ink-900 hover:bg-slate-100",
+                )}
+              />
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className={cn(
+                  "rounded-lg px-3 py-2 text-sm font-medium transition",
+                  isActive(item.href) ? "text-brand-700" : "text-ink-600 hover:text-ink-900 hover:bg-slate-100",
+                )}
+              >
+                {item.label}
+              </Link>
+            ),
+          )}
           <span className="mx-1 h-5 w-px bg-slate-200" aria-hidden />
           {signedIn ? (
             <Link
               href="/dashboard"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50"
+              className="rounded-lg px-3.5 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50 transition"
             >
               Dashboard
             </Link>
           ) : (
-            <LinkButton href="/login" size="sm" variant="secondary">
-              Sign in
-            </LinkButton>
+            <div className="flex items-center gap-2">
+              <LinkButton href="/login" size="sm" variant="secondary">
+                Login
+              </LinkButton>
+              <LinkButton href="/signup" size="sm" variant="primary">
+                Get Started
+              </LinkButton>
+            </div>
           )}
         </nav>
 
@@ -93,35 +118,82 @@ export default function PublicHeader() {
       >
         <nav aria-label="Mobile" className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
           <ul className="flex flex-col gap-1">
-            {NAV.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  aria-current={isActive(item.href) ? "page" : undefined}
-                  className={cn(
-                    "block rounded-lg px-3 py-2 text-sm font-medium",
-                    isActive(item.href) ? "bg-brand-50 text-brand-700" : "text-ink-700 hover:bg-slate-100",
+            {NAV.map((item) =>
+              item.href === "/resources" ? (
+                <li key={item.href}>
+                  <button
+                    type="button"
+                    onClick={() => setResourcesMobileOpen((value) => !value)}
+                    aria-expanded={resourcesMobileOpen}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium",
+                      isActive(item.href) ? "bg-brand-50 text-brand-700" : "text-ink-700 hover:bg-slate-100",
+                    )}
+                  >
+                    {item.label}
+                    <ExpandMore fontSize="small" className={cn("transition-transform", resourcesMobileOpen && "rotate-180")} />
+                  </button>
+                  {resourcesMobileOpen && (
+                    <div className="mb-1 ml-3 border-l-2 border-[#308d46] pl-3 py-1 space-y-0.5">
+                      {topics.length > 0 ? (
+                        topics.map((topic) => (
+                          <Link
+                            key={topic.slug}
+                            href={`/resources#${topic.slug}`}
+                            onClick={() => setOpen(false)}
+                            className="block rounded-lg px-3 py-2 text-sm font-medium text-ink-700 hover:bg-slate-100"
+                          >
+                            {topic.name}
+                          </Link>
+                        ))
+                      ) : (
+                        <p className="px-3 py-2 text-xs text-slate-500">No tutorials yet.</p>
+                      )}
+                      <Link
+                        href="/resources"
+                        onClick={() => setOpen(false)}
+                        className="block rounded-lg border-t border-slate-200/80 px-3 py-2 text-sm font-semibold text-[#308d46] hover:bg-emerald-50"
+                      >
+                        All Tutorials
+                      </Link>
+                    </div>
                   )}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+                </li>
+              ) : (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={isActive(item.href) ? "page" : undefined}
+                    className={cn(
+                      "block rounded-lg px-3 py-2 text-sm font-medium",
+                      isActive(item.href) ? "bg-brand-50 text-brand-700" : "text-ink-700 hover:bg-slate-100",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ),
+            )}
           </ul>
           <div className="mt-3 flex flex-col gap-2 border-t border-slate-200 pt-3">
             {signedIn ? (
               <Link
                 href="/dashboard"
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2 text-center text-sm font-medium text-brand-700 hover:bg-brand-50"
+                className="rounded-lg px-3 py-2 text-center text-sm font-semibold text-brand-700 hover:bg-brand-50"
               >
                 Dashboard
               </Link>
             ) : (
-              <LinkButton href="/login" className="w-full">
-                Sign in
-              </LinkButton>
+              <div className="flex flex-col gap-2">
+                <LinkButton href="/login" variant="secondary" className="w-full">
+                  Login
+                </LinkButton>
+                <LinkButton href="/signup" className="w-full">
+                  Get Started
+                </LinkButton>
+              </div>
             )}
           </div>
         </nav>

@@ -21,12 +21,12 @@ export default function AccessDenied({
   return (
     <div
       role="alert"
-      className="mx-auto flex max-w-lg flex-col items-center rounded-[20px] border border-slate-200 bg-white px-6 py-14 text-center shadow-elev1"
+      className="mx-auto flex max-w-lg flex-col items-center rounded-xl border border-slate-200 bg-white px-6 py-14 text-center"
     >
       <span aria-hidden className="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-500">
         <Block />
       </span>
-      <h1 className="mt-4 font-display text-2xl font-bold text-ink-900">{title}</h1>
+      <h1 className="mt-4 font-display text-2xl font-semibold text-ink-900">{title}</h1>
       <p className="mt-2 text-[15px] text-ink-600">{description}</p>
       {actions && (
         <div className="mt-6 flex flex-wrap justify-center gap-3">

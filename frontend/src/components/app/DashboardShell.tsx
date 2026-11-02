@@ -12,8 +12,16 @@ import Favorite from "@mui/icons-material/Favorite";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Person from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
-import Logout from "@mui/icons-material/Logout";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import SpaceDashboard from "@mui/icons-material/SpaceDashboard";
+import HowToVote from "@mui/icons-material/HowToVote";
+import Insights from "@mui/icons-material/Insights";
+import LibraryBooks from "@mui/icons-material/LibraryBooks";
+import PeopleAlt from "@mui/icons-material/PeopleAlt";
+import HowToReg from "@mui/icons-material/HowToReg";
+import Web from "@mui/icons-material/Web";
+import History from "@mui/icons-material/History";
+import ArrowOutward from "@mui/icons-material/ArrowOutward";
 import { apiGet, NOTIFICATIONS_CHANGED_EVENT } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import Spinner from "@/components/ui/Spinner";
@@ -28,9 +36,75 @@ interface NavLink {
   exact?: boolean;
 }
 
-const ACCOUNT: NavLink[] = [
-  { href: "/dashboard/orders", label: "Orders", Icon: ReceiptLong },
-  { href: "/dashboard/wishlist", label: "Wishlist", Icon: Favorite },
+interface NavGroup {
+  label?: string;
+  items: NavLink[];
+}
+
+const LEARNER_GROUPS: NavGroup[] = [
+  {
+    items: [
+      { href: "/dashboard", label: "Home", Icon: Home, exact: true },
+      { href: "/dashboard/my-learning", label: "My learning", Icon: PlayCircle },
+      { href: "/dashboard/courses", label: "Browse courses", Icon: MenuBook },
+    ],
+  },
+  {
+    label: "Teaching",
+    items: [{ href: "/dashboard/mentor", label: "Mentor hub", Icon: CoPresent }],
+  },
+  {
+    label: "Community",
+    items: [
+      { href: "/polls", label: "Course polls", Icon: HowToVote },
+      { href: "/resources", label: "Free resources", Icon: LibraryBooks },
+      { href: "/dashboard/orders", label: "Orders", Icon: ReceiptLong },
+      { href: "/dashboard/wishlist", label: "Wishlist", Icon: Favorite },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { href: "/dashboard/profile", label: "Profile", Icon: Person },
+      { href: "/dashboard/settings", label: "Settings", Icon: SettingsIcon },
+    ],
+  },
+];
+
+const ADMIN_GROUPS: NavGroup[] = [
+  {
+    label: "Workspace",
+    items: [
+      { href: "/dashboard/admin", label: "Overview", Icon: SpaceDashboard, exact: true },
+      { href: "/dashboard/admin/analytics", label: "Analytics", Icon: Insights },
+      { href: "/dashboard/admin/courses", label: "Courses", Icon: MenuBook },
+      { href: "/dashboard/admin/resources", label: "Resources", Icon: LibraryBooks },
+      { href: "/dashboard/admin/polls", label: "Course polling", Icon: HowToVote },
+    ],
+  },
+  {
+    label: "People",
+    items: [
+      { href: "/dashboard/admin/users", label: "Users", Icon: PeopleAlt },
+      { href: "/dashboard/admin/mentors", label: "Mentors", Icon: CoPresent },
+      { href: "/dashboard/admin/applications", label: "Applications", Icon: HowToReg },
+    ],
+  },
+  {
+    label: "Website",
+    items: [{ href: "/dashboard/admin/cms", label: "Website CMS", Icon: Web }],
+  },
+  {
+    label: "Commerce",
+    items: [{ href: "/dashboard/admin/orders", label: "Orders", Icon: ReceiptLong }],
+  },
+  {
+    label: "System",
+    items: [
+      { href: "/dashboard/admin/audit", label: "Audit log", Icon: History },
+      { href: "/dashboard/admin/settings", label: "Settings", Icon: SettingsIcon },
+    ],
+  },
 ];
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -49,6 +123,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       if (isSigningOut()) return;
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
       return;
+    }
+    if (!user.onboardingDone) {
+      router.replace("/onboarding");
     }
   }, [loading, user, pathname, router, isSigningOut]);
 
@@ -85,183 +162,230 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     };
   }, [menuOpen]);
 
-  if (loading) {
+  if (loading || !user) {
     return (
-      <div className="grid min-h-dvh place-items-center">
-        <Spinner label="Loading your workspace…" />
+      <div className="grid min-h-dvh place-items-center bg-white">
+        <Spinner label="Loading your workspace..." />
       </div>
     );
   }
-  if (!user) return null;
 
-  const primary: NavLink[] = isAdmin
-    ? []
-    : [
-        { href: "/dashboard", label: "Home", Icon: Home },
-        { href: "/dashboard/courses", label: "Courses", Icon: MenuBook },
-        { href: "/dashboard/my-learning", label: "Learn", Icon: PlayCircle },
-        { href: "/dashboard/mentor", label: "Mentor", Icon: CoPresent },
-      ];
-  const secondary = isAdmin ? [] : ACCOUNT;
+  const groups = isAdmin ? ADMIN_GROUPS : LEARNER_GROUPS;
   const brandHref = isAdmin ? "/dashboard/admin" : "/dashboard";
+  const mobilePrimary = isAdmin ? [] : LEARNER_GROUPS[0].items;
 
   const isActive = (link: NavLink) =>
-    link.href === "/dashboard" || link.exact
+    link.exact || link.href === "/dashboard"
       ? pathname === link.href
       : pathname === link.href || pathname.startsWith(`${link.href}/`);
 
-  const linkClass = (active: boolean) =>
-    cn(
-      "flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
-      active ? "bg-brand-600 text-white shadow-elev1" : "text-ink-700 hover:bg-slate-100",
-    );
-
-  const links = [...primary, ...secondary];
-
-  const bottomTabClass = (active: boolean) =>
-    cn(
-      "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-semibold transition",
-      active ? "text-brand-700" : "text-slate-500 hover:text-ink-900",
-    );
-
-  const bottomIconClass = (active: boolean) =>
-    cn("grid h-7 w-11 place-items-center rounded-full transition", active && "bg-brand-100");
-
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-2 px-4 sm:px-6 lg:px-8">
-          <Link href={brandHref} className="flex min-w-0 shrink-0 items-center gap-2" aria-label="EduAltTech">
-            <BrandLogo withWordmark wordmarkClassName="text-sm sm:text-base" />
+    <div className="flex min-h-dvh bg-slate-50">
+      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex">
+        <div className="flex h-16 items-center border-b border-slate-200 px-5">
+          <Link href={brandHref} className="flex min-w-0 items-center gap-2" aria-label="EduAltTech">
+            <BrandLogo withWordmark wordmarkClassName="text-sm" />
           </Link>
+        </div>
 
-          <nav aria-label="Primary" className="ml-4 hidden items-center gap-1 lg:flex">
-            {primary.map((link) => (
-              <Link key={link.label} href={link.href} className={linkClass(isActive(link))} aria-current={isActive(link) ? "page" : undefined}>
-                <link.Icon fontSize="small" aria-hidden />
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            <nav aria-label="Shortcuts" className="hidden items-center gap-1 xl:flex">
-              {secondary.map((link) => (
-                <Link key={link.href} href={link.href} className={linkClass(isActive(link))} aria-current={isActive(link) ? "page" : undefined}>
-                  <link.Icon fontSize="small" aria-hidden />
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
-            <Link
-              href="/dashboard/notifications"
-              aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
-              className="relative grid h-10 w-10 place-items-center rounded-xl text-ink-700 transition hover:bg-slate-100"
-            >
-              <NotificationsIcon fontSize="small" aria-hidden />
-              {unread > 0 && (
-                <span className="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-bold leading-none text-white">
-                  {unread > 9 ? "9+" : unread}
-                </span>
+        <nav aria-label="Workspace" className="flex-1 overflow-y-auto px-3 py-5">
+          {groups.map((group, i) => (
+            <div key={group.label ?? i} className={i > 0 ? "mt-6" : undefined}>
+              {group.label && (
+                <p className="mb-1.5 px-3 text-[11px] font-semibold text-slate-400">{group.label}</p>
               )}
+              <ul className="space-y-0.5">
+                {group.items.map((link) => {
+                  const active = isActive(link);
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "block rounded-md px-3 py-2 text-sm transition-colors",
+                          active
+                            ? "bg-slate-100 font-semibold text-ink-900"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-ink-900",
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        <div className="border-t border-slate-200 p-3">
+          <Link
+            href="/"
+            className="flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-ink-900"
+          >
+            View public site
+            <ArrowOutward sx={{ fontSize: 15 }} aria-hidden />
+          </Link>
+        </div>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
+          <div className="flex h-14 items-center gap-2 px-4 sm:px-6 lg:px-10">
+            <Link href={brandHref} className="flex min-w-0 items-center gap-2 lg:hidden" aria-label="EduAltTech">
+              <BrandLogo withWordmark wordmarkClassName="text-sm" />
             </Link>
 
-            <div className="relative" ref={menuRef}>
-              <button
-                type="button"
-                onClick={() => setMenuOpen((v) => !v)}
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                className="flex items-center gap-1.5 rounded-full p-0.5 pr-1.5 transition hover:bg-slate-100"
+            <div className="ml-auto flex items-center gap-1 sm:gap-2">
+              <Link
+                href="/dashboard/notifications"
+                aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+                className="relative grid h-9 w-9 place-items-center rounded-md text-slate-600 transition hover:bg-slate-100 hover:text-ink-900"
               >
-                {user.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
-                ) : (
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">
-                    {initials(user.firstName, user.lastName)}
+                <NotificationsIcon fontSize="small" aria-hidden />
+                {unread > 0 && (
+                  <span className="absolute right-1 top-1 grid h-3.5 min-w-3.5 place-items-center rounded-full bg-brand-600 px-1 text-[9px] font-semibold leading-none text-white">
+                    {unread > 9 ? "9+" : unread}
                   </span>
                 )}
-                <ExpandMore fontSize="small" aria-hidden className="text-ink-500" />
-              </button>
+              </Link>
 
-              {menuOpen && (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-elev3"
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  className="flex items-center gap-1.5 rounded-full p-0.5 pr-1 transition hover:bg-slate-100"
                 >
-                  <div className="border-b border-slate-100 px-4 pb-2 pt-1">
-                    <p className="truncate font-semibold text-ink-900">{user.name}</p>
-                    <p className="truncate text-xs text-slate-500">{user.email}</p>
-                  </div>
-                  {secondary.map((link) => (
+                  {user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
+                      {initials(user.firstName, user.lastName)}
+                    </span>
+                  )}
+                  <ExpandMore fontSize="small" aria-hidden className="text-slate-400" />
+                </button>
+
+                {menuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 mt-2 w-60 overflow-hidden rounded-lg border border-slate-200 bg-white py-1.5 shadow-elev3"
+                  >
+                    <div className="border-b border-slate-100 px-4 pb-3 pt-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-semibold text-ink-900">{user.name}</p>
+                        {isAdmin && (
+                          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                      <p className="truncate text-xs text-slate-500">{user.email}</p>
+                    </div>
+                    {isAdmin && (
+                      <Link
+                        href="/dashboard/admin"
+                        role="menuitem"
+                        onClick={() => setMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-ink-700 hover:bg-slate-50"
+                      >
+                        Admin console
+                      </Link>
+                    )}
+                    {!isAdmin && (
+                      <>
+                        <Link href="/polls" role="menuitem" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-ink-700 hover:bg-slate-50">
+                          Course polls
+                        </Link>
+                        <Link href="/dashboard/profile" role="menuitem" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-ink-700 hover:bg-slate-50">
+                          Profile
+                        </Link>
+                      </>
+                    )}
                     <Link
-                      key={link.href}
-                      href={link.href}
+                      href={isAdmin ? "/dashboard/admin/settings" : "/dashboard/settings"}
                       role="menuitem"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-ink-700 hover:bg-slate-50"
+                      className="block px-4 py-2 text-sm text-ink-700 hover:bg-slate-50"
                     >
-                      <link.Icon fontSize="small" aria-hidden /> {link.label}
+                      Settings
                     </Link>
-                  ))}
-                  <Link href="/dashboard/profile" role="menuitem" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-ink-700 hover:bg-slate-50">
-                    <Person fontSize="small" aria-hidden /> Profile
-                  </Link>
-                  <Link href={isAdmin ? "/dashboard/admin/settings" : "/dashboard/settings"} role="menuitem" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-ink-700 hover:bg-slate-50">
-                    <SettingsIcon fontSize="small" aria-hidden /> Settings
-                  </Link>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => void signOut().then(() => router.replace("/"))}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-danger hover:bg-danger/5"
-                  >
-                    <Logout fontSize="small" aria-hidden /> Sign out
-                  </button>
-                </div>
-              )}
+                    <div className="my-1.5 border-t border-slate-100" />
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void signOut().then(() => router.replace("/"))}
+                      className="block w-full px-4 py-2 text-left text-sm text-slate-600 hover:bg-slate-50 hover:text-ink-900"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </header>
 
-      <div
-        className={cn(
-          "mx-auto w-full max-w-7xl flex-1 px-4 pt-8 sm:px-6 lg:px-8",
-          links.length > 0 ? "pb-28 lg:pb-8" : "pb-8",
-        )}
-      >
-        {children}
-      </div>
-
-      {links.length > 0 && (
-        <nav
-          aria-label="Primary mobile"
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
-        >
-          <ul className="mx-auto grid max-w-lg grid-cols-4 gap-1 px-2 pb-1.5 pt-1.5">
-            {primary.map((link) => {
-              const active = isActive(link);
-              return (
-                <li key={link.label}>
+          {isAdmin && (
+            <nav
+              aria-label="Admin sections"
+              className="flex gap-1 overflow-x-auto border-t border-slate-100 px-3 py-2 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
+            >
+              {ADMIN_GROUPS.flatMap((group) => group.items).map((link) => {
+                const active = isActive(link);
+                return (
                   <Link
+                    key={link.href}
                     href={link.href}
                     aria-current={active ? "page" : undefined}
-                    className={bottomTabClass(active)}
+                    className={cn(
+                      "whitespace-nowrap rounded-md px-3 py-1.5 text-sm",
+                      active ? "bg-slate-100 font-semibold text-ink-900" : "text-slate-600",
+                    )}
                   >
-                    <span className={bottomIconClass(active)}>
-                      <link.Icon sx={{ fontSize: 20 }} aria-hidden />
-                    </span>
                     {link.label}
                   </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      )}
+                );
+              })}
+            </nav>
+          )}
+        </header>
+
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-7 sm:px-6 lg:px-10 lg:pb-12">
+          {children}
+        </main>
+
+        {!isAdmin && mobilePrimary.length > 0 && (
+          <nav
+            aria-label="Primary mobile"
+            className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+          >
+            <ul className="mx-auto grid max-w-sm grid-cols-3 px-2 py-1">
+              {mobilePrimary.map((link) => {
+                const active = isActive(link);
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "flex flex-col items-center justify-center gap-1 rounded-md py-2 text-[11px] font-medium transition",
+                        active ? "text-ink-900" : "text-slate-500",
+                      )}
+                    >
+                      <link.Icon sx={{ fontSize: 20 }} aria-hidden />
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        )}
+      </div>
     </div>
   );
 }

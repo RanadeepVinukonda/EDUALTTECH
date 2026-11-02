@@ -147,8 +147,8 @@ export default function CheckoutView({ slug }: { slug: string }) {
       </Link>
 
       {enrolled ? (
-        <section className="rounded-[20px] border border-slate-200 bg-white p-8 text-center shadow-elev1">
-          <h1 className="font-display text-2xl font-bold text-ink-900">You&apos;re already enrolled</h1>
+        <section className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+          <h1 className="font-display text-2xl font-semibold text-ink-900">You&apos;re already enrolled</h1>
           <p className="mt-2 text-sm text-slate-500">Continue where you left off.</p>
           <div className="mt-6 flex justify-center gap-3">
             <Link href={`/dashboard/courses/${course.slug}/roadmap`} className={buttonClass("primary", "sm")}>
@@ -160,8 +160,8 @@ export default function CheckoutView({ slug }: { slug: string }) {
           </div>
         </section>
       ) : course.status !== "PUBLISHED" ? (
-        <section className="rounded-[20px] border border-slate-200 bg-white p-8 text-center shadow-elev1">
-          <h1 className="font-display text-2xl font-bold text-ink-900">This course is not available</h1>
+        <section className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+          <h1 className="font-display text-2xl font-semibold text-ink-900">This course is not available</h1>
           <p className="mt-2 text-sm text-slate-500">It isn&apos;t open for enrollment right now.</p>
           <Link href="/courses" className={buttonClass("secondary", "sm", "mt-6")}>
             Browse courses
@@ -169,12 +169,12 @@ export default function CheckoutView({ slug }: { slug: string }) {
         </section>
       ) : (
         <>
-          <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
-            <h1 className="font-display text-2xl font-bold text-ink-900">Checkout</h1>
+          <section className="rounded-xl border border-slate-200 bg-white p-6">
+            <h1 className="font-display text-2xl font-semibold text-ink-900">Checkout</h1>
             <div className="mt-5 flex gap-4">
               <CoverImage src={course.thumbnailUrl} alt="" fallback={course.title} className="h-20 w-28 shrink-0 rounded-xl" />
               <div className="min-w-0">
-                <h2 className="font-display font-bold text-ink-900">{course.title}</h2>
+                <h2 className="font-display font-semibold text-ink-900">{course.title}</h2>
                 <p className="mt-0.5 text-xs text-slate-500">{course.category}</p>
               </div>
             </div>
@@ -186,7 +186,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
               </div>
               <div className="flex justify-between text-base">
                 <dt className="font-semibold text-ink-900">Total payable</dt>
-                <dd className="font-display font-bold text-ink-900">{formatPrice(course.pricePaise, course.currency)}</dd>
+                <dd className="font-display font-semibold text-ink-900">{formatPrice(course.pricePaise, course.currency)}</dd>
               </div>
             </dl>
             <p className="mt-3 text-xs text-slate-500">
@@ -196,14 +196,14 @@ export default function CheckoutView({ slug }: { slug: string }) {
             </p>
           </section>
 
-          <section className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
-            <h2 className="font-display text-lg font-bold text-ink-900">Choose your mentor</h2>
+          <section className="rounded-xl border border-slate-200 bg-white p-6">
+            <h2 className="font-display text-lg font-semibold text-ink-900">Choose your mentor</h2>
             <p className="mt-1 text-sm text-slate-500">
               Your mentor guides you, answers questions, and reviews your work. You can pick one now.
             </p>
 
             {mentors.length === 0 ? (
-              <p className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-ink-600">
+              <p className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-ink-600">
                 No mentors are listed yet - we&apos;ll assign one to you after enrollment.
               </p>
             ) : (
@@ -218,7 +218,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
                         disabled={full}
                         aria-pressed={selected}
                         onClick={() => setMentorUserId(m.user.id)}
-                        className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
+                        className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition ${
                           selected
                             ? "border-brand-500 bg-brand-50 ring-1 ring-brand-500"
                             : "border-slate-200 hover:border-brand-300"
@@ -250,7 +250,7 @@ export default function CheckoutView({ slug }: { slug: string }) {
           </section>
 
           {needsMobile && (
-            <section role="alert" className="rounded-[20px] border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+            <section role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
               <p className="font-semibold">Verify your mobile number to continue.</p>
               <p className="mt-1">Paid courses require a verified mobile number.</p>
               <Link href="/dashboard/settings" className={buttonClass("primary", "sm", "mt-3")}>

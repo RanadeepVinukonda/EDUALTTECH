@@ -4,8 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
-const EMAIL = "admin@edualttech.demo";
-const PASSWORD = "Demo@12345";
+const EMAIL = (process.env.ADMIN_EMAIL || "admin@edualttech.com").trim().toLowerCase();
+const PASSWORD = process.env.ADMIN_PASSWORD || "Admin@EduAltTech2026!";
 
 async function main(): Promise<void> {
   const url = process.env.SUPABASE_URL;
@@ -29,7 +29,7 @@ async function main(): Promise<void> {
     authUser = data.user;
     console.log(`[admin] created Supabase auth user ${EMAIL}`);
   } else {
-    // Ensure the known demo password, since the row may predate this script.
+    // Ensure the known password, since the row may predate this script.
     const { error } = await admin.auth.admin.updateUserById(authUser.id, { password: PASSWORD, email_confirm: true });
     if (error) throw new Error(`updateUserById failed: ${error.message}`);
     console.log(`[admin] reusing Supabase auth user ${EMAIL} (password reset)`);
@@ -37,15 +37,16 @@ async function main(): Promise<void> {
 
   const user = await prisma.user.upsert({
     where: { email: EMAIL },
-    update: { id: authUser.id, role: "ADMIN", isActive: true },
+    update: { id: authUser.id, role: "ADMIN", isActive: true, onboardingDone: true },
     create: {
       id: authUser.id,
       email: EMAIL,
+      username: "admin",
       firstName: "Admin",
       lastName: "EduAltTech",
       role: "ADMIN",
       emailVerifiedAt: new Date(),
-      mobile: "+910000000000",
+      mobile: "+919999999999",
       mobileVerifiedAt: new Date(),
       onboardingDone: true,
     },

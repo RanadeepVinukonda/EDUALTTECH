@@ -39,7 +39,7 @@ export default function AdminAnalytics() {
                 onClick={() => setRange(r.value)}
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-sm font-semibold transition",
-                  range === r.value ? "bg-white text-ink-900 shadow-elev1" : "text-slate-600 hover:text-ink-900",
+                  range === r.value ? "bg-white text-ink-900" : "text-slate-600 hover:text-ink-900",
                 )}
               >
                 {r.label}
@@ -53,8 +53,8 @@ export default function AdminAnalytics() {
         <ErrorState message={error} onRetry={reload} />
       ) : loading || !data ? (
         <div className="space-y-4">
-          <Skeleton className="h-64 rounded-[20px]" />
-          <Skeleton className="h-64 rounded-[20px]" />
+          <Skeleton className="h-64 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl" />
         </div>
       ) : (
         <AnalyticsBody data={data} />
@@ -78,7 +78,7 @@ function AnalyticsBody({ data }: { data: AnalyticsData }) {
   return (
     <div className="space-y-6">
       {empty && (
-        <p className="rounded-[20px] border border-dashed border-slate-300 bg-white px-5 py-4 text-sm text-slate-500">
+        <p className="rounded-xl border border-dashed border-slate-300 bg-white px-5 py-4 text-sm text-slate-500">
           No registrations, enrolments or paid orders were recorded in this period. This is a genuine zero, not missing data.
         </p>
       )}

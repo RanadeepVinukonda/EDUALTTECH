@@ -17,6 +17,7 @@ export default async function LoginPage({
   const sp = await searchParams;
   const next = Array.isArray(sp.next) ? sp.next[0] : sp.next;
   const reset = Array.isArray(sp.reset) ? sp.reset[0] : sp.reset;
+  const email = Array.isArray(sp.email) ? sp.email[0] : sp.email;
   const expired = Array.isArray(sp.expired) ? sp.expired[0] : sp.expired;
   const notice = reset
     ? "Your password has been updated. Sign in with your new password."
@@ -26,7 +27,7 @@ export default async function LoginPage({
 
   return (
     <AuthShell title="Welcome back" subtitle="Sign in to continue to your EduAltTech account.">
-      <LoginForm next={next} notice={notice} />
+      <LoginForm next={next} notice={notice} initialEmail={email} />
     </AuthShell>
   );
 }

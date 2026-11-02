@@ -74,11 +74,11 @@ export function CmsDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="cms-dialog-title"
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[20px] border border-slate-200 bg-white shadow-elev3"
+        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl border border-slate-200 bg-white shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-slate-100 px-6 py-4">
-          <h2 id="cms-dialog-title" className="font-display text-lg font-bold text-ink-900">{title}</h2>
+          <h2 id="cms-dialog-title" className="font-display text-lg font-semibold text-ink-900">{title}</h2>
           {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5">{children}</div>
@@ -133,11 +133,11 @@ export function MediaPicker({
         role="dialog"
         aria-modal="true"
         aria-labelledby="media-picker-title"
-        className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-[20px] border border-slate-200 bg-white shadow-elev3"
+        className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-xl border border-slate-200 bg-white shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-slate-100 px-6 py-4">
-          <h2 id="media-picker-title" className="font-display text-lg font-bold text-ink-900">
+          <h2 id="media-picker-title" className="font-display text-lg font-semibold text-ink-900">
             {multiple ? "Select media" : "Select an image"}
           </h2>
           <p className="mt-1 text-sm text-slate-500">Pick from assets already registered in the media library.</p>

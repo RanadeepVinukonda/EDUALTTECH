@@ -24,6 +24,7 @@ import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync } from "
 import { MediaPicker, MediaReference } from "./cms-ui";
 import AdminRoadmapBuilder from "./AdminRoadmapBuilder";
 import AdminParticipants from "./AdminParticipants";
+import AdminNewCourseWizard from "./AdminNewCourseWizard";
 
 const MAX_PAISE = 10_000_000;
 
@@ -33,7 +34,7 @@ type CourseWorkspaceTab = "details" | "roadmap" | "participants";
 
 const WORKSPACE_TABS: { key: CourseWorkspaceTab; label: string }[] = [
   { key: "details", label: "Details" },
-  { key: "roadmap", label: "Roadmap" },
+  { key: "roadmap", label: "Curriculum" },
   { key: "participants", label: "Participants" },
 ];
 
@@ -51,6 +52,8 @@ interface EditorCourse {
   currency: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   thumbnailUrl: string | null;
+  roadmapTitle: string | null;
+  roadmapSummary: string | null;
 }
 
 function editorError(err: unknown, fallback: string): string {
@@ -72,7 +75,7 @@ function toWorkspaceTab(value: string | undefined): CourseWorkspaceTab {
 }
 
 export default function AdminCourseEditor({ courseId, tab }: { courseId: string | null; tab?: string }) {
-  return courseId ? <EditWorkspace id={courseId} initialTab={toWorkspaceTab(tab)} /> : <NewCourseEditor />;
+  return courseId ? <EditWorkspace id={courseId} initialTab={toWorkspaceTab(tab)} /> : <AdminNewCourseWizard />;
 }
 
 function EditWorkspace({ id, initialTab }: { id: string; initialTab: CourseWorkspaceTab }) {
@@ -94,7 +97,7 @@ function EditWorkspace({ id, initialTab }: { id: string; initialTab: CourseWorks
       <div className="space-y-5">
         <Skeleton className="h-10 w-72 rounded-xl" />
         <Skeleton className="h-10 w-80 rounded-xl" />
-        <Skeleton className="h-96 rounded-[20px]" />
+        <Skeleton className="h-96 rounded-xl" />
       </div>
     );
   }
@@ -128,6 +131,8 @@ function EditWorkspace({ id, initialTab }: { id: string; initialTab: CourseWorks
     currency: c.currency,
     status: c.status as EditorCourse["status"],
     thumbnailUrl: c.thumbnailUrl,
+    roadmapTitle: c.roadmapTitle ?? null,
+    roadmapSummary: c.roadmapSummary ?? null,
   };
 
   return (
@@ -155,7 +160,7 @@ function CourseTabs({ active, onChange }: { active: CourseWorkspaceTab; onChange
   return (
     <nav
       aria-label="Course workspace"
-      className="flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-elev1"
+      className="flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1"
     >
       {WORKSPACE_TABS.map((t) => (
         <button
@@ -176,25 +181,6 @@ function CourseTabs({ active, onChange }: { active: CourseWorkspaceTab; onChange
   );
 }
 
-function NewCourseEditor() {
-  const initial: EditorCourse = {
-    id: "",
-    title: "",
-    description: "",
-    type: "EDUCATION",
-    category: "",
-    domain: "",
-    features: [],
-    level: null,
-    tags: [],
-    pricePaise: 0,
-    currency: "INR",
-    status: "DRAFT",
-    thumbnailUrl: null,
-  };
-  return <CourseForm initial={initial} mode="create" />;
-}
-
 function CourseForm({
   initial,
   mode,
@@ -207,6 +193,8 @@ function CourseForm({
   const router = useRouter();
   const [title, setTitle] = useState(initial.title);
   const [description, setDescription] = useState(initial.description);
+  const [roadmapTitle, setRoadmapTitle] = useState(initial.roadmapTitle ?? "");
+  const [roadmapSummary, setRoadmapSummary] = useState(initial.roadmapSummary ?? "");
   const [type, setType] = useState<EditorCourse["type"]>(initial.type);
   const [category, setCategory] = useState(initial.category);
   const [domain, setDomain] = useState(initial.domain);
@@ -234,7 +222,9 @@ function CourseForm({
     level !== (initial.level ?? "") ||
     JSON.stringify(tags) !== JSON.stringify(initial.tags) ||
     priceRupees !== (initial.pricePaise ? String(initial.pricePaise / 100) : "") ||
-    thumbnailUrl !== (initial.thumbnailUrl ?? "");
+    thumbnailUrl !== (initial.thumbnailUrl ?? "") ||
+    roadmapTitle !== (initial.roadmapTitle ?? "") ||
+    roadmapSummary !== (initial.roadmapSummary ?? "");
 
   const pricePaise = parsePrice(priceRupees);
   const priceInvalid = pricePaise === null;
@@ -268,6 +258,8 @@ function CourseForm({
       tags: withDraftTag(tags, tagDraft),
       pricePaise: pricePaise as number,
       thumbnailUrl: thumbnailUrl.trim() || null,
+      roadmapTitle: roadmapTitle.trim() || null,
+      roadmapSummary: roadmapSummary.trim() || null,
     };
 
     try {
@@ -347,6 +339,29 @@ function CourseForm({
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
                 />
                 <p className="mt-1 text-xs text-slate-500">10–8000 characters.</p>
+              </div>
+              <div>
+                <label htmlFor="c-roadmap-title" className="mb-1 block text-sm font-semibold text-ink-700">Course intro heading</label>
+                <Input
+                  id="c-roadmap-title"
+                  value={roadmapTitle}
+                  onChange={(e) => setRoadmapTitle(e.target.value)}
+                  maxLength={160}
+                  placeholder="What you'll learn"
+                />
+                <p className="mt-1 text-xs text-slate-500">Optional. Heading of the public course intro.</p>
+              </div>
+              <div>
+                <label htmlFor="c-roadmap-summary" className="mb-1 block text-sm font-semibold text-ink-700">Course intro</label>
+                <textarea
+                  id="c-roadmap-summary"
+                  value={roadmapSummary}
+                  onChange={(e) => setRoadmapSummary(e.target.value)}
+                  maxLength={4000}
+                  rows={4}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+                />
+                <p className="mt-1 text-xs text-slate-500">Optional. Shows under the heading on the public page.</p>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>

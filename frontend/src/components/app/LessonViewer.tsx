@@ -11,7 +11,7 @@ import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import AccessDenied from "@/components/ui/AccessDenied";
 import Button, { buttonClass } from "@/components/ui/Button";
-import Lock from "@mui/icons-material/Lock";
+import MarkdownArticleViewer from "@/components/ui/MarkdownArticleViewer";
 import type { LessonRow, TopicRow, ChapterRow } from "@/lib/app-types";
 
 interface Entry {
@@ -30,7 +30,7 @@ function LessonSkeleton() {
         <Skeleton className="mt-3 h-8 w-3/4" />
         <Skeleton className="mt-2 h-4 w-1/4" />
       </div>
-      <div className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1" aria-hidden>
+      <div className="rounded-xl border border-slate-200 bg-white p-6" aria-hidden>
         <Skeleton className="h-4 w-full" />
         <Skeleton className="mt-3 h-4 w-11/12" />
         <Skeleton className="mt-3 h-4 w-10/12" />
@@ -124,11 +124,9 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
         <Link href={`/dashboard/courses/${slug}/roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
           ← Back to roadmap
         </Link>
-        <div className="grid place-items-center rounded-[20px] border border-slate-200 bg-white p-10 text-center shadow-elev1">
-          <span className="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-500">
-            <Lock aria-hidden />
-          </span>
-          <h1 className="mt-4 font-display text-xl font-bold text-ink-900">This lesson is locked</h1>
+        <div className="grid place-items-center rounded-xl border border-slate-200 bg-white p-10 text-center">
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Locked</p>
+          <h1 className="mt-3 font-display text-xl font-semibold text-ink-900">This lesson is locked</h1>
           <p className="mt-1 max-w-md text-sm text-slate-500">
             Your mentor unlocks each lesson once its video or live class is ready. Check back soon.
           </p>
@@ -160,17 +158,17 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
         <Link href={`/dashboard/courses/${slug}/roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
           ← Back to roadmap
         </Link>
-        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          {chapter.title} · {topic.title}
+        <h1 className="mt-3 font-display text-2xl font-semibold text-ink-900">{lesson.title}</h1>
+        <p className="mt-1 text-xs font-medium text-slate-500">
+          {chapter.title} › {topic.title}
         </p>
-        <h1 className="mt-1 font-display text-2xl font-bold text-ink-900">{lesson.title}</h1>
         <p className="mt-1 text-sm text-slate-500">
           {lesson.type === "VIDEO" ? "Video lesson" : "Reading"}
-          {done && <span className="ml-2 font-semibold text-green-700">· Completed</span>}
+          {done && <span className="ml-2 font-semibold text-emerald-700">· Completed</span>}
         </p>
       </div>
 
-      <article className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
+      <article className="rounded-xl border border-slate-200 bg-white p-6">
         {lesson.type === "VIDEO" ? (
           lesson.hasVideo ? (
             videoUrl ? (
@@ -191,9 +189,32 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
             <p className="text-sm text-slate-500">No video has been added to this lesson yet.</p>
           )
         ) : lesson.textContent ? (
-          <div className="whitespace-pre-wrap text-[16px] leading-relaxed text-ink-800">{lesson.textContent}</div>
+          <MarkdownArticleViewer content={lesson.textContent} />
         ) : (
           <p className="text-sm text-slate-500">No content has been added to this lesson yet.</p>
+        )}
+
+        {lesson.resourceArticle && (
+          <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Supplementary guide
+              </span>
+              <h3 className="font-display text-sm sm:text-base font-semibold text-ink-900 mt-1">
+                {lesson.resourceArticle.title}
+              </h3>
+              <p className="text-xs text-slate-600 mt-0.5">
+                {lesson.resourceArticle.difficulty} · ~{lesson.resourceArticle.estimatedMinutes} min read
+              </p>
+            </div>
+            <Link
+              href={`/resources/${lesson.resourceArticle.slug}`}
+              target="_blank"
+              className="inline-flex shrink-0 items-center rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-ink-900 transition hover:bg-slate-50"
+            >
+              Read guide →
+            </Link>
+          </div>
         )}
       </article>
 

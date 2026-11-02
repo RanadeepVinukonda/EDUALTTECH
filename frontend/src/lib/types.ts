@@ -1,5 +1,7 @@
 export type CourseType = "EDUCATION" | "ALTERNATIVE_EDUCATION";
 
+export type LessonType = "VIDEO" | "READING" | "PROJECT";
+
 export interface CourseListItem {
   id: string;
   slug: string;
@@ -22,6 +24,7 @@ export interface CourseTopic {
   title: string;
   order: number;
   _count: { lessons: number };
+  lessons: { id: string; title: string; type: LessonType; order: number }[];
 }
 
 export interface CourseChapter {
@@ -55,10 +58,15 @@ export interface CourseDetail {
   thumbnailUrl: string | null;
   roadmapTitle: string | null;
   roadmapSummary: string | null;
+  prerequisites?: string[];
+  learningOutcomes?: string[];
+  targetAudience?: string[];
+  durationHours?: number | null;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   createdBy: { id: string; firstName: string; lastName: string; avatarUrl: string | null; bio: string | null } | null;
   chapters: CourseChapter[];
   mentors: CourseMentor[];
+  recommendedResources?: ResourceArticleCard[];
   enrolledCount: number;
   isStaff: boolean;
 }
@@ -74,6 +82,61 @@ export interface CourseDetailResponse {
     interviewAt: string | null;
     reviewNote: string | null;
   } | null;
+}
+
+export interface ResourceCatalogItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  domain: string;
+  thumbnailUrl: string | null;
+  updatedAt: string;
+  chapterCount: number;
+  topicCount: number;
+  lessonCount: number;
+}
+
+export interface ResourceLesson {
+  id: string;
+  title: string;
+  type: LessonType;
+  textContent: string | null;
+  contentUrl: string | null;
+  order: number;
+}
+
+export interface ResourceTopic {
+  id: string;
+  title: string;
+  summary: string | null;
+  order: number;
+  lessons: ResourceLesson[];
+}
+
+export interface ResourceChapter {
+  id: string;
+  title: string;
+  summary: string | null;
+  order: number;
+  topics: ResourceTopic[];
+}
+
+export interface ResourceTutorial {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  domain: string;
+  thumbnailUrl: string | null;
+  updatedAt: string;
+  chapters: ResourceChapter[];
+}
+
+export interface ResourceTutorialResponse {
+  resource: ResourceTutorial;
 }
 
 export interface WorkItem {
@@ -106,3 +169,133 @@ export interface OrganizationItem {
   logoUrl: string | null;
   websiteUrl: string | null;
 }
+
+// ────────────────────────────────────────────────────────────────────
+// Resource Library Types
+// ────────────────────────────────────────────────────────────────────
+
+export interface ResourceSubcategoryItem {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  order: number;
+}
+
+export interface ResourceCategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  order: number;
+  articleCount?: number;
+  subcategories: ResourceSubcategoryItem[];
+}
+
+export interface ResourceArticleCard {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  estimatedMinutes: number;
+  coverUrl: string | null;
+  tags: string[];
+  views: number;
+  createdAt: string;
+  updatedAt: string;
+  category?: { id: string; name: string; slug: string; icon: string | null };
+  subcategory?: { id: string; name: string; slug: string } | null;
+  author?: { firstName: string; lastName: string; avatarUrl: string | null } | null;
+}
+
+export interface ResourceArticleDetail extends ResourceArticleCard {
+  content: string;
+  categoryId?: string;
+  subcategoryId?: string | null;
+  isPublished?: boolean;
+  published?: boolean;
+  isFeatured?: boolean;
+  authorAttribution?: string | null;
+  isBookmarked?: boolean;
+  linkedCourseId?: string | null;
+  linkedCourse?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    thumbnailUrl?: string | null;
+  } | null;
+  relatedCourse?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    thumbnailUrl: string | null;
+    pricePaise: number;
+    level: string | null;
+    category: string;
+  } | null;
+  prevArticle?: { id: string; slug: string; title: string } | null;
+  nextArticle?: { id: string; slug: string; title: string } | null;
+}
+
+export interface ResourceArticleDetailResponse {
+  article: ResourceArticleDetail;
+  isBookmarked: boolean;
+  prev: { id: string; slug: string; title: string } | null;
+  next: { id: string; slug: string; title: string } | null;
+  related: ResourceArticleCard[];
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Course Polling Types
+// ────────────────────────────────────────────────────────────────────
+
+export interface PollOptionItem {
+  id: string;
+  pollId: string;
+  title: string;
+  description: string;
+  category: string;
+  domain?: string;
+  difficulty?: string | null;
+  durationWeeks?: number | null;
+  estimatedDuration?: string | null;
+  learningOutcomes?: string[];
+  outcomes?: string[];
+  votes: number;
+  voteCount?: number;
+  percentage?: number;
+  isWinningOption?: boolean;
+  isWinner?: boolean;
+  convertedCourseId?: string | null;
+  orderIndex?: number;
+  order?: number;
+}
+
+export interface CoursePollItem {
+  id: string;
+  title: string;
+  description: string;
+  status: "DRAFT" | "OPEN" | "CLOSED" | "ARCHIVED";
+  startDate: string | null;
+  endDate: string | null;
+  allowMultipleVotes?: boolean;
+  allowVoteChange?: boolean;
+  hideResultsUntilClosed?: boolean;
+  totalVotes?: number;
+  options: PollOptionItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ActivePollResponse {
+  poll: CoursePollItem | null;
+  userVotes?: string[];
+  userVoteOptionId?: string | null;
+  userVotedOptionId?: string | null;
+}
+

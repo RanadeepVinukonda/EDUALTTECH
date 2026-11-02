@@ -19,8 +19,8 @@ export default function AuthShell({
           <BrandLogo withWordmark wordmarkClassName="text-base" />
         </Link>
 
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-elev1 sm:p-8">
-          <h1 className="font-display text-2xl font-bold text-ink-900">{title}</h1>
+        <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-ink-900">{title}</h1>
           {subtitle && <p className="mt-2 text-sm leading-relaxed text-ink-600">{subtitle}</p>}
           <div className="mt-6">{children}</div>
         </div>

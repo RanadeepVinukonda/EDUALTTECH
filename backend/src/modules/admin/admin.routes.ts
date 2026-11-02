@@ -220,14 +220,17 @@ router.delete("/users/:id", async (req, res) => {
 router.get("/courses", validate({ query: z.object({
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
   type: z.enum(["EDUCATION", "ALTERNATIVE_EDUCATION"]).optional(),
+  kind: z.enum(["RESOURCE", "COURSE"]).optional(),
   q: z.string().trim().max(120).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 }) }), async (req, res) => {
-  const { status, type, q, page, limit } = req.query as unknown as { status?: string; type?: string; q?: string; page: number; limit: number };
+  const { status, type, kind, q, page, limit } = req.query as unknown as { status?: string; type?: string; kind?: string; q?: string; page: number; limit: number };
   const where = {
     ...(status ? { status: status as never } : {}),
     ...(type ? { type: type as never } : {}),
+    ...(kind === "RESOURCE" ? { features: { has: "100% Free Resource" } } : {}),
+    ...(kind === "COURSE" ? { NOT: { features: { has: "100% Free Resource" } } } : {}),
     ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
   };
   const [total, courses] = await Promise.all([
@@ -235,7 +238,8 @@ router.get("/courses", validate({ query: z.object({
     prisma.course.findMany({
       where, orderBy: { createdAt: "desc" }, skip: (page - 1) * limit, take: limit,
       select: {
-        id: true, slug: true, title: true, category: true, type: true, status: true, pricePaise: true, currency: true, createdAt: true,
+        id: true, slug: true, title: true, description: true, category: true, domain: true,
+        thumbnailUrl: true, features: true, type: true, status: true, pricePaise: true, currency: true, createdAt: true,
         createdBy: { select: { firstName: true, lastName: true } },
         _count: {
           select: {

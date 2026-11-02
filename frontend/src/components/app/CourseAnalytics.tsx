@@ -47,9 +47,9 @@ export default function CourseAnalyticsView({ slug }: { slug: string }) {
           { label: "Completed", value: completed },
           { label: "Published lessons", value: data.totalLessons },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-2xl border border-slate-200 bg-white p-4">
+          <div key={stat.label} className="rounded-xl border border-slate-200 bg-white p-4">
             <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{stat.label}</dt>
-            <dd className="mt-1 font-display text-2xl font-bold text-ink-900">{stat.value}</dd>
+            <dd className="mt-1 font-display text-2xl font-semibold text-ink-900">{stat.value}</dd>
           </div>
         ))}
       </dl>
@@ -57,7 +57,7 @@ export default function CourseAnalyticsView({ slug }: { slug: string }) {
       {learners.length === 0 ? (
         <EmptyState title="No active learners" description="Analytics will appear once learners enroll." />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -72,7 +72,7 @@ export default function CourseAnalyticsView({ slug }: { slug: string }) {
                 <tr key={l.id}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
                         {initials(l.user.firstName, l.user.lastName)}
                       </span>
                       <span className="min-w-0">

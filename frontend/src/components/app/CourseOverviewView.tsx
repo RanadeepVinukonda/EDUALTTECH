@@ -10,36 +10,37 @@ import { notifyError, notifySuccess } from "@/lib/notify";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
+import MarkdownArticleViewer from "@/components/ui/MarkdownArticleViewer";
 import ChatView from "./ChatView";
-import Lock from "@mui/icons-material/Lock";
-import PlayCircle from "@mui/icons-material/PlayCircle";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 
 function CourseSkeleton() {
   return (
     <div className="space-y-6" role="status" aria-live="polite">
       <span className="sr-only">Loading course…</span>
-      <div className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1" aria-hidden>
+      <div className="rounded-xl border border-slate-200 bg-white p-6" aria-hidden>
         <Skeleton className="h-5 w-40" />
         <Skeleton className="mt-3 h-8 w-2/3" />
         <Skeleton className="mt-2 h-4 w-1/3" />
         <Skeleton className="mt-5 h-2 w-full rounded-full" />
       </div>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]" aria-hidden>
-        <div className="order-2 space-y-3 lg:order-1">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1">
-              <Skeleton className="h-5 w-1/2" />
-              <Skeleton className="mt-3 h-4 w-3/4" />
-              <Skeleton className="mt-2 h-4 w-2/3" />
-            </div>
-          ))}
-        </div>
-        <div className="order-1 rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1 lg:order-2" aria-hidden>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]" aria-hidden>
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="mt-3 h-7 w-1/2" />
           <Skeleton className="mt-5 h-4 w-full" />
           <Skeleton className="mt-2 h-4 w-11/12" />
           <Skeleton className="mt-2 h-4 w-9/12" />
+        </div>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="mt-3 h-4 w-3/4" />
+              <Skeleton className="mt-2 h-4 w-2/3" />
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -88,6 +89,12 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
     () => lessons.find((l) => l.isPublished && !completed.has(l.id)) ?? lessons.find((l) => l.isPublished) ?? lessons[0] ?? null,
     [lessons, completed],
   );
+  const selectedIndex = useMemo(
+    () => (selected ? lessons.findIndex((l) => l.id === selected.id) : -1),
+    [lessons, selected],
+  );
+  const prev = selectedIndex > 0 ? lessons[selectedIndex - 1] : null;
+  const next = selectedIndex >= 0 ? lessons[selectedIndex + 1] ?? null : null;
 
   useEffect(() => {
     if (selected || !roadmap || !detail) return;
@@ -120,7 +127,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
     try {
       const res = await apiPost<{ progressPct: number }>(`/courses/lessons/${lesson.id}/complete`);
       setProgress(res.progressPct);
-      setCompleted((prev) => new Set(prev).add(lesson.id));
+      setCompleted((prevSet) => new Set(prevSet).add(lesson.id));
       notifySuccess("Lesson marked complete.");
     } catch (err) {
       notifyError(describeError(err, "Could not update progress."));
@@ -134,9 +141,9 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
       return (
         <div
           role="status"
-          className="mx-auto max-w-lg rounded-[20px] border border-slate-200 bg-white p-8 text-center shadow-elev1"
+          className="mx-auto max-w-lg rounded-xl border border-slate-200 bg-white p-8 text-center"
         >
-          <h1 className="font-display text-xl font-bold text-ink-900">This course isn&apos;t in your learning area</h1>
+          <h1 className="font-display text-xl font-semibold text-ink-900">This course isn&apos;t in your learning area</h1>
           <p className="mt-2 text-sm text-slate-500">
             It may not be published yet, or you&apos;re not enrolled. Visit the course page to enroll and start learning.
           </p>
@@ -163,9 +170,9 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
     return (
       <div
         role="alert"
-        className="rounded-[20px] border border-slate-200 bg-white p-8 text-center shadow-elev1"
+        className="rounded-xl border border-slate-200 bg-white p-8 text-center"
       >
-        <h1 className="font-display text-xl font-bold text-ink-900">You&apos;re not enrolled in this course</h1>
+        <h1 className="font-display text-xl font-semibold text-ink-900">You&apos;re not enrolled in this course</h1>
         <p className="mt-2 text-sm text-slate-500">Visit the course page to enroll and start learning.</p>
         <div className="mt-6 flex justify-center gap-3">
           <Link href={`/courses/${course.slug}`} className={buttonClass("primary", "sm")}>
@@ -181,181 +188,239 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
   if (!roadmap) return <CourseSkeleton />;
 
   return (
-    <div className="space-y-6">
-      <header className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <Link href={`/courses/${course.slug}`} className="text-sm font-semibold text-brand-700 hover:underline">
-            Public course page
-          </Link>
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="h-1 w-full bg-slate-100">
+        <div className="h-full bg-brand-600 transition-[width] duration-500" style={{ width: `${progress}%` }} />
+      </div>
+
+      <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 px-5 py-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate font-display text-lg font-semibold text-ink-900">{course.title}</h1>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {course.category} · {course.enrolledCount} learners
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          {isLearner && (
+            <span className="text-sm font-semibold text-ink-700" aria-live="polite">
+              {progress}% complete
+            </span>
+          )}
+          {!isLearner && <span className="text-sm text-slate-500">Mentor / staff view — read only</span>}
           <Link href={`/dashboard/courses/${course.slug}/roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
             Full roadmap
           </Link>
+          <Link href={`/courses/${course.slug}`} className="text-sm font-semibold text-brand-700 hover:underline">
+            Course page
+          </Link>
         </div>
-        <h1 className="mt-2 font-display text-2xl font-bold text-ink-900">{course.title}</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {course.category} · {course.enrolledCount} learners
-        </p>
-
-        {isLearner && (
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold text-ink-700">Your progress</span>
-              <span className="text-slate-500">{progress}%</span>
-            </div>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-brand-600 transition-[width] duration-500" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        )}
-        {!isLearner && <p className="mt-3 text-sm font-semibold text-ink-700">Mentor / staff view — read only.</p>}
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,380px)]">
-        <nav aria-label="Course roadmap" className="order-2 lg:order-1">
-          <ol className="space-y-4">
-            {course.chapters
-              .slice()
-              .sort((a, b) => a.order - b.order)
-              .map((chapter) => (
-                <li key={chapter.id} className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1">
-                  <p className="font-display font-bold text-ink-900">{chapter.title}</p>
-                  {roadmap.chapters
-                    .find((c) => c.id === chapter.id)
-                    ?.topics.map((topic) => (
-                      <div key={topic.id} className="mt-3">
-                        {isLearner ? (
-                          <button
-                            type="button"
-                            onClick={() => void openTopic(topic.id)}
-                            className="text-left text-sm font-semibold text-ink-700 hover:text-brand-700"
-                          >
-                            {topic.title}
-                          </button>
-                        ) : (
-                          <p className="text-sm font-semibold text-ink-700">{topic.title}</p>
-                        )}
-                        <ul className="mt-1 space-y-1">
-                          {topic.lessons.map((lesson) => {
-                            const done = completed.has(lesson.id);
-                            const active = selected?.id === lesson.id;
-                            const locked = !lesson.isPublished && !access.isStaff;
-                            if (locked) {
-                              return (
-                                <li key={lesson.id}>
-                                  <div className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-400">
-                                    <Lock fontSize="inherit" aria-hidden className="shrink-0" />
-                                    <span className="truncate">{lesson.title}</span>
-                                    <span className="ml-auto shrink-0 text-[10px] font-semibold uppercase tracking-wide">
-                                      Locked
-                                    </span>
-                                  </div>
-                                </li>
-                              );
-                            }
-                            return (
-                              <li key={lesson.id}>
-                                <button
-                                  type="button"
-                                  onClick={() => setSelected(lesson)}
-                                  className={cn(
-                                    "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition",
-                                    active ? "bg-brand-50 text-brand-800" : "text-slate-600 hover:bg-slate-50",
-                                  )}
-                                >
-                                  <span
-                                    aria-hidden
-                                    className={cn(
-                                      "grid h-4 w-4 shrink-0 place-items-center rounded-full border text-[10px]",
-                                      done ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300",
-                                    )}
-                                  >
-                                    {done ? "✓" : ""}
-                                  </span>
-                                  <span className="truncate">{lesson.title}</span>
-                                  <span className="sr-only">{done ? "completed" : "not completed"}</span>
-                                </button>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    ))}
-                </li>
-              ))}
-            {course.chapters.length === 0 && (
-              <li className="rounded-[20px] border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
-                The roadmap for this course is still being prepared.
-              </li>
-            )}
-          </ol>
-        </nav>
-
-        <section className="order-1 lg:order-2">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]">
+        <div className="order-1 min-w-0">
           {selected ? (
-            <article className="rounded-[20px] border border-slate-200 bg-white p-6 shadow-elev1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {selected.type === "VIDEO" ? "Video lesson" : "Reading"}
-              </p>
-              <h2 className="mt-1 font-display text-xl font-bold text-ink-900">{selected.title}</h2>
+            <article>
+              <div className="flex items-start gap-3 px-5 py-4 sm:px-6">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
+                    {selected.type === "VIDEO" ? "Video" : "Reading"}
+                  </p>
+                  <h2 className="mt-1 font-display text-xl font-semibold text-ink-900">{selected.title}</h2>
+                </div>
+                <div className="hidden items-center gap-1 sm:flex">
+                  <button
+                    type="button"
+                    disabled={!prev}
+                    onClick={() => prev && setSelected(prev)}
+                    aria-label="Previous lesson"
+                    className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+                  >
+                    <ChevronLeft fontSize="small" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!next}
+                    onClick={() => next && setSelected(next)}
+                    aria-label="Next lesson"
+                    className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+                  >
+                    <ChevronRight fontSize="small" aria-hidden />
+                  </button>
+                </div>
+              </div>
 
-              <div className="mt-4">
+              <div className="px-5 pb-6 sm:px-6">
                 {!selected.isPublished && !access.isStaff ? (
                   <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
                     This lesson is locked. Your mentor unlocks it once its video or live class is ready.
                   </div>
                 ) : selected.type === "VIDEO" ? (
-                  <div className="flex flex-wrap items-center gap-3">
-                    {selected.hasVideo && (
-                      <Link
-                        href={`/dashboard/courses/${course.slug}/lessons/${selected.id}`}
-                        className={buttonClass("primary", "sm")}
-                      >
-                        <PlayCircle fontSize="small" aria-hidden /> Watch video lesson
-                      </Link>
-                    )}
-                    {selected.contentUrl && (
-                      <a href={selected.contentUrl} target="_blank" rel="noreferrer" className={buttonClass("secondary", "sm")}>
-                        Open video lesson
-                      </a>
-                    )}
-                    {!selected.hasVideo && !selected.contentUrl && (
-                      <p className="text-sm text-slate-500">No video has been added to this lesson yet.</p>
-                    )}
+                  <div className="flex min-h-[220px] flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-slate-900 px-6 py-10 text-center">
+                    <p className="font-display text-lg font-semibold text-white">Video lesson</p>
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                      {selected.hasVideo && (
+                        <Link
+                          href={`/dashboard/courses/${course.slug}/lessons/${selected.id}`}
+                          className={buttonClass("primary", "sm")}
+                        >
+                          Play
+                        </Link>
+                      )}
+                      {selected.contentUrl && (
+                        <a
+                          href={selected.contentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+                        >
+                          Open video lesson
+                        </a>
+                      )}
+                      {!selected.hasVideo && !selected.contentUrl && (
+                        <p className="text-sm text-white/60">No video has been added to this lesson yet.</p>
+                      )}
+                    </div>
                   </div>
                 ) : selected.textContent ? (
-                  <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink-700">{selected.textContent}</div>
+                  <MarkdownArticleViewer content={selected.textContent} />
                 ) : (
                   <p className="text-sm text-slate-500">No content has been added to this lesson yet.</p>
                 )}
               </div>
 
-              {isLearner && selected.isPublished && (
-                <div className="mt-6">
-                  {completed.has(selected.id) ? (
-                    <p className="text-sm font-semibold text-green-700">Completed</p>
+              <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 bg-slate-50/70 px-5 py-4 sm:px-6">
+                {isLearner && selected.isPublished ? (
+                  completed.has(selected.id) ? (
+                    <span className="text-sm font-semibold text-emerald-700">Completed</span>
                   ) : (
                     <Button onClick={() => void markComplete(selected)} loading={marking}>
                       Mark as complete
                     </Button>
-                  )}
+                  )
+                ) : (
+                  <span className="text-sm text-slate-500">Preview</span>
+                )}
+                <div className="ml-auto flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={!prev}
+                    onClick={() => prev && setSelected(prev)}
+                    className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!next}
+                    onClick={() => next && setSelected(next)}
+                    className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-40"
+                  >
+                    Next lesson
+                  </button>
                 </div>
-              )}
+              </div>
             </article>
           ) : (
-            <div className="rounded-[20px] border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-              Select a lesson to begin.
-            </div>
+            <div className="px-6 py-16 text-center text-sm text-slate-500">Select a lesson to begin.</div>
           )}
-        </section>
 
-        {isLearner && (
-          <aside aria-label="Course messages" className="order-3 lg:col-span-2 xl:col-span-1">
-            <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-elev1 xl:sticky xl:top-6">
-              <h2 className="mb-3 font-display font-bold text-ink-900">Messages</h2>
+          {isLearner && (
+            <div className="border-t border-slate-200 px-5 py-5 sm:px-6">
+              <h2 className="mb-3 font-display font-semibold text-ink-900">Messages</h2>
               <ChatView courseId={course.id} compact />
             </div>
-          </aside>
-        )}
+          )}
+        </div>
+
+        <aside aria-label="Course content" className="order-2 border-t border-slate-200 lg:border-l lg:border-t-0">
+          <div className="px-5 py-4">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-slate-500">Course content</h2>
+          </div>
+          <div className="divide-y divide-slate-200">
+            {course.chapters
+              .slice()
+              .sort((a, b) => a.order - b.order)
+              .map((chapter, chapterIndex) => {
+                const rm = roadmap.chapters.find((c) => c.id === chapter.id);
+                const containsSelected = rm?.topics.some((t) => t.lessons.some((l) => l.id === selected?.id));
+                const done = rm?.topics.flatMap((t) => t.lessons).filter((l) => completed.has(l.id)).length ?? 0;
+                const total = rm?.topics.flatMap((t) => t.lessons).length ?? 0;
+                return (
+                  <details key={chapter.id} open={Boolean(containsSelected)} className="group">
+                    <summary className="flex cursor-pointer list-none items-start gap-3 px-5 py-4 hover:bg-slate-50">
+                      <span className="mt-0.5 text-xs font-semibold text-slate-400">{chapterIndex + 1}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-ink-900">{chapter.title}</span>
+                        <span className="mt-0.5 block text-xs text-slate-500">
+                          {done}/{total} lessons done
+                        </span>
+                      </span>
+                      <ChevronRight
+                        fontSize="small"
+                        aria-hidden
+                        className="mt-0.5 shrink-0 text-slate-400 transition-transform group-open:rotate-90"
+                      />
+                    </summary>
+                    <ol className="pb-2">
+                      {rm?.topics.map((topic) => (
+                        <li key={topic.id} className="pt-1">
+                          <p className="px-5 pb-1 pl-10 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            {topic.title}
+                          </p>
+                          <ul>
+                            {topic.lessons.map((lesson) => {
+                              const isDone = completed.has(lesson.id);
+                              const active = selected?.id === lesson.id;
+                              const locked = !lesson.isPublished && !access.isStaff;
+                              if (locked) {
+                                return (
+                                  <li key={lesson.id}>
+                                    <div className="flex items-center gap-2 px-5 py-2 pl-10 text-sm text-slate-400">
+                                      <span className="truncate">{lesson.title}</span>
+                                      <span className="ml-auto shrink-0 text-[11px] uppercase tracking-wider">Locked</span>
+                                    </div>
+                                  </li>
+                                );
+                              }
+                              return (
+                                <li key={lesson.id}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelected(lesson);
+                                      void openTopic(topic.id);
+                                    }}
+                                    aria-current={active ? "true" : undefined}
+                                    className={cn(
+                                      "flex w-full items-center gap-2 px-5 py-2 pl-10 text-left text-sm transition",
+                                      active
+                                        ? "bg-slate-100 font-medium text-ink-900"
+                                        : "text-slate-700 hover:bg-slate-50",
+                                    )}
+                                  >
+                                    <span className="truncate">{lesson.title}</span>
+                                    <span className="ml-auto shrink-0 text-[11px] uppercase tracking-wider text-slate-400">
+                                      {isDone ? "Done" : lesson.type === "VIDEO" ? "Video" : "Reading"}
+                                    </span>
+                                    <span className="sr-only">
+                                      {isDone ? "completed" : lesson.type === "VIDEO" ? "video" : "reading"}
+                                    </span>
+                                  </button>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </li>
+                      ))}
+                    </ol>
+                  </details>
+                );
+              })}
+            {course.chapters.length === 0 && (
+              <p className="px-5 py-8 text-center text-sm text-slate-500">The roadmap is still being prepared.</p>
+            )}
+          </div>
+        </aside>
       </div>
     </div>
   );

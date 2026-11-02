@@ -68,10 +68,14 @@ export async function api<T = unknown>(path: string, opts: ApiOptions = {}): Pro
   if (opts.body !== undefined && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
+  let sentAuthToken = false;
   if (opts.auth !== false) {
     const { data } = await getSupabase().auth.getSession();
     const token = data.session?.access_token;
-    if (token) headers.set("Authorization", `Bearer ${token}`);
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+      sentAuthToken = true;
+    }
   }
 
   let res: Response;
@@ -93,7 +97,24 @@ export async function api<T = unknown>(path: string, opts: ApiOptions = {}): Pro
     throw new ApiError(res.status, { code: "INVALID_RESPONSE", message: `Unexpected response (${res.status})` });
   }
   if (!payload.success) {
-    if (res.status === 401 || payload.error.code === "UNAUTHORIZED") signalSessionExpired();
+    // Only signal session expiry if the request was authenticated, a token was sent,
+    // and the backend explicitly rejected it with 401 Unauthorized.
+    // Also skip on auth routes (/login, /signup, etc.) to prevent redirect loops.
+    if (
+      opts.auth !== false &&
+      sentAuthToken &&
+      (res.status === 401 || payload.error.code === "UNAUTHORIZED")
+    ) {
+      const isAuthPage =
+        typeof window !== "undefined" &&
+        (window.location.pathname.startsWith("/login") ||
+          window.location.pathname.startsWith("/signup") ||
+          window.location.pathname.startsWith("/verify-email") ||
+          window.location.pathname.startsWith("/reset-password"));
+      if (!isAuthPage) {
+        signalSessionExpired();
+      }
+    }
     throw new ApiError(res.status, payload.error);
   }
   return payload.data;
@@ -102,6 +123,8 @@ export async function api<T = unknown>(path: string, opts: ApiOptions = {}): Pro
 export const apiGet = <T = unknown>(path: string, query?: ApiOptions["query"]) => api<T>(path, { method: "GET", query });
 export const apiPost = <T = unknown>(path: string, body?: unknown, opts: ApiOptions = {}) =>
   api<T>(path, { ...opts, method: "POST", body });
+export const apiPut = <T = unknown>(path: string, body?: unknown, opts: ApiOptions = {}) =>
+  api<T>(path, { ...opts, method: "PUT", body });
 export const apiPatch = <T = unknown>(path: string, body?: unknown, opts: ApiOptions = {}) =>
   api<T>(path, { ...opts, method: "PATCH", body });
 export const apiDelete = <T = unknown>(path: string, opts: ApiOptions = {}) => api<T>(path, { ...opts, method: "DELETE" });

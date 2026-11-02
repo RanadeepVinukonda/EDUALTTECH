@@ -80,7 +80,7 @@ export default function PaymentResultView({ orderRef, cancelled }: { orderRef: s
 
   return (
     <div className="mx-auto max-w-xl space-y-6 px-4 py-10 sm:px-6">
-      <div className="rounded-[20px] border border-slate-200 bg-white p-8 text-center shadow-elev1">
+      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
         <StatusHeading phase={phase} />
 
         {phase === "confirmed" && order && (
@@ -143,7 +143,7 @@ function StatusHeading({ phase }: { phase: Phase }) {
   const s = map[phase];
   return (
     <>
-      <h1 className={`font-display text-2xl font-bold ${s.tone}`}>{s.title}</h1>
+      <h1 className={`font-display text-2xl font-semibold ${s.tone}`}>{s.title}</h1>
       <p className="mt-2 text-sm text-slate-500">{s.note}</p>
     </>
   );

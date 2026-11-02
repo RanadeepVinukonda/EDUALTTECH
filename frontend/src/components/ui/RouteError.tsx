@@ -21,7 +21,7 @@ export default function RouteError({
       <span aria-hidden className="grid h-12 w-12 place-items-center rounded-full bg-red-50 text-red-600">
         <ErrorOutlined />
       </span>
-      <h1 className="mt-4 font-display text-2xl font-bold text-ink-900">Something went wrong</h1>
+      <h1 className="mt-4 font-display text-2xl font-semibold text-ink-900">Something went wrong</h1>
       <p className="mt-2 text-[15px] text-ink-600">
         This section ran into an unexpected problem. Try again, or continue elsewhere - the rest of your workspace is unaffected.
       </p>

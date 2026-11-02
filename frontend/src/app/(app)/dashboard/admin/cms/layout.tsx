@@ -16,7 +16,10 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "/dashboard/admin/cms";
   return (
     <div className="space-y-6">
-      <nav aria-label="CMS sections" className="flex gap-1 overflow-x-auto">
+      <nav
+        aria-label="CMS sections"
+        className="flex gap-1 overflow-x-auto border-b border-slate-200"
+      >
         {TABS.map(({ href, label, exact }) => {
           const active = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
           return (
@@ -25,8 +28,10 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
               href={href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex shrink-0 items-center rounded-full px-4 py-1.5 text-sm font-semibold transition",
-                active ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:bg-slate-100 hover:text-ink-900",
+                "-mb-px flex shrink-0 items-center border-b-2 px-3 py-2.5 text-sm font-semibold transition",
+                active
+                  ? "border-ink-900 text-ink-900"
+                  : "border-transparent text-slate-500 hover:border-slate-300 hover:text-ink-900",
               )}
             >
               {label}

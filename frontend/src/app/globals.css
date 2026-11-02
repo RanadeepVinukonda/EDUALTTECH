@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
 
   --color-brand-50: #f0fff5;
   --color-brand-100: #d7f5e1;
@@ -42,15 +45,17 @@
 
   --radius-xs: 0.25rem;
   --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.75rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 0.875rem;
+  --radius-3xl: 1rem;
   --radius-full: 9999px;
 
-  --shadow-elev1: 0 1px 2px rgba(2, 64, 89, 0.06), 0 1px 3px rgba(2, 64, 89, 0.1);
-  --shadow-elev2: 0 2px 6px rgba(2, 64, 89, 0.06), 0 4px 12px rgba(2, 64, 89, 0.08);
-  --shadow-elev3: 0 4px 8px rgba(2, 64, 89, 0.06), 0 8px 24px rgba(2, 64, 89, 0.1);
-  --shadow-soft: 0 4px 16px rgba(2, 64, 89, 0.08);
+  --shadow-elev1: 0 1px 2px rgba(2, 28, 43, 0.04);
+  --shadow-elev2: 0 1px 2px rgba(2, 28, 43, 0.04), 0 4px 12px rgba(2, 28, 43, 0.05);
+  --shadow-elev3: 0 8px 28px rgba(2, 28, 43, 0.1);
+  --shadow-soft: 0 4px 16px rgba(2, 28, 43, 0.06);
 }
 
 :root {
@@ -61,6 +66,26 @@ body {
   background-color: var(--color-slate-50);
   color: var(--color-slate-800);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-brand-100);
+  color: var(--color-ink-900);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline-color: var(--color-brand-600);
 }
 
 /* ─── Pay / enrol button ──────────────────────────────────────── */
@@ -1090,7 +1115,7 @@ body {
   background-color: rgb(255, 69, 69);
 }
 
-/* view — eye opens, turns brand navy */
+/* view — eye icon is visible by default; animates & turns brand navy on card/btn hover */
 .hv-btn .eye-closed,
 .hv-btn .eye-open {
   position: absolute;
@@ -1102,30 +1127,27 @@ body {
   transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .hv-btn .eye-closed {
-  opacity: 1;
+  opacity: 0;
+  display: none;
 }
 .hv-btn .eye-open {
-  opacity: 0;
-  transform: scaleY(0);
+  opacity: 1;
+  transform: scaleY(1);
 }
 .hv-btn--view:hover:not(:disabled) .eye-open,
 .hv-btn--view:focus-visible:not(:disabled) .eye-open,
 .group:hover .hv-btn--view .eye-open,
 .group:focus-within .hv-btn--view .eye-open {
   opacity: 1;
-  transform: scaleY(1);
-}
-.hv-btn--view:hover:not(:disabled) .eye-closed,
-.hv-btn--view:focus-visible:not(:disabled) .eye-closed,
-.group:hover .hv-btn--view .eye-closed,
-.group:focus-within .hv-btn--view .eye-closed {
-  opacity: 0;
+  transform: scale(1.12);
 }
 .hv-btn--view:hover:not(:disabled),
 .hv-btn--view:focus-visible:not(:disabled),
 .group:hover .hv-btn--view,
 .group:focus-within .hv-btn--view {
   background-color: #024059;
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(2, 64, 89, 0.35);
 }
 
 .chapter-chevron {

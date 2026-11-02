@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { apiGet } from "@/lib/api";
+import Link from "next/link";
 import type { Application, MyCourses, MentoringRow } from "@/lib/app-types";
 import { APPLICATION_STATUS_META } from "@/lib/mentor";
 import { formatDate } from "@/lib/format";
@@ -11,10 +11,8 @@ import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import CourseCard from "@/components/landing/CourseCard";
 import { meetingLabel } from "@/components/landing/CourseCardLive";
-import { ViewButton } from "@/components/ui/IconActionButton";
 
 export default function MentorDashboardView() {
-  const router = useRouter();
   const [courses, setCourses] = useState<MentoringRow[] | null>(null);
   const [apps, setApps] = useState<Application[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,12 +45,12 @@ export default function MentorDashboardView() {
   return (
     <div className="flex flex-col gap-8">
       <header>
-        <h1 className="font-display text-2xl font-extrabold text-ink-900">Mentor</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink-900">Mentor</h1>
         <p className="mt-1 text-sm text-slate-500">Your teaching assignments and applications.</p>
       </header>
 
       <section aria-labelledby="teaching-h">
-        <h2 id="teaching-h" className="font-display text-lg font-bold text-ink-900">
+        <h2 id="teaching-h" className="font-display text-lg font-semibold text-ink-900">
           Teaching
         </h2>
         {courses.length === 0 ? (
@@ -91,7 +89,7 @@ export default function MentorDashboardView() {
       ))}
 
       <section aria-labelledby="apps-h">
-        <h2 id="apps-h" className="font-display text-lg font-bold text-ink-900">
+        <h2 id="apps-h" className="font-display text-lg font-semibold text-ink-900">
           Your applications
         </h2>
         {apps.length === 0 ? (
@@ -102,7 +100,7 @@ export default function MentorDashboardView() {
             />
           </div>
         ) : (
-          <ul className="mt-3 flex flex-col divide-y divide-slate-200 rounded-[20px] border border-slate-200 bg-white">
+          <ul className="mt-3 flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
             {apps.map((a) => {
               const meta = APPLICATION_STATUS_META[a.status];
               return (
@@ -114,10 +112,12 @@ export default function MentorDashboardView() {
                       <span className={meta.tone}>{meta.label}</span>
                     </p>
                   </div>
-                  <ViewButton
-                    onClick={() => router.push(`/dashboard/mentor/applications/${a.id}`)}
-                    aria-label={`View application: ${a.course.title}`}
-                  />
+                  <Link
+                    href={`/dashboard/mentor/applications/${a.id}`}
+                    className="text-sm font-semibold text-brand-700 hover:text-brand-800"
+                  >
+                    View application →
+                  </Link>
                 </li>
               );
             })}

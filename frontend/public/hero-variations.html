@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduAltTech — 5 Hero Section Variations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-green: #038c3e;
+      --brand-green-hover: #02692e;
+      --brand-green-light: #e6f6ec;
+      --brand-navy: #024059;
+      --brand-navy-hover: #012b3c;
+      --brand-navy-light: #e3eef4;
+      --ink-900: #0a141d;
+      --ink-800: #0f1c24;
+      --ink-700: #1b2e3b;
+      --ink-600: #334e5e;
+      --ink-500: #557283;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-400: #94a3b8;
+      --white: #ffffff;
+      --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      color: var(--ink-700);
+      background-color: #f1f5f9;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Sticky Control Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 20, 29, 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .top-bar__brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 15px;
+      color: #fff;
+      text-decoration: none;
+    }
+    .top-bar__badge {
+      background: var(--brand-green);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .nav-tab {
+      background: rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .nav-tab:hover, .nav-tab.active {
+      background: var(--brand-green);
+      color: #fff;
+      border-color: var(--brand-green);
+    }
+
+    /* Container Wrap */
+    .wrapper {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Variation Section Card */
+    .variation-block {
+      margin: 40px auto 60px;
+      max-width: 1360px;
+      background: var(--white);
+      border-radius: 28px;
+      border: 1px solid var(--slate-200);
+      box-shadow: 0 20px 40px -15px rgba(10, 20, 29, 0.08);
+      overflow: hidden;
+    }
+    .variation-header {
+      background: linear-gradient(to right, #0a141d, #1b2e3b);
+      color: #fff;
+      padding: 20px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .variation-tag {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #86efac;
+    }
+    .variation-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 2px;
+    }
+    .variation-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      max-width: 600px;
+    }
+
+    /* Shared UI Primitives */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      padding: 13px 26px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--brand-green);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(3, 140, 62, 0.25);
+    }
+    .btn-primary:hover {
+      background: var(--brand-green-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(3, 140, 62, 0.35);
+    }
+    .btn-secondary {
+      background: #fff;
+      color: var(--ink-800);
+      border: 1px solid var(--slate-300);
+    }
+    .btn-secondary:hover {
+      background: var(--slate-50);
+      border-color: var(--slate-400);
+      color: var(--ink-900);
+    }
+    .check-list {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 24px;
+      margin-top: 36px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink-800);
+    }
+    .check-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .check-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--brand-green);
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       VARIATION A: Asymmetric Editorial Split (Refined Current Style)
+       ========================================================================= */
+    .hero-a {
+      padding: 80px 0;
+      position: relative;
+      background: #ffffff;
+      overflow: hidden;
+    }
+    .hero-a__bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(75% 60% at 50% -10%, rgba(3, 140, 62, 0.07) 0%, rgba(2, 64, 89, 0.02) 60%, transparent 100%);
+    }
+    .hero-a__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (min-width: 1024px) {
+      .hero-a__grid {
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 64px;
+      }
+    }
+    .hero-a h1 {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 4.2vw, 56px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      color: var(--ink-900);
+      text-wrap: balance;
+    }
+    .hero-a p.lead {
+      margin-top: 22px;
+      font-size: 18px;
+      line-height: 1.65;
+      color: var(--ink-600);
+      max-width: 580px;
+    }
+    .hero-a__actions {
+      margin-top: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .hero-a__photo-card {
+      position: relative;
+      border-radius: 26px;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid var(--slate-200);
+      box-shadow: 0 20px 45px -10px rgba(10, 20, 29, 0.12);
+    }
+    .hero-a__photo-card::before {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      border-radius: 36px;
+      background: radial-gradient(circle at 70% 30%, rgba(3, 140, 62, 0.15), transparent 70%);
+      z-index: -1;
+      filter: blur(20px);
+    }
+    .hero-a__img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      border-radius: 18px;
+      display: block;
+    }
+
+    /* =========================================================================
+       VARIATION B: Centered Cinematic Showcase (Linear / Vercel Style)
+       ========================================================================= */
+    .hero-b {
+      padding: 84px 0 96px;
+      background: #ffffff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-b__bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(3, 140, 62, 0.1) 0%, transparent 70%);
+    }
+    .hero-b h1 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--ink-900);
+      max-width: 860px;
+      margin: 0 auto;
+      text-wrap: balance;
+    }
+    .hero-b p.lead {
+      margin: 22px auto 0;
+      font-size: 19px;
+      line-height: 1.6;
+      color: var(--ink-600);
+      max-width: 640px;
+    }
+    .hero-b__actions {
+      margin-top: 34px;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .hero-b__theater {
+      margin: 54px auto 0;
+      max-width: 1060px;
+      position: relative;
+    }
+    .hero-b__theater-inner {
+      border-radius: 26px;
+      background: #0a141d;
+      padding: 12px;
+      box-shadow: 0 30px 70px -15px rgba(10, 20, 29, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hero-b__img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      border-radius: 18px;
+      display: block;
+    }
+    .hero-b__metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-top: 36px;
+      padding: 24px 32px;
+      background: var(--slate-50);
+      border-radius: 20px;
+      border: 1px solid var(--slate-200);
+      text-align: left;
+    }
+    .hero-b__metric-num {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--ink-900);
+    }
+    .hero-b__metric-lbl {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-500);
+      margin-top: 2px;
+    }
+
+    /* =========================================================================
+       VARIATION C: Mentorship Proof & Live Code Review Deck
+       ========================================================================= */
+    .hero-c {
+      padding: 80px 0;
+      background: #ffffff;
+      position: relative;
+    }
+    .hero-c__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (min-width: 1024px) {
+      .hero-c__grid {
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 56px;
+      }
+    }
+    .hero-c h1 {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 4vw, 54px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      color: var(--ink-900);
+    }
+    .hero-c p.lead {
+      margin-top: 20px;
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--ink-600);
+    }
+    .hero-c__deck {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .console-card {
+      background: #0f1c24;
+      border: 1px solid #1b2e3b;
+      border-radius: 20px;
+      padding: 20px;
+      color: #e2e8f0;
+      box-shadow: 0 16px 36px -8px rgba(10, 20, 29, 0.18);
+    }
+    .console-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+    .console-badge {
+      background: rgba(3, 140, 62, 0.2);
+      color: #86efac;
+      border: 1px solid rgba(3, 140, 62, 0.4);
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .console-diff {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.6;
+      background: #081118;
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 14px;
+    }
+    .diff-del { color: #f87171; }
+    .diff-add { color: #4ade80; }
+    .diff-ctx { color: #94a3b8; }
+    .mentor-comment {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .mentor-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--brand-navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .mentor-bubble {
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+    .mentor-bubble strong {
+      color: #fff;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* =========================================================================
+       VARIATION D: Dual-Photo Human Mosaic (Collegiate / Lab Life)
+       ========================================================================= */
+    .hero-d {
+      padding: 80px 0;
+      background: #ffffff;
+    }
+    .hero-d__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (min-width: 1024px) {
+      .hero-d__grid {
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 60px;
+      }
+    }
+    .hero-d h1 {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 4.2vw, 54px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      color: var(--ink-900);
+    }
+    .hero-d p.lead {
+      margin-top: 20px;
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--ink-600);
+    }
+    .mosaic-frame {
+      position: relative;
+      height: 440px;
+    }
+    .mosaic-primary {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 82%;
+      height: 320px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 6px solid #fff;
+      box-shadow: 0 16px 40px -10px rgba(10, 20, 29, 0.15);
+    }
+    .mosaic-primary img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .mosaic-secondary {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 65%;
+      height: 230px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 6px solid #fff;
+      box-shadow: 0 20px 45px -10px rgba(10, 20, 29, 0.2);
+    }
+    .mosaic-secondary img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* =========================================================================
+       VARIATION E: Search & Course Catalog First (Marketplace Style)
+       ========================================================================= */
+    .hero-e {
+      padding: 80px 0;
+      background: #ffffff;
+    }
+    .hero-e__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (min-width: 1024px) {
+      .hero-e__grid {
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 60px;
+      }
+    }
+    .hero-e h1 {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 4vw, 52px);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.025em;
+      color: var(--ink-900);
+    }
+    .hero-e p.lead {
+      margin-top: 18px;
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--ink-600);
+    }
+    .search-box {
+      margin-top: 30px;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border: 2px solid var(--slate-300);
+      border-radius: 16px;
+      padding: 6px 6px 6px 18px;
+      box-shadow: 0 4px 16px rgba(10, 20, 29, 0.06);
+      transition: all 0.2s ease;
+      max-width: 540px;
+    }
+    .search-box:focus-within {
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 4px rgba(3, 140, 62, 0.15);
+    }
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--ink-900);
+      background: transparent;
+    }
+    .search-btn {
+      background: var(--brand-green);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .search-tags {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--slate-400);
+    }
+    .search-tag-chip {
+      background: var(--slate-100);
+      color: var(--ink-700);
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1px solid var(--slate-200);
+      transition: all 0.2s ease;
+    }
+    .search-tag-chip:hover {
+      background: var(--brand-green-light);
+      color: var(--brand-green);
+      border-color: var(--brand-green);
+    }
+
+    /* Featured Course Tile on the Right */
+    .featured-tile {
+      background: #fff;
+      border-radius: 24px;
+      border: 1px solid var(--slate-200);
+      overflow: hidden;
+      box-shadow: 0 20px 40px -10px rgba(10, 20, 29, 0.12);
+      transition: transform 0.25s ease;
+    }
+    .featured-tile:hover {
+      transform: translateY(-4px);
+    }
+    .featured-tile__thumb {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+      background: #0a141d;
+    }
+    .featured-tile__body {
+      padding: 22px;
+    }
+    .featured-tile__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .featured-tile__cat {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--brand-green);
+    }
+    .featured-tile__title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink-900);
+      line-height: 1.35;
+    }
+    .featured-tile__desc {
+      font-size: 13px;
+      color: var(--ink-600);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .featured-tile__foot {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--slate-100);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .featured-tile__price {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink-900);
+    }
+
+    /* Signature Eye Button Component (.hv-btn.hv-btn--view) */
+    .hv-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: rgb(20, 20, 20);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .hv-btn:hover {
+      background-color: var(--brand-navy);
+      transform: scale(1.08);
+      box-shadow: 0 6px 18px rgba(2, 64, 89, 0.35);
+    }
+    .hv-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Top Quick-Jump Bar -->
+  <header class="top-bar">
+    <div class="top-bar__brand">
+      <span>EduAltTech</span>
+      <span class="top-bar__badge">Hero Exploration</span>
+    </div>
+    <nav class="nav-tabs">
+      <a href="#variation-a" class="nav-tab active">A: Editorial Split</a>
+      <a href="#variation-b" class="nav-tab">B: Centered Cinematic</a>
+      <a href="#variation-c" class="nav-tab">C: Mentorship Proof</a>
+      <a href="#variation-d" class="nav-tab">D: Photo Mosaic</a>
+      <a href="#variation-e" class="nav-tab">E: Catalog Search</a>
+    </nav>
+  </header>
+
+  <!-- =========================================================================
+       VARIATION A: Asymmetric Editorial Split (High-Authority Editorial)
+       ========================================================================= -->
+  <section id="variation-a" class="variation-block">
+    <div class="variation-header">
+      <div>
+        <span class="variation-tag">Variation A</span>
+        <h2 class="variation-title">Asymmetric Editorial Split</h2>
+      </div>
+      <p class="variation-desc">Left column dedicated to clean authoritative copy and primary action; right column frames the authentic physical classroom photo with gallery-style mat and soft ambient glow.</p>
+    </div>
+
+    <div class="hero-a">
+      <div class="hero-a__bg"></div>
+      <div class="wrapper">
+        <div class="hero-a__grid">
+          <div>
+            <h1>Master real engineering with working mentors.</h1>
+            <p class="lead">
+              Structured courses in applied AI, software systems, and entrepreneurship. We connect
+              ambitious students with vetted industry practitioners who review your code and guide you
+              through genuine deployed projects.
+            </p>
+            <div class="hero-a__actions">
+              <a href="/courses" class="btn btn-primary">
+                Explore courses
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </a>
+              <a href="/mentor" class="btn btn-secondary">Teach and earn with us</a>
+            </div>
+            <div class="check-list">
+              <div class="check-item">
+                <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span>1-on-1 Mentor Guidance</span>
+              </div>
+              <div class="check-item">
+                <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span>Zero Passive Lecture Slop</span>
+              </div>
+              <div class="check-item">
+                <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span>Deployed Portfolio Projects</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-a__photo-card">
+            <img src="/media/photos/EAT3.jpg" alt="EduAltTech students collaborating directly with mentors" class="hero-a__img" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       VARIATION B: Centered Cinematic Showcase (Linear / Vercel Style)
+       ========================================================================= -->
+  <section id="variation-b" class="variation-block">
+    <div class="variation-header">
+      <div>
+        <span class="variation-tag">Variation B</span>
+        <h2 class="variation-title">Centered Cinematic Showcase</h2>
+      </div>
+      <p class="variation-desc">Symmetrical, bold centerpiece headline leading directly into a 16:9 panoramic media theater. Clean and modern aesthetic preferred by top engineering tools.</p>
+    </div>
+
+    <div class="hero-b">
+      <div class="hero-b__bg"></div>
+      <div class="wrapper">
+        <h1>Master real engineering with working mentors.</h1>
+        <p class="lead">
+          Structured courses in applied AI, software systems, and entrepreneurship. Direct 1-on-1 code reviews and deployed portfolio projects.
+        </p>
+        <div class="hero-b__actions">
+          <a href="/courses" class="btn btn-primary">
+            Explore courses
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </a>
+          <a href="/mentor" class="btn btn-secondary">Teach and earn with us</a>
+        </div>
+
+        <div class="hero-b__theater">
+          <div class="hero-b__theater-inner">
+            <img src="/media/photos/EAT2.jpg" alt="EduAltTech workshop theater preview" class="hero-b__img" />
+          </div>
+        </div>
+
+        <div class="hero-b__metrics">
+          <div>
+            <div class="hero-b__metric-num">100%</div>
+            <div class="hero-b__metric-lbl">Project-Driven Practice</div>
+          </div>
+          <div>
+            <div class="hero-b__metric-num">1-on-1</div>
+            <div class="hero-b__metric-lbl">Direct Mentor Code Audits</div>
+          </div>
+          <div>
+            <div class="hero-b__metric-num">4+</div>
+            <div class="hero-b__metric-lbl">Partner Institutions</div>
+          </div>
+          <div>
+            <div class="hero-b__metric-num">Zero</div>
+            <div class="hero-b__metric-lbl">Passive Lecture Slop</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       VARIATION C: Mentorship Proof & Live Code Review Deck
+       ========================================================================= */
+  -->
+  <section id="variation-c" class="variation-block">
+    <div class="variation-header">
+      <div>
+        <span class="variation-tag">Variation C</span>
+        <h2 class="variation-title">Mentorship Proof &amp; Live Code Review Console</h2>
+      </div>
+      <p class="variation-desc">Developer-centric layout showing exactly how mentorship works: a dark-mode interactive code review audit card showing real student pull requests and senior engineer feedback.</p>
+    </div>
+
+    <div class="hero-c">
+      <div class="wrapper">
+        <div class="hero-c__grid">
+          <div>
+            <h1>Stop watching passive videos. Get your code audited.</h1>
+            <p class="lead">
+              We connect ambitious builders with industry practitioners who review your pull requests line by line. Build and deploy genuine cloud &amp; AI architectures that stand up to inspection.
+            </p>
+            <div class="hero-a__actions">
+              <a href="/courses" class="btn btn-primary">
+                Start with real code
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </a>
+              <a href="/mentor" class="btn btn-secondary">Become a reviewer</a>
+            </div>
+            <div class="check-list">
+              <div class="check-item">
+                <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span>GitHub Pull Request Audits</span>
+              </div>
+              <div class="check-item">
+                <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span>Direct Mentor Slack Access</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-c__deck">
+            <!-- Code Review Console -->
+            <div class="console-card">
+              <div class="console-head">
+                <span>PR #42 · rag-indexing-pipeline.ts</span>
+                <span class="console-badge">Approved by Mentor</span>
+              </div>
+              <div class="console-diff">
+                <div class="diff-ctx">  async function retrieveContext(query: string) {</div>
+                <div class="diff-del">-   const raw = await db.query(query); // ⚠️ O(N) scan</div>
+                <div class="diff-add">+   const embedding = await embedText(query);</div>
+                <div class="diff-add">+   const hits = await vectorIndex.search(embedding, 5);</div>
+                <div class="diff-ctx">    return hits.map(h => h.chunk);</div>
+                <div class="diff-ctx">  }</div>
+              </div>
+              <div class="mentor-comment">
+                <div class="mentor-avatar">JD</div>
+                <div class="mentor-bubble">
+                  <strong>John Doe · Senior AI Systems Mentor</strong>
+                  <span>"Excellent refactor switching to approximate vector index search. Latency drops from 420ms to 18ms. Merging into production."</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       VARIATION D: Dual-Photo Human Mosaic (Collegiate / Lab Life)
+       ========================================================================= -->
+  <section id="variation-d" class="variation-block">
+    <div class="variation-header">
+      <div>
+        <span class="variation-tag">Variation D</span>
+        <h2 class="variation-title">Dual-Photo Human Mosaic</h2>
+      </div>
+      <p class="variation-desc">Warm, collegiate, community-driven feel using two staggered real-life workshop photographs showing classroom collaboration and 1-on-1 mentorship.</p>
+    </div>
+
+    <div class="hero-d">
+      <div class="wrapper">
+        <div class="hero-d__grid">
+          <div>
+            <h1>Real engineering, built together in classroom labs.</h1>
+            <p class="lead">
+              We teach alternative tech education where students collaborate shoulder-to-shoulder with experienced engineers. Gain practical skills that textbooks never cover.
+            </p>
+            <div class="hero-a__actions">
+              <a href="/courses" class="btn btn-primary">
+                Join next cohort
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </a>
+              <a href="/partners" class="btn btn-secondary">School partnerships</a>
+            </div>
+            <div class="check-list">
+              <div class="check-item">
+                <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span>Hands-On Physical Labs</span>
+              </div>
+              <div class="check-item">
+                <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span>Live Mentor Feedback</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mosaic-frame">
+            <div class="mosaic-primary">
+              <img src="/media/photos/EAT3.jpg" alt="EduAltTech active group lab" />
+            </div>
+            <div class="mosaic-secondary">
+              <img src="/media/photos/EAT4.jpg" alt="EduAltTech 1-on-1 mentor guidance" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       VARIATION E: Search & Course Catalog First (Marketplace Style)
+       ========================================================================= -->
+  <section id="variation-e" class="variation-block">
+    <div class="variation-header">
+      <div>
+        <span class="variation-tag">Variation E</span>
+        <h2 class="variation-title">Catalog Search &amp; Discovery First</h2>
+      </div>
+      <p class="variation-desc">Instant transactional utility: high-conversion search input with popular domain filter chips on the left, paired with a featured live course card featuring the eye ViewButton on the right.</p>
+    </div>
+
+    <div class="hero-e">
+      <div class="wrapper">
+        <div class="hero-e__grid">
+          <div>
+            <h1>What do you want to build today?</h1>
+            <p class="lead">
+              Browse structured engineering tracks in applied AI, full-stack systems, and alternate education. Learn with vetted mentors.
+            </p>
+
+            <form class="search-box" action="/courses" method="GET">
+              <input type="text" name="q" placeholder="Search by topic, skill (e.g. AI, Python, Docker)..." class="search-input" />
+              <button type="submit" class="search-btn">Search</button>
+            </form>
+
+            <div class="search-tags">
+              <span>Popular:</span>
+              <a href="/courses?domain=ai" class="search-tag-chip">Applied AI</a>
+              <a href="/courses?domain=web" class="search-tag-chip">Full-Stack</a>
+              <a href="/courses?domain=systems" class="search-tag-chip">System Architecture</a>
+              <a href="/courses?domain=alt-ed" class="search-tag-chip">Alt-Education</a>
+            </div>
+          </div>
+
+          <div>
+            <article class="featured-tile">
+              <img src="/media/photos/EAT2.jpg" alt="Featured Course" class="featured-tile__thumb" />
+              <div class="featured-tile__body">
+                <div class="featured-tile__head">
+                  <span class="featured-tile__cat">Featured Curriculum</span>
+                  <span style="font-size:11.5px; font-weight:700; color:#557283;">18 Lessons · 4 Chapters</span>
+                </div>
+                <h3 class="featured-tile__title">Applied AI Systems &amp; RAG Architecture</h3>
+                <p class="featured-tile__desc">Build vector embeddings, fine-tune models, and deploy production agentic workflows with live code review.</p>
+                <div class="featured-tile__foot">
+                  <span class="featured-tile__price">₹2,999 <span style="font-size:12px; font-weight:600; color:#94a3b8;">One-time</span></span>
+                  <a href="/courses" class="hv-btn" aria-label="View course" title="View course">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M12 5.5C7.3 5.5 3.2 8.4 1.5 12c1.7 3.6 5.8 6.5 10.5 6.5s8.8-2.9 10.5-6.5C20.8 8.4 16.7 5.5 12 5.5Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sticky tab click highlight script -->
+  <script>
+    const tabs = document.querySelectorAll('.nav-tab');
+    window.addEventListener('scroll', () => {
+      const fromTop = window.scrollY + 100;
+      tabs.forEach(tab => {
+        const section = document.querySelector(tab.getAttribute('href'));
+        if (section) {
+          if (section.offsetTop <= fromTop && section.offsetTop + section.offsetHeight > fromTop) {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
