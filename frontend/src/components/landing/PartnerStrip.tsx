@@ -30,8 +30,8 @@ export default function PartnerStrip({
       className={cn("bg-slate-50", divider && "border-y border-slate-200", className)}
     >
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-          Trusted &amp; deployed in collaboration with educational institutions
+        <p className="text-center text-xs font-semibold text-slate-500">
+          School and learning partners
         </p>
 
         {scroll ? (
@@ -48,7 +48,7 @@ export default function PartnerStrip({
                     src={p.src}
                     alt={p.name}
                     loading="lazy"
-                    className="max-h-16 sm:max-h-20 w-auto max-w-full object-contain opacity-95 transition duration-300 hover:opacity-100 hover:scale-105"
+                    className="max-h-20 sm:max-h-24 w-auto max-w-full object-contain opacity-95 transition-opacity duration-300 hover:opacity-100"
                   />
                 </li>
               ))}
@@ -70,7 +70,7 @@ export default function PartnerStrip({
                     className="max-h-16 w-auto max-w-full object-contain opacity-95 transition duration-300 hover:opacity-100"
                   />
                 </div>
-                <span className="text-center text-xs font-semibold uppercase tracking-wider text-ink-800">{p.name}</span>
+                <span className="text-center text-xs font-semibold text-ink-800">{p.name}</span>
               </li>
             ))}
           </ul>
@@ -79,7 +79,7 @@ export default function PartnerStrip({
         {showAll && (
           <p className="mt-6 text-center text-xs font-semibold text-slate-500">
             <Link href="/partners" className="text-brand-700 hover:text-brand-800 hover:underline">
-              View all partner schools &amp; programs →
+              View partner schools and programs
             </Link>
           </p>
         )}

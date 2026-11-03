@@ -23,12 +23,12 @@ const responsibilities = [
 
 export default function MentorPage() {
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-14 sm:px-6 lg:px-8">
-      <h1 className="font-display text-4xl font-semibold tracking-tight text-ink-900 sm:text-5xl">
+    <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <h1 className="max-w-3xl font-display text-display-s font-semibold tracking-tight text-ink-900">
         Turn your skills into paid teaching
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-slate-600">
-        If you have real skill but no steady work, teaching here is a paid role — not volunteering.
+        If you have real skill but no steady work, teaching here is a paid role, not volunteering.
         Mentors author lessons and run live sessions for the courses they are assigned. Apply for a
         specific course and our team will review your application.
       </p>
@@ -55,10 +55,10 @@ export default function MentorPage() {
 
       <section className="mt-14">
         <h2 className="font-display text-2xl font-semibold text-ink-900">How the process works</h2>
-        <ol className="mt-6 grid gap-6 sm:grid-cols-2">
-          {steps.map((s) => (
-            <li key={s.n} className="border-t border-slate-200 pt-4">
-              <p className="font-mono text-sm text-brand-700">Step {s.n}</p>
+        <ol className="mt-6 divide-y divide-slate-200 border-y border-slate-200 sm:grid sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+          {steps.map((s, index) => (
+            <li key={s.n} className={`py-5 sm:px-5 ${index % 2 === 0 ? "sm:pl-0" : ""}`}>
+              <p className="text-sm font-semibold text-brand-700">Step {s.n}</p>
               <p className="mt-1 font-display text-lg font-semibold text-ink-900">{s.t}</p>
               <p className="mt-1 text-sm text-slate-600">{s.d}</p>
             </li>
@@ -71,11 +71,11 @@ export default function MentorPage() {
         <ul className="mt-4 flex flex-col gap-2 text-slate-700">
           <li>Choose the course you want to teach.</li>
           <li>Write a qualification summary describing your relevant expertise.</li>
-          <li>Have a resume ready (PDF, DOC, DOCX, or TXT — up to 5&nbsp;MB).</li>
+          <li>Have a resume ready (PDF, DOC, DOCX, or TXT, up to 5&nbsp;MB).</li>
         </ul>
       </section>
 
-      <section className="mt-14 rounded-xl border border-slate-200 bg-white p-6">
+      <section className="mt-14 border-y border-slate-200 bg-paper-2 p-6">
         <h2 className="font-display text-xl font-semibold text-ink-900">Applying and tracking status</h2>
         <p className="mt-2 text-slate-600">
           Applying requires an account. After you sign in, you can submit an application and track

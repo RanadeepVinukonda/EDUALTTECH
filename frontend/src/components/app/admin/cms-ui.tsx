@@ -35,7 +35,7 @@ export function Field({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1 block text-sm font-semibold text-ink-700">
+      <label htmlFor={htmlFor} className="mb-1 block text-xs font-semibold tracking-wide text-ink-700">
         {label}
         {required && <span className="text-danger"> *</span>}
       </label>
@@ -74,7 +74,7 @@ export function CmsDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="cms-dialog-title"
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl border border-slate-200 bg-white shadow-elev3"
+        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg border border-slate-200 bg-paper shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-slate-100 px-6 py-4">
@@ -133,7 +133,7 @@ export function MediaPicker({
         role="dialog"
         aria-modal="true"
         aria-labelledby="media-picker-title"
-        className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-xl border border-slate-200 bg-white shadow-elev3"
+        className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg border border-slate-200 bg-paper shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-slate-100 px-6 py-4">

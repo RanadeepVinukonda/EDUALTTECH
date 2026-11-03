@@ -52,10 +52,10 @@ const APPROACH = [
 
 export default function AboutPage() {
   return (
-    <div className="bg-white">
+    <div className="bg-paper">
       {/* Intro */}
-      <section className="border-b border-slate-200 bg-slate-50">
-        <div className={`${wrap} py-10 sm:py-14`}>
+      <section className="border-b border-slate-200 bg-paper-2">
+        <div className={`${wrap} py-12 sm:py-16`}>
           <nav aria-label="Breadcrumb" className="mb-8">
             <ol className="flex items-center gap-1.5 text-sm text-ink-600">
               <li>
@@ -72,12 +72,11 @@ export default function AboutPage() {
             </ol>
           </nav>
 
-          <h1 className="max-w-4xl font-display text-4xl font-semibold tracking-tight text-ink-900 sm:text-5xl sm:leading-[1.06]">
-            Practical learning, and work for the people who teach it.
+          <h1 className="max-w-4xl font-display text-display-s font-semibold tracking-tight text-ink-900 leading-[1.06]">
+            Practical skills and paid teaching
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-600 sm:text-lg">
-            Students learn skills in AI, entrepreneurship, and technology. The mentors who teach them are
-            skilled professionals we train and employ.
+            Learners build skills in AI and technology; practitioners earn by teaching.
           </p>
 
           <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-200 pt-6 text-xs font-semibold text-slate-600">
@@ -93,7 +92,7 @@ export default function AboutPage() {
       </section>
 
       {/* Why practical learning */}
-      <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
+      <section className="border-b border-slate-200 bg-paper py-12 sm:py-16">
         <div className={`${wrap} grid items-center gap-10 lg:grid-cols-12 lg:gap-16`}>
           <figure className="lg:col-span-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -128,7 +127,7 @@ export default function AboutPage() {
       </section>
 
       {/* Commitments */}
-      <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
+      <section className="border-b border-slate-200 bg-paper py-12 sm:py-16">
         <div className={wrap}>
           <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
             Learning and livelihood, together.
@@ -137,11 +136,11 @@ export default function AboutPage() {
             Three commitments sit behind everything we run. Each one has to be real to count.
           </p>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+          <div className="mt-8 divide-y divide-slate-200 border-y border-slate-200 sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             {COMMITMENTS.map((c) => (
-              <div key={c.title} className="rounded-xl border border-slate-200 bg-slate-50/50 p-6">
+              <div key={c.title} className="py-5 sm:px-5 sm:py-4 first:sm:pl-0 last:sm:pr-0">
                 <h3 className="font-display text-base font-semibold text-ink-900">{c.title}</h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-ink-600">{c.body}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink-600">{c.body}</p>
               </div>
             ))}
           </div>
@@ -149,7 +148,7 @@ export default function AboutPage() {
       </section>
 
       {/* Approach */}
-      <section className="border-b border-slate-200 bg-slate-50 py-16 sm:py-24">
+      <section className="border-b border-slate-200 bg-paper-2 py-12 sm:py-16">
         <div className={wrap}>
           <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
             Four ideas we work from.
@@ -158,9 +157,9 @@ export default function AboutPage() {
             These principles guide both how we teach and what we build.
           </p>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+          <div className="mt-8 grid gap-x-10 gap-y-7 border-t border-slate-200 pt-7 sm:grid-cols-2">
             {APPROACH.map((item, i) => (
-              <div key={item.title} className="rounded-xl border border-slate-200 bg-white p-6">
+              <div key={item.title} className="border-b border-slate-200 pb-6">
                 <span className="font-mono text-xs text-slate-400">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="mt-4 font-display text-lg font-semibold text-ink-900">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink-600">{item.body}</p>
@@ -171,7 +170,7 @@ export default function AboutPage() {
       </section>
 
       {/* Team */}
-      <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
+      <section className="border-b border-slate-200 bg-paper py-12 sm:py-16">
         <div className={wrap}>
           <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
             The people behind EduAltTech.
@@ -197,7 +196,7 @@ export default function AboutPage() {
       </section>
 
       {/* Setsuzoku */}
-      <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
+      <section className="border-b border-slate-200 bg-paper py-12 sm:py-16">
         <div className={wrap}>
           <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
             A product by Setsuzoku.
@@ -217,7 +216,7 @@ export default function AboutPage() {
       </section>
 
       {/* Closing */}
-      <section className="bg-white py-16 sm:py-24">
+      <section className="bg-paper py-12 sm:py-16">
         <div className={wrap}>
           <h2 className="max-w-xl font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
             Where would you like to start?

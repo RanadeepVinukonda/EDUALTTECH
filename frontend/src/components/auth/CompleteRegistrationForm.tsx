@@ -102,10 +102,6 @@ export default function CompleteRegistrationForm() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm leading-relaxed text-ink-600">
-        Last step — add your name and choose a password to finish creating your account for{" "}
-        <span className="font-semibold text-ink-900">{flow.email}</span>.
-      </p>
       <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField

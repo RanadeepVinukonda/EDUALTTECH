@@ -73,7 +73,7 @@ export default function CmsTeam() {
         }
       />
 
-      <Panel title="Members" description="Ordered by display position. Use the arrows to reorder.">
+      <Panel title="Members" description="Use the arrows to change the order shown on the public Team page.">
         {items.error ? (
           <ErrorState message={items.error} onRetry={items.reload} />
         ) : items.loading && !items.data ? (

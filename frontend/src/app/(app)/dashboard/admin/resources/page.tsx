@@ -10,11 +10,61 @@ import Close from "@mui/icons-material/Close";
 import Search from "@mui/icons-material/Search";
 import Category from "@mui/icons-material/Category";
 import School from "@mui/icons-material/School";
-import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
-import type { ResourceCategoryItem, ResourceArticleCard, CourseListItem } from "@/lib/types";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
+import type {
+  ResourceCategoryItem,
+  ResourceArticleCard,
+  ResourceSubcategoryItem,
+  CourseListItem,
+} from "@/lib/types";
 import { cn } from "@/lib/cn";
 import Spinner from "@/components/ui/Spinner";
 import MarkdownArticleViewer from "@/components/ui/MarkdownArticleViewer";
+
+const LEARNING_PATH_SLUGS = new Set([
+  "ai-for-kids",
+  "ai-game-development",
+  "music",
+  "video-editing",
+]);
+
+const LESSON_TEMPLATE = `## What you will learn
+
+Describe the idea in clear, learner-friendly language.
+
+## Explore the idea
+
+Explain the key concept with a practical example.
+
+## Try it
+
+Give learners a small activity they can complete.
+
+## Check your understanding
+
+Ask a question or describe what learners should be able to do.`;
+
+async function loadAllAdminArticles(): Promise<ResourceArticleCard[]> {
+  const firstPage = await apiGet<{
+    articles: ResourceArticleCard[];
+    total: number;
+    hasMore: boolean;
+  }>("/resources/admin/articles", { page: 1, limit: 100 });
+  const articles = [...firstPage.articles];
+  let page = 2;
+
+  while (firstPage.hasMore && articles.length < firstPage.total) {
+    const nextPage = await apiGet<{
+      articles: ResourceArticleCard[];
+      hasMore: boolean;
+    }>("/resources/admin/articles", { page, limit: 100 });
+    articles.push(...nextPage.articles);
+    if (!nextPage.hasMore || nextPage.articles.length === 0) break;
+    page += 1;
+  }
+
+  return articles;
+}
 
 export default function AdminResourcesPage() {
   const [activeTab, setActiveTab] = useState<"articles" | "categories">("articles");
@@ -36,10 +86,14 @@ export default function AdminResourcesPage() {
   const [formSubcategoryId, setFormSubcategoryId] = useState("");
   const [formDifficulty, setFormDifficulty] = useState("Beginner");
   const [formMinutes, setFormMinutes] = useState(5);
-  const [formAuthor, setFormAuthor] = useState("EduAltTech Faculty");
   const [formTags, setFormTags] = useState("");
   const [formLinkedCourseId, setFormLinkedCourseId] = useState("");
   const [formPublished, setFormPublished] = useState(true);
+  const [chapterFormOpen, setChapterFormOpen] = useState(false);
+  const [newChapterName, setNewChapterName] = useState("");
+  const [newChapterDescription, setNewChapterDescription] = useState("");
+  const [creatingChapter, setCreatingChapter] = useState(false);
+  const [chapterError, setChapterError] = useState<string | null>(null);
   const [editorPreview, setEditorPreview] = useState(false);
   const [savingArticle, setSavingArticle] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -63,13 +117,13 @@ export default function AdminResourcesPage() {
   async function loadData() {
     setLoading(true);
     try {
-      const [catsRes, articlesRes, coursesRes] = await Promise.all([
+      const [catsRes, articles, coursesRes] = await Promise.all([
         apiGet<{ categories: ResourceCategoryItem[] }>("/resources/categories"),
-        apiGet<{ articles: ResourceArticleCard[] }>("/resources/library?limit=100"),
+        loadAllAdminArticles(),
         apiGet<{ courses: CourseListItem[] }>("/courses?limit=50").catch(() => ({ courses: [] })),
       ]);
       setCategories(catsRes.categories || []);
-      setArticles(articlesRes.articles || []);
+      setArticles(articles);
       setCourses(coursesRes.courses || []);
     } catch {
       // ignore
@@ -87,25 +141,37 @@ export default function AdminResourcesPage() {
     const found = categories.find((c) => c.id === formCategoryId);
     return found ? found.subcategories : [];
   }, [categories, formCategoryId]);
+  const creatorCategories = useMemo(
+    () =>
+      editingArticleId
+        ? categories
+        : categories.filter((category) => LEARNING_PATH_SLUGS.has(category.slug)),
+    [categories, editingArticleId],
+  );
 
   function openCreateArticleModal() {
     setEditingArticleId(null);
     setFormTitle("");
     setFormSlug("");
     setFormDescription("");
-    setFormContent(
-      "## Introduction\n\nExplain the foundational concept here.\n\n```python\n# Example code snippet\ndef calculate_metric():\n    return 42\n```\n\n## Practical Walkthrough\n\n1. Step one\n2. Step two\n\n> Note: Emphasize key takeaways for the learner."
+    setFormContent(LESSON_TEMPLATE);
+    setFormCategoryId(
+      categories.find((category) => category.slug === "ai-for-kids")?.id ??
+        categories.find((category) => LEARNING_PATH_SLUGS.has(category.slug))?.id ??
+        "",
     );
-    setFormCategoryId(categories[0]?.id || "");
     setFormSubcategoryId("");
     setFormDifficulty("Beginner");
     setFormMinutes(6);
-    setFormAuthor("EduAltTech Faculty");
-    setFormTags("technology, guide, basics");
+    setFormTags("");
     setFormLinkedCourseId("");
     setFormPublished(true);
     setEditorPreview(false);
     setFormError(null);
+    setChapterFormOpen(false);
+    setNewChapterName("");
+    setNewChapterDescription("");
+    setChapterError(null);
     setArticleModalOpen(true);
   }
 
@@ -122,15 +188,18 @@ export default function AdminResourcesPage() {
     setFormPublished(true);
     setFormError(null);
     setEditorPreview(false);
+    setChapterFormOpen(false);
+    setNewChapterName("");
+    setNewChapterDescription("");
+    setChapterError(null);
 
     try {
-      const detail = await apiGet<{ article: { content: string; authorAttribution?: string; linkedCourseId?: string; published: boolean } }>(
+      const detail = await apiGet<{ article: { content: string; relatedCourseId?: string | null; isPublished: boolean } }>(
         `/resources/article/${art.slug}`
       );
       setFormContent(detail.article.content);
-      setFormAuthor(detail.article.authorAttribution || "EduAltTech Faculty");
-      setFormLinkedCourseId(detail.article.linkedCourseId || "");
-      setFormPublished(detail.article.published);
+      setFormLinkedCourseId(detail.article.relatedCourseId || "");
+      setFormPublished(detail.article.isPublished);
     } catch {
       setFormContent("");
     }
@@ -157,17 +226,16 @@ export default function AdminResourcesPage() {
       subcategoryId: formSubcategoryId || undefined,
       difficulty: formDifficulty,
       estimatedMinutes: Number(formMinutes) || 5,
-      authorAttribution: formAuthor.trim(),
       tags: formTags.split(",").map((t) => t.trim()).filter(Boolean),
-      linkedCourseId: formLinkedCourseId || null,
-      published: formPublished,
+      relatedCourseId: formLinkedCourseId || null,
+      isPublished: formPublished,
     };
 
     try {
       if (editingArticleId) {
-        await apiPut(`/resources/admin/articles/${editingArticleId}`, payload);
+        await apiPatch(`/resources/articles/${editingArticleId}`, payload);
       } else {
-        await apiPost("/resources/admin/articles", payload);
+        await apiPost("/resources/articles", payload);
       }
       setArticleModalOpen(false);
       await loadData();
@@ -178,10 +246,40 @@ export default function AdminResourcesPage() {
     }
   }
 
+  async function handleCreateChapter() {
+    if (!formCategoryId || !newChapterName.trim()) return;
+
+    setCreatingChapter(true);
+    setChapterError(null);
+    try {
+      const response = await apiPost<{ subcategory: ResourceSubcategoryItem }>("/resources/subcategories", {
+        categoryId: formCategoryId,
+        name: newChapterName.trim(),
+        description: newChapterDescription.trim() || undefined,
+        order: modalSubcategories.length + 1,
+      });
+      setCategories((current) =>
+        current.map((category) =>
+          category.id === formCategoryId
+            ? { ...category, subcategories: [...category.subcategories, response.subcategory] }
+            : category,
+        ),
+      );
+      setFormSubcategoryId(response.subcategory.id);
+      setNewChapterName("");
+      setNewChapterDescription("");
+      setChapterFormOpen(false);
+    } catch (error) {
+      setChapterError(error instanceof Error ? error.message : "Could not create chapter.");
+    } finally {
+      setCreatingChapter(false);
+    }
+  }
+
   async function handleDeleteArticle(id: string, title: string) {
     if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
     try {
-      await apiDelete(`/resources/admin/articles/${id}`);
+      await apiDelete(`/resources/articles/${id}`);
       await loadData();
     } catch {
       alert("Failed to delete article");
@@ -193,7 +291,7 @@ export default function AdminResourcesPage() {
     if (!catName.trim()) return;
     setSavingCat(true);
     try {
-      await apiPost("/resources/admin/categories", {
+      await apiPost("/resources/categories", {
         name: catName.trim(),
         slug: catSlug.trim() || undefined,
         description: catDescription.trim() || undefined,
@@ -216,7 +314,7 @@ export default function AdminResourcesPage() {
     if (!subName.trim() || !subParentCatId) return;
     setSavingSub(true);
     try {
-      await apiPost("/resources/admin/subcategories", {
+      await apiPost("/resources/subcategories", {
         categoryId: subParentCatId,
         name: subName.trim(),
         slug: subSlug.trim() || undefined,
@@ -254,55 +352,55 @@ export default function AdminResourcesPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink-900">
-            Resource Library Management
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink-900 sm:text-[28px]">
+            Learning path content
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Create multidisciplinary tutorials, organize learning categories, and bridge free resources to structured courses.
+          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-600">
+            Add lessons to AI, music, and video learning paths. Place each lesson in the chapter where it belongs.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
             onClick={() => setCategoryModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-paper px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-paper-2"
           >
             <Category fontSize="small" />
-            <span>+ Add Category</span>
+            <span>+ Add category</span>
           </button>
           <button
             type="button"
             onClick={openCreateArticleModal}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 transition"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-800 active:translate-y-px motion-reduce:transition-none"
           >
             <Add fontSize="small" />
-            <span>Write New Tutorial</span>
+            <span>Add a lesson</span>
           </button>
         </div>
       </div>
 
       {/* Metric Cards */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Tutorials</p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="border-t-2 border-slate-300 bg-paper-2/70 px-4 py-3.5">
+          <p className="text-xs font-semibold text-slate-600">Total tutorials</p>
           <p className="mt-2 font-display text-3xl font-semibold text-ink-900">{articles.length}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Categories</p>
+        <div className="border-t-2 border-slate-300 bg-paper-2/70 px-4 py-3.5">
+          <p className="text-xs font-semibold text-slate-600">Categories</p>
           <p className="mt-2 font-display text-3xl font-semibold text-ink-900">{categories.length}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Subcategories</p>
+        <div className="border-t-2 border-slate-300 bg-paper-2/70 px-4 py-3.5">
+          <p className="text-xs font-semibold text-slate-600">Subcategories</p>
           <p className="mt-2 font-display text-3xl font-semibold text-ink-900">
             {categories.reduce((acc, c) => acc + c.subcategories.length, 0)}
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Article Reads</p>
+        <div className="border-t-2 border-brand-600 bg-paper-2/70 px-4 py-3.5">
+          <p className="text-xs font-semibold text-slate-600">Article reads</p>
           <p className="mt-2 font-display text-3xl font-semibold text-brand-700">
             {articles.reduce((acc, a) => acc + (a.views || 0), 0).toLocaleString()}
           </p>
@@ -310,30 +408,30 @@ export default function AdminResourcesPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex min-w-0 gap-1 overflow-x-auto border-b border-slate-200">
         <button
           type="button"
           onClick={() => setActiveTab("articles")}
           className={cn(
-            "border-b-2 px-5 py-3 text-sm font-semibold transition",
+            "min-h-11 shrink-0 border-b-2 px-4 py-2 text-sm font-semibold transition",
             activeTab === "articles"
               ? "border-brand-600 text-brand-700"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          Articles & Tutorials ({articles.length})
+          Lessons ({articles.length})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("categories")}
           className={cn(
-            "border-b-2 px-5 py-3 text-sm font-semibold transition",
+            "min-h-11 shrink-0 border-b-2 px-4 py-2 text-sm font-semibold transition",
             activeTab === "categories"
               ? "border-brand-600 text-brand-700"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          Categories & Subcategories ({categories.length})
+          Learning paths ({categories.length})
         </button>
       </div>
 
@@ -357,7 +455,7 @@ export default function AdminResourcesPage() {
               onChange={(e) => setSelectedCatFilter(e.target.value)}
               className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
             >
-              <option value="all">All Domains ({articles.length})</option>
+              <option value="all">All categories ({articles.length})</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.slug}>
                   {c.name}
@@ -367,13 +465,13 @@ export default function AdminResourcesPage() {
           </div>
 
           {/* Articles Table */}
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+          <div className="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-paper">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-200 bg-slate-50/70 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <table className="w-full min-w-[680px] text-left text-xs">
+                <thead className="border-b border-slate-200 bg-paper-2 text-xs font-semibold text-slate-600">
                   <tr>
                     <th className="px-5 py-3">Tutorial</th>
-                    <th className="px-4 py-3">Category / Subcategory</th>
+                    <th className="px-4 py-3">Category and subcategory</th>
                     <th className="px-4 py-3">Difficulty</th>
                     <th className="px-4 py-3">Duration</th>
                     <th className="px-4 py-3">Views</th>
@@ -384,7 +482,7 @@ export default function AdminResourcesPage() {
                   {filteredArticles.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-10 text-center text-slate-500">
-                        No articles found. Click &quot;Write New Tutorial&quot; to publish one.
+                        No lessons found. Add a lesson to build a learning path.
                       </td>
                     </tr>
                   ) : (
@@ -392,7 +490,9 @@ export default function AdminResourcesPage() {
                       <tr key={art.id} className="hover:bg-slate-50/50 transition">
                         <td className="px-5 py-3.5">
                           <p className="font-display font-semibold text-ink-900 line-clamp-1">{art.title}</p>
-                          <p className="mt-0.5 text-[11px] text-slate-500 line-clamp-1">{art.description}</p>
+                          <p className="mt-0.5 text-[11px] text-slate-500 line-clamp-1">
+                            {art.isPublished === false ? "Hidden from learners" : "Published"} · {art.description}
+                          </p>
                         </td>
                         <td className="px-4 py-3.5 whitespace-nowrap">
                           <span className="font-semibold text-slate-800">{art.category?.name || "General"}</span>
@@ -456,8 +556,8 @@ export default function AdminResourcesPage() {
             <div key={cat.id} className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="rounded-md bg-brand-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-brand-700">
-                    Domain Category
+                  <span className="rounded bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-800">
+                    Category
                   </span>
                   <h3 className="mt-1 font-display text-lg font-semibold text-ink-900">{cat.name}</h3>
                   <p className="mt-1 text-xs text-slate-600">{cat.description || "No description provided."}</p>
@@ -470,14 +570,14 @@ export default function AdminResourcesPage() {
                   }}
                   className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 transition"
                 >
-                  + Add Topic
+                  + Add topic
                 </button>
               </div>
 
               {/* Subcategories */}
               <div className="mt-4 border-t border-slate-100 pt-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  Topics / Subcategories ({cat.subcategories.length})
+                <p className="mb-2 text-xs font-semibold text-slate-600">
+                  Topics and subcategories ({cat.subcategories.length})
                 </p>
                 {cat.subcategories.length === 0 ? (
                   <p className="text-xs italic text-slate-400">No subcategories yet.</p>
@@ -499,13 +599,13 @@ export default function AdminResourcesPage() {
         </div>
       )}
 
-      {/* Modal: Write / Edit Article */}
+      {/* Modal: Write / Edit Lesson */}
       {articleModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="relative my-8 w-full max-w-4xl rounded-xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+          <div className="relative my-8 w-full max-w-4xl rounded-xl bg-white border border-slate-200 overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50">
               <h2 className="font-display text-lg font-semibold text-ink-900">
-                {editingArticleId ? "Edit Educational Tutorial" : "Create New Educational Tutorial"}
+                {editingArticleId ? "Edit lesson" : "Add a lesson to a learning path"}
               </h2>
               <button
                 type="button"
@@ -525,13 +625,13 @@ export default function AdminResourcesPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Tutorial Title *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Lesson title *</label>
                   <input
                     type="text"
                     required
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
-                    placeholder="e.g. Practical Machine Learning in Python"
+                    placeholder="e.g. What is artificial intelligence?"
                     className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:border-brand-600 focus:outline-none"
                   />
                 </div>
@@ -548,53 +648,125 @@ export default function AdminResourcesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Summary Description *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">What learners will learn *</label>
                 <textarea
                   rows={2}
                   required
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="A concise synopsis of concepts learned in this tutorial."
+                  placeholder="Describe the idea and outcome for this lesson."
                   className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:border-brand-600 focus:outline-none"
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Domain Category *</label>
+              <section className="rounded-xl border border-slate-200 bg-paper-2/60 p-4">
+                <div className="mb-3">
+                  <h3 className="text-sm font-semibold text-ink-900">Place this lesson in its path</h3>
+                  <p className="mt-1 text-xs text-slate-600">
+                    Choose a learning path and chapter. New lessons are added to the end of that chapter.
+                  </p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Learning path *</label>
                   <select
                     value={formCategoryId}
+                    required={!editingArticleId}
                     onChange={(e) => {
                       setFormCategoryId(e.target.value);
                       setFormSubcategoryId("");
+                      setChapterFormOpen(false);
+                      setChapterError(null);
                     }}
                     className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:border-brand-600 focus:outline-none"
                   >
-                    <option value="">Select Category</option>
-                    {categories.map((c) => (
+                    <option value="">Select a learning path</option>
+                    {creatorCategories.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
                     ))}
                   </select>
-                </div>
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Subcategory / Topic</label>
+                  <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Chapter *</label>
                   <select
                     value={formSubcategoryId}
                     onChange={(e) => setFormSubcategoryId(e.target.value)}
+                    required={!editingArticleId}
                     className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:border-brand-600 focus:outline-none"
                   >
-                    <option value="">General Topic</option>
+                    <option value="">Select a chapter</option>
                     {modalSubcategories.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
                       </option>
                     ))}
                   </select>
+                  </div>
                 </div>
+                {!editingArticleId && formCategoryId && (
+                  <div className="mt-3">
+                    {!chapterFormOpen ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setChapterFormOpen(true);
+                          setChapterError(null);
+                        }}
+                        className="whitespace-nowrap text-xs font-semibold text-brand-700 hover:text-brand-800 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                      >
+                        + Add chapter
+                      </button>
+                    ) : (
+                      <div className="grid gap-2 rounded-lg border border-slate-200 bg-white p-3 sm:grid-cols-[1fr_1.5fr_auto] sm:items-end">
+                        <div>
+                          <label className="mb-1 block text-xs font-semibold text-slate-700" htmlFor="new-chapter-name">
+                            Chapter name
+                          </label>
+                          <input
+                            id="new-chapter-name"
+                            value={newChapterName}
+                            onChange={(event) => setNewChapterName(event.target.value)}
+                            placeholder="e.g. Build your first project"
+                            maxLength={100}
+                            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:border-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/20"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-semibold text-slate-700" htmlFor="new-chapter-description">
+                            Short chapter description
+                          </label>
+                          <input
+                            id="new-chapter-description"
+                            value={newChapterDescription}
+                            onChange={(event) => setNewChapterDescription(event.target.value)}
+                            placeholder="What this chapter covers"
+                            maxLength={1000}
+                            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:border-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/20"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void handleCreateChapter()}
+                          disabled={creatingChapter || !newChapterName.trim()}
+                          className="min-h-10 rounded-lg bg-brand-700 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
+                        >
+                          {creatingChapter ? "Adding…" : "Add chapter"}
+                        </button>
+                        {chapterError && (
+                          <p role="alert" className="text-xs text-rose-700 sm:col-span-3">
+                            {chapterError}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
 
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Difficulty</label>
                   <select
@@ -609,7 +781,7 @@ export default function AdminResourcesPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Estimated Read Time (mins)</label>
                   <input
@@ -621,21 +793,12 @@ export default function AdminResourcesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Author / Faculty Attribution</label>
-                  <input
-                    type="text"
-                    value={formAuthor}
-                    onChange={(e) => setFormAuthor(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:border-brand-600 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Tags (comma-separated)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Related search terms (comma-separated)</label>
                   <input
                     type="text"
                     value={formTags}
                     onChange={(e) => setFormTags(e.target.value)}
-                    placeholder="ai, machine-learning, python"
+                    placeholder="patterns, data, classification"
                     className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:border-brand-600 focus:outline-none"
                   />
                 </div>
@@ -734,7 +897,7 @@ export default function AdminResourcesPage() {
                   disabled={savingArticle}
                   className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-5 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                 >
-                  {savingArticle ? "Saving..." : editingArticleId ? "Update Tutorial" : "Publish Tutorial"}
+                  {savingArticle ? "Saving…" : editingArticleId ? "Save lesson" : "Publish lesson"}
                 </button>
               </div>
             </form>
@@ -745,11 +908,11 @@ export default function AdminResourcesPage() {
       {/* Modal: Create Category */}
       {categoryModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-xl bg-white shadow-2xl border border-slate-200 p-6">
-            <h2 className="font-display text-base font-semibold text-ink-900">Add New Domain Category</h2>
+          <div className="w-full max-w-md rounded-xl bg-white shadow-elev3 border border-slate-200 p-6">
+            <h2 className="font-display text-base font-semibold text-ink-900">Add a category</h2>
             <form onSubmit={handleCreateCategory} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Category Name *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Category name *</label>
                 <input
                   type="text"
                   required
@@ -805,7 +968,7 @@ export default function AdminResourcesPage() {
                   disabled={savingCat}
                   className="rounded-xl bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700"
                 >
-                  {savingCat ? "Creating..." : "Create Category"}
+                  {savingCat ? "Creating..." : "Create category"}
                 </button>
               </div>
             </form>
@@ -816,11 +979,11 @@ export default function AdminResourcesPage() {
       {/* Modal: Create Subcategory */}
       {subModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-xl bg-white shadow-2xl border border-slate-200 p-6">
-            <h2 className="font-display text-base font-semibold text-ink-900">Add Subcategory / Topic</h2>
+          <div className="w-full max-w-md rounded-xl bg-white shadow-elev3 border border-slate-200 p-6">
+            <h2 className="font-display text-base font-semibold text-ink-900">Add a subcategory or topic</h2>
             <form onSubmit={handleCreateSubcategory} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Parent Category</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Parent category</label>
                 <select
                   value={subParentCatId}
                   onChange={(e) => setSubParentCatId(e.target.value)}
@@ -834,7 +997,7 @@ export default function AdminResourcesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Topic Name *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Topic name *</label>
                 <input
                   type="text"
                   required
@@ -867,7 +1030,7 @@ export default function AdminResourcesPage() {
                   disabled={savingSub}
                   className="rounded-xl bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700"
                 >
-                  {savingSub ? "Creating..." : "Create Topic"}
+                  {savingSub ? "Creating..." : "Create topic"}
                 </button>
               </div>
             </form>

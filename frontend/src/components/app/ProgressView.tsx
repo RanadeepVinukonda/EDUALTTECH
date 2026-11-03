@@ -72,8 +72,8 @@ export default function ProgressView({ compact = false }: { compact?: boolean })
     <div className={compact ? "space-y-6" : "space-y-8"}>
       {!compact && (
         <header>
-          <h1 className="font-display text-3xl font-semibold text-ink-900">Progress</h1>
-          <p className="mt-1 text-[15px] text-slate-500">Your learning across enrolled courses.</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Progress</h1>
+          <p className="mt-2 text-[15px] text-muted">Your learning across enrolled courses.</p>
         </header>
       )}
 
@@ -89,24 +89,24 @@ export default function ProgressView({ compact = false }: { compact?: boolean })
         />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 divide-y divide-rule border-y border-rule sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             <Summary label="Enrolled courses" value={rows.length} />
             <Summary label="In progress" value={activeCourses} />
             <Summary label="Completed" value={completedCourses} />
           </div>
 
-          <ul className="space-y-4">
+          {!compact && <ul className="divide-y divide-rule border-y border-rule">
             {rows.map((r) => {
               const complete = r.totalLessons !== null && r.totalLessons > 0 && r.completedLessons === r.totalLessons;
               return (
-                <li key={r.id} className="rounded-xl border border-slate-200 bg-white p-5">
+                <li key={r.id} className="border-b border-rule py-5 last:border-0">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="flex min-w-0 gap-4">
-                      <CoverImage src={r.thumbnailUrl} alt="" fallback={r.title} className="h-16 w-24 shrink-0 rounded-xl" />
+                      <CoverImage src={r.thumbnailUrl} alt="" fallback={r.title} className="h-16 w-24 shrink-0 rounded-lg" />
                       <div className="min-w-0">
-                        <h2 className="truncate font-display font-semibold text-ink-900">{r.title}</h2>
-                        <p className="mt-0.5 text-xs text-slate-500">{r.category}</p>
-                        <p className="mt-1 text-sm text-slate-600">
+                        <h2 className="truncate font-display font-semibold text-ink">{r.title}</h2>
+                        <p className="mt-0.5 text-xs text-muted">{r.category}</p>
+                        <p className="mt-1 text-sm text-ink-2">
                           {r.totalLessons === null
                             ? `${r.progressPct}% complete`
                             : `${r.completedLessons} of ${r.totalLessons} lessons complete`}
@@ -122,21 +122,21 @@ export default function ProgressView({ compact = false }: { compact?: boolean })
                   </div>
                   <div className="mt-4">
                     <div
-                      className="h-2 w-full overflow-hidden rounded-full bg-slate-100"
+                      className="h-2 w-full overflow-hidden rounded-full bg-paper-3"
                       role="progressbar"
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-valuenow={r.progressPct}
                       aria-label={`${r.title} progress`}
                     >
-                      <div className="h-full rounded-full bg-brand-600" style={{ width: `${r.progressPct}%` }} />
+                      <div className="h-full rounded-full bg-accent" style={{ width: `${r.progressPct}%` }} />
                     </div>
-                    <p className="mt-1 text-xs text-slate-500">{r.progressPct}% complete</p>
+                    <p className="mt-1 text-xs text-muted">{r.progressPct}% complete</p>
                   </div>
                 </li>
               );
             })}
-          </ul>
+          </ul>}
         </>
       )}
     </div>
@@ -145,9 +145,9 @@ export default function ProgressView({ compact = false }: { compact?: boolean })
 
 function Summary({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <p className="font-display text-3xl font-semibold text-ink-900">{value}</p>
-      <p className="mt-1 text-sm text-slate-500">{label}</p>
+    <div className="py-4 sm:px-4 sm:py-5">
+      <p className="font-display text-2xl font-semibold tabular-nums text-ink">{value}</p>
+      <p className="mt-1 text-sm text-muted">{label}</p>
     </div>
   );
 }
@@ -157,8 +157,8 @@ function StatusPill({ complete }: { complete: boolean }) {
     <span
       className={
         complete
-          ? "rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800"
-          : "rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700"
+          ? "rounded-full bg-paper-2 px-3 py-1 text-xs font-semibold text-accent"
+          : "rounded-full bg-paper-2 px-3 py-1 text-xs font-semibold text-ink-2"
       }
     >
       {complete ? "Completed" : "In progress"}

@@ -13,7 +13,6 @@ import { cn } from "@/lib/cn";
 import EmptyState from "@/components/ui/EmptyState";
 import ErrorState from "@/components/ui/ErrorState";
 import Select from "@/components/ui/Select";
-import CoverImage from "@/components/ui/CoverImage";
 
 const PAGE_SIZE = 12;
 
@@ -39,65 +38,38 @@ const SORTS = [
 
 const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"] as const;
 
-const difficultyTone: Record<string, string> = {
-  Beginner: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Intermediate: "bg-sky-50 text-sky-700 border-sky-200",
-  Advanced: "bg-violet-50 text-violet-700 border-violet-200",
-};
-
-function articleMeta(article: ResourceArticleCard) {
-  return article.category?.name ?? "Resource";
-}
-
 function ArticleCard({ article }: { article: ResourceArticleCard }) {
   return (
     <Link
       href={`/resources/${article.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-brand-300 hover:shadow-[0_8px_30px_rgba(2,35,18,0.06)] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-600/30"
+      className={cn(
+        "group grid min-w-0 gap-3 border-b border-slate-200 py-5 transition-colors hover:border-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6",
+      )}
     >
-      <div className="relative aspect-[16/9] overflow-hidden bg-brand-50">
-        <CoverImage
-          src={article.coverUrl}
-          alt={article.title}
-          fallback={articleMeta(article)}
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-        />
-        <span className="absolute left-3 top-3 rounded-full border border-brand-200 bg-white/95 px-2.5 py-0.5 text-xs font-medium text-brand-800 backdrop-blur">
-          {articleMeta(article)}
-        </span>
-      </div>
-
-      <div className="flex flex-1 flex-col p-5">
+      <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "rounded-full border px-2 py-0.5 text-[11px] font-medium",
-              difficultyTone[article.difficulty] ?? difficultyTone.Beginner,
-            )}
-          >
-            {article.difficulty}
-          </span>
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+          <span className="inline-flex items-center gap-1 text-xs text-slate-500">
             <AccessTime sx={{ fontSize: 14 }} />
             {article.estimatedMinutes} min read
           </span>
         </div>
 
-        <h3 className="mt-3 line-clamp-2 font-display text-lg font-semibold leading-snug text-ink-900 group-hover:text-brand-800">
+        <h3 className="mt-3 min-w-0 break-words line-clamp-2 font-display text-lg font-semibold leading-snug text-ink-900 group-hover:text-brand-800">
           {article.title}
         </h3>
-        <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-slate-600">{article.description}</p>
-
-        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-          <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
-            <Visibility sx={{ fontSize: 15 }} />
-            {article.views.toLocaleString()} reads
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700">
-            Read
-            <ArrowForward sx={{ fontSize: 15 }} className="transition group-hover:translate-x-0.5" />
-          </span>
-        </div>
+        <p className="mt-2 line-clamp-2 text-base leading-relaxed text-slate-600">
+          {article.description}
+        </p>
+      </div>
+      <div className="flex items-center justify-between gap-5 sm:justify-end">
+        <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+          <Visibility sx={{ fontSize: 15 }} />
+          {article.views.toLocaleString()} reads
+        </span>
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700">
+          Read
+          <ArrowForward sx={{ fontSize: 15 }} className="transition group-hover:translate-x-0.5" />
+        </span>
       </div>
     </Link>
   );
@@ -105,9 +77,8 @@ function ArticleCard({ article }: { article: ResourceArticleCard }) {
 
 function CardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200" aria-hidden>
-      <div className="aspect-[16/9] w-full animate-pulse bg-slate-100 motion-reduce:animate-none" />
-      <div className="space-y-3 p-5">
+    <div className="border-b border-slate-200 py-5" aria-hidden>
+      <div className="space-y-3">
         <div className="h-3 w-1/4 animate-pulse rounded bg-slate-100 motion-reduce:animate-none" />
         <div className="h-5 w-3/4 animate-pulse rounded bg-slate-100 motion-reduce:animate-none" />
         <div className="h-3 w-full animate-pulse rounded bg-slate-100 motion-reduce:animate-none" />
@@ -189,9 +160,12 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
 
   const categories = useMemo(() => initialCategories.filter((c) => (c.articleCount ?? 0) > 0), [initialCategories]);
   const activeCategory = categories.find((c) => c.slug === category);
-  const showFeatured = page === 1 && !filtersActive && featured.length > 0;
+  const showFeatured = !filtersActive && featured.length > 0;
+  const featuredIds = useMemo(() => new Set(featured.slice(0, 3).map((article) => article.id)), [featured]);
+  const visibleArticles = showFeatured ? articles.filter((article) => !featuredIds.has(article.id)) : articles;
+  const visibleTotal = showFeatured ? Math.max(0, total - featuredIds.size) : total;
   const showEmpty = !loading && !error && articles.length === 0 && filtersActive;
-  const showLibraryEmpty = !loading && !error && articles.length === 0 && !filtersActive;
+  const showLibraryEmpty = !loading && !error && articles.length === 0 && !filtersActive && !showFeatured;
 
   const resetFilters = () => {
     setTerm("");
@@ -203,18 +177,13 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       {showFeatured && (
         <section aria-labelledby="featured-resources">
-          <div className="flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <h2 id="featured-resources" className="font-display text-2xl font-semibold text-ink-900">
-                Featured guides
-              </h2>
-              <p className="mt-1 text-sm text-slate-600">Hand-picked reads to start with.</p>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 id="featured-resources" className="font-display text-2xl font-semibold text-ink-900">
+            Featured guides
+          </h2>
+          <div className="mt-3">
             {featured.slice(0, 3).map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
@@ -226,19 +195,19 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 id="library-heading" className="font-display text-2xl font-semibold text-ink-900">
-              {activeCategory ? activeCategory.name : "All resources"}
+              {activeCategory ? activeCategory.name : showFeatured ? "More guides" : "Browse all guides"}
             </h2>
             <p className="mt-1 text-sm text-slate-600">
               {loading && page === 1
                 ? "Loading resources…"
-                : `${total} free ${total === 1 ? "resource" : "resources"}${activeCategory ? ` in ${activeCategory.name}` : ""}`}
+                : `${visibleTotal} ${visibleTotal === 1 ? "guide" : "guides"}`}
             </p>
           </div>
           {filtersActive && (
             <button
               type="button"
               onClick={resetFilters}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30 active:scale-[0.98]"
             >
               <Close sx={{ fontSize: 14 }} />
               Clear filters
@@ -262,14 +231,14 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
                 placeholder="Search guides, topics, tags…"
-                className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-10 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+                className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-10 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 active:border-brand-500"
               />
               {term && (
                 <button
                   type="button"
                   onClick={() => setTerm("")}
                   aria-label="Clear search"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30 active:bg-slate-200"
                 >
                   <Close sx={{ fontSize: 16 }} />
                 </button>
@@ -288,7 +257,7 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
                     setDifficulty(e.target.value);
                     setPage(1);
                   }}
-                  className="h-11"
+                  className="h-11 active:border-brand-500"
                 >
                   <option value="">All levels</option>
                   {DIFFICULTIES.map((d) => (
@@ -309,7 +278,7 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
                     setSort(e.target.value);
                     setPage(1);
                   }}
-                  className="h-11"
+                  className="h-11 active:border-brand-500"
                 >
                   {SORTS.map((s) => (
                     <option key={s.value} value={s.value}>
@@ -330,7 +299,7 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
               }}
               aria-pressed={category === ""}
               className={cn(
-                "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30",
+                "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30 active:scale-[0.97]",
                 category === ""
                   ? "border-brand-700 bg-brand-700 text-white"
                   : "border-slate-300 bg-white text-slate-700 hover:border-brand-400",
@@ -348,7 +317,7 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
                 }}
                 aria-pressed={category === c.slug}
                 className={cn(
-                  "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30",
+                  "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30 active:scale-[0.97]",
                   category === c.slug
                     ? "border-brand-700 bg-brand-700 text-white"
                     : "border-slate-300 bg-white text-slate-700 hover:border-brand-400",
@@ -369,7 +338,7 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
               onRetry={() => setNonce((n) => n + 1)}
             />
           ) : loading && page === 1 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="divide-y divide-slate-200">
               {Array.from({ length: 6 }).map((_, i) => (
                 <CardSkeleton key={i} />
               ))}
@@ -386,14 +355,14 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
             />
           ) : (
             <>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {articles.map((article) => (
+              <div className="divide-y divide-slate-200">
+                {visibleArticles.map((article) => (
                   <ArticleCard key={article.id} article={article} />
                 ))}
               </div>
 
               {loading && page > 1 && (
-                <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-6 divide-y divide-slate-200">
                   <CardSkeleton />
                   <CardSkeleton />
                   <CardSkeleton />
@@ -406,7 +375,7 @@ export default function ResourceLibraryExplorer({ initialCategories, initialArti
                     type="button"
                     onClick={() => setPage((p) => p + 1)}
                     disabled={loading}
-                    className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-800 transition hover:border-brand-500 hover:text-brand-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
+                    className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-sm font-semibold text-ink-800 transition hover:border-brand-500 hover:text-brand-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30 active:scale-[0.98]"
                   >
                     {loading ? "Loading…" : "Load more resources"}
                   </button>

@@ -29,5 +29,11 @@ export default function CourseMeetings({ slug }: { slug: string }) {
     );
   }
 
-  return <MeetingManager courseId={detail.course.id} readOnly={!detail.access.isStaff} />;
+  return (
+    <MeetingManager
+      courseId={detail.course.id}
+      poster={detail.course.thumbnailUrl ?? "/media/photos/EAT3.jpg"}
+      readOnly={!detail.access.isStaff}
+    />
+  );
 }

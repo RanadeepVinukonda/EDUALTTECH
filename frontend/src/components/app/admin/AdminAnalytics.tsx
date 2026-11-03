@@ -153,7 +153,7 @@ function SeriesChart({
             <div className="mt-3 max-h-64 overflow-auto">
               <table className="w-full text-left text-sm">
                 <caption className="sr-only">{title} by bucket</caption>
-                <thead className="sticky top-0 bg-white text-xs uppercase tracking-wide text-slate-500">
+                <thead className="sticky top-0 bg-white text-xs text-slate-500">
                   <tr>
                     <th scope="col" className="py-2 pr-4 font-semibold">Bucket</th>
                     <th scope="col" className="py-2 font-semibold">{title}</th>
@@ -190,7 +190,7 @@ function TopCourses({ courses }: { courses: AnalyticsTopCourse[] }) {
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-wide text-slate-500">
+            <thead className="text-xs text-slate-500">
               <tr>
                 <th scope="col" className="py-2 pr-4 font-semibold">Course</th>
                 <th scope="col" className="py-2 pr-4 font-semibold">Status</th>

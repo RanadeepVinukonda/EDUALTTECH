@@ -179,8 +179,9 @@ function ChapterCard({
       ) : (
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-brand-700">Module {index + 1}</p>
-            <h2 className="font-display text-lg font-semibold text-ink-900">{chapter.title}</h2>
+            <h2 className="font-display text-lg font-semibold text-ink-900">
+              Module {index + 1}: {chapter.title}
+            </h2>
             {chapter.summary && <p className="mt-0.5 text-sm text-slate-500">{chapter.summary}</p>}
             <p className="mt-1 text-xs text-slate-500">
               {chapter.topics.length} {chapter.topics.length === 1 ? "section" : "sections"} ·{" "}
@@ -397,7 +398,7 @@ function LessonCard({
             <LessonTypeIcon type={lesson.type} />
             <span className="min-w-0 truncate text-sm font-medium text-ink-900">{lesson.title}</span>
             {!lesson.isPublished && (
-              <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+              <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">
                 Draft
               </span>
             )}
@@ -406,7 +407,7 @@ function LessonCard({
               disabled={busy}
               onClick={() => void toggleType()}
               title={`Switch to ${TYPE_LABEL[NEXT_TYPE[lesson.type]].toLowerCase()}`}
-              className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
+              className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
             >
               {TYPE_LABEL[lesson.type]}
             </button>

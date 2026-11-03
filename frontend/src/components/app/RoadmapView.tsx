@@ -76,41 +76,28 @@ export default function RoadmapView({ slug }: { slug: string }) {
     <div className="space-y-8">
       <Link
         href={`/dashboard/courses/${courseSlug}`}
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-700 hover:text-brand-700"
+        className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink-2 hover:text-accent"
       >
-        ← Back to course overview
+        Back to course overview
       </Link>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden rounded-xl bg-ink-900 p-6 text-white sm:p-9">
-        <span aria-hidden className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full border border-white/10" />
-        <span aria-hidden className="pointer-events-none absolute -right-12 -top-24 h-60 w-60 rounded-full border border-white/10" />
-        <div className="relative flex items-start justify-between gap-6">
-          <div className="min-w-0 max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-brand-200">
-              <Insights fontSize="inherit" aria-hidden /> {detail.course.category}
+      <section className="border-y border-rule bg-paper px-5 py-7 sm:px-8 sm:py-9">
+        <div className="min-w-0 max-w-3xl">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">{detail.course.title}</h1>
+          {detail.course.description && (
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">{detail.course.description}</p>
+          )}
+          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-2">
+            <span>Category: {detail.course.category}</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Subject fontSize="small" aria-hidden /> {roadmap.chapters.length} chapters
             </span>
-            <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{detail.course.title}</h1>
-            {detail.course.description && (
-              <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-ink-100">{detail.course.description}</p>
-            )}
-            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-brand-100">
-              <span className="inline-flex items-center gap-1.5">
-                <Subject fontSize="small" aria-hidden /> {roadmap.chapters.length} chapters
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <PlayCircle fontSize="small" aria-hidden /> {totalLessons} lessons
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle fontSize="small" aria-hidden /> {doneCount} completed
-              </span>
-            </div>
-          </div>
-          <div
-            aria-hidden
-            className="hidden h-32 w-32 shrink-0 place-items-center rounded-xl border border-brand-200/25 bg-brand-200/10 font-mono text-4xl text-brand-200 sm:grid"
-          >
-            &lt;/&gt;
+            <span className="inline-flex items-center gap-1.5">
+              <PlayCircle fontSize="small" aria-hidden /> {totalLessons} lessons
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle fontSize="small" aria-hidden /> {doneCount} completed
+            </span>
           </div>
         </div>
       </section>
@@ -118,30 +105,33 @@ export default function RoadmapView({ slug }: { slug: string }) {
       {/* Roadmap head + progress */}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-paper-2 text-accent">
             <Insights aria-hidden />
           </span>
           <div>
-            <h2 className="font-display text-xl font-semibold text-ink-900">Your Roadmap</h2>
-            <p className="text-sm text-slate-500">Complete each chapter in order. One step at a time.</p>
+            <h2 className="font-display text-xl font-semibold text-ink">Your roadmap</h2>
+            <p className="text-sm text-muted">Complete each chapter in order. One step at a time.</p>
           </div>
         </div>
         <div className="w-full sm:w-56">
-          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-            <span>Your progress</span>
-            <span className="text-brand-700">{percent}%</span>
+          <div className="flex items-center justify-between text-xs font-medium text-muted">
+            <span>Progress</span>
+            <span className="text-accent">{percent}%</span>
           </div>
           <div
-            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200"
+            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-paper-3"
             role="progressbar"
             aria-label="Course progress"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={percent}
           >
-            <div className="h-full rounded-full bg-brand-600 transition-[width]" style={{ width: `${percent}%` }} />
+            <div
+              className="h-full origin-left rounded-full bg-accent transition-transform duration-500 motion-reduce:transition-none"
+              style={{ transform: `scaleX(${percent / 100})` }}
+            />
           </div>
-          <p className="mt-1.5 text-right text-[11px] text-slate-500">
+          <p className="mt-1.5 text-right text-[11px] text-muted">
             {doneCount} of {totalLessons} lessons completed
           </p>
         </div>
@@ -160,43 +150,42 @@ export default function RoadmapView({ slug }: { slug: string }) {
             return (
               <li key={chapter.id} className="relative pl-14">
                 {!isLast && (
-                  <span aria-hidden className="absolute left-[19px] top-11 h-[calc(100%+0.75rem)] w-px bg-slate-200" />
+                  <span aria-hidden className="absolute left-[19px] top-11 h-[calc(100%+0.75rem)] w-px bg-rule" />
                 )}
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute left-0 top-2.5 grid h-10 w-10 place-items-center rounded-full border-[3px] border-white font-display text-sm font-semibold",
-                    complete ? "bg-emerald-500 text-white" : "bg-brand-600 text-white",
+                    "absolute left-0 top-2.5 grid h-10 w-10 place-items-center rounded-full border-[3px] border-paper font-display text-sm font-semibold",
+                    complete ? "bg-accent text-accent-ink" : "bg-ink text-paper",
                   )}
                 >
                   {complete ? "✓" : index + 1}
                 </span>
 
-                <details className="group overflow-hidden rounded-xl border border-slate-200 bg-white" open={index === 0}>
-                  <summary className="flex cursor-pointer list-none items-center gap-4 px-4 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 sm:px-5 [&::-webkit-details-marker]:hidden">
+                <details className="group overflow-hidden border-y border-rule bg-paper" open={index === 0}>
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center gap-4 px-4 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40 sm:px-5 [&::-webkit-details-marker]:hidden">
                     <span className="min-w-0 flex-1">
-                      <span className="block font-display font-semibold text-ink-900">{chapter.title}</span>
-                      <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
+                      <span className="block font-display font-semibold text-ink">{chapter.title}</span>
+                      <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
                         <span>{chapterTotal} {chapterTotal === 1 ? "lesson" : "lessons"}</span>
-                        <span aria-hidden className="text-slate-300">·</span>
-                        <span>{chapterDone}/{chapterTotal} completed</span>
+                        <span>{chapterDone} of {chapterTotal} completed</span>
                       </span>
                     </span>
                     <span className="hidden w-24 shrink-0 sm:block">
-                      <span className="block text-[10px] font-semibold text-slate-500">{chapterDone}/{chapterTotal}</span>
-                      <span className="mt-1 block h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                      <span className="block text-[10px] font-semibold text-muted">{chapterDone}/{chapterTotal}</span>
+                      <span className="mt-1 block h-1.5 w-full overflow-hidden rounded-full bg-paper-3">
                         <span
-                          className="block h-full rounded-full bg-brand-600"
-                          style={{ width: `${chapterTotal ? (chapterDone / chapterTotal) * 100 : 0}%` }}
+                          className="block h-full origin-left rounded-full bg-accent"
+                          style={{ transform: `scaleX(${chapterTotal ? chapterDone / chapterTotal : 0})` }}
                         />
                       </span>
                     </span>
-                    <ExpandMore aria-hidden className="chapter-chevron shrink-0 text-ink-700" />
+                    <ExpandMore aria-hidden className="chapter-chevron shrink-0 text-ink-2" />
                   </summary>
 
-                  <div className="border-t border-slate-100 px-2 py-2 sm:px-3">
+                  <div className="border-t border-rule px-2 py-2 sm:px-3">
                     {chapterTotal === 0 ? (
-                      <p className="px-3 py-2 text-sm text-slate-500">No lessons in this chapter yet.</p>
+                      <p className="px-3 py-2 text-sm text-muted">No lessons in this chapter yet.</p>
                     ) : (
                       <ul className="space-y-0.5">
                         {lessons.map((lesson, li) => {
@@ -206,10 +195,10 @@ export default function RoadmapView({ slug }: { slug: string }) {
                           const row = (
                             <>
                               <LessonDot done={done} />
-                              <span className="w-8 shrink-0 font-mono text-[11px] text-slate-400">{num}</span>
-                              <span className="min-w-0 flex-1 truncate text-[15px] text-ink-800">{lesson.title}</span>
-                              <span className="shrink-0 text-[11px] text-slate-400">{TYPE_LABEL[lesson.type] ?? lesson.type}</span>
-                              <ArrowForward fontSize="inherit" aria-hidden className="shrink-0 text-brand-600" />
+                              <span className="w-8 shrink-0 font-mono text-[11px] text-muted">{num}</span>
+                              <span className="min-w-0 flex-1 truncate text-[15px] text-ink-2">{lesson.title}</span>
+                              <span className="shrink-0 text-[11px] text-muted">{TYPE_LABEL[lesson.type] ?? lesson.type}</span>
+                              <ArrowForward fontSize="inherit" aria-hidden className="shrink-0 text-accent" />
                             </>
                           );
                           return (
@@ -217,15 +206,15 @@ export default function RoadmapView({ slug }: { slug: string }) {
                               {playable ? (
                                 <Link
                                   href={lessonHref(lesson.id)}
-                                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+                                  className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 transition hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/40"
                                 >
                                   {row}
                                   <span className="sr-only">{done ? "completed" : "not completed"}</span>
                                 </Link>
                               ) : (
-                                <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 opacity-70">
+                                <div className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 opacity-70">
                                   {row}
-                                  <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                                  <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-paper-2 px-2 py-0.5 text-[10px] font-semibold text-ink-2">
                                     <Lock fontSize="inherit" aria-hidden /> Locked
                                   </span>
                                 </div>
@@ -244,12 +233,12 @@ export default function RoadmapView({ slug }: { slug: string }) {
       )}
 
       {/* Bottom CTA */}
-      <section className="flex flex-col gap-4 rounded-xl border border-brand-100 bg-brand-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <section className="flex flex-col gap-4 border-y border-rule bg-paper-2 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-display font-semibold text-ink-900">
+          <p className="font-display font-semibold text-ink">
             {allDone ? "Course completed. Excellent work!" : "Keep building your skills."}
           </p>
-          <p className="mt-0.5 text-sm text-slate-500">
+          <p className="mt-0.5 text-sm text-muted">
             {allDone
               ? "You’ve completed every lesson in this roadmap."
               : nextLesson
@@ -258,11 +247,11 @@ export default function RoadmapView({ slug }: { slug: string }) {
           </p>
         </div>
         {nextLesson ? (
-          <Link href={lessonHref(nextLesson.id)} className={buttonClass("primary", "md", "shrink-0")}>
+          <Link href={lessonHref(nextLesson.id)} className={buttonClass("primary", "md", "w-full shrink-0 sm:w-auto")}>
             Continue learning <ArrowForward fontSize="small" aria-hidden />
           </Link>
         ) : (
-          <Link href={`/dashboard/courses/${courseSlug}`} className={buttonClass("secondary", "md", "shrink-0")}>
+          <Link href={`/dashboard/courses/${courseSlug}`} className={buttonClass("secondary", "md", "w-full shrink-0 sm:w-auto")}>
             Review course
           </Link>
         )}
@@ -277,7 +266,7 @@ function LessonDot({ done }: { done: boolean }) {
       aria-hidden
       className={cn(
         "grid h-4 w-4 shrink-0 place-items-center rounded-full border text-[10px]",
-        done ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300",
+        done ? "border-accent bg-accent text-accent-ink" : "border-rule",
       )}
     >
       {done ? "✓" : ""}

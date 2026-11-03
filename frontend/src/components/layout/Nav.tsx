@@ -15,7 +15,7 @@ export function Nav() {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <nav className="border-b border-slate-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
+    <nav className="border-b border-rule bg-paper fixed top-0 left-0 right-0 z-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         <div className="flex items-center gap-4">
           <Link href="/" className="font-display font-semibold text-ink-900 text-lg">
@@ -48,7 +48,7 @@ export function Nav() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-ink-900/75 z-40 flex items-center justify-center p-4">
           <button
             aria-label="Close menu"
             onClick={() => closeMobileMenu()}

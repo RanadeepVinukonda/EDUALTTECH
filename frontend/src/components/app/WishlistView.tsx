@@ -56,7 +56,7 @@ export default function WishlistView() {
   if (items.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="font-display text-3xl font-semibold text-ink-900">Wishlist</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Wishlist</h1>
         <EmptyState
           title="Your wishlist is empty"
           description="Save courses you're interested in and find them here later."
@@ -73,11 +73,11 @@ export default function WishlistView() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-semibold text-ink-900">Wishlist</h1>
-        <p className="mt-1 text-[15px] text-slate-500">Saved courses. Saving does not enroll you — that happens at checkout.</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Wishlist</h1>
+        <p className="mt-2 text-[15px] text-muted">Saved courses. Saving does not enroll you. That happens at checkout.</p>
       </header>
 
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => {
           const available = item.course.status === "PUBLISHED";
           const busy = pending.has(item.courseId);

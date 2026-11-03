@@ -173,22 +173,21 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
 
   if (user && !user.mobileVerifiedAt) {
     return (
-      <div className="flex max-w-2xl flex-col gap-6">
-        <header>
-          <h1 className="font-display text-2xl font-semibold text-ink-900">Apply to mentor</h1>
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+        <header className="border-b border-slate-200 pb-5">
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink-900">Apply to mentor</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Choose a course and tell us about your expertise. Submission does not grant teaching
-            access — a reviewer assesses every application.
+            Share your expertise; a reviewer assesses applications before teaching access.
           </p>
         </header>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-5">
           <p className="font-semibold text-amber-900">Verify your mobile number to continue</p>
           <p className="mt-1 text-sm text-amber-800">
-            We ask for a verified mobile number before you can apply to mentor. The application form
-            unlocks automatically as soon as your number is verified.
+            We ask you to verify your mobile number before applying to mentor. After verification,
+            you can continue with the application.
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
+        <div className="rounded-lg border border-slate-200 bg-paper p-5">
           <MobileVerification />
         </div>
       </div>
@@ -196,17 +195,17 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
-      <header>
-        <h1 className="font-display text-2xl font-semibold text-ink-900">Apply to mentor</h1>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <header className="border-b border-slate-200 pb-5">
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink-900">Apply to mentor</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Choose a course and tell us about your expertise. Submission does not grant teaching
-          access — a reviewer assesses every application.
+          Choose a course and tell us about your expertise. A reviewer assesses each application
+          before teaching access is granted.
         </p>
       </header>
 
       {needsMobile && (
-        <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           Verify your mobile number before applying.{" "}
           <Link href="/dashboard/settings" className="font-semibold underline">
             Go to settings
@@ -215,12 +214,12 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
       )}
 
       {available.length === 0 ? (
-        <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+        <p className="rounded-lg border border-slate-200 bg-paper p-5 text-sm text-slate-600">
           You already have an open application for every published course. You can apply again only
           after a previous application is rejected, or for a new course.
         </p>
       ) : (
-        <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+        <form onSubmit={submit} noValidate className="flex flex-col gap-5 rounded-lg border border-slate-200 bg-paper p-4 sm:p-6">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="courseId" className="text-sm font-semibold text-ink-700">
               Course <span className="text-danger">*</span>
@@ -236,7 +235,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
               <option value="">Select a course…</option>
               {available.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.title} — {c.category}
+                  {c.title} ({c.category})
                 </option>
               ))}
             </Select>
@@ -255,7 +254,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
               onChange={(e) => setQualification(e.target.value)}
               placeholder="Describe your relevant experience and subject expertise…"
               className={cn(
-                "w-full rounded-xl border bg-white px-4 py-3 text-[15px] outline-none transition focus:ring-2",
+                "w-full rounded-lg border bg-paper px-4 py-3 text-[15px] outline-none transition focus:ring-2",
                 fieldErrors.qualification
                   ? "border-danger focus:border-danger focus:ring-danger/20"
                   : "border-slate-300 focus:border-brand-600 focus:ring-brand-600/20",
@@ -277,7 +276,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Anything you'd like the reviewer to know…"
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+              className="w-full rounded-lg border border-slate-300 bg-paper px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
             />
           </div>
 
@@ -292,7 +291,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
             </div>
 
             {user?.resumeName && (
-              <label className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-sm text-slate-700 cursor-pointer hover:bg-slate-50 transition">
+              <label className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg border border-slate-200 bg-paper-2/70 p-3 text-sm text-slate-700 transition hover:bg-paper-2">
                 <input
                   type="checkbox"
                   checked={useProfileResume}
@@ -316,8 +315,8 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
             )}
 
             {useProfileResume ? (
-              <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-800">
-                <AttachFile fontSize="small" className="text-emerald-600" />
+              <div className="flex items-center gap-2.5 rounded-lg border border-brand-200 bg-brand-50/70 p-3 text-sm text-brand-900">
+                <AttachFile fontSize="small" className="text-brand-700" />
                 <span>Your profile resume will be attached to this application automatically.</span>
               </div>
             ) : (
@@ -338,7 +337,7 @@ export default function ApplicationForm({ initialCourseSlug }: { initialCourseSl
           </div>
 
           {submitError && (
-            <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
               {submitError}
             </p>
           )}

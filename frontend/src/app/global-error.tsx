@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import "./globals.css";
 
 export default function GlobalError({
   error,
@@ -15,57 +16,31 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body style={{ fontFamily: "system-ui, sans-serif", margin: 0 }}>
-        <div
-          style={{
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            padding: "2rem",
-            color: "#024059",
-          }}
-        >
-          <h1 style={{ fontSize: "1.5rem", fontWeight: 700 }}>Something went wrong</h1>
-          <p style={{ marginTop: "0.5rem", color: "#475569" }}>
+      <body className="min-h-dvh bg-paper text-ink">
+        <main className="container flex min-h-dvh flex-col items-center justify-center py-12 text-center">
+          <h1 className="font-display text-2xl font-semibold">Something went wrong</h1>
+          <p className="mt-2 max-w-[48ch] text-ink-2">
             The application hit an unexpected error. Reloading usually fixes it.
           </p>
-          <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.75rem" }}>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
             <button
               type="button"
               onClick={reset}
-              style={{
-                background: "#038C3E",
-                color: "white",
-                border: "none",
-                borderRadius: "0.75rem",
-                padding: "0.6rem 1rem",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
+              className="rounded-lg bg-accent px-6 py-3 font-semibold text-accent-ink transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
               Try again
             </button>
             <a
               href="/"
-              style={{
-                border: "1px solid #cbd5e1",
-                borderRadius: "0.75rem",
-                padding: "0.6rem 1rem",
-                fontWeight: 600,
-                color: "#024059",
-                textDecoration: "none",
-              }}
+              className="rounded-lg border border-rule px-6 py-3 font-semibold text-ink-2 transition-colors hover:bg-paper-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
               Go home
             </a>
           </div>
           {error.digest && (
-            <p style={{ marginTop: "1.5rem", fontSize: "0.75rem", color: "#94a3b8" }}>Reference: {error.digest}</p>
+            <p className="mt-6 text-sm text-muted">Reference: {error.digest}</p>
           )}
-        </div>
+        </main>
       </body>
     </html>
   );

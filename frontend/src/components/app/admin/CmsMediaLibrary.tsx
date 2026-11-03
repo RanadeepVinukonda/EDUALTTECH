@@ -122,7 +122,7 @@ export default function CmsMediaLibrary() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={a.url} alt={a.alt ?? ""} width={400} height={300} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="grid h-full place-items-center text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <div className="grid h-full place-items-center text-xs font-semibold text-slate-500">
                       {a.kind}
                     </div>
                   )}

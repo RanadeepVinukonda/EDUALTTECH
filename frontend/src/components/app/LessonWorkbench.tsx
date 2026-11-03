@@ -310,7 +310,7 @@ function ArticleForm({ lesson, ctx, onClose }: { lesson: LessonRow; ctx: Ctx; on
         Connect an open tutorial from the Resource Library for learners to read alongside this lesson.
       </p>
       {loading ? (
-        <p className="text-xs text-slate-400">Loading tutorials...</p>
+        <p className="text-xs text-slate-400">Loading tutorials…</p>
       ) : (
         <select
           value={selectedId}
@@ -590,7 +590,7 @@ export default function LessonWorkbench({
         <p role="note" className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
           For each lesson add whatever it needs: <strong>lesson text</strong>, <strong>resources</strong>,
           a <strong>meeting</strong>, or a <strong>recording</strong>. Tick the checkbox to mark a lesson
-          complete and unlock it for learners.
+          complete and make it available to learners.
         </p>
       )}
 

@@ -36,7 +36,7 @@ function isValidUrl(v: string): boolean {
   }
 }
 
-function RecordingPlayer({ meetingId }: { meetingId: string }) {
+function RecordingPlayer({ meetingId, poster }: { meetingId: string; poster: string }) {
   const [url, setUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -53,7 +53,7 @@ function RecordingPlayer({ meetingId }: { meetingId: string }) {
     }
   }
 
-  if (url) return <video controls className="w-full max-w-xl rounded-xl bg-black" src={url} />;
+  if (url) return <video controls preload="none" poster={poster} className="w-full max-w-xl rounded-xl bg-black" src={url} />;
   return (
     <div className="flex flex-col items-end gap-1">
       <Button size="sm" variant="secondary" loading={busy} onClick={() => void open()}>
@@ -120,7 +120,7 @@ function RecordingUploader({ meetingId, hasRecording, onDone }: { meetingId: str
   );
 }
 
-export default function MeetingManager({ courseId, readOnly = false }: { courseId: string; readOnly?: boolean }) {
+export default function MeetingManager({ courseId, poster, readOnly = false }: { courseId: string; poster: string; readOnly?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [scope, setScope] = useState<Scope>("upcoming");
@@ -396,7 +396,7 @@ export default function MeetingManager({ courseId, readOnly = false }: { courseI
                           Cancel
                         </button>
                       )}
-                      {readOnly && m.hasRecording && <RecordingPlayer meetingId={m.id} />}
+                      {readOnly && m.hasRecording && <RecordingPlayer meetingId={m.id} poster={poster} />}
                     </div>
                   </div>
                   {upcoming && (

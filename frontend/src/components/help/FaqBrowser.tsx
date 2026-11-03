@@ -136,18 +136,18 @@ function FaqBrowserView({ items }: { items: FaqItem[] }) {
       </p>
 
       {filtered.length > 0 ? (
-        <ul className="mt-4 space-y-3">
+        <ul className="mt-4 divide-y divide-slate-200 border-y border-slate-200">
           {filtered.map((item) => (
-            <li key={item.id}>
-              <details className="group rounded-2xl border border-slate-200 bg-white">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
+            <li key={item.id} className="py-1">
+              <details className="group">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
                   <span className="font-semibold text-ink-900">{item.question}</span>
                   <ExpandMore
                     fontSize="small"
-                    className="shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                    className="shrink-0 text-slate-400 transition-transform motion-reduce:transition-none group-open:rotate-180"
                   />
                 </summary>
-                <div className="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-ink-700">
+                <div className="border-t border-slate-200 py-4 text-base leading-7 text-ink-700">
                   {item.answer}
                 </div>
               </details>

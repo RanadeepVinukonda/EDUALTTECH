@@ -89,7 +89,7 @@ const items: FaqItem[] = [
       <p>
         Refunds are reviewed case by case. Requesting a refund does not automatically complete one - only an
         approved refund returns money. See our{" "}
-        <Link href="/refund-policy" className="font-semibold text-brand-700 hover:underline">
+        <Link href="/refund-policy" className="font-semibold text-brand-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2">
           Refund &amp; Cancellation Policy
         </Link>
         .
@@ -104,7 +104,7 @@ const items: FaqItem[] = [
       <p>
         We use your information to run your account, courses, and mentorship features, and to respond to your
         enquiries. We do not sell your personal information. Read our{" "}
-        <Link href="/privacy" className="font-semibold text-brand-700 hover:underline">
+        <Link href="/privacy" className="font-semibold text-brand-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2">
           Privacy Policy
         </Link>
         .
@@ -118,11 +118,11 @@ const items: FaqItem[] = [
     answer: (
       <p>
         Use our{" "}
-        <Link href="/contact" className="font-semibold text-brand-700 hover:underline">
+        <Link href="/contact" className="font-semibold text-brand-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2">
           contact page
         </Link>{" "}
         or email{" "}
-        <a href="mailto:info@edualttech.com" className="font-semibold text-brand-700 hover:underline">
+        <a href="mailto:info@edualttech.com" className="font-semibold text-brand-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2">
           info@edualttech.com
         </a>
         . We will respond by email.
@@ -156,10 +156,10 @@ const faqJsonLd = {
 
 export default function FaqPage() {
   return (
-    <div className="bg-white">
+    <div className="bg-paper">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <section className="border-b border-slate-200 bg-slate-50">
-        <div className={`${wrap} py-10 sm:py-14`}>
+      <section className="border-b border-slate-200 bg-paper-2">
+        <div className={`${wrap} py-12 sm:py-16`}>
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1.5 text-sm text-ink-600">
               <li>
@@ -177,23 +177,22 @@ export default function FaqPage() {
           </nav>
           <SectionHeading
             as="h1"
-            eyebrow="Help & FAQ"
             title="Frequently asked questions"
             lead="Quick answers about accounts, courses, payments, mentorship, and our policies."
           />
         </div>
       </section>
 
-      <section className="py-16 sm:py-20">
+      <section className="py-12 sm:py-16">
         <div className={`${wrap} max-w-4xl`}>
           <FaqBrowser items={items} />
 
-          <div className="mt-14 rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
+          <div className="mt-14 border-t border-slate-200 pt-8">
             <h2 className="font-display text-xl font-semibold text-ink-900">Still need help?</h2>
             <p className="mx-auto mt-2 max-w-xl text-ink-600">
               Send us your question and we will get back to you by email.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <LinkButton href="/contact">Contact us</LinkButton>
               <LinkButton href="/courses" variant="secondary">
                 Browse courses

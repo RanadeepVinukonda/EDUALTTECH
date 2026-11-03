@@ -54,7 +54,7 @@ router.get("/", optionalAuth, validate({ query: z.object({
       where, orderBy, skip: (page - 1) * limit, take: limit,
       select: {
         id: true, slug: true, title: true, description: true, category: true, type: true,
-        domain: true, features: true,
+        domain: true, tags: true, features: true,
         gradeLevel: true, pricePaise: true, currency: true, thumbnailUrl: true,
         createdAt: true,
         createdBy: { select: { firstName: true, lastName: true, avatarUrl: true } },
@@ -95,7 +95,7 @@ router.get("/mine", requireAuth, async (req, res) => {
       where: { userId, role: "LEARNER" },
       orderBy: { enrolledAt: "desc" },
       include: {
-        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, features: true, type: true, status: true, pricePaise: true, currency: true } },
+        course: { select: { id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, tags: true, features: true, type: true, status: true, pricePaise: true, currency: true } },
       },
     }),
     prisma.courseParticipant.findMany({
@@ -104,7 +104,7 @@ router.get("/mine", requireAuth, async (req, res) => {
       include: {
         course: {
           select: {
-            id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, features: true, type: true, status: true,
+            id: true, slug: true, title: true, thumbnailUrl: true, category: true, domain: true, tags: true, features: true, type: true, status: true,
             _count: { select: { participants: { where: { role: "LEARNER", status: "ACTIVE" } }, lessons: true } },
           },
         },

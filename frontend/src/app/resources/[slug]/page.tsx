@@ -44,7 +44,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
   if (error) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-        <div role="alert" className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center">
+        <div role="alert" className="mx-auto max-w-md border-y border-slate-200 bg-paper-2 p-8">
           <h1 className="font-display text-xl font-semibold text-ink-900">We couldn&apos;t load this resource</h1>
           <p className="mt-2 text-sm text-slate-600">There was a problem reaching the server. Please try again.</p>
           <div className="mt-6 flex justify-center gap-3">

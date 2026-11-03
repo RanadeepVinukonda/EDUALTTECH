@@ -17,8 +17,7 @@ import Search from "@mui/icons-material/Search";
 import School from "@mui/icons-material/School";
 import Flag from "@mui/icons-material/Flag";
 import Article from "@mui/icons-material/Article";
-import LandingCourseCard from "@/components/landing/CourseCard";
-import { AdminHeader, ConfirmDialog, Pagination, Panel, Skeleton, useAsync, useDebouncedValue } from "./admin-ui";
+import { AdminHeader, ConfirmDialog, Pagination, Panel, Skeleton, StatusPill, statusTone, useAsync, useDebouncedValue } from "./admin-ui";
 
 const LIMIT = 5;
 type Status = "" | "DRAFT" | "PUBLISHED" | "ARCHIVED";
@@ -149,9 +148,9 @@ export default function AdminCourses() {
         {error ? (
           <ErrorState message={courseError(error, "Could not load courses.")} onRetry={reload} />
         ) : loading && !data ? (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-72 rounded-xl" />
+              <Skeleton key={i} className="h-16 rounded-lg" />
             ))}
           </div>
         ) : data && data.courses.length === 0 ? (
@@ -168,11 +167,26 @@ export default function AdminCourses() {
           />
         ) : data ? (
           <>
-            <ul className="grid gap-5 md:grid-cols-2">
-              {data.courses.map((c) => (
-                <CourseCard key={c.id} course={c} onChanged={reload} />
-              ))}
-            </ul>
+            <div className="min-w-0 overflow-x-auto rounded-lg border border-slate-200">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <caption className="sr-only">Courses in the catalogue</caption>
+                <thead className="border-b border-slate-200 bg-paper-2 text-xs font-semibold text-slate-600">
+                  <tr>
+                    <th scope="col" className="px-4 py-3">Course</th>
+                    <th scope="col" className="px-4 py-3">Status</th>
+                    <th scope="col" className="px-4 py-3">Learners</th>
+                    <th scope="col" className="px-4 py-3">Chapters</th>
+                    <th scope="col" className="px-4 py-3">Price</th>
+                    <th scope="col" className="px-4 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 bg-paper">
+                  {data.courses.map((c) => (
+                    <CourseRow key={c.id} course={c} onChanged={reload} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <div className="mt-6">
               <Pagination page={data.page} total={data.total} limit={LIMIT} hasMore={data.hasMore} busy={loading} onChange={setPage} />
             </div>
@@ -183,7 +197,7 @@ export default function AdminCourses() {
   );
 }
 
-function CourseCard({ course, onChanged }: { course: AdminCourseSummary; onChanged: () => void }) {
+function CourseRow({ course, onChanged }: { course: AdminCourseSummary; onChanged: () => void }) {
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState<null | { status: "PUBLISHED" | "DRAFT" | "ARCHIVED"; label: string; detail: string }>(null);
 
@@ -216,17 +230,23 @@ function CourseCard({ course, onChanged }: { course: AdminCourseSummary; onChang
 
   return (
     <>
-      <LandingCourseCard
-        course={course}
-        href={`/dashboard/admin/courses/${course.id}`}
-        badge={`${course.features.includes("100% Free Resource") ? "resource" : "course"} · ${course.status.toLowerCase()}`}
-        priceLabel={course.pricePaise > 0 ? formatMoney(course.pricePaise, course.currency) : "Free"}
-        stats={[
-          { label: "Learners", value: String(course._count.participants) },
-          { label: "Chapters", value: String(course._count.chapters) },
-        ]}
-        actions={
-          <>
+      <tr className="align-middle">
+        <th scope="row" className="px-4 py-3 font-medium text-ink-900">
+          <Link href={`/dashboard/admin/courses/${course.id}`} className="font-semibold hover:text-brand-800 hover:underline">
+            {course.title}
+          </Link>
+          <span className="mt-1 block text-xs font-normal text-slate-500">
+            {course.features.includes("100% Free Resource") ? "Resource" : "Course"}
+          </span>
+        </th>
+        <td className="px-4 py-3">
+          <StatusPill tone={statusTone(course.status)}>{course.status.toLowerCase()}</StatusPill>
+        </td>
+        <td className="px-4 py-3 tabular-nums text-slate-700">{course._count.participants}</td>
+        <td className="px-4 py-3 tabular-nums text-slate-700">{course._count.chapters}</td>
+        <td className="px-4 py-3 text-slate-700">{course.pricePaise > 0 ? formatMoney(course.pricePaise, course.currency) : "Free"}</td>
+        <td className="px-4 py-2">
+          <div className="flex items-center justify-end gap-1">
             {actions.map((a) => (
               <Button
                 key={a.label}
@@ -238,21 +258,26 @@ function CourseCard({ course, onChanged }: { course: AdminCourseSummary; onChang
                 {a.label}
               </Button>
             ))}
-          </>
-        }
-        viewLabel={`Open ${course.title}`}
-      />
-      <ConfirmDialog
-        open={Boolean(confirm)}
-        title={`${confirm?.label ?? "Update"} course`}
-        confirmLabel={confirm?.label ?? "Confirm"}
-        tone={confirm?.status === "ARCHIVED" ? "danger" : "primary"}
-        busy={busy}
-        onClose={() => setConfirm(null)}
-        onConfirm={() => confirm && void apply(confirm.status)}
-      >
-        {confirm?.detail}
-      </ConfirmDialog>
+          </div>
+        </td>
+      </tr>
+      {confirm && (
+        <tr>
+          <td colSpan={6} className="p-0">
+            <ConfirmDialog
+              open={Boolean(confirm)}
+              title={`${confirm.label} course`}
+              confirmLabel={confirm.label}
+              tone={confirm.status === "ARCHIVED" ? "danger" : "primary"}
+              busy={busy}
+              onClose={() => setConfirm(null)}
+              onConfirm={() => void apply(confirm.status)}
+            >
+              {confirm.detail}
+            </ConfirmDialog>
+          </td>
+        </tr>
+      )}
     </>
   );
 }

@@ -19,19 +19,6 @@ interface Props {
   article: ResourceArticleDetail;
 }
 
-function getDifficultyTone(diff: string) {
-  switch (diff.toLowerCase()) {
-    case "beginner":
-      return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    case "intermediate":
-      return "bg-sky-50 text-sky-700 border-sky-200";
-    case "advanced":
-      return "bg-purple-50 text-purple-700 border-purple-200";
-    default:
-      return "bg-slate-50 text-slate-700 border-slate-200";
-  }
-}
-
 interface TocItem {
   id: string;
   title: string;
@@ -97,9 +84,9 @@ export default function ResourceArticleReader({ article }: Props) {
   });
 
   return (
-    <div className="bg-white min-h-screen pb-20">
+    <div className="min-h-screen bg-paper pb-20">
       {/* Top Breadcrumb & Metadata Bar */}
-      <div className="border-b border-slate-200 bg-slate-50/70">
+      <div className="border-b border-slate-200 bg-paper-2">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
             <Link href="/" className="hover:text-brand-700 transition">
@@ -125,12 +112,12 @@ export default function ResourceArticleReader({ article }: Props) {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-10 lg:flex-row lg:items-start">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-16">
           {/* Main Article Body */}
-          <main className="min-w-0 flex-1 max-w-3xl">
+          <main className="min-w-0 max-w-[740px] flex-1">
             {/* Title */}
-            <h1 className="font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl leading-tight">
+            <h1 className="font-display text-display-s font-semibold tracking-tight text-ink-900 leading-tight">
               {article.title}
             </h1>
 
@@ -138,9 +125,6 @@ export default function ResourceArticleReader({ article }: Props) {
             <div className="mt-3.5 flex flex-wrap items-center gap-2">
               <span className="rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
                 {article.subcategory?.name || article.category?.name || "Tutorial"}
-              </span>
-              <span className={cn("rounded-md border px-2.5 py-0.5 text-xs font-medium", getDifficultyTone(article.difficulty))}>
-                {article.difficulty}
               </span>
               <span className="inline-flex items-center gap-1 text-xs text-slate-500 pl-1">
                 <AccessTime sx={{ fontSize: 14 }} />
@@ -213,7 +197,7 @@ export default function ResourceArticleReader({ article }: Props) {
             {/* Tags */}
             {article.tags.length > 0 && (
               <div className="mt-10 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-6">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Related tags:</span>
+                <span className="text-sm font-medium text-muted">Related topics</span>
                 {article.tags.map((tag) => (
                   <span
                     key={tag}
@@ -228,9 +212,6 @@ export default function ResourceArticleReader({ article }: Props) {
             {/* Ecosystem Bridge: Resource -> Structured Course */}
             {article.linkedCourse && (
               <div className="mt-10 rounded-xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Structured learning track
-                </p>
                 <h3 className="mt-2 font-display text-xl font-semibold text-ink-900">
                   Continue with {article.linkedCourse.title}
                 </h3>
@@ -289,11 +270,11 @@ export default function ResourceArticleReader({ article }: Props) {
           </main>
 
           {/* Table of Contents & Quick Navigation Sticky Sidebar */}
-          <aside className="hidden lg:block lg:w-72 lg:shrink-0">
+          <aside className="hidden lg:block lg:w-64 lg:shrink-0">
             <div className="sticky top-24 space-y-6">
               {toc.length > 0 && (
                 <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5">
-                  <h2 className="font-display text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <h2 className="font-display text-sm font-semibold text-slate-500">
                     On this page
                   </h2>
                   <nav className="mt-3 space-y-1.5" aria-label="Table of contents">

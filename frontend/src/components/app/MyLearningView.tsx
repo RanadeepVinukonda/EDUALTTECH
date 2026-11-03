@@ -31,10 +31,10 @@ export default function MyLearningView() {
   if (!data) return <Spinner label="Loading your courses…" />;
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-6xl space-y-8">
       <header>
-        <h1 className="font-display text-3xl font-semibold text-ink-900">My Learning</h1>
-        <p className="mt-1 text-[15px] text-slate-500">Everything you&apos;re enrolled in.</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">My learning</h1>
+        <p className="mt-2 text-[15px] text-muted">Everything you&apos;re enrolled in.</p>
       </header>
 
       {data.learning.length === 0 ? (
@@ -48,7 +48,7 @@ export default function MyLearningView() {
           }
         />
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {data.learning.map((row) => (
             <CourseCard
               key={row.id}

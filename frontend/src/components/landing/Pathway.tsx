@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import ArrowForward from "@mui/icons-material/ArrowForward";
+import Image from "next/image";
 import { cn } from "@/lib/cn";
 
 interface Feature {
@@ -17,162 +15,133 @@ const FEATURES: Feature[] = [
   {
     id: "Find your course",
     title: "Find your course",
-    content:
-      "Browse by track, category, or skill. Every course shows its roadmap, chapters, mentor, and price before you commit.",
+    content: "Review course details before enrolling.",
     image: "/media/photos/find course.jpg",
   },
   {
-    id: "Enroll and start",
-    title: "Enroll and start",
-    content:
-      "Create a free account, enroll, and work through chapters at your own pace. Free open notes need no login.",
+    id: "Start learning",
+    title: "Start learning",
+    content: "Create an account to enroll; free open notes require no login.",
     image: "/media/photos/enroll.jpg",
   },
   {
-    id: "Learn with a mentor",
-    title: "Learn with a mentor",
-    content:
-      "Submit projects, get feedback, and book 1-on-1 check-ins with the practitioner who built the course.",
+    id: "Learn with mentors",
+    title: "Learn with mentors",
+    content: "Submit projects, get feedback, and meet with your course mentor.",
     image: "/media/photos/start learning.jpg",
   },
 ];
 
-const AUTOPLAY_MS = 4500;
-
 export default function Pathway() {
   const [current, setCurrent] = useState(0);
-  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          setCurrent((c) => (c + 1) % FEATURES.length);
-          return 0;
-        }
-        return prev + 100 / (AUTOPLAY_MS / 100);
-      });
-    }, 100);
-    return () => clearInterval(timer);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const timer = window.setInterval(() => {
+      setCurrent((step) => (step + 1) % FEATURES.length);
+    }, 3000);
+
+    return () => window.clearInterval(timer);
   }, []);
 
-  const select = (i: number) => {
-    setCurrent(i);
-    setProgress(0);
-  };
-
   return (
-    <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-24">
+    <section className="border-t border-slate-200 bg-slate-50 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div className="max-w-2xl">
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl sm:leading-tight">
-              How learning works on EduAltTech
-            </h2>
-            <p className="mt-3 text-base sm:text-lg leading-relaxed text-slate-600">
-              Three clear steps from choosing your topic to shipping your first project.
-            </p>
-          </div>
-          <Link
-            href="/courses"
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
-          >
-            Get started
-            <ArrowForward fontSize="small" />
-          </Link>
+        <div className="max-w-2xl">
+          <h2 className="font-display text-section font-semibold tracking-tight text-ink-900 leading-tight">
+            How learning works
+          </h2>
+          <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-lg">
+            From interest to practice.
+          </p>
         </div>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-2 md:gap-12">
-          <ol className="order-2 space-y-6 md:order-1">
+        <div className="mt-8 grid gap-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:items-stretch md:gap-12">
+          <ol className="relative flex flex-col justify-center">
             {FEATURES.map((feature, index) => {
               const active = index === current;
-              const done = index < current;
               return (
-                <li key={feature.id}>
+                <li key={feature.id} className="relative">
+                  {index < FEATURES.length - 1 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute bottom-0 left-[19px] top-10 w-px bg-slate-200"
+                    />
+                  )}
                   <button
                     type="button"
-                    onClick={() => select(index)}
+                    onClick={() => setCurrent(index)}
                     aria-current={active ? "step" : undefined}
-                    className={cn(
-                      "flex w-full items-start gap-5 rounded-lg p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40",
-                      active ? "bg-slate-50" : "hover:bg-slate-50/60",
-                    )}
+                    className="group relative flex min-h-24 w-full items-start gap-4 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2"
                   >
-                    <motion.span
+                    <span
                       className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold",
+                        "z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition-colors",
                         active
-                          ? "border-brand-600 bg-brand-600 text-white"
-                          : done
-                            ? "border-brand-600 bg-white text-brand-700"
-                            : "border-slate-300 bg-white text-slate-400",
+                          ? "border-brand-700 bg-brand-700 text-white"
+                          : "border-slate-300 bg-slate-50 text-slate-600 group-hover:border-brand-300",
                       )}
-                      
                     >
-                      {done ? "✓" : index + 1}
-                    </motion.span>
-
-                    <div className="flex-1">
-                      <h3 className="font-display text-lg font-semibold text-ink-900 sm:text-xl">
+                      {index + 1}
+                    </span>
+                    <span className="min-w-0 pt-1">
+                      <span
+                        className={cn(
+                          "block font-display text-lg font-semibold",
+                          active ? "text-ink-900" : "text-slate-600 group-hover:text-ink-900",
+                        )}
+                      >
                         {feature.title}
-                      </h3>
-                      <p className="mt-1 text-sm leading-relaxed text-slate-600 sm:text-base">
-                        {feature.content}
-                      </p>
+                      </span>
                       {active && (
-                        <span className="mt-3 block h-0.5 w-full overflow-hidden rounded-full bg-slate-200">
-                          <motion.span
-                            className="block h-full bg-brand-600"
-                            style={{ width: `${Math.min(progress, 100)}%` }}
-                          />
+                        <span
+                          aria-live="polite"
+                          className="mt-2 block max-w-sm text-sm leading-relaxed text-slate-600"
+                        >
+                          {feature.content}
                         </span>
                       )}
-                    </div>
+                    </span>
                   </button>
                 </li>
               );
             })}
           </ol>
 
-          <div className="order-1 relative h-[240px] overflow-hidden rounded-xl border border-slate-200 bg-slate-100 md:order-2 md:h-[380px] lg:h-[420px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={current}
-                className="absolute inset-0"
-                initial={{ y: 60, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -60, opacity: 0 }}
-                transition={{ duration: 0.45, ease: "easeInOut" }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={FEATURES[current].image}
-                  alt={FEATURES[current].title}
-                  className="h-full w-full object-cover"
-                />
-              </motion.div>
-            </AnimatePresence>
+          <div className="relative min-h-[280px] min-w-0 overflow-hidden rounded-2xl bg-slate-200 md:min-h-[390px]">
+            <Image
+              key={current}
+              src={FEATURES[current].image}
+              alt={FEATURES[current].title}
+              fill
+              sizes="(min-width: 768px) 65vw, 100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-ink-900/80 p-5 text-white sm:p-7">
+              <div>
+                <p className="text-sm font-medium text-white/75">
+                  Step {current + 1} of {FEATURES.length}
+                </p>
+                <h3 className="mt-1 font-display text-xl font-semibold sm:text-2xl">
+                  {FEATURES[current].title}
+                </h3>
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5" aria-hidden="true">
+                {FEATURES.map((feature, index) => (
+                  <span
+                    key={feature.id}
+                    className={cn(
+                      "h-1.5 rounded-full transition-colors",
+                      index === current ? "w-7 bg-white" : "w-1.5 bg-white/50",
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-start justify-between gap-5 rounded-xl border border-slate-200 bg-white p-6 sm:flex-row sm:items-center sm:p-8">
-          <div className="max-w-2xl">
-            <h3 className="font-display text-lg font-semibold text-ink-900">
-              Already have the skill? Mentor a course and get paid.
-            </h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
-              Apply with your experience, get vetted by our academic team, then teach your own course
-              and earn for every learner you guide.
-            </p>
-          </div>
-          <Link
-            href="/mentor"
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-ink-700 transition hover:bg-slate-50"
-          >
-            Apply to mentor
-            <ArrowForward fontSize="small" />
-          </Link>
-        </div>
       </div>
     </section>
   );

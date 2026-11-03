@@ -19,14 +19,14 @@ function CourseSkeleton() {
   return (
     <div className="space-y-6" role="status" aria-live="polite">
       <span className="sr-only">Loading course…</span>
-      <div className="rounded-xl border border-slate-200 bg-white p-6" aria-hidden>
+      <div className="rounded-xl border border-rule bg-paper p-6" aria-hidden>
         <Skeleton className="h-5 w-40" />
         <Skeleton className="mt-3 h-8 w-2/3" />
         <Skeleton className="mt-2 h-4 w-1/3" />
         <Skeleton className="mt-5 h-2 w-full rounded-full" />
       </div>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]" aria-hidden>
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl border border-rule bg-paper p-6">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="mt-3 h-7 w-1/2" />
           <Skeleton className="mt-5 h-4 w-full" />
@@ -35,7 +35,7 @@ function CourseSkeleton() {
         </div>
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
+            <div key={i} className="rounded-xl border border-rule bg-paper p-4">
               <Skeleton className="h-5 w-1/2" />
               <Skeleton className="mt-3 h-4 w-3/4" />
               <Skeleton className="mt-2 h-4 w-2/3" />
@@ -141,9 +141,9 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
       return (
         <div
           role="status"
-          className="mx-auto max-w-lg rounded-xl border border-slate-200 bg-white p-8 text-center"
+          className="mx-auto max-w-lg border-y border-rule bg-paper px-5 py-10 text-center sm:px-8"
         >
-          <h1 className="font-display text-xl font-semibold text-ink-900">This course isn&apos;t in your learning area</h1>
+          <h1 className="font-display text-xl font-semibold text-ink-900">Course not in your learning area</h1>
           <p className="mt-2 text-sm text-slate-500">
             It may not be published yet, or you&apos;re not enrolled. Visit the course page to enroll and start learning.
           </p>
@@ -170,7 +170,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
     return (
       <div
         role="alert"
-        className="rounded-xl border border-slate-200 bg-white p-8 text-center"
+        className="border-y border-rule bg-paper px-5 py-10 text-center sm:px-8"
       >
         <h1 className="font-display text-xl font-semibold text-ink-900">You&apos;re not enrolled in this course</h1>
         <p className="mt-2 text-sm text-slate-500">Visit the course page to enroll and start learning.</p>
@@ -188,29 +188,40 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
   if (!roadmap) return <CourseSkeleton />;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="h-1 w-full bg-slate-100">
-        <div className="h-full bg-brand-600 transition-[width] duration-500" style={{ width: `${progress}%` }} />
+    <div className="overflow-hidden border-y border-rule bg-paper">
+      <div
+        className="h-1 w-full bg-paper-3"
+        role="progressbar"
+        aria-label={`${course.title} progress`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={progress}
+      >
+        <div
+          className="h-full origin-left rounded-full bg-accent transition-transform duration-500 motion-reduce:transition-none"
+          style={{ transform: `scaleX(${progress / 100})` }}
+        />
       </div>
 
-      <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 px-5 py-4">
+      <header className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-rule px-4 py-5 sm:px-6">
         <div className="min-w-0 flex-1">
-          <h1 className="truncate font-display text-lg font-semibold text-ink-900">{course.title}</h1>
-          <p className="mt-0.5 text-xs text-slate-500">
-            {course.category} · {course.enrolledCount} learners
+          <h1 className="truncate font-display text-xl font-semibold text-ink">{course.title}</h1>
+          <p className="mt-1 flex flex-wrap gap-x-3 text-xs text-muted">
+            <span>{course.category}</span>
+            <span>{course.enrolledCount} learners</span>
           </p>
         </div>
         <div className="flex items-center gap-4">
           {isLearner && (
-            <span className="text-sm font-semibold text-ink-700" aria-live="polite">
+            <span className="text-sm font-semibold text-accent" aria-live="polite">
               {progress}% complete
             </span>
           )}
-          {!isLearner && <span className="text-sm text-slate-500">Mentor / staff view — read only</span>}
-          <Link href={`/dashboard/courses/${course.slug}/roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
+          {!isLearner && <span className="text-sm text-muted">Mentor and staff view, read only</span>}
+          <Link href={`/dashboard/courses/${course.slug}/roadmap`} className="inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline">
             Full roadmap
           </Link>
-          <Link href={`/courses/${course.slug}`} className="text-sm font-semibold text-brand-700 hover:underline">
+          <Link href={`/courses/${course.slug}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline">
             Course page
           </Link>
         </div>
@@ -220,12 +231,12 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
         <div className="order-1 min-w-0">
           {selected ? (
             <article>
-              <div className="flex items-start gap-3 px-5 py-4 sm:px-6">
+              <div className="flex items-start gap-3 px-4 py-5 sm:px-6">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
+                  <h2 className="mt-1 font-display text-xl font-semibold text-ink">{selected.title}</h2>
+                  <p className="mt-1 text-sm text-muted">
                     {selected.type === "VIDEO" ? "Video" : "Reading"}
                   </p>
-                  <h2 className="mt-1 font-display text-xl font-semibold text-ink-900">{selected.title}</h2>
                 </div>
                 <div className="hidden items-center gap-1 sm:flex">
                   <button
@@ -233,7 +244,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                     disabled={!prev}
                     onClick={() => prev && setSelected(prev)}
                     aria-label="Previous lesson"
-                    className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+                    className="grid h-11 w-11 place-items-center rounded-lg border border-rule text-muted transition hover:bg-paper-2 disabled:opacity-40"
                   >
                     <ChevronLeft fontSize="small" aria-hidden />
                   </button>
@@ -242,17 +253,17 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                     disabled={!next}
                     onClick={() => next && setSelected(next)}
                     aria-label="Next lesson"
-                    className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+                    className="grid h-11 w-11 place-items-center rounded-lg border border-rule text-muted transition hover:bg-paper-2 disabled:opacity-40"
                   >
                     <ChevronRight fontSize="small" aria-hidden />
                   </button>
                 </div>
               </div>
 
-              <div className="px-5 pb-6 sm:px-6">
+              <div className="px-4 pb-6 sm:px-6">
                 {!selected.isPublished && !access.isStaff ? (
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
-                    This lesson is locked. Your mentor unlocks it once its video or live class is ready.
+                  <div className="border border-dashed border-rule bg-paper-2 p-4 text-sm text-muted">
+                    This lesson is not available yet. Your mentor will make it available when its video or live class is ready.
                   </div>
                 ) : selected.type === "VIDEO" ? (
                   <div className="flex min-h-[220px] flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-slate-900 px-6 py-10 text-center">
@@ -284,28 +295,28 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                 ) : selected.textContent ? (
                   <MarkdownArticleViewer content={selected.textContent} />
                 ) : (
-                  <p className="text-sm text-slate-500">No content has been added to this lesson yet.</p>
+                  <p className="text-sm text-muted">No content has been added to this lesson yet.</p>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 bg-slate-50/70 px-5 py-4 sm:px-6">
+              <div className="flex flex-wrap items-center gap-3 border-t border-rule bg-paper-2/70 px-4 py-4 sm:px-6">
                 {isLearner && selected.isPublished ? (
                   completed.has(selected.id) ? (
-                    <span className="text-sm font-semibold text-emerald-700">Completed</span>
+                    <span className="text-sm font-semibold text-accent">Completed</span>
                   ) : (
                     <Button onClick={() => void markComplete(selected)} loading={marking}>
                       Mark as complete
                     </Button>
                   )
                 ) : (
-                  <span className="text-sm text-slate-500">Preview</span>
+                  <span className="text-sm text-muted">Preview</span>
                 )}
                 <div className="ml-auto flex items-center gap-2">
                   <button
                     type="button"
                     disabled={!prev}
                     onClick={() => prev && setSelected(prev)}
-                    className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-40"
+                    className="min-h-11 rounded-lg border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ink-2 transition hover:bg-paper-2 disabled:opacity-40"
                   >
                     Previous
                   </button>
@@ -313,7 +324,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                     type="button"
                     disabled={!next}
                     onClick={() => next && setSelected(next)}
-                    className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-40"
+                    className="min-h-11 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-ink transition hover:bg-brand-700 disabled:opacity-40"
                   >
                     Next lesson
                   </button>
@@ -321,22 +332,22 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
               </div>
             </article>
           ) : (
-            <div className="px-6 py-16 text-center text-sm text-slate-500">Select a lesson to begin.</div>
+            <div className="px-6 py-16 text-center text-sm text-muted">Select a lesson to begin.</div>
           )}
 
           {isLearner && (
-            <div className="border-t border-slate-200 px-5 py-5 sm:px-6">
-              <h2 className="mb-3 font-display font-semibold text-ink-900">Messages</h2>
+            <div className="border-t border-rule px-4 py-5 sm:px-6">
+              <h2 className="mb-3 font-display font-semibold text-ink">Messages</h2>
               <ChatView courseId={course.id} compact />
             </div>
           )}
         </div>
 
-        <aside aria-label="Course content" className="order-2 border-t border-slate-200 lg:border-l lg:border-t-0">
-          <div className="px-5 py-4">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-slate-500">Course content</h2>
+        <aside aria-label="Course content" className="order-2 border-t border-rule bg-paper-2/60 lg:border-l lg:border-t-0">
+          <div className="px-4 py-4 sm:px-5">
+            <h2 className="text-sm font-semibold text-muted">Course content</h2>
           </div>
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-rule">
             {course.chapters
               .slice()
               .sort((a, b) => a.order - b.order)
@@ -347,24 +358,24 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                 const total = rm?.topics.flatMap((t) => t.lessons).length ?? 0;
                 return (
                   <details key={chapter.id} open={Boolean(containsSelected)} className="group">
-                    <summary className="flex cursor-pointer list-none items-start gap-3 px-5 py-4 hover:bg-slate-50">
-                      <span className="mt-0.5 text-xs font-semibold text-slate-400">{chapterIndex + 1}</span>
+                    <summary className="flex min-h-11 cursor-pointer list-none items-start gap-3 px-4 py-4 hover:bg-paper-2">
+                      <span className="mt-0.5 text-xs font-semibold text-muted">{chapterIndex + 1}</span>
                       <span className="min-w-0 flex-1">
-                        <span className="block font-semibold text-ink-900">{chapter.title}</span>
-                        <span className="mt-0.5 block text-xs text-slate-500">
+                        <span className="block font-semibold text-ink">{chapter.title}</span>
+                        <span className="mt-0.5 block text-xs text-muted">
                           {done}/{total} lessons done
                         </span>
                       </span>
                       <ChevronRight
                         fontSize="small"
                         aria-hidden
-                        className="mt-0.5 shrink-0 text-slate-400 transition-transform group-open:rotate-90"
+                        className="mt-0.5 shrink-0 text-muted transition-transform motion-reduce:transition-none group-open:rotate-90"
                       />
                     </summary>
                     <ol className="pb-2">
                       {rm?.topics.map((topic) => (
                         <li key={topic.id} className="pt-1">
-                          <p className="px-5 pb-1 pl-10 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                          <p className="px-4 pb-1 pl-9 text-xs font-medium text-muted">
                             {topic.title}
                           </p>
                           <ul>
@@ -375,9 +386,9 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                               if (locked) {
                                 return (
                                   <li key={lesson.id}>
-                                    <div className="flex items-center gap-2 px-5 py-2 pl-10 text-sm text-slate-400">
+                                    <div className="flex min-h-11 items-center gap-2 px-4 py-2 pl-9 text-sm text-muted">
                                       <span className="truncate">{lesson.title}</span>
-                                      <span className="ml-auto shrink-0 text-[11px] uppercase tracking-wider">Locked</span>
+                                      <span className="ml-auto shrink-0 text-[11px]">Locked</span>
                                     </div>
                                   </li>
                                 );
@@ -392,15 +403,15 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                                     }}
                                     aria-current={active ? "true" : undefined}
                                     className={cn(
-                                      "flex w-full items-center gap-2 px-5 py-2 pl-10 text-left text-sm transition",
+                                      "flex min-h-11 w-full items-center gap-2 px-4 py-2 pl-9 text-left text-sm transition-colors",
                                       active
-                                        ? "bg-slate-100 font-medium text-ink-900"
-                                        : "text-slate-700 hover:bg-slate-50",
+                                        ? "bg-paper-3/70 font-medium text-ink"
+                                        : "text-ink-2 hover:bg-paper-2",
                                     )}
                                   >
                                     <span className="truncate">{lesson.title}</span>
-                                    <span className="ml-auto shrink-0 text-[11px] uppercase tracking-wider text-slate-400">
-                                      {isDone ? "Done" : lesson.type === "VIDEO" ? "Video" : "Reading"}
+                                    <span className="ml-auto shrink-0 text-[11px] text-muted">
+                                      {isDone ? "Complete" : lesson.type === "VIDEO" ? "Video" : "Reading"}
                                     </span>
                                     <span className="sr-only">
                                       {isDone ? "completed" : lesson.type === "VIDEO" ? "video" : "reading"}
@@ -417,7 +428,7 @@ export default function CourseOverviewView({ slug }: { slug: string }) {
                 );
               })}
             {course.chapters.length === 0 && (
-              <p className="px-5 py-8 text-center text-sm text-slate-500">The roadmap is still being prepared.</p>
+              <p className="px-5 py-8 text-center text-sm text-muted">The roadmap is still being prepared.</p>
             )}
           </div>
         </aside>

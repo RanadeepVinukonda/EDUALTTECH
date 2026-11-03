@@ -39,13 +39,13 @@ export default async function PartnersPage() {
   );
 
   return (
-    <div className="bg-white">
-      <section className="border-b border-slate-200 bg-slate-50">
-        <div className={`${wrap} py-10 sm:py-14`}>
+    <div className="bg-paper">
+      <section className="border-b border-slate-200 bg-paper-2">
+        <div className={`${wrap} py-12 sm:py-16`}>
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1.5 text-sm text-ink-600">
               <li>
-                <Link href="/" className="hover:text-ink-900">
+                <Link href="/" className="hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2">
                   Home
                 </Link>
               </li>
@@ -59,7 +59,6 @@ export default async function PartnersPage() {
           </nav>
           <SectionHeading
             as="h1"
-            eyebrow="Partners & Organizations"
             title="Working together for practical education"
             lead="Supporting practical learning and technology for schools takes collaboration. We list organizations we work with here, with the type of relationship they have with EduAltTech."
           />
@@ -77,10 +76,10 @@ export default async function PartnersPage() {
               {groups.map(([type, list]) => (
                 <div key={type}>
                   <h2 className="font-display text-xl font-semibold text-ink-900">{TYPE_LABEL[type] ?? "Organizations"}</h2>
-                  <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <ul className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
                     {list.map((o) => (
-                      <li key={o.id} className="flex gap-4 rounded-xl border border-slate-200 bg-white p-5">
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-white">
+                      <li key={o.id} className="flex gap-4 py-5">
+                        <div className="h-16 w-16 shrink-0 overflow-hidden border border-slate-200 bg-paper">
                           <CoverImage src={o.logoUrl} alt="" fallback={o.name.slice(0, 2).toUpperCase()} className="object-contain p-2" />
                         </div>
                         <div className="min-w-0">
@@ -91,7 +90,7 @@ export default async function PartnersPage() {
                               href={o.websiteUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800"
+                              className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2"
                             >
                               Visit website
                               <span className="sr-only"> (opens in a new tab)</span>
@@ -123,15 +122,15 @@ export default async function PartnersPage() {
       </section>
 
       {items.length > 0 && (
-        <section className="bg-slate-50 py-16 sm:py-20">
-          <div className={`${wrap} text-center`}>
-            <h2 className="mx-auto max-w-2xl font-display text-3xl font-semibold text-ink-900">
+        <section className="border-t border-slate-200 bg-paper-2 py-12 sm:py-16">
+          <div className={wrap}>
+            <h2 className="max-w-2xl font-display text-3xl font-semibold text-ink-900">
               Interested in partnering with us?
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-ink-600">
+            <p className="mt-4 max-w-xl text-lg text-ink-600">
               Tell us about your school or organization and the problem you would like to work on.
             </p>
-            <div className="mt-8">
+            <div className="mt-6">
               <LinkButton href="/contact" size="lg">
                 Get in touch
               </LinkButton>

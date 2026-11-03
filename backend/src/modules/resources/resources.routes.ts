@@ -13,6 +13,13 @@ const router = Router();
 const slugify = (s: string) =>
   s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
 
+const LEARNING_PATH_SLUGS = [
+  "ai-for-kids",
+  "ai-game-development",
+  "music",
+  "video-editing",
+] as const;
+
 // ────────────────────────────────────────────────────────────────────
 // Resource Library (Categories & Subcategories)
 // ────────────────────────────────────────────────────────────────────
@@ -37,10 +44,69 @@ router.get("/categories", async (_req, res) => {
   });
 });
 
+router.get("/learning-path", async (_req, res) => {
+  const categories = await prisma.resourceCategory.findMany({
+    where: {
+      slug: { in: [...LEARNING_PATH_SLUGS] },
+      articles: { some: { isPublished: true } },
+    },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      order: true,
+      articles: {
+        where: { isPublished: true, subcategoryId: null },
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          estimatedMinutes: true,
+          tags: true,
+          createdAt: true,
+        },
+      },
+      subcategories: {
+        where: { articles: { some: { isPublished: true } } },
+        orderBy: [{ order: "asc" }, { name: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          order: true,
+          articles: {
+            where: { isPublished: true },
+            orderBy: { createdAt: "asc" },
+            select: {
+              id: true,
+              slug: true,
+              title: true,
+              description: true,
+              estimatedMinutes: true,
+              tags: true,
+              createdAt: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  res.json({ success: true, data: { categories } });
+});
+
 // Public catalog endpoint for header navigation and category dropdowns
 router.get("/catalog", async (_req, res) => {
   const articles = await prisma.resourceArticle.findMany({
-    where: { isPublished: true },
+    where: {
+      isPublished: true,
+      category: { slug: { in: [...LEARNING_PATH_SLUGS] } },
+    },
     include: {
       category: { select: { id: true, name: true, slug: true } },
       subcategory: { select: { id: true, name: true, slug: true } },
@@ -69,7 +135,11 @@ router.get("/catalog", async (_req, res) => {
 // Public featured articles endpoint
 router.get("/featured", async (_req, res) => {
   const featured = await prisma.resourceArticle.findMany({
-    where: { isPublished: true, isFeatured: true },
+    where: {
+      isPublished: true,
+      isFeatured: true,
+      category: { slug: { in: [...LEARNING_PATH_SLUGS] } },
+    },
     take: 6,
     orderBy: { createdAt: "desc" },
     select: {
@@ -212,19 +282,26 @@ router.get("/library", optionalAuth, validate({
 
   const where = {
     isPublished: true,
-    ...(q
-      ? {
-          OR: [
-            { title: { contains: q, mode: "insensitive" as const } },
-            { description: { contains: q, mode: "insensitive" as const } },
-            { tags: { has: q } },
-          ],
-        }
-      : {}),
-    ...(category ? { OR: [{ categoryId: category }, { category: { slug: category } }] } : {}),
-    ...(subcategory ? { OR: [{ subcategoryId: subcategory }, { subcategory: { slug: subcategory } }] } : {}),
-    ...(difficulty ? { difficulty } : {}),
-    ...(tag ? { tags: { has: tag } } : {}),
+    AND: [
+      ...(req.user?.role === "ADMIN"
+        ? []
+        : [{ category: { slug: { in: [...LEARNING_PATH_SLUGS] } } }]),
+      ...(q
+        ? [
+            {
+              OR: [
+                { title: { contains: q, mode: "insensitive" as const } },
+                { description: { contains: q, mode: "insensitive" as const } },
+                { tags: { has: q } },
+              ],
+            },
+          ]
+        : []),
+      ...(category ? [{ OR: [{ categoryId: category }, { category: { slug: category } }] }] : []),
+      ...(subcategory ? [{ OR: [{ subcategoryId: subcategory }, { subcategory: { slug: subcategory } }] }] : []),
+      ...(difficulty ? [{ difficulty }] : []),
+      ...(tag ? [{ tags: { has: tag } }] : []),
+    ],
   };
 
   const orderBy =
@@ -541,7 +618,7 @@ router.get("/admin/articles", requireAuth, requireRole("ADMIN"), validate({
       skip: (page - 1) * limit,
       take: limit,
       include: {
-        category: { select: { id: true, name: true } },
+        category: { select: { id: true, name: true, slug: true } },
         subcategory: { select: { id: true, name: true } },
       },
     }),

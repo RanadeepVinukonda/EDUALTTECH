@@ -123,7 +123,7 @@ function LessonForm({
         </label>
         <label className="flex items-center gap-2 text-sm text-ink-700">
           <Checkbox checked={draft.isPublished} onChange={(v) => setDraft({ ...draft, isPublished: v })} />
-          Unlock for learners
+          Make available to learners
         </label>
       </div>
       {draft.type === "VIDEO" ? (

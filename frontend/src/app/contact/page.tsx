@@ -22,13 +22,13 @@ const ENQUIRY_TYPES = [
 
 export default function ContactPage() {
   return (
-    <div className="bg-white">
-      <section className="border-b border-slate-200 bg-slate-50">
-        <div className={`${wrap} py-10 sm:py-14`}>
+    <div className="bg-paper">
+      <section className="border-b border-slate-200 bg-paper-2">
+        <div className={`${wrap} py-12 sm:py-16`}>
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1.5 text-sm text-ink-600">
               <li>
-                <Link href="/" className="hover:text-ink-900">
+                <Link href="/" className="hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2">
                   Home
                 </Link>
               </li>
@@ -42,15 +42,14 @@ export default function ContactPage() {
           </nav>
           <SectionHeading
             as="h1"
-            eyebrow="Contact"
             title="Get in touch"
             lead="Send us a message and we will respond by email. Whether you are a learner, a prospective mentor, or a school, tell us what you need."
           />
         </div>
       </section>
 
-      <section className="py-16 sm:py-20">
-        <div className={`${wrap} grid gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16`}>
+      <section className="py-12 sm:py-16">
+        <div className={`${wrap} grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16`}>
           <div>
             <h2 className="font-display text-xl font-semibold text-ink-900">What we can help with</h2>
             <ul className="mt-4 space-y-3">
@@ -65,21 +64,21 @@ export default function ContactPage() {
             <h2 className="mt-10 font-display text-xl font-semibold text-ink-900">Email</h2>
             <a
               href="mailto:info@edualttech.com"
-              className="mt-3 inline-flex font-semibold text-brand-700 hover:text-brand-800"
+              className="mt-3 inline-flex font-semibold text-brand-700 hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2"
             >
               info@edualttech.com
             </a>
 
             <p className="mt-8 text-sm leading-relaxed text-slate-500">
               We use the information you submit only to respond to your enquiry. See our{" "}
-              <Link href="/privacy" className="font-semibold text-brand-700 hover:underline">
+              <Link href="/privacy" className="font-semibold text-brand-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2">
                 Privacy Policy
               </Link>
               .
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+          <div className="border-y border-slate-200 bg-paper-2 p-6 sm:p-8">
             <InquiryForm />
           </div>
         </div>

@@ -1,0 +1,149 @@
+@theme static {
+  --color-paper: oklch(98% 0.006 145);
+  --color-paper-2: oklch(96% 0.008 145);
+  --color-paper-3: oklch(92.5% 0.011 145);
+  --color-ink: oklch(20% 0.018 175);
+  --color-ink-2: oklch(34% 0.018 175);
+  --color-muted: oklch(48% 0.018 165);
+  --color-rule: oklch(87% 0.012 145);
+  --color-accent: oklch(41% 0.13 150);
+  --color-accent-ink: oklch(98% 0.006 145);
+  --color-focus: oklch(37% 0.15 150);
+  --color-error: oklch(52% 0.17 28);
+  --color-success: oklch(41% 0.13 150);
+  --color-danger: oklch(52% 0.17 28);
+  --color-warning: oklch(68% 0.13 78);
+  --color-surface: var(--color-paper);
+  --color-white: var(--color-paper);
+  --color-black: var(--color-ink);
+
+  --color-brand-50: #f0fff5;
+  --color-brand-100: #d7f5e1;
+  --color-brand-200: #b0e8c5;
+  --color-brand-300: #82d5a0;
+  --color-brand-400: #4fbc75;
+  --color-brand-500: #038c3e;
+  --color-brand-600: #026b2f;
+  --color-brand-700: #025926;
+  --color-brand-800: #034f25;
+  --color-brand-900: #023a1c;
+  --color-brand-950: #012312;
+
+  --color-ink-100: #e3eef4;
+  --color-ink-200: #bcd5e3;
+  --color-ink-300: #8fb5cc;
+  --color-ink-400: #5c8da8;
+  --color-ink-500: #2f6a8b;
+  --color-ink-600: #124a72;
+  --color-ink-700: #024059;
+  --color-ink-800: #022d41;
+  --color-ink-900: #011c2b;
+  --color-ink-950: #010b11;
+
+  --color-slate-50: var(--color-paper);
+  --color-slate-100: var(--color-paper-2);
+  --color-slate-200: var(--color-rule);
+  --color-slate-300: oklch(84% 0.016 145);
+  --color-slate-400: oklch(67% 0.018 155);
+  --color-slate-500: var(--color-muted);
+  --color-slate-600: var(--color-ink-2);
+  --color-slate-700: var(--color-ink-2);
+  --color-slate-800: var(--color-ink);
+  --color-slate-900: oklch(16% 0.018 175);
+  --color-slate-950: oklch(12% 0.016 175);
+
+  --color-m3-100: #b7f0c1;
+  --color-m3-900: #00210e;
+  --color-m3-surface: #f1f6f1;
+  --color-m3-surface-alt: #ebf1ec;
+  --color-m3-outline: #748478;
+
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-display-s: clamp(2.25rem, 4vw + 0.5rem, 3.75rem);
+  --text-display: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+  --text-section: clamp(2rem, 2.5vw + 1rem, 3.5rem);
+  --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem);
+  --text-lead: clamp(1.125rem, 0.35vw + 1rem, 1.375rem);
+
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 0.875rem;
+  --radius-3xl: 1rem;
+  --radius-full: 9999px;
+  --radius-card: 0.75rem;
+  --radius-pill: 9999px;
+
+  --shadow-elev1: 0 1px 2px oklch(20% 0.01 155 / 0.04);
+  --shadow-elev2: 0 1px 2px oklch(20% 0.01 155 / 0.04), 0 4px 12px oklch(20% 0.01 155 / 0.05);
+  --shadow-elev3: 0 8px 28px oklch(20% 0.01 155 / 0.1);
+  --shadow-soft: 0 4px 16px oklch(20% 0.01 155 / 0.06);
+}
+
+:root {
+  color-scheme: light;
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-2lg: 32px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+  --space-4xl: 144px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+  --container: 1440px;
+  --gutter: 64px;
+  --gap-columns: 32px;
+  --section-gap-s: 120px;
+  --section-gap: 144px;
+  --section-gap-l: 176px;
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-sticky-nav: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+  --tracking-display: -0.02em;
+  --rule-hair: 1px;
+}
+
+@media (max-width: 60rem) {
+  :root {
+    --gutter: 24px;
+    --section-gap-s: 80px;
+    --section-gap: 96px;
+    --section-gap-l: 120px;
+  }
+}
+
+@media (max-width: 40rem) {
+  :root {
+    --gutter: 16px;
+    --section-gap-s: 56px;
+    --section-gap: 72px;
+    --section-gap-l: 96px;
+    --gap-columns: 16px;
+  }
+}

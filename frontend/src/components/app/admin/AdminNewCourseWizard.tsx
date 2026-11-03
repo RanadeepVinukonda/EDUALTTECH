@@ -3,7 +3,6 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import AutoStories from "@mui/icons-material/AutoStories";
 import School from "@mui/icons-material/School";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import MenuBook from "@mui/icons-material/MenuBook";
@@ -14,7 +13,6 @@ import Add from "@mui/icons-material/Add";
 import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import CheckCircle from "@mui/icons-material/CheckCircle";
 import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
 import Image from "@mui/icons-material/Image";
 import Category from "@mui/icons-material/Category";
@@ -71,7 +69,7 @@ interface CourseMilestoneItem {
   id: string;
   title: string;
   type: "VIDEO" | "READING" | "ASSIGNMENT" | "QUIZ" | "LIVE";
-  duration: string; // e.g. "15 min", "1 hour"
+  duration: string;
   mentorNotes: string; // Guidance for the mentor who will fill the contents
 }
 
@@ -79,7 +77,6 @@ interface CourseMilestoneItem {
 interface CourseWeekModule {
   id: string;
   title: string; // e.g. "Week 1: Fundamentals of Python"
-  estimatedHours: string; // e.g. "3 hours to complete"
   summary: string;
   items: CourseMilestoneItem[];
 }
@@ -88,7 +85,7 @@ export default function AdminNewCourseWizard() {
   const router = useRouter();
 
   // Mode selection: null (choose card), "RESOURCE" (Free Resource/Tutorial), "PAID_COURSE" (Structured Course)
-  const [kind, setKind] = useState<OfferingKind | null>(null);
+  const [kind] = useState<OfferingKind>("PAID_COURSE");
 
   // Stepper: 1 = Details, 2 = Builder
   const [step, setStep] = useState<1 | 2>(1);
@@ -110,7 +107,7 @@ export default function AdminNewCourseWizard() {
   const [showDirectUrlInput, setShowDirectUrlInput] = useState(false);
 
   // Paid Course specific
-  const [priceRupees, setPriceRupees] = useState("1999");
+  const [priceRupees, setPriceRupees] = useState("");
   const [hasCertificate, setHasCertificate] = useState(true);
 
   // Course Skeleton Weeks - starts empty so admin structures syllabus manually from scratch
@@ -194,27 +191,20 @@ export default function AdminNewCourseWizard() {
       });
 
       const base64Data = dataUrl.slice(dataUrl.indexOf(",") + 1);
-      let imgUrl = dataUrl;
-      try {
-        const res = await apiPost<{ asset: { url: string } }>("/cms/admin/media/upload", {
-          name: file.name,
-          type: file.type,
-          data: base64Data,
-          kind: "image",
-          category: "Tutorial Article",
-        });
-        if (res.asset?.url) {
-          imgUrl = res.asset.url;
-        }
-      } catch {
-        // Fallback to data URL so images display even if CMS asset storage is offline
-      }
+      const res = await apiPost<{ asset: { url: string } }>("/cms/admin/media/upload", {
+        name: file.name,
+        type: file.type,
+        data: base64Data,
+        kind: "image",
+        category: "Tutorial Article",
+      });
+      if (!res.asset?.url) throw new Error("The upload did not return an image URL.");
 
       const cleanAlt = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-      insertTextIntoActiveSubLesson(`\n![${cleanAlt}](${imgUrl})\n*Figure: ${cleanAlt}*\n`);
+      insertTextIntoActiveSubLesson(`\n![${cleanAlt}](${res.asset.url})\n*Figure: ${cleanAlt}*\n`);
       notifySuccess("Image inserted into article!");
-    } catch {
-      notifyError("Failed to upload image.");
+    } catch (err) {
+      notifyError(err instanceof ApiError ? err.message : "Could not upload the article image.");
     } finally {
       setUploadingArticleImage(false);
       if (articleImageInputRef.current) {
@@ -224,12 +214,18 @@ export default function AdminNewCourseWizard() {
   }
 
   // Validation
-  const pricePaise = kind === "RESOURCE" ? 0 : Math.round((Number(priceRupees) || 0) * 100);
+  const parsedPrice = Number(priceRupees);
+  const hasValidPaidPrice =
+    /^\d+(?:\.\d{1,2})?$/.test(priceRupees.trim()) &&
+    Number.isFinite(parsedPrice) &&
+    parsedPrice > 0;
+  const pricePaise =
+    kind === "RESOURCE" ? 0 : hasValidPaidPrice ? Math.round(parsedPrice * 100) : 0;
   const detailsValid =
     title.trim().length >= 3 &&
     description.trim().length >= 10 &&
     domain.trim().length >= 2 &&
-    (kind === "RESOURCE" || (Number(priceRupees) >= 0 && Number.isFinite(Number(priceRupees))));
+    (kind === "RESOURCE" || hasValidPaidPrice);
 
   function commitTag(t: string) {
     const clean = t.trim().slice(0, 30);
@@ -261,26 +257,18 @@ export default function AdminNewCourseWizard() {
       });
 
       const base64Data = dataUrl.slice(dataUrl.indexOf(",") + 1);
-      try {
-        const res = await apiPost<{ asset: { url: string } }>("/cms/admin/media/upload", {
-          name: file.name,
-          type: file.type,
-          data: base64Data,
-          kind: "image",
-          category: "Course Thumbnail",
-        });
-        if (res.asset?.url) {
-          setThumbnailUrl(res.asset.url);
-          notifySuccess("Thumbnail uploaded successfully!");
-          return;
-        }
-      } catch {
-        // Fallback to data URL so thumbnail works even if backend media storage is offline
-        setThumbnailUrl(dataUrl);
-        notifySuccess("Thumbnail attached successfully!");
-      }
-    } catch {
-      notifyError("Failed to process thumbnail image.");
+      const res = await apiPost<{ asset: { url: string } }>("/cms/admin/media/upload", {
+        name: file.name,
+        type: file.type,
+        data: base64Data,
+        kind: "image",
+        category: "Course Thumbnail",
+      });
+      if (!res.asset?.url) throw new Error("The upload did not return an image URL.");
+      setThumbnailUrl(res.asset.url);
+      notifySuccess("Thumbnail uploaded successfully!");
+    } catch (err) {
+      notifyError(err instanceof ApiError ? err.message : "Could not upload the thumbnail.");
     } finally {
       setUploadingThumb(false);
     }
@@ -342,15 +330,18 @@ export default function AdminNewCourseWizard() {
         // Structured course: Weeks -> Topic skeletons
         initialChapters = modules.map((m) => ({
           title: m.title,
-          summary: `${m.estimatedHours} · ${m.summary}`,
+          summary: m.summary,
           topics: m.items.map((item) => ({
-            title: `${item.title} (${item.duration})`,
+            title:
+              item.type !== "VIDEO" && item.type !== "READING" && item.duration
+                ? `${item.title} (${item.duration})`
+                : item.title,
             summary: `[${item.type}] ${item.mentorNotes}`,
             lessons: [
               {
                 title: item.title,
                 type: (item.type === "VIDEO" ? "VIDEO" : "READING") as "VIDEO" | "READING",
-                textContent: `### Topic Outline\n\n- **Type:** ${item.type}\n- **Duration:** ${item.duration}\n- **Mentor Scope:** ${item.mentorNotes}\n\n*Note for Mentor: Please upload video/notes for this syllabus item.*`,
+                textContent: `### Topic Outline\n\n- **Type:** ${item.type}\n${item.type !== "VIDEO" && item.type !== "READING" && item.duration ? `- **Duration:** ${item.duration}\n` : ""}- **Mentor Scope:** ${item.mentorNotes}\n\n*Note for Mentor: Please upload video/notes for this syllabus item.*`,
               },
             ],
           })),
@@ -386,99 +377,6 @@ export default function AdminNewCourseWizard() {
     } finally {
       setSaving(false);
     }
-  }
-
-  // ────────────────────────────────────────────────────────────────
-  // SCREEN 0: SELECT RESOURCE VS PAID COURSE
-  // ────────────────────────────────────────────────────────────────
-  if (kind === null) {
-    return (
-      <div className="mx-auto max-w-4xl space-y-8">
-        <AdminHeader
-          title="Create New Offering"
-          description="Choose whether you want to publish a free tutorial resource or a structured mentor-guided course."
-          actions={
-            <Link href="/dashboard/admin/courses" className={buttonClass("ghost", "sm")}>
-              ← Back to Courses
-            </Link>
-          }
-        />
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* Card 1: Free Resource (Tutorials & Articles) */}
-          <button
-            type="button"
-            onClick={() => {
-              setKind("RESOURCE");
-              setPriceRupees("0");
-              setHasCertificate(false);
-            }}
-            className="group relative flex flex-col items-start rounded-xl border-2 border-slate-200 bg-white p-7 text-left shadow-sm transition hover:border-emerald-500 hover:focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition group-hover:scale-105">
-              <AutoStories sx={{ fontSize: 32 }} />
-            </div>
-            <h3 className="mt-3 text-xl font-semibold text-ink-900 group-hover:text-emerald-700">
-              Free Resource (Tutorials & Articles)
-            </h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Create structured tutorials, documentation, and notes with chapters, sub-topics, code snippets, diagrams, and explanations. Always free for all learners.
-            </p>
-            <ul className="mt-5 space-y-2 text-xs font-medium text-slate-600">
-              <li className="flex items-center gap-2 text-emerald-700">
-                <CheckCircle sx={{ fontSize: 16 }} /> Hierarchical chapters & sub-lesson articles
-              </li>
-              <li className="flex items-center gap-2 text-emerald-700">
-                <CheckCircle sx={{ fontSize: 16 }} /> Code blocks with 1-click copy & syntax styling
-              </li>
-              <li className="flex items-center gap-2 text-emerald-700">
-                <CheckCircle sx={{ fontSize: 16 }} /> Embedded diagrams, images & markdown notes
-              </li>
-            </ul>
-            <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-emerald-600 group-hover:translate-x-1 transition-transform">
-              <span>Create Free Tutorial</span>
-              <ArrowForward fontSize="small" />
-            </div>
-          </button>
-
-          {/* Card 2: Paid Course (Curriculum & Milestones) */}
-          <button
-            type="button"
-            onClick={() => {
-              setKind("PAID_COURSE");
-              setPriceRupees("1999");
-              setHasCertificate(true);
-            }}
-            className="group relative flex flex-col items-start rounded-xl border-2 border-slate-200 bg-white p-7 text-left shadow-sm transition hover:border-brand-500 hover:focus:outline-none focus:ring-2 focus:ring-brand-500"
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:scale-105">
-              <School sx={{ fontSize: 32 }} />
-            </div>
-            <h3 className="mt-3 text-xl font-semibold text-ink-900 group-hover:text-brand-700">
-              Paid Course (Curriculum & Milestones)
-            </h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Create a structured course syllabus organized by weeks and learning modules. Set pricing and certificate options; assigned mentors will craft the video lessons and exercises.
-            </p>
-            <ul className="mt-5 space-y-2 text-xs font-medium text-slate-600">
-              <li className="flex items-center gap-2 text-brand-700">
-                <CheckCircle sx={{ fontSize: 16 }} /> Multi-week curriculum & milestone skeleton
-              </li>
-              <li className="flex items-center gap-2 text-brand-700">
-                <CheckCircle sx={{ fontSize: 16 }} /> Mentors craft the internal video & reading materials
-              </li>
-              <li className="flex items-center gap-2 text-brand-700">
-                <CheckCircle sx={{ fontSize: 16 }} /> Certificate of completion & custom INR pricing
-              </li>
-            </ul>
-            <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-brand-600 group-hover:translate-x-1 transition-transform">
-              <span>Configure Course Details</span>
-              <ArrowForward fontSize="small" />
-            </div>
-          </button>
-        </div>
-      </div>
-    );
   }
 
   // ────────────────────────────────────────────────────────────────
@@ -530,14 +428,6 @@ export default function AdminNewCourseWizard() {
             Course Builder
           </button>
 
-          <span className="text-slate-300 ml-1">·</span>
-          <button
-            type="button"
-            onClick={() => setKind(null)}
-            className="text-xs text-brand-600 hover:text-brand-800 hover:underline transition"
-          >
-            Change Type
-          </button>
         </div>
 
         {step === 2 && (
@@ -759,17 +649,21 @@ export default function AdminNewCourseWizard() {
                   <Input
                     id="price"
                     type="number"
-                    min={0}
+                    min={0.01}
+                    step={0.01}
+                    required={kind !== "RESOURCE"}
                     value={kind === "RESOURCE" ? "0" : priceRupees}
                     disabled={kind === "RESOURCE"}
                     icon={<CurrencyRupee fontSize="small" />}
                     onChange={(e) => setPriceRupees(e.target.value)}
-                    placeholder="0 for free"
+                    placeholder={kind === "RESOURCE" ? "0" : "Enter course price"}
                   />
                   <p className="mt-1 text-xs text-slate-400">
                     {kind === "RESOURCE"
                       ? "Free resources are accessible to all learners for ₹0."
-                      : `Amount in INR: ${formatMoney(pricePaise, "INR")}`}
+                      : hasValidPaidPrice
+                        ? `Amount in INR: ${formatMoney(pricePaise, "INR")}`
+                        : "Enter a price greater than ₹0."}
                   </p>
                 </div>
 
@@ -802,12 +696,12 @@ export default function AdminNewCourseWizard() {
                         <img
                           src={thumbnailUrl}
                           alt="Course thumbnail preview"
-                          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                          className="h-full w-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/30 pointer-events-none" />
 
                         {/* Top badge */}
-                        <div className="absolute top-2.5 left-2.5 flex items-center rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
+                        <div className="absolute top-2.5 left-2.5 flex items-center rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white">
                           16:9 Thumbnail Ready
                         </div>
 
@@ -818,7 +712,7 @@ export default function AdminNewCourseWizard() {
                               type="button"
                               onClick={() => thumbnailInputRef.current?.click()}
                               disabled={uploadingThumb}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-white/90 hover:bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-900 shadow-sm backdrop-blur-md transition disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-white hover:bg-paper-2 px-2.5 py-1.5 text-xs font-semibold text-ink-900 shadow-sm transition disabled:opacity-50"
                             >
                               <CloudUploadOutlined fontSize="small" />
                               Replace
@@ -826,7 +720,7 @@ export default function AdminNewCourseWizard() {
                             <button
                               type="button"
                               onClick={() => setPickingMedia(true)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-black/50 hover:bg-black/70 px-2.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-ink-900 hover:bg-ink-800 px-2.5 py-1.5 text-xs font-semibold text-white transition"
                             >
                               <Image fontSize="small" />
                               Library
@@ -861,7 +755,7 @@ export default function AdminNewCourseWizard() {
                       }}
                       onClick={() => !uploadingThumb && thumbnailInputRef.current?.click()}
                       className={cn(
-                        "group relative flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition-all",
+                        "group relative flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition-colors",
                         draggingThumb
                           ? "border-brand-600 bg-brand-50/80 ring-4 ring-brand-100"
                           : "border-slate-300 bg-slate-50/60 hover:border-brand-500 hover:bg-brand-50/20",
@@ -898,7 +792,7 @@ export default function AdminNewCourseWizard() {
                       className="inline-flex items-center gap-1 font-semibold text-brand-600 hover:text-brand-700 hover:underline"
                     >
                       <Image fontSize="inherit" />
-                      Choose from Media Library
+                      Browse media library
                     </button>
 
                     <button
@@ -917,7 +811,7 @@ export default function AdminNewCourseWizard() {
                         value={thumbnailUrl}
                         icon={<Image fontSize="small" />}
                         onChange={(e) => setThumbnailUrl(e.target.value)}
-                        placeholder="https://images.unsplash.com/…"
+                        placeholder="Paste an image URL or choose from the media library"
                         className="text-xs"
                       />
                     </div>
@@ -1089,8 +983,8 @@ export default function AdminNewCourseWizard() {
                 <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div className="flex-1 min-w-48">
-                      <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                        Sub-lesson Article Title
+                      <label className="text-xs font-semibold text-slate-500">
+                        Sub-lesson article title
                       </label>
                       <input
                         type="text"
@@ -1143,7 +1037,7 @@ export default function AdminNewCourseWizard() {
                     <div className="space-y-3">
                       {/* Markdown & Media Toolbar */}
                       <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-100 pb-2 text-xs">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">
+                        <span className="text-xs font-semibold text-slate-500 mr-1">
                           Insert:
                         </span>
 
@@ -1166,27 +1060,16 @@ export default function AdminNewCourseWizard() {
                           + Media Library
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const snippet = "\n![Diagram or Architecture Screenshot](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1000&auto=format&fit=crop)\n*Figure 1: Architectural diagram and component overview.*\n";
-                            insertTextIntoActiveSubLesson(snippet);
-                          }}
-                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-ink-700 font-medium transition"
-                        >
-                          + Image URL
-                        </button>
-
                         <span className="h-4 w-px bg-slate-200 mx-1" />
 
                         {/* Code snippet buttons */}
                         <button
                           type="button"
                           onClick={() => {
-                            const snippet = "\n```python\n# Python code example\ndef calculate_metrics(items):\n    return sum(x['score'] for x in items) / max(len(items), 1)\n\nprint(calculate_metrics([{'score': 95}, {'score': 88}]))\n```\n";
+                            const snippet = "\n```python\ndef format_titles(items):\n    return [item['title'].strip() for item in items if item['title'].strip()]\n```\n";
                             insertTextIntoActiveSubLesson(snippet);
                           }}
-                          className="rounded-lg px-2 py-1 bg-slate-100 hover:bg-slate-200 text-ink-700 font-mono transition"
+                          className="rounded-lg px-2 py-1 bg-slate-100 hover:bg-slate-200 text-ink-700 transition"
                         >
                           + Python Code
                         </button>
@@ -1194,10 +1077,10 @@ export default function AdminNewCourseWizard() {
                         <button
                           type="button"
                           onClick={() => {
-                            const snippet = "\n```typescript\n// TypeScript / JavaScript example\ninterface UserProfile {\n  id: string;\n  name: string;\n  role: 'admin' | 'learner';\n}\n\nconst currentUser: UserProfile = {\n  id: 'usr-101',\n  name: 'Alex Turner',\n  role: 'admin',\n};\n```\n";
+                            const snippet = "\n```typescript\ninterface CourseOutline {\n  title: string;\n  lessons: string[];\n}\n\nconst outline: CourseOutline = {\n  title: \"Course title\",\n  lessons: [],\n};\n```\n";
                             insertTextIntoActiveSubLesson(snippet);
                           }}
-                          className="rounded-lg px-2 py-1 bg-slate-100 hover:bg-slate-200 text-ink-700 font-mono transition"
+                          className="rounded-lg px-2 py-1 bg-slate-100 hover:bg-slate-200 text-ink-700 transition"
                         >
                           + JS / TS Code
                         </button>
@@ -1208,7 +1091,7 @@ export default function AdminNewCourseWizard() {
                             const snippet = "\n```html\n<!-- Example HTML Structure -->\n<div class=\"card\">\n  <h3>Interactive Card</h3>\n  <button class=\"btn-primary\">Explore</button>\n</div>\n```\n";
                             insertTextIntoActiveSubLesson(snippet);
                           }}
-                          className="rounded-lg px-2 py-1 bg-slate-100 hover:bg-slate-200 text-ink-700 font-mono transition"
+                          className="rounded-lg px-2 py-1 bg-slate-100 hover:bg-slate-200 text-ink-700 transition"
                         >
                           + HTML Code
                         </button>
@@ -1216,7 +1099,7 @@ export default function AdminNewCourseWizard() {
                         <button
                           type="button"
                           onClick={() => {
-                            const snippet = "\n> 💡 **Key Takeaway:** Always ensure edge cases and error states are handled gracefully before deploying to production.\n";
+                            const snippet = "\n> **Key takeaway:** Check edge cases and error states before deploying to production.\n";
                             insertTextIntoActiveSubLesson(snippet);
                           }}
                           className="rounded-lg px-2 py-1 bg-amber-50 text-amber-800 hover:bg-amber-100 font-medium transition"
@@ -1359,7 +1242,6 @@ export default function AdminNewCourseWizard() {
                     const newMod: CourseWeekModule = {
                       id: `mod-${Date.now()}`,
                       title: "Week 1",
-                      estimatedHours: "",
                       summary: "",
                       items: [],
                     };
@@ -1396,20 +1278,7 @@ export default function AdminNewCourseWizard() {
                           placeholder="Week Module Title…"
                         />
                       </div>
-                      <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
-                        <input
-                          type="text"
-                          value={mod.estimatedHours}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setModules((prev) =>
-                              prev.map((m) => (m.id === mod.id ? { ...m, estimatedHours: val } : m)),
-                            );
-                          }}
-                          placeholder="e.g. 3 hours to complete"
-                          className="border-b border-slate-300 text-xs text-slate-600 bg-transparent outline-none w-36"
-                        />
-                        <span>·</span>
+                      <div className="mt-1.5 text-xs text-slate-500">
                         <span>{mod.items.length} learning milestones</span>
                       </div>
                     </div>
@@ -1451,7 +1320,7 @@ export default function AdminNewCourseWizard() {
                           <span className="mt-0.5 sm:mt-0 shrink-0">{typeConfig.icon}</span>
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded">
+                              <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded">
                                 {typeConfig.label}
                               </span>
                               <input
@@ -1511,7 +1380,16 @@ export default function AdminNewCourseWizard() {
                                     ? {
                                         ...m,
                                         items: m.items.map((i) =>
-                                          i.id === item.id ? { ...i, type: val } : i,
+                                          i.id === item.id
+                                            ? {
+                                                ...i,
+                                                type: val,
+                                                duration:
+                                                  val === "VIDEO" || val === "READING"
+                                                    ? ""
+                                                    : i.duration,
+                                              }
+                                            : i,
                                         ),
                                       }
                                     : m,
@@ -1527,27 +1405,30 @@ export default function AdminNewCourseWizard() {
                             <option value="LIVE">Live Session</option>
                           </select>
 
-                          <input
-                            type="text"
-                            value={item.duration}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setModules((prev) =>
-                                prev.map((m) =>
-                                  m.id === mod.id
-                                    ? {
-                                        ...m,
-                                        items: m.items.map((i) =>
-                                          i.id === item.id ? { ...i, duration: val } : i,
-                                        ),
-                                      }
-                                    : m,
-                                ),
-                              );
-                            }}
-                            className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-xs font-semibold text-slate-700 outline-none"
-                            placeholder="15 min"
-                          />
+                          {item.type !== "VIDEO" && item.type !== "READING" && (
+                            <input
+                              type="text"
+                              value={item.duration}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setModules((prev) =>
+                                  prev.map((m) =>
+                                    m.id === mod.id
+                                      ? {
+                                          ...m,
+                                          items: m.items.map((i) =>
+                                            i.id === item.id ? { ...i, duration: val } : i,
+                                          ),
+                                        }
+                                      : m,
+                                  ),
+                                );
+                              }}
+                              className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-xs font-semibold text-slate-700 outline-none"
+                              placeholder="Duration"
+                              aria-label={`${item.type.toLowerCase()} duration`}
+                            />
+                          )}
 
                           <button
                             type="button"
@@ -1589,7 +1470,7 @@ export default function AdminNewCourseWizard() {
                   }}
                   className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 py-2.5 text-xs font-semibold text-brand-700 hover:bg-brand-50 hover:border-brand-400 transition"
                 >
-                  <Add sx={{ fontSize: 16 }} /> Add Lesson / Topic to Week {modIdx + 1}
+                  <Add sx={{ fontSize: 16 }} /> Add item to week {modIdx + 1}
                 </button>
               </div>
             </div>
@@ -1603,7 +1484,6 @@ export default function AdminNewCourseWizard() {
                   const newMod: CourseWeekModule = {
                     id: `mod-${Date.now()}`,
                     title: `Week ${modules.length + 1}`,
-                    estimatedHours: "",
                     summary: "",
                     items: [],
                   };
@@ -1611,7 +1491,7 @@ export default function AdminNewCourseWizard() {
                 }}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-4 text-sm font-semibold text-slate-700 hover:border-brand-500 hover:text-brand-700 hover:bg-white transition"
               >
-                <Add fontSize="small" /> Add Another Week / Module
+              <Add fontSize="small" /> Add week
               </button>
             )}
           </div>

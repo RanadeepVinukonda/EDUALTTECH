@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { publicFetch } from "@/lib/server-api";
-import type { ResourceCategoryItem, ResourceArticleCard } from "@/lib/types";
-import ResourceLibraryExplorer from "@/components/resources/ResourceLibraryExplorer";
+import type { ResourceLearningPathCategory } from "@/lib/types";
+import StructuredResourceLibrary from "@/components/resources/StructuredResourceLibrary";
 
 export const metadata: Metadata = {
   title: "Free Resources & Knowledge Library",
@@ -15,20 +15,16 @@ export const metadata: Metadata = {
 const wrap = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
 
 export default async function ResourcesPage() {
-  const [categoriesData, articlesData, featuredData] = await Promise.all([
-    publicFetch<{ categories: ResourceCategoryItem[] }>("/resources/categories", {}, 120),
-    publicFetch<{ articles: ResourceArticleCard[] }>("/resources/library", {}, 120),
-    publicFetch<{ featured: ResourceArticleCard[] }>("/resources/featured", {}, 120),
-  ]);
-
-  const categories = categoriesData?.categories ?? [];
-  const initialArticles = articlesData?.articles ?? [];
-  const initialFeatured = featuredData?.featured ?? [];
+  const learningPathData = await publicFetch<{ categories: ResourceLearningPathCategory[] }>(
+    "/resources/learning-path",
+    {},
+    120,
+  );
+  const categories = learningPathData?.categories ?? [];
 
   return (
-    <div className="bg-white min-h-screen">
-      {/* Hero Header Section */}
-      <section className="border-b border-slate-200 bg-slate-50 py-12 sm:py-16">
+    <div className="min-h-screen bg-paper">
+      <section className="border-b border-slate-200 bg-paper-2 py-10 sm:py-14">
         <div className={wrap}>
           <nav aria-label="Breadcrumb" className="mb-4">
             <ol className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -46,28 +42,18 @@ export default async function ResourcesPage() {
             </ol>
           </nav>
 
-          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-ink-900 leading-tight">
-            Explore learning resources
+          <h1 className="min-w-0 max-w-3xl break-words font-display text-display-s font-semibold tracking-tight text-ink-900 leading-tight">
+            Learn one topic at a time
           </h1>
 
-          <p className="mt-4 max-w-3xl text-base sm:text-lg leading-relaxed text-slate-600">
-            Learn at your own pace without mandatory enrollment or paywalls. Explore structured tutorials across
-            Computer Science, Academic Disciplines, Creative & Performing Arts, and Leadership.
-          </p>
-
-          <p className="mt-6 text-sm font-medium text-slate-500">
-            Free and open access · Step-by-step guides and code examples · Direct bridges to mentor-led courses
+          <p className="mt-4 max-w-3xl text-lead leading-relaxed text-ink-600">
+            Follow a topic from its foundations through focused tutorials, in order.
           </p>
         </div>
       </section>
 
-      {/* Main Interactive Explorer */}
       <div className={`${wrap} py-10 sm:py-12`}>
-        <ResourceLibraryExplorer
-          initialCategories={categories}
-          initialArticles={initialArticles}
-          initialFeatured={initialFeatured}
-        />
+        <StructuredResourceLibrary categories={categories} />
       </div>
     </div>
   );

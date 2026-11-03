@@ -19,9 +19,9 @@ export default async function PollsPage() {
   const closedPolls = historyData?.polls ?? [];
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen bg-paper">
       {/* Header Banner */}
-      <section className="border-b border-slate-200 bg-slate-50 py-12 sm:py-16">
+      <section className="border-b border-slate-200 bg-paper-2 py-12 sm:py-16">
         <div className={wrap}>
           <nav aria-label="Breadcrumb" className="mb-4">
             <ol className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -39,13 +39,12 @@ export default async function PollsPage() {
             </ol>
           </nav>
 
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-5xl leading-tight">
+          <h1 className="max-w-3xl font-display text-display-s font-semibold tracking-tight text-ink-900 leading-tight">
             Vote for what we should teach next
           </h1>
 
           <p className="mt-4 max-w-3xl text-base sm:text-lg leading-relaxed text-slate-600">
-            EduAltTech builds courses directly around learner demand. When you vote for a course, our academic team
-            evaluates syllabus scope, designs project roadmaps, and recruits industry-tested mentors.
+            Your votes help us decide which course proposals to develop next.
           </p>
 
           <p className="mt-6 max-w-2xl text-sm text-slate-500">
@@ -58,7 +57,7 @@ export default async function PollsPage() {
       <CommunityCoursePoll />
 
       {/* Historical Polls & Winning Courses Section */}
-      <section id="past-polls" className="scroll-mt-12 py-16 bg-slate-50 border-b border-slate-200">
+      <section id="past-polls" className="scroll-mt-12 border-b border-slate-200 bg-paper-2 py-12 sm:py-16">
         <div className={wrap}>
           <h2 className="font-display text-2xl sm:text-3xl font-semibold text-ink-900">
             Past poll results and prioritized courses
@@ -68,7 +67,7 @@ export default async function PollsPage() {
           </p>
 
           {closedPolls.length === 0 ? (
-            <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <div className="mt-8 border-y border-slate-200 bg-paper py-8">
               <p className="text-sm font-semibold text-ink-900">
                 This is our inaugural course demand cycle!
               </p>
@@ -85,7 +84,7 @@ export default async function PollsPage() {
                 return (
                   <div
                     key={poll.id}
-                    className="overflow-hidden rounded-xl border border-slate-200 bg-white p-6 "
+                    className="overflow-hidden border-b border-slate-200 bg-paper py-6"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-4">
                       <div>
@@ -100,7 +99,7 @@ export default async function PollsPage() {
                     </div>
 
                     {winner && (
-                      <div className="mt-4 rounded-xl border border-brand-200 bg-brand-50/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="mt-4 border-l-2 border-brand-600 bg-paper-2 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-wider text-brand-800">
                             Winning proposal

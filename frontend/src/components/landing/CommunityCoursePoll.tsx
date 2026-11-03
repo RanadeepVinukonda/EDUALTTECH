@@ -21,10 +21,10 @@ export default function CommunityCoursePoll() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
-  const [pollTitle, setPollTitle] = useState("Community Course Demand & Prioritization Poll");
-  const [pollDescription, setPollDescription] = useState(
-    "We don't guess what learners want. Every cycle, our community votes on the next skills to bring to EduAltTech. Winning courses receive dedicated roadmaps, learning materials, and vetted mentors."
-  );
+  const [pollTitle, setPollTitle] = useState("");
+  const [pollDescription, setPollDescription] = useState("");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [pollId, setPollId] = useState<string | null>(null);
   const [options, setOptions] = useState<PollOptionItem[]>([]);
   const [userVotedOptionId, setUserVotedOptionId] = useState<string | null>(null);
@@ -36,26 +36,31 @@ export default function CommunityCoursePoll() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    setLoadError(null);
     apiGet<ActivePollResponse>("/polls/active")
       .then((res) => {
         if (!alive) return;
         if (res.poll) {
           setPollId(res.poll.id);
           setPollTitle(res.poll.title);
-          if (res.poll.description) setPollDescription(res.poll.description);
+          setPollDescription(res.poll.description ?? "");
           setOptions(res.poll.options && res.poll.options.length > 0 ? res.poll.options : []);
         } else {
           setPollId(null);
+          setPollTitle("");
+          setPollDescription("");
           setOptions([]);
         }
-        if (res.userVoteOptionId) {
-          setUserVotedOptionId(res.userVoteOptionId);
-        }
+        setUserVotedOptionId(res.userVoteOptionId ?? null);
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         if (alive) {
           setPollId(null);
+          setPollTitle("");
+          setPollDescription("");
           setOptions([]);
+          setUserVotedOptionId(null);
+          setLoadError(err instanceof ApiError ? err.message : "Could not load course proposals.");
         }
       })
       .finally(() => {
@@ -65,7 +70,7 @@ export default function CommunityCoursePoll() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   const totalVotes = options.reduce((acc, p) => acc + (p.votes || 0), 0);
 
@@ -92,7 +97,7 @@ export default function CommunityCoursePoll() {
     if (pollId) {
       try {
         await apiPost(`/polls/${pollId}/vote`, { optionId });
-      } catch {
+      } catch (err) {
         // Revert on error
         setUserVotedOptionId(prevOptionId);
         setOptions((current) =>
@@ -102,6 +107,7 @@ export default function CommunityCoursePoll() {
             return opt;
           })
         );
+        notifyError(err instanceof ApiError ? err.message : "Could not record your vote. Try again.");
       } finally {
         setVoting(null);
       }
@@ -118,8 +124,6 @@ export default function CommunityCoursePoll() {
     try {
       await apiPost("/polls/suggest", {
         title: customSkill.trim(),
-        category: "Community Suggestion",
-        description: "Learner wishlist submission for the upcoming curriculum vote.",
       });
       setCustomSkill("");
       setSuggestSuccess(true);
@@ -170,13 +174,15 @@ export default function CommunityCoursePoll() {
         <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
           {/* Left Column: Heading and Context */}
           <div className="lg:col-span-5">
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl sm:leading-tight">
-              {pollTitle}
-            </h2>
+            {pollTitle && (
+              <h2 className="font-display text-section font-semibold tracking-tight text-ink-900 leading-tight">
+                {pollTitle}
+              </h2>
+            )}
 
-            <p className="mt-4 text-base leading-relaxed text-slate-600">
-              {pollDescription}
-            </p>
+            {pollDescription && (
+              <p className="mt-4 text-base leading-relaxed text-slate-600">{pollDescription}</p>
+            )}
 
             <div className="mt-8 rounded-xl bg-slate-50 p-6 border border-slate-200 shadow-xs">
               <h3 className="text-sm font-semibold text-ink-900 flex items-center gap-2">
@@ -213,16 +219,18 @@ export default function CommunityCoursePoll() {
               )}
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
-              <span>Total votes: <strong className="font-semibold text-slate-700">{totalVotes.toLocaleString()}</strong></span>
-              <Link
-                href="/polls#past-polls"
-                className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-brand-700 hover:underline"
-              >
-                <span>View past winners</span>
-                <ArrowForward fontSize="inherit" />
-              </Link>
-            </div>
+            {pollId && options.length > 0 && (
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
+                <span>Total votes: <strong className="font-semibold text-slate-700">{totalVotes.toLocaleString()}</strong></span>
+                <Link
+                  href="/polls#past-polls"
+                  className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-brand-700 hover:underline"
+                >
+                  <span>View past winners</span>
+                  <ArrowForward fontSize="inherit" />
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Live Poll Cards or Honest Empty State */}
@@ -230,6 +238,18 @@ export default function CommunityCoursePoll() {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-16 rounded-xl border border-slate-200 bg-slate-50/50">
                 <Spinner label="Loading current course proposals..." />
+              </div>
+            ) : loadError ? (
+              <div role="alert" className="rounded-xl border border-rule bg-paper p-8 text-center">
+                <h3 className="font-display text-lg font-semibold text-ink-900">Course proposals could not be loaded</h3>
+                <p className="mt-2 text-sm text-ink-2">{loadError}</p>
+                <button
+                  type="button"
+                  onClick={() => setReloadKey((key) => key + 1)}
+                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                >
+                  Try again
+                </button>
               </div>
             ) : options.length === 0 ? (
               <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-12 text-center">
@@ -253,7 +273,7 @@ export default function CommunityCoursePoll() {
                     <div
                       key={option.id}
                       className={cn(
-                        "relative overflow-hidden rounded-xl border p-5 sm:p-6 transition-all duration-200",
+                        "relative overflow-hidden rounded-xl border p-5 sm:p-6 transition-colors duration-200",
                         hasVoted
                           ? "border-brand-500 bg-brand-50/20 ring-1 ring-brand-500/20"
                           : "border-slate-200 bg-white hover:border-slate-300"
@@ -261,16 +281,18 @@ export default function CommunityCoursePoll() {
                     >
                       {/* Background progress fill bar */}
                       <div
-                        className="absolute inset-y-0 left-0 bg-brand-100/40 -z-10 transition-all duration-700 ease-out"
-                        style={{ width: `${Math.max(percentage, 4)}%` }}
+                        className="absolute inset-y-0 left-0 -z-10 w-full origin-left bg-brand-100/40 transition-transform duration-700 ease-out"
+                        style={{ transform: `scaleX(${Math.max(percentage, 4) / 100})` }}
                       />
 
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-                              {option.category}
-                            </span>
+                          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                            {option.category && option.category !== "General" && (
+                              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                                {option.category}
+                              </span>
+                            )}
                             {option.difficulty && (
                               <span className="text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
                                 {option.difficulty}

@@ -20,9 +20,9 @@ import type { Me } from "@/lib/app-types";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <div className="mt-1 text-[15px] font-medium text-ink-900">{value}</div>
+    <div className="border-y border-rule bg-paper-2/60 px-4 py-3">
+      <p className="text-xs font-medium text-muted">{label}</p>
+      <div className="mt-1 text-[15px] font-medium text-ink">{value}</div>
     </div>
   );
 }
@@ -83,11 +83,11 @@ export default function ProfileView() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-semibold text-ink-900">Profile</h1>
-          <p className="mt-1 text-[15px] text-slate-500">Your details across EduAltTech.</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Profile</h1>
+          <p className="mt-2 text-[15px] text-muted">Your details across EduAltTech.</p>
         </div>
         {!editing && (
           <Button variant="secondary" onClick={() => setEditing(true)}>
@@ -102,14 +102,14 @@ export default function ProfileView() {
       </header>
 
       {/* Identity Card */}
-      <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+      <section className="border-y border-rule bg-paper px-5 py-6 sm:px-8">
         <div className="flex flex-wrap items-center gap-6">
           <AvatarUploader avatarUrl={user.avatarUrl} firstName={user.firstName} lastName={user.lastName} />
           <div className="min-w-0">
-            <p className="font-display text-2xl font-semibold text-ink-900">{user.name}</p>
+            <p className="font-display text-2xl font-semibold text-ink">{user.name}</p>
             {user.username && <p className="text-sm font-mono text-brand-700">@{user.username}</p>}
-            <p className="text-sm text-slate-500">{user.email}</p>
-            <p className="mt-1 inline-flex items-center text-xs font-medium text-slate-500">
+            <p className="text-sm text-muted">{user.email}</p>
+            <p className="mt-1 inline-flex items-center text-xs font-medium text-muted">
               {user.role === "ADMIN" ? "Administrator" : "Member"}
             </p>
           </div>
@@ -118,8 +118,8 @@ export default function ProfileView() {
 
       {/* Details Card */}
       {editing ? (
-        <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
-          <h2 className="font-display text-lg font-semibold text-ink-900">Edit details</h2>
+        <section className="border-y border-rule bg-paper px-5 py-6 sm:px-8">
+          <h2 className="font-display text-lg font-semibold text-ink">Edit details</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="pf-first" className="mb-1 block text-sm font-semibold text-ink-700">
@@ -181,7 +181,7 @@ export default function ProfileView() {
               maxLength={1000}
               rows={3}
               onChange={(e) => setBio(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+              className="w-full rounded-lg border border-rule bg-paper px-4 py-3 text-[15px] outline-none focus:border-focus focus:ring-2 focus:ring-focus/20"
               placeholder="A short bio (optional)…"
             />
             <p className="mt-1 text-right text-xs text-slate-400">{bio.length}/1000</p>
@@ -189,7 +189,7 @@ export default function ProfileView() {
 
           <div className="mt-4">
             <label htmlFor="pf-experience" className="mb-1 block text-sm font-semibold text-ink-700">
-              Experience &amp; Background
+              Experience and background
             </label>
             <textarea
               id="pf-experience"
@@ -197,7 +197,7 @@ export default function ProfileView() {
               maxLength={3000}
               rows={4}
               onChange={(e) => setExperience(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+              className="w-full rounded-lg border border-rule bg-paper px-4 py-3 text-[15px] outline-none focus:border-focus focus:ring-2 focus:ring-focus/20"
               placeholder="Your work, engineering, creative arts, or teaching experience…"
             />
             <p className="mt-1 text-right text-xs text-slate-400">{experience.length}/3000</p>
@@ -213,8 +213,8 @@ export default function ProfileView() {
           </div>
         </section>
       ) : (
-        <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
-          <h2 className="font-display text-lg font-semibold text-ink-900">Your details</h2>
+        <section className="border-y border-rule bg-paper px-5 py-6 sm:px-8">
+          <h2 className="font-display text-lg font-semibold text-ink">Your details</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Username" value={user.username ? `@${user.username}` : "Not set"} />
             <Field label="Email" value={user.email} />
@@ -236,20 +236,20 @@ export default function ProfileView() {
 
           {user.bio && (
             <div className="mt-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">About you</p>
+              <p className="text-xs font-medium text-muted">About you</p>
               <p className="mt-1.5 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-700">{user.bio}</p>
             </div>
           )}
 
           {user.experience && (
             <div className="mt-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Experience &amp; Background</p>
+              <p className="text-xs font-medium text-muted">Experience and background</p>
               <p className="mt-1.5 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-700">{user.experience}</p>
             </div>
           )}
 
           {user.mobileVerifiedAt === false && (
-            <p className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <p className="mt-5 border-y border-rule bg-paper-2 px-4 py-3 text-sm text-ink-2">
               Want to buy courses or apply as a mentor?{" "}
               <Link href="/dashboard/settings" className="font-semibold text-brand-700 hover:underline">
                 Add your mobile number
@@ -259,10 +259,10 @@ export default function ProfileView() {
           )}
 
           {/* Profile Resume */}
-          <div className="mt-6 border-t border-slate-100 pt-6">
-            <h3 className="text-sm font-semibold text-ink-900 mb-2">Resume / Curriculum Vitae</h3>
-            <p className="text-xs text-slate-500 mb-3">
-              Keep an up-to-date resume here to streamline your applications when applying to mentor any course.
+          <div className="mt-6 border-t border-rule pt-6">
+            <h3 className="text-sm font-semibold text-ink mb-2">Resume / Curriculum Vitae</h3>
+            <p className="text-xs text-muted mb-3">
+              Keep your resume up to date here to make it easier to apply as a mentor.
             </p>
             <ResumeUploader resumeName={user.resumeName} resumeUpdatedAt={user.resumeUpdatedAt} />
           </div>

@@ -42,7 +42,7 @@ export default function AdminParticipants({ courseId, embedded = false }: { cour
         {mentors.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[520px] text-left text-sm">
-              <thead className="text-xs uppercase tracking-wide text-slate-500">
+              <thead className="text-xs text-slate-500">
                 <tr>
                   <th scope="col" className="px-2 py-2 font-semibold">Mentor</th>
                   <th scope="col" className="px-2 py-2 font-semibold">Capacity</th>

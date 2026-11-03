@@ -156,7 +156,7 @@ export default function ResourcesSection() {
                 className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-700"
               >
                 Browse resources
-                <svg className="arrow-down inline w-2 h-2" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="arrow-down inline w-2 h-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M7 10l5 5 5-5" />
                 </svg>
               </Link>

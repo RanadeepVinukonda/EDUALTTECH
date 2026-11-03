@@ -40,6 +40,11 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
+function formatKind(kind: string) {
+  const normalized = kind.toLowerCase();
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
 export default function CourseResources({ slug }: { slug: string }) {
   const { detail, roadmap, loading, error, reload } = useCourseRoadmap(slug);
 
@@ -96,7 +101,7 @@ export default function CourseResources({ slug }: { slug: string }) {
   const topicLabels = useMemo(() => {
     const m = new Map<string, string>();
     for (const ch of roadmap?.chapters ?? [])
-      for (const t of ch.topics) m.set(t.id, `${ch.title} · ${t.title}`);
+      for (const t of ch.topics) m.set(t.id, `${ch.title}, ${t.title}`);
     return m;
   }, [roadmap]);
 
@@ -238,16 +243,16 @@ export default function CourseResources({ slug }: { slug: string }) {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl font-semibold text-ink-900">Resources</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="font-display text-2xl font-semibold text-ink">Resources</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
             {isStaff ? "Post files and links for this course. Attach them to a topic in the roadmap." : "Files and links shared for this course."}
           </p>
         </div>
       </header>
 
       {isStaff && (
-        <section aria-labelledby="post-resource-h" className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 id="post-resource-h" className="font-display text-lg font-semibold text-ink-900">
+        <section aria-labelledby="post-resource-h" className="border-y border-rule bg-paper px-4 py-5 sm:px-6">
+          <h3 id="post-resource-h" className="font-display text-lg font-semibold text-ink">
             Post a resource
           </h3>
           <form onSubmit={create} className="mt-4 flex flex-col gap-3">
@@ -275,7 +280,7 @@ export default function CourseResources({ slug }: { slug: string }) {
                   <option value="">Course-wide</option>
                   {topics.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.chapterTitle} · {t.title}
+                      {t.chapterTitle}, {t.title}
                     </option>
                   ))}
                 </Select>
@@ -297,7 +302,7 @@ export default function CourseResources({ slug }: { slug: string }) {
                 accept={ACCEPT}
                 file={file}
                 ariaLabel="Resource file"
-                hint="Up to 5 MB · type validated by the server"
+                hint="Up to 5 MB. File type is validated by the server."
                 onFile={setFile}
               />
             ) : (
@@ -315,7 +320,7 @@ export default function CourseResources({ slug }: { slug: string }) {
       )}
 
       <section aria-labelledby="course-resources-h">
-        <h3 id="course-resources-h" className="font-display text-lg font-semibold text-ink-900">
+        <h3 id="course-resources-h" className="font-display text-lg font-semibold text-ink">
           {isStaff ? "Course resources" : "Shared with you"}
         </h3>
 
@@ -336,12 +341,12 @@ export default function CourseResources({ slug }: { slug: string }) {
           <div className="mt-3 space-y-6">
             {groups.map(([topicId, items]) => (
               <div key={topicId ?? "general"}>
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <h4 className="text-xs font-medium text-muted">
                   {topicId ? topicLabels.get(topicId) : "Course-wide"}
                 </h4>
                 <ul className="mt-2 grid gap-4 sm:grid-cols-2">
                   {items.map((r) => (
-                    <li key={r.id} className="rounded-xl border border-slate-200 bg-white p-5">
+                    <li key={r.id} className="border-y border-rule bg-paper px-4 py-5 sm:px-5">
                       {editingId === r.id ? (
                         <div className="flex flex-col gap-3">
                           <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} aria-label="Resource title" />
@@ -367,14 +372,14 @@ export default function CourseResources({ slug }: { slug: string }) {
                         </div>
                       ) : (
                         <div className="flex h-full flex-col">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{r.kind}</span>
-                          <span className="mt-1 line-clamp-2 font-display text-lg font-semibold text-ink-900">{r.title}</span>
-                          {r.description && <span className="mt-1 line-clamp-2 text-sm text-slate-600">{r.description}</span>}
-                          <span className="mt-2 text-sm text-slate-500">
+                          <span className="text-xs text-muted">{formatKind(r.kind)}</span>
+                          <span className="mt-1 line-clamp-2 font-display text-lg font-semibold text-ink">{r.title}</span>
+                          {r.description && <span className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2">{r.description}</span>}
+                          <span className="mt-2 text-sm text-muted">
                             {r.storagePath ? "File" : r.url ? "Link" : "Resource"}
-                            {!r.isPublished && <span className="text-amber-700"> · Draft</span>}
+                            {!r.isPublished && <span className="text-amber-700">, draft</span>}
                           </span>
-                          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+                          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-rule pt-3">
                             <button type="button" className={buttonClass("secondary", "sm")} onClick={() => void openResource(r)}>
                               Open
                             </button>

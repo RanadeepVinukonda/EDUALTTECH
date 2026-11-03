@@ -29,14 +29,14 @@ interface ListResponse {
 
 function SkeletonGrid() {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="overflow-hidden rounded-2xl border border-slate-200">
-          <div className="aspect-[16/10] w-full animate-pulse bg-slate-200" />
+        <div key={i} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div className="aspect-[16/10] w-full animate-pulse motion-reduce:animate-none bg-slate-200" />
           <div className="space-y-3 p-5">
-            <div className="h-4 w-1/3 animate-pulse rounded bg-slate-200" />
-            <div className="h-5 w-2/3 animate-pulse rounded bg-slate-200" />
-            <div className="h-4 w-full animate-pulse rounded bg-slate-200" />
+            <div className="h-4 w-1/3 animate-pulse motion-reduce:animate-none rounded bg-slate-200" />
+            <div className="h-5 w-2/3 animate-pulse motion-reduce:animate-none rounded bg-slate-200" />
+            <div className="h-4 w-full animate-pulse motion-reduce:animate-none rounded bg-slate-200" />
           </div>
         </div>
       ))}
@@ -133,7 +133,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
   return (
     <div>
       {/* Search + filters */}
-      <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
+      <div className="border-y border-slate-200 bg-paper-2 py-4 sm:px-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
           <div className="flex-1">
             <label htmlFor="course-search" className="mb-1.5 block text-xs font-semibold text-slate-600">
@@ -146,7 +146,9 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
               />
               <input
                 id="course-search"
-                type="search"
+                type="text"
+                role="searchbox"
+                inputMode="search"
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
                 placeholder="Course, topic, or skill"
@@ -157,7 +159,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
                   type="button"
                   onClick={() => setTerm("")}
                   aria-label="Clear search"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-ink-700 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
                 >
                   <Close fontSize="small" />
                 </button>
@@ -253,7 +255,7 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
           </div>
         ) : showNoResults ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-            <h2 className="font-display text-lg font-semibold text-ink-900">No courses match your search</h2>
+            <h2 className="mx-auto font-display text-lg font-semibold text-ink-900">No courses match your search</h2>
             <p className="mx-auto mt-2 max-w-md text-ink-600">
               Try different keywords or remove the filters you have applied.
             </p>
@@ -267,15 +269,18 @@ export default function CourseBrowser({ basePath = "/courses" }: { basePath?: st
           </div>
         ) : showEmpty ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-            <h2 className="font-display text-lg font-semibold text-ink-900">Courses are being published</h2>
+            <h2 className="mx-auto font-display text-lg font-semibold text-ink-900">Courses are being published</h2>
             <p className="mx-auto mt-2 max-w-md text-ink-600">
               Our catalogue is being prepared. Check back soon, or get in touch to hear about upcoming programs.
             </p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((c) => (
-              <CourseCardLive key={c.id} course={c} />
+              <CourseCardLive
+                key={c.id}
+                course={c}
+              />
             ))}
           </div>
         )}

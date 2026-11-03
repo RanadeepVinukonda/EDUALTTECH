@@ -120,8 +120,8 @@ export default function NotificationsView() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink-900">Notifications</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="font-display text-2xl font-semibold text-ink">Notifications</h1>
+          <p className="mt-1 text-sm text-muted">
             {unread > 0 ? `${unread} unread` : "You're all caught up."}
           </p>
         </div>
@@ -134,8 +134,8 @@ export default function NotificationsView() {
                 aria-pressed={filter === f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-sm font-semibold capitalize",
-                  filter === f ? "bg-brand-600 text-white" : "bg-slate-100 text-ink-700 hover:bg-slate-200",
+                  "min-h-11 rounded-full px-4 py-2 text-sm font-semibold capitalize",
+                  filter === f ? "bg-accent text-accent-ink" : "bg-paper-2 text-ink-2 hover:bg-paper-3",
                 )}
               >
                 {f}
@@ -157,7 +157,7 @@ export default function NotificationsView() {
         />
       ) : (
         <>
-          <ul className="flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+          <ul className="flex flex-col divide-y divide-rule border-y border-rule bg-paper">
             {items.map((n) => {
               const unreadItem = !n.readAt;
               const body = (
@@ -175,7 +175,7 @@ export default function NotificationsView() {
                 </div>
               );
               return (
-                <li key={n.id} className={cn("p-4 sm:p-5", unreadItem && "bg-brand-50/40")}>
+                <li key={n.id} className={cn("p-4 sm:p-5", unreadItem && "bg-paper-2/70")}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     {n.course ? (
                       <Link

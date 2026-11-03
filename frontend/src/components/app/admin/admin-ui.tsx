@@ -60,12 +60,12 @@ export function AdminHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4 pb-4">
+    <header className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-5">
       <div className="min-w-0">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink-900 sm:text-[30px]">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink-900 sm:text-[28px]">
           {title}
         </h1>
-        {description && <p className="mt-1.5 max-w-2xl text-[15px] leading-relaxed text-slate-500">{description}</p>}
+        {description && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-600">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
@@ -88,7 +88,7 @@ export function MetricCard({
   const inner = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+        <p className="text-xs font-semibold text-slate-600">{label}</p>
         {href && (
           <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-brand-600">
             <path d="M4 12 12 4M6 4h6v6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -107,7 +107,7 @@ export function MetricCard({
     </>
   );
   const cls = cn(
-    "group border-t-2 bg-white px-4 py-4",
+    "group border-t-2 bg-paper-2/70 px-4 py-3.5",
     tone === "warn"
       ? "border-amber-400"
       : tone === "danger"
@@ -135,38 +135,40 @@ export function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white">
+    <section className="min-w-0 rounded-lg border border-slate-200 bg-paper shadow-elev1">
       {(title || actions) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-paper-2/60 px-4 py-3 sm:px-5">
           <div className="min-w-0">
-            {title && <h2 className="font-display text-base font-semibold tracking-tight text-ink-900">{title}</h2>}
+            {title && <h2 className="font-display text-[15px] font-semibold tracking-tight text-ink-900">{title}</h2>}
             {description && <p className="mt-0.5 text-sm text-slate-500">{description}</p>}
           </div>
           {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
       )}
-      <div className="p-5">{children}</div>
+      <div className="min-w-0 p-4 sm:p-5">{children}</div>
     </section>
   );
 }
 
 const TONE: Record<string, string> = {
-  success: "bg-emerald-50 text-emerald-800",
-  warn: "bg-amber-50 text-amber-800",
-  danger: "bg-red-50 text-red-700",
+  success: "bg-brand-50 text-brand-800",
+  warn: "bg-amber-50 text-amber-900",
+  danger: "bg-red-50 text-red-800",
   info: "bg-brand-50 text-brand-800",
   neutral: "bg-slate-100 text-ink-700",
 };
 
 export function StatusPill({ tone = "neutral", children }: { tone?: keyof typeof TONE; children: React.ReactNode }) {
+  const text = typeof children === "string" ? children.replace(/_/g, " ").toLowerCase() : null;
+  const label = text ? `${text.charAt(0).toUpperCase()}${text.slice(1)}` : children;
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize",
+        "inline-flex items-center rounded px-2 py-1 text-[11px] font-semibold leading-none",
         TONE[tone] ?? TONE.neutral,
       )}
     >
-      {children}
+      {label}
     </span>
   );
 }
@@ -300,7 +302,7 @@ export function ConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-6 shadow-elev3"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-lg border border-slate-200 bg-paper p-6 shadow-elev3"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="confirm-title" className="font-display text-lg font-semibold text-ink-900">
@@ -338,7 +340,7 @@ export function FilterSelect({
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <label htmlFor={id} className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <label htmlFor={id} className="text-xs font-semibold text-slate-600">
         {label}
       </label>
       <div className="relative inline-flex items-center">

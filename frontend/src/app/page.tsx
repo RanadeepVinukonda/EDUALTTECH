@@ -17,50 +17,86 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-paper">
       <HomeAuthRedirect />
 
-      {/* 2. Hero Section */}
       <Hero />
 
-      {/* 3. Trust & Credibility: Impact Numbers, Partner Schools & Classrooms */}
       <TrustCredibility />
 
-      {/* 4. Explore Learning Categories */}
       <Offerings />
 
-      {/* 5. Featured Courses */}
       <CurriculumPreview />
 
-      {/* 6. How It Works */}
       <Pathway />
 
-      {/* 9. Final Call to Action */}
-      <section className="bg-ink-900 py-16 sm:py-24">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:items-end lg:gap-14 lg:px-8">
-          <div className="lg:col-span-8">
-            <h2 className="max-w-2xl font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl sm:leading-tight lg:text-5xl">
-              Learn a skill worth paying for. Or teach one.
+      <section className="border-t border-rule bg-paper-2 py-12 sm:py-16">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
+          <div className="lg:col-span-5">
+            <h2 className="max-w-md font-display text-section font-semibold tracking-tight text-ink leading-tight">
+              Beyond the course
             </h2>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300">
-              Structured courses with working mentors, free open notes, and a paid path for
-              practitioners who want to teach what they know.
-            </p>
           </div>
+          <nav aria-label="More ways to learn" className="lg:col-span-7">
+            <ul className="divide-y divide-rule border-y border-rule">
+              <li>
+                <Link
+                  href="/resources"
+                  className="flex min-h-16 items-center justify-between gap-4 py-4 font-medium text-ink transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                >
+                  Free resources
+                  <ArrowForward fontSize="small" aria-hidden />
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/polls"
+                  className="flex min-h-16 items-center justify-between gap-4 py-4 font-medium text-ink transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                >
+                  Course polls
+                  <ArrowForward fontSize="small" aria-hidden />
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/mentor"
+                  className="flex min-h-16 items-center justify-between gap-4 py-4 font-medium text-ink transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                >
+                  Mentoring
+                  <ArrowForward fontSize="small" aria-hidden />
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </section>
 
-          <div className="flex flex-wrap gap-3 lg:col-span-4 lg:justify-end">
+      <section className="bg-brand-900 py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="font-display text-section font-semibold leading-tight text-white">
+            Mentored courses. Paid teaching.
+          </h2>
+          <div className="mt-10 grid border-t border-white/25 sm:grid-cols-3">
             <Link
               href="/courses"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-ink-900 transition hover:bg-slate-100"
+              className="flex min-h-28 flex-col justify-between gap-5 border-b border-white/25 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:border-b-0 sm:border-r sm:pr-6"
             >
-              Explore courses
-              <ArrowForward fontSize="small" />
+              <span className="font-display text-lg font-semibold">Courses</span>
+              <span className="inline-flex items-center gap-2 text-sm">Explore courses <ArrowForward fontSize="small" aria-hidden /></span>
             </Link>
             <Link
               href="/mentor"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="flex min-h-28 flex-col justify-between gap-5 border-b border-white/25 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:border-b-0 sm:border-r sm:px-6"
             >
-              Become a mentor
+              <span className="font-display text-lg font-semibold">Mentoring</span>
+              <span className="inline-flex items-center gap-2 text-sm">Explore mentoring <ArrowForward fontSize="small" aria-hidden /></span>
+            </Link>
+            <Link
+              href="/resources"
+              className="flex min-h-28 flex-col justify-between gap-5 border-b border-white/25 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:border-b-0 sm:pl-6"
+            >
+              <span className="font-display text-lg font-semibold">Open resources</span>
+              <span className="inline-flex items-center gap-2 text-sm">Browse free lessons <ArrowForward fontSize="small" aria-hidden /></span>
             </Link>
           </div>
         </div>

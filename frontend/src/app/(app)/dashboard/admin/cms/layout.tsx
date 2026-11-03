@@ -28,7 +28,7 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
               href={href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "-mb-px flex shrink-0 items-center border-b-2 px-3 py-2.5 text-sm font-semibold transition",
+                "-mb-px flex min-h-11 shrink-0 items-center border-b-2 px-4 py-2 text-sm font-semibold transition",
                 active
                   ? "border-ink-900 text-ink-900"
                   : "border-transparent text-slate-500 hover:border-slate-300 hover:text-ink-900",

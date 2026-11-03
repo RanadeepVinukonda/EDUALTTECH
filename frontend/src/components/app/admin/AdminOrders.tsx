@@ -63,7 +63,7 @@ export default function AdminOrders() {
           <div className="space-y-4">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-slate-500">
+                <thead className="text-xs text-slate-500">
                   <tr>
                     <th scope="col" className="px-2 py-2 font-semibold">Order</th>
                     <th scope="col" className="px-2 py-2 font-semibold">Purchaser</th>
@@ -98,8 +98,8 @@ export default function AdminOrders() {
       <WebhookEvents />
 
       <p className="text-sm text-slate-500">
-        Refunds and cancellations are not supported by the backend — there is no admin endpoint for them, so no such
-        actions are offered here.
+        Refunds and cancellations are not supported by the backend. There is no admin endpoint for these actions, so
+        they are not available here.
       </p>
     </div>
   );
@@ -185,7 +185,7 @@ function WebhookEvents() {
       ) : events.data && events.data.events.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-wide text-slate-500">
+            <thead className="text-xs text-slate-500">
               <tr>
                 <th scope="col" className="px-2 py-2 font-semibold">Event</th>
                 <th scope="col" className="px-2 py-2 font-semibold">Provider ref</th>
@@ -246,7 +246,7 @@ function WebhookEvents() {
               <Field label="Received at" value={formatDate(selected.receivedAt)} />
             </dl>
             <p className="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-              The raw payload and signature are intentionally not rendered — they can contain payment and signing data.
+              The raw payload and signature are not rendered. They can contain payment and signing data.
               Use the backend logs if a deep inspection is required.
             </p>
             <div className="mt-5 text-right">
@@ -269,7 +269,7 @@ function WebhookEvents() {
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</dt>
+      <dt className="text-xs font-semibold text-slate-500">{label}</dt>
       <dd className={mono ? "break-all font-mono text-xs text-ink-900" : "text-ink-900"}>{value}</dd>
     </div>
   );

@@ -11,11 +11,12 @@ import { formatDate, formatCountdown } from "@/lib/format";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import CourseCard from "@/components/landing/CourseCard";
 import type { CourseListItem } from "@/lib/types";
 import { buttonClass } from "@/components/ui/Button";
 import ProgressView from "./ProgressView";
 import Spinner from "@/components/ui/Spinner";
+import CourseCardLive from "@/components/landing/CourseCardLive";
+import CommunityCoursePoll from "@/components/landing/CommunityCoursePoll";
 
 function DashboardSkeleton() {
   return (
@@ -25,14 +26,14 @@ function DashboardSkeleton() {
         <Skeleton className="h-9 w-64" />
         <Skeleton className="mt-2 h-5 w-48" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2" aria-hidden>
-        {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4">
-            <Skeleton className="h-20 w-28 shrink-0 rounded-lg" />
-            <div className="min-w-0 flex-1 space-y-2">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="overflow-hidden rounded-xl border border-rule bg-paper">
+            <Skeleton className="aspect-[16/10] w-full rounded-none" />
+            <div className="space-y-3 p-5">
               <Skeleton className="h-5 w-3/4" />
               <Skeleton className="h-3 w-1/3" />
-              <Skeleton className="mt-3 h-1.5 w-full rounded-full" />
+              <Skeleton className="h-4 w-full" />
             </div>
           </div>
         ))}
@@ -102,65 +103,36 @@ export default function DashboardView() {
   if (error) return <ErrorState message={error} onRetry={() => void load()} />;
   if (!data) return <DashboardSkeleton />;
 
-  const current = data.learning[0];
   const upcoming = data.upcomingMeetings[0];
   const explore = (discover ?? []).slice(0, 4);
   const unread = data.unreadNotifications + data.unreadMessages;
 
   return (
-    <div className="space-y-10">
-      <header className="flex flex-col gap-5 border-b border-slate-200 pb-7 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mx-auto max-w-6xl space-y-12">
+      <header className="flex flex-col gap-5 border-b border-rule pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
-            Welcome back{user?.firstName ? `, ${user.firstName}` : ""}
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            Dashboard
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-muted">
+            {user?.firstName ? `Welcome back, ${user.firstName}. ` : ""}
             {data.learning.length > 0
-              ? `${data.learning.length} active ${data.learning.length === 1 ? "course" : "courses"}${unread > 0 ? ` · ${unread} unread` : ""}`
-              : "Pick a course to get started."}
+              ? `Continue your learning or explore what’s new.${unread > 0 ? ` You have ${unread} unread updates.` : ""}`
+              : "Find a course to begin learning."}
           </p>
         </div>
-        {current ? (
-          <Link
-            href={`/dashboard/courses/${current.course.slug}`}
-            className={buttonClass("primary", "md", "max-w-full")}
-          >
-            <span className="truncate">Continue {current.course.title}</span>
-          </Link>
-        ) : (
-          <Link href="/dashboard/courses" className={buttonClass("primary", "md")}>
-            Browse courses
-          </Link>
-        )}
+        <Link href="/dashboard/courses" className={buttonClass("primary", "sm", "w-full sm:w-auto")}>
+          Explore courses
+        </Link>
       </header>
 
-      {upcoming && (
-        <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500">Next live session</p>
-            <p className="mt-1 font-display text-lg font-semibold text-ink-900">{upcoming.title}</p>
-            <p className="mt-0.5 text-sm text-slate-600">
-              {upcoming.course.title} · {formatDate(upcoming.scheduledAt)} · {upcoming.durationMin} min
-            </p>
-            {new Date(upcoming.scheduledAt).getTime() > now && (
-              <p className="mt-1 text-sm font-medium text-brand-700">
-                Starts in {formatCountdown(new Date(upcoming.scheduledAt).getTime() - now)}
-              </p>
-            )}
-          </div>
-          <a href={upcoming.meetingUrl} target="_blank" rel="noreferrer" className={buttonClass("secondary", "sm")}>
-            Join session
-          </a>
-        </section>
-      )}
-
       <section>
-        <div className="mb-4 flex items-end justify-between gap-3">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="font-display text-xl font-semibold text-ink-900">Continue learning</h2>
-            <p className="mt-0.5 text-sm text-slate-500">Your active courses and current progress.</p>
+            <h2 className="font-display text-2xl font-semibold text-ink">Continue learning</h2>
+            <p className="mt-1 text-sm text-muted">Pick up where you left off in an active course.</p>
           </div>
-          <Link href="/dashboard/my-learning" className="text-sm font-medium text-slate-600 hover:text-ink-900">
+          <Link href="/dashboard/my-learning" className="text-sm font-semibold text-accent underline-offset-4 hover:underline">
             View all
           </Link>
         </div>
@@ -175,35 +147,52 @@ export default function DashboardView() {
             }
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {data.learning.slice(0, 4).map((row) => (
-              <CourseCard
-                key={row.id}
-                course={row.course}
-                href={`/dashboard/courses/${row.course.slug}`}
-                priceLabel="Enrolled"
-                progressPct={row.progressPct}
-                mentor={row.mentor ? `${row.mentor.firstName} ${row.mentor.lastName}` : undefined}
-                viewLabel={row.progressPct > 0 ? "Continue" : "Start learning"}
-              />
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {data.learning.slice(0, 3).map((row) => (
+              <li key={row.id} className="min-w-0">
+                <CourseCardLive course={row.course} />
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </section>
 
-      {data.upcomingMeetings.length > 0 && (
+      {upcoming && (
+        <section className="grid gap-5 rounded-xl border border-rule bg-paper p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-muted">Next live session</p>
+            <h2 className="mt-1 font-display text-xl font-semibold text-ink">{upcoming.title}</h2>
+            <p className="mt-1 text-sm text-muted">
+              {upcoming.course.title}, {formatDate(upcoming.scheduledAt)}, {upcoming.durationMin} min
+            </p>
+            {new Date(upcoming.scheduledAt).getTime() > now && (
+              <p className="mt-2 text-sm font-medium text-accent">
+                Starts in {formatCountdown(new Date(upcoming.scheduledAt).getTime() - now)}
+              </p>
+            )}
+          </div>
+          <a href={upcoming.meetingUrl} target="_blank" rel="noreferrer" className={buttonClass("primary", "sm", "w-full sm:w-auto")}>
+            Join session
+          </a>
+        </section>
+      )}
+
+      {data.upcomingMeetings.length > 1 && (
         <section>
-          <h2 className="mb-4 font-display text-xl font-semibold text-ink-900">Upcoming sessions</h2>
-          <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
-            {data.upcomingMeetings.slice(0, 5).map((m) => (
-              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+          <div className="mb-4 flex items-end justify-between gap-3">
+            <h2 className="font-display text-xl font-semibold text-ink">More upcoming sessions</h2>
+            <Link href="/dashboard/my-learning" className="text-sm font-semibold text-accent underline-offset-4 hover:underline">Your courses</Link>
+          </div>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {data.upcomingMeetings.slice(1, 5).map((m) => (
+              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-rule bg-paper p-4">
                 <div>
-                  <p className="text-sm font-semibold text-ink-900">{m.title}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    {m.course.title} · {formatDate(m.scheduledAt)} · {m.durationMin} min
+                  <p className="text-sm font-semibold text-ink">{m.title}</p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {m.course.title}, {formatDate(m.scheduledAt)}, {m.durationMin} min
                   </p>
                 </div>
-                <a href={m.meetingUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-ink-700 hover:text-brand-700">
+                <a href={m.meetingUrl} target="_blank" rel="noreferrer" className="text-sm font-semibold text-accent hover:underline">
                   Join
                 </a>
               </li>
@@ -217,33 +206,40 @@ export default function DashboardView() {
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
               <h2 className="font-display text-xl font-semibold text-ink-900">Explore courses</h2>
-              <p className="mt-0.5 text-sm text-slate-500">New additions to the catalogue.</p>
+              <p className="mt-0.5 text-sm text-slate-500">Recent courses in the catalogue.</p>
             </div>
             <Link href="/dashboard/courses" className="text-sm font-medium text-slate-600 hover:text-ink-900">
               View all
             </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {explore.map((c) => (
-              <CourseCard key={c.id} course={c} />
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {explore.slice(0, 3).map((c) => (
+              <li key={c.id} className="min-w-0">
+                <CourseCardLive course={c} />
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
 
       <section aria-labelledby="progress-h">
-        <h2 id="progress-h" className="mb-4 font-display text-xl font-semibold text-ink-900">
-          Your progress
-        </h2>
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <h2 id="progress-h" className="font-display text-xl font-semibold text-ink">Your progress</h2>
+          <Link href="/dashboard/progress" className="text-sm font-semibold text-accent underline-offset-4 hover:underline">
+            Details
+          </Link>
+        </div>
         <ProgressView compact />
       </section>
+
+      <CommunityCoursePoll />
 
       {data.applications.length > 0 && (
         <section>
           <h2 className="mb-4 font-display text-xl font-semibold text-ink-900">Mentor applications</h2>
-          <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+          <ul className="divide-y divide-rule border-y border-rule">
             {data.applications.map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-3 px-5 py-4">
+              <li key={a.id} className="flex items-center justify-between gap-3 py-4">
                 <div>
                   <p className="text-sm font-semibold text-ink-900">{a.course.title}</p>
                   <p className="mt-0.5 text-xs text-slate-500">Applied {formatDate(a.createdAt)}</p>

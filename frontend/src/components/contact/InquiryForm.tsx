@@ -9,14 +9,13 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { api, ApiError } from "@/lib/api";
 
-type Fields = { name: string; email: string; phone: string; intent: string; subject: string; body: string };
+type Fields = { name: string; email: string; phone: string; intent: string; subject: string };
 const EMPTY: Fields = {
   name: "",
   email: "",
   phone: "",
   intent: "Course or learning enquiry",
   subject: "",
-  body: "",
 };
 
 const INTENTS = [
@@ -37,8 +36,6 @@ function validate(f: Fields): Partial<Record<keyof Fields, string>> {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.trim())) e.email = "Please enter a valid email address.";
   if (f.phone.trim().length > 20) e.phone = "Phone number is too long.";
   if (f.subject.trim().length > 200) e.subject = "Subject is too long.";
-  if (f.body.trim().length < 5) e.body = "Please describe your inquiry (at least 5 characters).";
-  else if (f.body.trim().length > 5000) e.body = "Please keep your message under 5,000 characters.";
   return e;
 }
 
@@ -75,7 +72,7 @@ export default function InquiryForm() {
           email: fields.email.trim().toLowerCase(),
           phone: fields.phone.trim() || null,
           subject: `[${fields.intent}]${fields.subject.trim() ? ` ${fields.subject.trim()}` : ""}`.slice(0, 200),
-          body: fields.body.trim(),
+          body: `Enquiry type: ${fields.intent}. Subject: ${fields.subject.trim() || "Not provided"}.`,
         },
       });
       setFields(EMPTY);
@@ -97,7 +94,7 @@ export default function InquiryForm() {
       <div role="status" className="rounded-2xl border border-brand-200 bg-brand-50 p-8 text-center">
         <h3 className="font-display text-xl font-semibold text-ink-900">Message sent</h3>
         <p className="mx-auto mt-2 max-w-md text-ink-600">
-          Thank you — we have received your inquiry and will get back to you by email.
+          Thank you. We have received your inquiry and will get back to you by email.
         </p>
         <button
           type="button"
@@ -217,27 +214,6 @@ export default function InquiryForm() {
             </p>
           )}
         </div>
-      </div>
-
-      <div>
-        <label htmlFor="inq-body" className="mb-1.5 block text-sm font-semibold text-ink-700">
-          How can we help?
-        </label>
-        <textarea
-          id="inq-body"
-          name="body"
-          rows={5}
-          value={fields.body}
-          onChange={set("body")}
-          aria-invalid={Boolean(errors.body)}
-          aria-describedby={errors.body ? "inq-body-err" : undefined}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 aria-[invalid=true]:border-danger aria-[invalid=true]:focus:border-danger aria-[invalid=true]:focus:ring-danger/20"
-        />
-        {errors.body && (
-          <p id="inq-body-err" role="alert" className="mt-1 text-sm text-red-600">
-            {errors.body}
-          </p>
-        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-4">

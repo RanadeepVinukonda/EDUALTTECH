@@ -18,6 +18,7 @@ interface Props {
   triggerClassName?: string;
   compact?: boolean;
   showChevron?: boolean;
+  active?: boolean;
   align?: "left" | "right" | "center";
   placement?: "down" | "up";
 }
@@ -58,6 +59,7 @@ export default function ResourcesCategoryMenu({
   triggerClassName,
   compact = false,
   showChevron = true,
+  active = false,
   align = "left",
   placement = "down",
 }: Props) {
@@ -93,6 +95,7 @@ export default function ResourcesCategoryMenu({
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-haspopup="true"
+        aria-current={active ? "page" : undefined}
         aria-label={compact ? "Resources" : undefined}
         className={triggerClassName}
       >
@@ -115,7 +118,7 @@ export default function ResourcesCategoryMenu({
       {open && (
         <div
           className={cn(
-            "absolute z-50 max-h-[70vh] w-[250px] overflow-y-auto border-t-4 border-[#308d46] bg-[#f9f9f9] text-[#273239] shadow-[0_0_15px_0_rgba(0,0,0,0.18)]",
+            "absolute z-50 max-h-[70vh] w-[250px] overflow-y-auto border-t-4 border-brand-600 bg-paper text-ink shadow-elev3",
             placement === "up" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]",
             align === "right" ? "right-0" : align === "center" ? "left-1/2 -translate-x-1/2" : "left-0",
           )}
@@ -127,7 +130,7 @@ export default function ResourcesCategoryMenu({
                   <Link
                     href={`/resources#${topic.slug}`}
                     onClick={() => setOpen(false)}
-                    className="block w-full text-sm font-medium text-inherit transition-colors hover:bg-[#ececec]"
+                    className="block w-full text-sm font-medium text-inherit transition-colors hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                   >
                     <div className="mx-5 my-2.5 flex max-w-[170px] items-center justify-between">
                       <span>{topic.name}</span>
@@ -137,12 +140,12 @@ export default function ResourcesCategoryMenu({
               ))}
             </ul>
           ) : (
-            <p className="px-5 py-3 text-sm text-slate-500">No tutorials yet.</p>
+            <p className="px-5 py-3 text-sm text-muted">No tutorials yet.</p>
           )}
           <Link
             href="/resources"
             onClick={() => setOpen(false)}
-            className="block w-full border-t border-[#9e9e9e4d] text-sm font-medium text-inherit transition-colors hover:bg-[#ececec]"
+            className="block w-full border-t border-rule text-sm font-medium text-inherit transition-colors hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             <div className="mx-5 my-2.5 flex max-w-[170px] items-center justify-between">
               <span>All Tutorials</span>

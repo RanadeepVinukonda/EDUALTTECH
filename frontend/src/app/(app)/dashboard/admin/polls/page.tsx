@@ -24,6 +24,11 @@ interface NewOptionDraft {
   learningOutcomes: string;
 }
 
+function statusLabel(status: string) {
+  const label = status.replace(/_/g, " ").toLowerCase();
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 export default function AdminPollsPage() {
   const [loading, setLoading] = useState(true);
   const [polls, setPolls] = useState<CoursePollItem[]>([]);
@@ -255,61 +260,61 @@ export default function AdminPollsPage() {
     : [];
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink-900">
-            Course Demand & Prioritization Polling
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink-900 sm:text-[28px]">
+            Course demand and prioritization polls
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Analyze learner demand, evaluate votes, select winning proposals, and convert them directly into structured Course drafts.
+          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-600">
+            Analyze learner demand, evaluate votes, select winning proposals, and convert them directly into structured course drafts.
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => setCreateModalOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-brand-700 transition"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800"
         >
           <Add fontSize="small" />
-          <span>Create New Course Poll</span>
+          <span>Create new course poll</span>
         </button>
       </div>
 
       {successMessage && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm font-semibold text-brand-900">
           <div className="flex items-center gap-2">
             <CheckCircle fontSize="small" />
             <span>{successMessage}</span>
           </div>
-          <Link href="/dashboard/admin/courses" className="underline hover:text-emerald-950">
-            Go to Course Builder →
+          <Link href="/dashboard/admin/courses" className="underline hover:text-brand-950">
+            Go to course builder
           </Link>
         </div>
       )}
 
       {polls.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
+        <div className="rounded-lg border border-dashed border-slate-300 bg-paper-2 p-8 text-center sm:p-12">
           <HowToVote className="mx-auto text-slate-400" sx={{ fontSize: 48 }} />
-          <h3 className="mt-4 font-display text-lg font-semibold text-ink-900">No Course Polls Created Yet</h3>
+          <h3 className="mt-4 font-display text-lg font-semibold text-ink-900">No course polls created yet</h3>
           <p className="mt-2 text-sm text-slate-600">
             Launch a curriculum poll to let learners vote on which programs you develop next.
           </p>
           <button
             type="button"
             onClick={() => setCreateModalOpen(true)}
-            className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-700"
+            className="mt-5 min-h-11 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800"
           >
-            Create Inaugural Poll
+            Create first poll
           </button>
         </div>
       ) : (
-        <div className="grid gap-8 lg:grid-cols-12">
+        <div className="grid min-w-0 gap-6 lg:grid-cols-12">
           {/* Left Column: Poll Selector & Quick Controls */}
           <div className="lg:col-span-4 space-y-4">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Poll Cycles ({polls.length})
+            <h2 className="text-sm font-semibold text-ink-800">
+              Polls ({polls.length})
             </h2>
             <div className="space-y-2">
               {polls.map((p) => {
@@ -322,7 +327,7 @@ export default function AdminPollsPage() {
                     type="button"
                     onClick={() => setSelectedPoll(p)}
                     className={cn(
-                      "w-full rounded-xl border p-4 text-left transition-all",
+                      "w-full rounded-lg border p-4 text-left transition-colors",
                       isSelected
                         ? "border-brand-600 bg-brand-50/40 shadow-xs"
                         : "border-slate-200 bg-white hover:border-slate-300"
@@ -331,17 +336,17 @@ export default function AdminPollsPage() {
                     <div className="flex items-center justify-between gap-2">
                       <span
                         className={cn(
-                          "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+                          "rounded-full px-2 py-0.5 text-[10px] font-semibold",
                           p.status === "OPEN"
-                            ? "bg-emerald-100 text-emerald-800"
+                            ? "bg-brand-50 text-brand-800"
                             : p.status === "CLOSED"
-                            ? "bg-slate-200 text-slate-700"
-                            : "bg-amber-100 text-amber-800"
+                            ? "bg-slate-100 text-ink-700"
+                            : "bg-paper-2 text-ink-700"
                         )}
                       >
-                        {p.status}
+                        {statusLabel(p.status)}
                       </span>
-                      <span className="text-xs font-mono text-slate-500">
+                      <span className="text-xs text-slate-500">
                         {pVotes} votes
                       </span>
                     </div>
@@ -361,19 +366,19 @@ export default function AdminPollsPage() {
           {activePoll && (
             <div className="lg:col-span-8 space-y-6">
               {/* Poll Summary Bar */}
-              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="min-w-0 rounded-lg border border-slate-200 bg-paper p-4 sm:p-5">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
-                          "rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider",
+                          "rounded-full px-2.5 py-0.5 text-xs font-semibold",
                           activePoll.status === "OPEN"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-slate-200 text-slate-700"
+                            ? "bg-brand-50 text-brand-800"
+                            : "bg-slate-100 text-ink-700"
                         )}
                       >
-                        {activePoll.status}
+                        {statusLabel(activePoll.status)}
                       </span>
                       <span className="text-xs text-slate-400">
                         Created {new Date(activePoll.createdAt).toLocaleDateString()}
@@ -392,35 +397,35 @@ export default function AdminPollsPage() {
                         type="button"
                         onClick={() => handlePublishPoll(activePoll.id)}
                         disabled={actionLoading === `publish-${activePoll.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#308d46] px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 transition"
+                        className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-800"
                       >
                         <Campaign fontSize="small" />
-                        <span>{actionLoading === `publish-${activePoll.id}` ? "Posting..." : "Post Poll to Users"}</span>
+                        <span>{actionLoading === `publish-${activePoll.id}` ? "Posting..." : "Post poll to users"}</span>
                       </button>
                     ) : (
                       <>
-                        <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-800">
                           <CheckCircle fontSize="inherit" />
-                          <span>Live to Users</span>
+                          <span>Live to users</span>
                         </span>
                         <button
                           type="button"
                           onClick={() => handlePublishPoll(activePoll.id)}
                           disabled={actionLoading === `publish-${activePoll.id}`}
                           title="Broadcast a notification to learners about this active poll"
-                          className="inline-flex items-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 transition"
+                          className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-800 transition-colors hover:bg-brand-100"
                         >
                           <Campaign fontSize="small" />
-                          <span>Announce / Re-post</span>
+                          <span>Announce or repost</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleStatusChange(activePoll.id, "CLOSED")}
                           disabled={actionLoading === `status-${activePoll.id}`}
-                          className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                          className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-slate-300 bg-paper px-3 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:bg-paper-2"
                         >
                           <Stop fontSize="small" />
-                          <span>Close Voting</span>
+                          <span>Close voting</span>
                         </button>
                       </>
                     )}
@@ -430,21 +435,21 @@ export default function AdminPollsPage() {
                 {/* Metrics */}
                 <div className="mt-6 grid grid-cols-3 gap-4 border-t border-slate-100 pt-4 text-center">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Votes Cast</p>
+                    <p className="text-xs font-semibold text-slate-600">Total votes cast</p>
                     <p className="mt-1 font-display text-2xl font-semibold text-brand-700">
                       {totalVotes.toLocaleString()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Proposed Courses</p>
+                    <p className="text-xs font-semibold text-slate-600">Proposed courses</p>
                     <p className="mt-1 font-display text-2xl font-semibold text-ink-900">
                       {activePoll.options.length}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Top Candidate</p>
+                    <p className="text-xs font-semibold text-slate-600">Top candidate</p>
                     <p className="mt-1 font-display text-sm font-semibold text-ink-900 truncate">
-                      {rankedOptions[0]?.title || "—"}
+                      {rankedOptions[0]?.title || "No proposals yet"}
                     </p>
                   </div>
                 </div>
@@ -454,7 +459,7 @@ export default function AdminPollsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-display text-base font-semibold text-ink-900">
-                    Proposed Courses & Demand Ranking
+                    Proposed courses and demand ranking
                   </h3>
                   <span className="text-xs text-slate-500">
                     Highest voted proposal displayed first
@@ -470,9 +475,9 @@ export default function AdminPollsPage() {
                       <div
                         key={opt.id}
                         className={cn(
-                          "relative overflow-hidden rounded-xl border bg-white p-5 shadow-xs transition",
+                          "relative overflow-hidden rounded-lg border bg-paper p-5 shadow-xs transition-colors",
                           opt.isWinningOption
-                            ? "border-amber-400 bg-amber-50/20"
+                            ? "border-brand-300 bg-brand-50/30"
                             : isLeader
                             ? "border-brand-500"
                             : "border-slate-200"
@@ -480,8 +485,8 @@ export default function AdminPollsPage() {
                       >
                         {/* Progress fill */}
                         <div
-                          className="absolute inset-y-0 left-0 bg-slate-100/70 -z-10 transition-all duration-500"
-                          style={{ width: `${Math.max(percentage, 2)}%` }}
+                          className="absolute inset-y-0 left-0 -z-10 w-full origin-left scale-x-0 bg-paper-2 transition-transform duration-500 motion-reduce:transition-none"
+                          style={{ transform: `scaleX(${Math.max(percentage, 2) / 100})` }}
                         />
 
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -490,18 +495,18 @@ export default function AdminPollsPage() {
                               <span className="font-mono text-xs font-semibold text-slate-400">
                                 #{rankIdx + 1}
                               </span>
-                              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                              <span className="rounded bg-paper-2 px-2 py-0.5 text-[11px] font-semibold text-ink-700">
                                 {opt.category}
                               </span>
                               {opt.isWinningOption && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-800">
                                   <EmojiEvents fontSize="inherit" />
-                                  Selected Winner
+                                  Selected winner
                                 </span>
                               )}
                               {isLeader && !opt.isWinningOption && (
-                                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[11px] font-semibold text-brand-800">
-                                  Leading Candidate
+                                <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-800">
+                                  Leading candidate
                                 </span>
                               )}
                             </div>
@@ -518,7 +523,7 @@ export default function AdminPollsPage() {
                                 {opt.learningOutcomes.map((loc) => (
                                   <span
                                     key={loc}
-                                    className="rounded bg-white border border-slate-200 px-2 py-0.5 text-[10px] text-slate-600"
+                                    className="rounded border border-slate-200 bg-paper px-2 py-0.5 text-[10px] text-ink-700"
                                   >
                                     ✓ {loc}
                                   </span>
@@ -533,7 +538,7 @@ export default function AdminPollsPage() {
                                 {opt.votes.toLocaleString()}
                               </span>
                               <span className="text-xs text-slate-500 ml-1">votes</span>
-                              <div className="font-mono text-xs font-semibold text-brand-700">
+                              <div className="text-xs font-semibold text-brand-700 tabular-nums">
                                 {percentage}% of total
                               </div>
                             </div>
@@ -546,29 +551,29 @@ export default function AdminPollsPage() {
                                   onClick={() => handleMarkWinner(opt.id)}
                                   disabled={actionLoading === `winner-${opt.id}`}
                                   className="rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                                  title="Mark as Winner"
+                                  title="Mark as winner"
                                 >
-                                  Mark Winner
+                                  Mark winner
                                 </button>
                               )}
 
                               {opt.convertedCourseId ? (
                                 <Link
                                   href={`/dashboard/admin/courses`}
-                                  className="inline-flex items-center gap-1 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 transition"
+                                  className="inline-flex items-center gap-1 rounded-lg border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800 transition-colors hover:bg-brand-100"
                                 >
                                   <CheckCircle fontSize="inherit" />
-                                  <span>Draft Created</span>
+                                  <span>Draft created</span>
                                 </Link>
                               ) : (
                                 <button
                                   type="button"
                                   onClick={() => handleConvertToCourse(opt.id, opt.title)}
                                   disabled={actionLoading === `convert-${opt.id}`}
-                                  className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700 transition"
+                                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-brand-700 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-brand-800"
                                 >
                                   <School fontSize="inherit" />
-                                  <span>Convert to Course</span>
+                                  <span>Convert to course</span>
                                 </button>
                               )}
                             </div>
@@ -587,10 +592,10 @@ export default function AdminPollsPage() {
       {/* Modal: Create Course Poll */}
       {createModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="relative my-8 w-full max-w-3xl rounded-xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+          <div className="relative my-8 w-full max-w-3xl rounded-xl bg-white border border-slate-200 overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50">
               <h2 className="font-display text-base font-semibold text-ink-900">
-                Launch New Course Prioritization Poll
+                Launch a course prioritization poll
               </h2>
               <button
                 type="button"
@@ -603,13 +608,13 @@ export default function AdminPollsPage() {
 
             <form onSubmit={handleCreatePoll} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Poll Title *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Poll title *</label>
                 <input
                   type="text"
                   required
                   value={pollTitle}
                   onChange={(e) => setPollTitle(e.target.value)}
-                  placeholder="e.g. Q1 Curriculum Prioritization Vote"
+                  placeholder="e.g. Q1 curriculum prioritization vote"
                   className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:border-brand-600 focus:outline-none"
                 />
               </div>
@@ -627,7 +632,7 @@ export default function AdminPollsPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Start Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Start date</label>
                   <input
                     type="date"
                     value={pollStartDate}
@@ -636,7 +641,7 @@ export default function AdminPollsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">End / Closing Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">End date</label>
                   <input
                     type="date"
                     value={pollEndDate}
@@ -666,17 +671,17 @@ export default function AdminPollsPage() {
                   <span>Show live results to participants</span>
                 </label>
 
-                <label className="flex items-start gap-2.5 text-xs font-semibold text-emerald-800 cursor-pointer bg-emerald-50/80 border border-emerald-200 p-3 rounded-xl sm:col-span-2">
+                <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-brand-200 bg-brand-50 p-3 text-xs font-semibold text-brand-900 sm:col-span-2">
                   <input
                     type="checkbox"
                     checked={publishImmediately}
                     onChange={(e) => setPublishImmediately(e.target.checked)}
-                    className="rounded text-[#308d46] focus:ring-emerald-500 h-4 w-4 mt-0.5"
+                    className="mt-0.5 h-4 w-4 rounded text-brand-700 focus:ring-brand-600"
                   />
                   <div>
                     <span>Post live to users immediately upon creation</span>
                     <p className="text-[11px] font-normal text-slate-600">
-                      If checked, status is set to OPEN and the poll appears on the learner voting page right away. Uncheck to save as Draft.
+                      When selected, the poll opens on the learner voting page after creation. Otherwise, it is saved as a draft.
                     </p>
                   </div>
                 </label>
@@ -685,29 +690,29 @@ export default function AdminPollsPage() {
               {/* Proposed Courses Drafts */}
               <div className="space-y-4 border-t border-slate-200 pt-4">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    Proposed Courses for Voting ({optionsDraft.length})
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Proposed courses ({optionsDraft.length})
                   </label>
                   <button
                     type="button"
                     onClick={addOptionDraft}
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-brand-700 hover:bg-slate-100 transition"
+                    className="min-h-11 rounded-lg border border-slate-200 bg-paper-2 px-3 py-1 text-xs font-semibold text-brand-800 transition-colors hover:bg-slate-100"
                   >
-                    + Add Proposed Course
+                    + Add proposed course
                   </button>
                 </div>
 
                 {optionsDraft.map((opt, idx) => (
                   <div key={idx} className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-semibold text-slate-500">
+                      <span className="text-xs font-semibold text-slate-500">
                         Proposal #{idx + 1}
                       </span>
                       {optionsDraft.length > 2 && (
                         <button
                           type="button"
                           onClick={() => removeOptionDraft(idx)}
-                          className="text-xs text-rose-600 hover:underline"
+                          className="text-xs text-danger hover:underline"
                         >
                           Remove
                         </button>
@@ -721,7 +726,7 @@ export default function AdminPollsPage() {
                           required
                           value={opt.title}
                           onChange={(e) => updateOptionDraft(idx, "title", e.target.value)}
-                          placeholder="Course Title (e.g. Distributed Systems in Go)"
+                          placeholder="Course title (e.g. Distributed Systems in Go)"
                           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800"
                         />
                       </div>
@@ -793,7 +798,7 @@ export default function AdminPollsPage() {
                   disabled={creating}
                   className="rounded-xl bg-brand-600 px-5 py-2 text-xs font-semibold text-white hover:bg-brand-700"
                 >
-                  {creating ? "Saving..." : publishImmediately ? "Post Poll to Users" : "Save as Draft"}
+                  {creating ? "Saving..." : publishImmediately ? "Post poll to users" : "Save as draft"}
                 </button>
               </div>
             </form>

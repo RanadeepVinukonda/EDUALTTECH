@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 
 export default function TeamPage() {
   return (
-    <div className="bg-white">
-      <section className="border-b border-slate-200 bg-slate-50">
-        <div className={`${wrap} py-10 sm:py-14`}>
+    <div className="bg-paper">
+      <section className="border-b border-slate-200 bg-paper-2">
+        <div className={`${wrap} py-12 sm:py-16`}>
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1.5 text-sm text-ink-600">
               <li>
@@ -37,19 +37,18 @@ export default function TeamPage() {
           </nav>
           <SectionHeading
             as="h1"
-            eyebrow="Our team"
             title="The people behind EduAltTech"
             lead="The educators, builders, and mentors who make our courses work."
           />
         </div>
       </section>
 
-      <section className="py-16 sm:py-20">
+      <section className="py-12 sm:py-16">
         <div className={wrap}>
           <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {TEAM.map((m) => (
               <li key={m.name} className="flex gap-4">
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-slate-100">
                   <CoverImage src={m.image} alt={`Portrait of ${m.name}`} fallback={initialsFromName(m.name)} />
                 </div>
                 <div className="min-w-0">
@@ -62,13 +61,13 @@ export default function TeamPage() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-16 sm:py-20">
-        <div className={`${wrap} text-center`}>
-          <h2 className="mx-auto max-w-2xl font-display text-3xl font-semibold text-ink-900">Want to work with us?</h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-ink-600">
+      <section className="border-t border-slate-200 bg-paper-2 py-12 sm:py-16">
+        <div className={wrap}>
+          <h2 className="max-w-2xl font-display text-3xl font-semibold text-ink-900">Want to work with us?</h2>
+          <p className="mt-4 max-w-xl text-lg text-ink-600">
             Explore our courses or get in touch.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-6 flex flex-wrap gap-3">
             <LinkButton href="/courses" size="lg">
               Explore courses
             </LinkButton>

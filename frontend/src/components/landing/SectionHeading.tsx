@@ -6,7 +6,6 @@ export default function SectionHeading({
   as: As = "h2",
   className,
 }: {
-  eyebrow?: string;
   title: string;
   lead?: string;
   as?: "h1" | "h2" | "h3";
@@ -14,7 +13,7 @@ export default function SectionHeading({
 }) {
   return (
     <div className={cn("max-w-2xl", className)}>
-      <As className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900 leading-tight">
+      <As className="font-display text-section font-semibold tracking-tight text-ink-900 leading-tight">
         {title}
       </As>
       {lead && <p className="mt-3 text-base sm:text-lg leading-relaxed text-slate-600">{lead}</p>}

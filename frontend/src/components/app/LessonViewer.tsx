@@ -22,7 +22,7 @@ interface Entry {
 
 function LessonSkeleton() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6" role="status" aria-live="polite">
+    <div className="mx-auto max-w-4xl space-y-6" role="status" aria-live="polite">
       <span className="sr-only">Loading lesson…</span>
       <div aria-hidden>
         <Skeleton className="h-4 w-32" />
@@ -30,7 +30,7 @@ function LessonSkeleton() {
         <Skeleton className="mt-3 h-8 w-3/4" />
         <Skeleton className="mt-2 h-4 w-1/4" />
       </div>
-      <div className="rounded-xl border border-slate-200 bg-white p-6" aria-hidden>
+      <div className="rounded-xl border border-rule bg-paper p-6" aria-hidden>
         <Skeleton className="h-4 w-full" />
         <Skeleton className="mt-3 h-4 w-11/12" />
         <Skeleton className="mt-3 h-4 w-10/12" />
@@ -120,15 +120,14 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
 
   if (!lesson.isPublished && !detail.access.isStaff) {
     return (
-      <div className="mx-auto max-w-3xl space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <Link href={`/dashboard/courses/${slug}/roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
-          ← Back to roadmap
+          Back to roadmap
         </Link>
-        <div className="grid place-items-center rounded-xl border border-slate-200 bg-white p-10 text-center">
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Locked</p>
+        <div className="grid place-items-center border-y border-rule bg-paper-2 px-5 py-12 text-center sm:px-10">
           <h1 className="mt-3 font-display text-xl font-semibold text-ink-900">This lesson is locked</h1>
           <p className="mt-1 max-w-md text-sm text-slate-500">
-            Your mentor unlocks each lesson once its video or live class is ready. Check back soon.
+            Your mentor will make each lesson available when its video or live class is ready. Check back soon.
           </p>
           <Link href={`/dashboard/courses/${slug}/roadmap`} className={buttonClass("secondary", "sm", "mt-4")}>
             Back to roadmap
@@ -153,26 +152,36 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <Link href={`/dashboard/courses/${slug}/roadmap`} className="text-sm font-semibold text-brand-700 hover:underline">
-          ← Back to roadmap
+    <div className="mx-auto max-w-4xl space-y-6 pb-3">
+      <header className="border-b border-rule pb-5">
+        <Link href={`/dashboard/courses/${slug}/roadmap`} className="inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline">
+          Course roadmap
         </Link>
-        <h1 className="mt-3 font-display text-2xl font-semibold text-ink-900">{lesson.title}</h1>
-        <p className="mt-1 text-xs font-medium text-slate-500">
-          {chapter.title} › {topic.title}
+        <p className="mt-3 flex flex-wrap items-center text-sm text-muted">
+          <span>{chapter.title}</span>
+          <span className="mx-2" aria-hidden>/</span>
+          <span>{topic.title}</span>
         </p>
-        <p className="mt-1 text-sm text-slate-500">
-          {lesson.type === "VIDEO" ? "Video lesson" : "Reading"}
-          {done && <span className="ml-2 font-semibold text-emerald-700">· Completed</span>}
-        </p>
-      </div>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">{lesson.title}</h1>
+          <p className="flex shrink-0 items-center gap-2 text-sm text-muted">
+            {lesson.type === "VIDEO" ? "Video lesson" : "Reading"}
+            {done && <span className="font-semibold text-accent">Completed</span>}
+          </p>
+        </div>
+      </header>
 
-      <article className="rounded-xl border border-slate-200 bg-white p-6">
+      <article className="border-y border-rule bg-paper px-4 py-6 sm:px-8 sm:py-9">
         {lesson.type === "VIDEO" ? (
           lesson.hasVideo ? (
             videoUrl ? (
-              <video controls className="w-full rounded-xl bg-black" src={videoUrl} />
+              <video
+                controls
+                preload="metadata"
+                poster={detail.course.thumbnailUrl ?? "/media/photos/EAT3.jpg"}
+                className="w-full rounded-xl bg-black"
+                src={videoUrl}
+              />
             ) : (
               <p className="text-sm text-slate-500">Loading video…</p>
             )
@@ -195,24 +204,22 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
         )}
 
         {lesson.resourceArticle && (
-          <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-8 flex flex-col gap-3 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Supplementary guide
-              </span>
-              <h3 className="font-display text-sm sm:text-base font-semibold text-ink-900 mt-1">
+              <h3 className="font-display text-sm font-semibold text-ink-900 sm:text-base">
                 {lesson.resourceArticle.title}
               </h3>
-              <p className="text-xs text-slate-600 mt-0.5">
-                {lesson.resourceArticle.difficulty} · ~{lesson.resourceArticle.estimatedMinutes} min read
+              <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-slate-600">
+                <span>{lesson.resourceArticle.difficulty}</span>
+                <span>About {lesson.resourceArticle.estimatedMinutes} minutes to read</span>
               </p>
             </div>
             <Link
               href={`/resources/${lesson.resourceArticle.slug}`}
               target="_blank"
-              className="inline-flex shrink-0 items-center rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-ink-900 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-rule px-4 py-2 text-xs font-semibold text-ink transition hover:bg-paper-2"
             >
-              Read guide →
+              Read guide
             </Link>
           </div>
         )}
@@ -230,17 +237,17 @@ export default function LessonViewer({ slug, lessonId }: { slug: string; lessonI
         </div>
       )}
 
-      <nav aria-label="Lesson navigation" className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+      <nav aria-label="Lesson navigation" className="sticky bottom-16 z-20 -mx-4 flex items-center justify-between gap-3 border-t border-rule bg-paper/95 px-4 py-3 backdrop-blur sm:bottom-0 sm:-mx-6 sm:px-6">
         {prev ? (
-          <Link href={`/dashboard/courses/${slug}/lessons/${prev.id}`} className={buttonClass("secondary", "sm")}>
-            ← Previous
+          <Link href={`/dashboard/courses/${slug}/lessons/${prev.id}`} className={buttonClass("secondary", "sm", "min-h-11")}>
+            Previous lesson
           </Link>
         ) : (
           <span />
         )}
         {next ? (
-          <Link href={`/dashboard/courses/${slug}/lessons/${next.id}`} className={buttonClass("secondary", "sm")}>
-            Next →
+          <Link href={`/dashboard/courses/${slug}/lessons/${next.id}`} className={buttonClass("primary", "sm", "min-h-11")}>
+            Next lesson
           </Link>
         ) : (
           <span />

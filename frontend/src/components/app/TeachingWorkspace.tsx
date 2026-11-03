@@ -48,34 +48,47 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
   const isOwner = detail.access.isCreator || detail.access.isAdmin;
 
   return (
-    <div className="flex flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+    <div className="mx-auto flex max-w-[1440px] flex-col gap-6">
+      <nav aria-label="Breadcrumb" className="text-xs font-medium text-slate-500">
         <Link href="/dashboard/mentor" className="hover:text-ink-700">
           Mentor
         </Link>
         <span aria-hidden> / </span>
-        <span className="text-ink-700">{course.title}</span>
+        <span aria-current="page" className="text-ink-800">{course.title}</span>
       </nav>
 
-      <header>
-        <h1 className="font-display text-2xl font-semibold text-ink-900">{course.title}</h1>
-        <p className="mt-1 text-xs font-medium text-slate-500">{course.category}</p>
+      <header className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink-900">{course.title}</h1>
+          <p className="mt-1 text-sm text-slate-600">{course.category}</p>
+        </div>
+        <span className="inline-flex w-fit items-center rounded bg-paper-2 px-2.5 py-1 text-xs font-semibold capitalize text-ink-700">
+          {course.status.toLowerCase()}
+        </span>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-w-0 flex-col gap-6">
-          <details className="group rounded-xl border border-slate-200 bg-white">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
+          <details className="group rounded-lg border border-slate-200 bg-paper">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 sm:px-5">
               <span className="font-display text-lg font-semibold text-ink-900">Student analytics</span>
               <span aria-hidden className="text-slate-400 transition group-open:rotate-180">▾</span>
             </summary>
-            <div className="border-t border-slate-100 p-5">
+            <div className="border-t border-slate-200 p-4 sm:p-5">
               <CourseAnalyticsView slug={course.slug} />
             </div>
           </details>
 
           {roadmap ? (
-            <LessonWorkbench courseId={course.id} roadmap={roadmap} isOwner={isOwner} onChanged={() => void reload()} />
+            <section aria-label="Teaching tasks" className="min-w-0 rounded-lg border border-slate-200 bg-paper">
+              <div className="border-b border-slate-200 px-4 py-3 sm:px-5">
+                <h2 className="mt-0.5 font-display text-lg font-semibold text-ink-900">Lessons and roadmap</h2>
+                <p className="mt-1 text-sm text-slate-600">Review the curriculum and make updates from the lesson controls.</p>
+              </div>
+              <div className="min-w-0 p-3 sm:p-5">
+                <LessonWorkbench courseId={course.id} roadmap={roadmap} isOwner={isOwner} onChanged={() => void reload()} />
+              </div>
+            </section>
           ) : (
             <EmptyState title="No roadmap" description="This course has no curriculum yet." />
           )}
@@ -83,10 +96,12 @@ export default function TeachingWorkspace({ slug }: { slug: string }) {
 
         <aside
           aria-label="Messages"
-          className={cn("flex flex-col gap-3 lg:sticky lg:top-6 lg:self-start")}
+          className={cn("flex min-w-0 flex-col gap-3 lg:sticky lg:top-6 lg:self-start")}
         >
-          <h2 className="font-display text-lg font-semibold text-ink-900">Messages</h2>
-          <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <div>
+            <h2 className="mt-0.5 font-display text-lg font-semibold text-ink-900">Messages</h2>
+          </div>
+          <div className="min-w-0 rounded-lg border border-slate-200 bg-paper p-3">
             <ChatView courseId={course.id} title={course.title} compact roster={roster ?? undefined} />
           </div>
         </aside>

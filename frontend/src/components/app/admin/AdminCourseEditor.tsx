@@ -325,7 +325,7 @@ function CourseForm({
               <div>
                 <label htmlFor="c-title" className="mb-1 block text-sm font-semibold text-ink-700">Title</label>
                 <Input id="c-title" value={title} icon={<Title fontSize="small" />} onChange={(e) => setTitle(e.target.value)} maxLength={160} required error={title.length > 0 && title.trim().length < 3} />
-                <p className="mt-1 text-xs text-slate-500">3–160 characters. Changing the title updates the URL slug.</p>
+                <p className="mt-1 text-xs text-slate-500">3 to 160 characters. Changing the title updates the URL slug.</p>
               </div>
               <div>
                 <label htmlFor="c-desc" className="mb-1 block text-sm font-semibold text-ink-700">Description</label>
@@ -338,7 +338,7 @@ function CourseForm({
                   required
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
                 />
-                <p className="mt-1 text-xs text-slate-500">10–8000 characters.</p>
+                <p className="mt-1 text-xs text-slate-500">10 to 8,000 characters.</p>
               </div>
               <div>
                 <label htmlFor="c-roadmap-title" className="mb-1 block text-sm font-semibold text-ink-700">Course intro heading</label>

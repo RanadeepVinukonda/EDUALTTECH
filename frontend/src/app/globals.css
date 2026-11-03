@@ -1,92 +1,9 @@
+/* Hallmark · shape: course-led narrative workflow · genre: modern-minimal · theme: Coral (dealt 1/3, brand-adapted) · redesign: full */
+/* paper: oklch(98% 0.006 145) · accent: oklch(41% 0.13 150) · display: Sora · body: Inter · hero: Settled · nav: quiet masthead · footer: useful index · signature: course discovery in a real learning journey · axes: warm green paper/geometric sans/brand green · posture: restrained · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, course discovery was buried beneath repeated promotional sections; put the real learning offer first */
 @import "tailwindcss";
-
-@theme {
-  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
-
-  --leading-tight: 1.15;
-  --leading-snug: 1.35;
-
-  --color-brand-50: #f0fff5;
-  --color-brand-100: #d7f5e1;
-  --color-brand-200: #b0e8c5;
-  --color-brand-300: #82d5a0;
-  --color-brand-400: #4fbc75;
-  --color-brand-500: #27a354;
-  --color-brand-600: #038c3e;
-  --color-brand-700: #026b2f;
-  --color-brand-800: #034f25;
-  --color-brand-900: #023a1c;
-  --color-brand-950: #012312;
-
-  --color-ink-100: #e3eef4;
-  --color-ink-200: #bcd5e3;
-  --color-ink-300: #8fb5cc;
-  --color-ink-400: #5c8da8;
-  --color-ink-500: #2f6a8b;
-  --color-ink-600: #124a72;
-  --color-ink-700: #024059;
-  --color-ink-800: #022d41;
-  --color-ink-900: #011c2b;
-  --color-ink-950: #010b11;
-
-  --color-m3-100: #b7f0c1;
-  --color-m3-900: #00210e;
-  --color-m3-surface: #f1f6f1;
-  --color-m3-surface-alt: #ebf1ec;
-  --color-m3-outline: #748478;
-
-  --color-success: #038c3e;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
-  --color-surface: #ffffff;
-  --color-muted: #f8fafc;
-
-  --radius-xs: 0.25rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 0.875rem;
-  --radius-3xl: 1rem;
-  --radius-full: 9999px;
-
-  --shadow-elev1: 0 1px 2px rgba(2, 28, 43, 0.04);
-  --shadow-elev2: 0 1px 2px rgba(2, 28, 43, 0.04), 0 4px 12px rgba(2, 28, 43, 0.05);
-  --shadow-elev3: 0 8px 28px rgba(2, 28, 43, 0.1);
-  --shadow-soft: 0 4px 16px rgba(2, 28, 43, 0.06);
-}
-
-:root {
-  color-scheme: light;
-}
-
-body {
-  background-color: var(--color-slate-50);
-  color: var(--color-slate-800);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-::selection {
-  background: var(--color-brand-100);
-  color: var(--color-ink-900);
-}
-
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-display);
-  letter-spacing: -0.025em;
-  text-wrap: balance;
-}
-
-:focus-visible {
-  outline-color: var(--color-brand-600);
-}
+@import "./tokens.css";
+@import "./base.css" layer(base);
 
 /* ─── Pay / enrol button ──────────────────────────────────────── */
 
@@ -96,24 +13,30 @@ h4 {
   width: 100%;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 12px 24px;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
   font-size: 15px;
-  color: #fff;
-  background: #1a1a1a;
+  color: var(--color-accent-ink);
+  background: var(--color-ink);
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--dur-short) ease, box-shadow var(--dur-short) ease;
+}
+
+.pay-btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
 }
 
 .pay-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-elev3);
 }
 
 .pay-btn:disabled {
-  opacity: 0.5;
+  color: var(--color-paper);
+  background: var(--color-muted);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -134,7 +57,7 @@ h4 {
   inset: 0;
   width: 24px;
   height: 24px;
-  color: #22c55e;
+  color: var(--color-accent);
   opacity: 0;
   visibility: hidden;
 }
@@ -208,7 +131,7 @@ h4 {
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #1a1a1a;
+  color: var(--color-ink);
 }
 
 .nf-face-container .nf-face-svg {
@@ -325,23 +248,23 @@ h4 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-md);
   margin-inline: auto;
-  padding: 32px 24px;
+  padding: var(--space-2lg) var(--space-lg);
   border-radius: 15px;
-  background-color: #fff;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  transition: 0.4s ease-in-out;
+  background-color: var(--color-paper);
+  box-shadow: var(--shadow-elev2);
+  transition: scale var(--dur-long) ease-in-out, box-shadow var(--dur-long) ease-in-out;
 }
 
 .verify-card:hover {
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-elev1);
   scale: 0.99;
 }
 
 @media (max-width: 420px) {
   .verify-card {
-    padding: 24px 16px;
+    padding: var(--space-lg) var(--space-md);
   }
 }
 
@@ -353,14 +276,14 @@ h4 {
 .verify-card__heading {
   font-weight: bold;
   font-size: 1.15rem;
-  color: #000;
+  color: var(--color-ink);
 }
 
 .verify-card__body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-md);
 }
 
 .pin-input {
@@ -370,21 +293,23 @@ h4 {
   height: 2.75rem;
   border-radius: 5px;
   border: none;
-  background-color: rgb(235, 235, 235);
-  box-shadow: inset 3px 3px 6px #d1d1d1, inset -3px -3px 6px #ffffff;
+  background-color: var(--color-paper-2);
+  box-shadow:
+    inset 3px 3px 6px color-mix(in oklab, var(--color-ink) 12%, transparent),
+    inset -3px -3px 6px var(--color-paper);
   padding: 0;
   text-align: center;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-ink-900);
+  color: var(--color-ink);
   outline: none;
-  transition: 0.4s ease-in-out;
+  transition: background-color var(--dur-long) ease-in-out, box-shadow var(--dur-long) ease-in-out;
 }
 
 .pin-input:hover,
 .pin-input:focus {
   box-shadow: none;
-  background-color: lightgray;
+  background-color: var(--color-paper-3);
 }
 
 .pin-input:focus-visible {
@@ -393,28 +318,33 @@ h4 {
 }
 
 .pin-input:disabled {
-  opacity: 0.5;
+  color: var(--color-muted);
+  background-color: var(--color-paper-3);
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 .btn-neo {
   border: none;
   border-radius: 5px;
-  background-color: #fff;
-  color: #000;
-  box-shadow: 1px 1px 3px #b5b5b5, -1px -1px 3px #ffffff;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-elev2);
 }
 
 .btn-neo:hover {
-  background-color: #fff;
-  color: #000;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
 }
 
 .btn-neo:active {
-  box-shadow: inset 3px 3px 6px #b5b5b5, inset -3px -3px 6px #ffffff;
+  box-shadow:
+    inset 3px 3px 6px color-mix(in oklab, var(--color-ink) 12%, transparent),
+    inset -3px -3px 6px var(--color-paper);
 }
 
 .tx-card {
-  background-color: #ffffff;
+  background-color: var(--color-paper);
   display: flex;
   width: 460px;
   max-width: 100%;
@@ -443,7 +373,7 @@ h4 {
 }
 
 .tx-left {
-  background-color: #5de2a3;
+  background-color: var(--color-brand-200);
   width: 130px;
   height: 120px;
   border-radius: 4px;
@@ -476,42 +406,42 @@ h4 {
 
 .tx-new {
   font-size: 23px;
-  font-family: "Lexend Deca", sans-serif;
+  font-family: var(--font-display);
   margin-left: 20px;
 }
 
 .tx-card-inner {
   width: 70px;
   height: 46px;
-  background-color: #c7ffbc;
+  background-color: var(--color-brand-100);
   border-radius: 6px;
   position: absolute;
   display: flex;
   z-index: 10;
   flex-direction: column;
   align-items: center;
-  -webkit-box-shadow: 9px 9px 9px -2px rgba(77, 200, 143, 0.72);
-  -moz-box-shadow: 9px 9px 9px -2px rgba(77, 200, 143, 0.72);
-  box-shadow: 9px 9px 9px -2px rgba(77, 200, 143, 0.72);
+  -webkit-box-shadow: var(--shadow-soft);
+  -moz-box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft);
 }
 
 .tx-line {
   width: 65px;
   height: 13px;
-  background-color: #80ea69;
+  background-color: var(--color-brand-300);
   border-radius: 2px;
-  margin-top: 7px;
+  margin-top: var(--space-xs);
 }
 
 .tx-buttons {
   width: 8px;
   height: 8px;
-  background-color: #379e1f;
-  box-shadow: 0 -10px 0 0 #26850e, 0 10px 0 0 #56be3e;
+  background-color: var(--color-brand-700);
+  box-shadow: 0 -10px 0 0 var(--color-brand-800), 0 10px 0 0 var(--color-brand-400);
   border-radius: 50%;
-  margin-top: 5px;
+  margin-top: var(--space-2xs);
   transform: rotate(90deg);
-  margin: 10px 0 0 -30px;
+  margin: var(--space-xs) 0 0 calc(-1 * var(--space-2lg));
 }
 
 .tx-card.is-paying .tx-card-inner {
@@ -547,7 +477,7 @@ h4 {
 .tx-post {
   width: 63px;
   height: 75px;
-  background-color: #dddde0;
+  background-color: var(--color-paper-3);
   position: absolute;
   z-index: 11;
   bottom: 10px;
@@ -559,7 +489,7 @@ h4 {
 .tx-post-line {
   width: 47px;
   height: 9px;
-  background-color: #545354;
+  background-color: var(--color-ink-2);
   position: absolute;
   border-radius: 0px 0px 3px 3px;
   right: 8px;
@@ -571,14 +501,14 @@ h4 {
   position: absolute;
   width: 47px;
   height: 9px;
-  background-color: #757375;
+  background-color: var(--color-muted);
   top: -8px;
 }
 
 .tx-screen {
   width: 47px;
   height: 23px;
-  background-color: #ffffff;
+  background-color: var(--color-paper);
   position: absolute;
   top: 22px;
   right: 8px;
@@ -588,8 +518,8 @@ h4 {
 .tx-numbers {
   width: 12px;
   height: 12px;
-  background-color: #838183;
-  box-shadow: 0 -18px 0 0 #838183, 0 18px 0 0 #838183;
+  background-color: var(--color-muted);
+  box-shadow: 0 -18px 0 0 var(--color-muted), 0 18px 0 0 var(--color-muted);
   border-radius: 2px;
   position: absolute;
   transform: rotate(90deg);
@@ -600,8 +530,8 @@ h4 {
 .tx-numbers-line2 {
   width: 12px;
   height: 12px;
-  background-color: #aaa9ab;
-  box-shadow: 0 -18px 0 0 #aaa9ab, 0 18px 0 0 #aaa9ab;
+  background-color: var(--color-slate-400);
+  box-shadow: 0 -18px 0 0 var(--color-slate-400), 0 18px 0 0 var(--color-slate-400);
   border-radius: 2px;
   position: absolute;
   transform: rotate(90deg);
@@ -624,11 +554,11 @@ h4 {
 .tx-dollar {
   position: absolute;
   font-size: 16px;
-  font-family: "Lexend Deca", sans-serif;
+  font-family: var(--font-display);
   width: 100%;
   left: 0;
   top: 0;
-  color: #4b953b;
+  color: var(--color-brand-700);
   text-align: center;
 }
 
@@ -664,20 +594,20 @@ h4 {
 }
 
 .appl-btn {
-  --color: #fff;
-  --background: #404660;
-  --background-hover: #3a4059;
-  --background-left: #2b3044;
-  --folder: #f3e9cb;
-  --folder-inner: #beb393;
-  --paper: #ffffff;
-  --paper-lines: #bbc1e1;
-  --paper-behind: #e1e6f9;
-  --pencil-cap: #fff;
-  --pencil-top: #275efe;
-  --pencil-middle: #fff;
-  --pencil-bottom: #5c86ff;
-  --shadow: rgba(13, 15, 25, 0.2);
+  --color: var(--color-accent-ink);
+  --background: var(--color-ink-800);
+  --background-hover: var(--color-ink-900);
+  --background-left: var(--color-ink-950);
+  --folder: var(--color-warning);
+  --folder-inner: var(--color-brand-300);
+  --paper: var(--color-paper);
+  --paper-lines: var(--color-rule);
+  --paper-behind: var(--color-paper-2);
+  --pencil-cap: var(--color-paper);
+  --pencil-top: var(--color-accent);
+  --pencil-middle: var(--color-paper);
+  --pencil-bottom: var(--color-brand-400);
+  --shadow: color-mix(in oklab, var(--color-ink) 20%, transparent);
   border: none;
   outline: none;
   cursor: pointer;
@@ -688,8 +618,8 @@ h4 {
   line-height: 19px;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
-  padding: 17px 29px 17px 69px;
-  transition: background 0.3s;
+  padding: var(--space-md) var(--space-2lg) var(--space-md) calc(var(--space-2lg) + var(--space-xl));
+  transition: background-color var(--dur-short) ease;
   color: var(--color);
   background: var(--bg, var(--background));
 }
@@ -855,6 +785,11 @@ h4 {
   transition: transform 0.3s;
 }
 
+.appl-btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
 .appl-btn:after {
   --r: 45deg;
 }
@@ -875,8 +810,11 @@ h4 {
 }
 
 .appl-btn:disabled {
-  cursor: default;
-  opacity: 0.7;
+  --color: var(--color-muted);
+  --background: var(--color-paper-3);
+  --background-hover: var(--color-paper-3);
+  --background-left: var(--color-rule);
+  cursor: not-allowed;
 }
 
 .sp-pencil {
@@ -1068,16 +1006,16 @@ h4 {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: rgb(20, 20, 20);
-  border: none;
+  background-color: var(--color-paper);
+  border: 1px solid var(--color-rule);
   font-weight: 600;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  color: #fff;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.164);
+  gap: var(--space-3xs);
+  color: var(--color-ink-2);
+  box-shadow: var(--shadow-elev2);
   cursor: pointer;
   transition-duration: 0.3s;
   overflow: hidden;
@@ -1093,8 +1031,10 @@ h4 {
 }
 
 .hv-btn:disabled {
-  cursor: default;
-  opacity: 0.5;
+  color: var(--color-muted);
+  background-color: var(--color-paper-3);
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 /* delete — bin lid rotates open, turns red */
@@ -1105,14 +1045,14 @@ h4 {
 .bin-top {
   transform-origin: bottom right;
 }
-.hv-btn--delete:hover:not(:disabled) .bin-top,
-.hv-btn--delete:focus-visible:not(:disabled) .bin-top {
+.hv-btn--delete:hover:not([disabled]) .bin-top,
+.hv-btn--delete:focus-visible:not([disabled]) .bin-top {
   transition-duration: 0.5s;
   transform: rotate(160deg);
 }
-.hv-btn--delete:hover:not(:disabled),
-.hv-btn--delete:focus-visible:not(:disabled) {
-  background-color: rgb(255, 69, 69);
+.hv-btn--delete:hover:not([disabled]),
+.hv-btn--delete:focus-visible:not([disabled]) {
+  background-color: var(--color-danger);
 }
 
 /* view — eye icon is visible by default; animates & turns brand navy on card/btn hover */
@@ -1134,20 +1074,21 @@ h4 {
   opacity: 1;
   transform: scaleY(1);
 }
-.hv-btn--view:hover:not(:disabled) .eye-open,
-.hv-btn--view:focus-visible:not(:disabled) .eye-open,
-.group:hover .hv-btn--view .eye-open,
-.group:focus-within .hv-btn--view .eye-open {
+.hv-btn--view:is(a, button:enabled):hover .eye-open,
+.hv-btn--view:is(a, button:enabled):focus-visible .eye-open,
+.group:hover .hv-btn--view:is(a, button:enabled) .eye-open,
+.group:focus-within .hv-btn--view:is(a, button:enabled) .eye-open {
   opacity: 1;
   transform: scale(1.12);
 }
-.hv-btn--view:hover:not(:disabled),
-.hv-btn--view:focus-visible:not(:disabled),
-.group:hover .hv-btn--view,
-.group:focus-within .hv-btn--view {
-  background-color: #024059;
-  transform: scale(1.06);
-  box-shadow: 0 4px 14px rgba(2, 64, 89, 0.35);
+.hv-btn--view:is(a, button:enabled):hover,
+.hv-btn--view:is(a, button:enabled):focus-visible,
+.group:hover .hv-btn--view:is(a, button:enabled),
+.group:focus-within .hv-btn--view:is(a, button:enabled) {
+  background-color: var(--color-paper-2);
+  border-color: var(--color-rule);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-elev1);
 }
 
 .chapter-chevron {
@@ -1160,7 +1101,7 @@ details[open] > summary .chapter-chevron {
 
 /* Mentor-waiting loader (decorative) */
 .tap-hand {
-  --skin-color: #e4c560;
+  --skin-color: var(--color-warning);
   --tap-speed: 0.6s;
   --tap-stagger: 0.1s;
   position: relative;
@@ -1176,7 +1117,7 @@ details[open] > summary .chapter-chevron {
   position: absolute;
   top: 70%;
   right: 20%;
-  background-color: black;
+  background-color: var(--color-ink);
   border-radius: 40px 10px;
   filter: blur(10px);
   opacity: 0.3;
@@ -1203,20 +1144,20 @@ details[open] > summary .chapter-chevron {
   transform-origin: calc(100% - 20px) 20px;
   transform: rotate(-20deg);
   border-radius: 30px 20px 20px 10px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
-  border-left: 2px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+  border-left: 2px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
 }
 
 .tap-thumb::after {
   width: 20%;
   height: 60%;
   content: "";
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: color-mix(in oklab, var(--color-paper) 30%, transparent);
   position: absolute;
   bottom: -8%;
   left: 5px;
   border-radius: 60% 10% 10% 30%;
-  border-right: 2px solid rgba(0, 0, 0, 0.05);
+  border-right: 2px solid color-mix(in oklab, var(--color-ink) 5%, transparent);
 }
 
 .tap-finger {
@@ -1326,17 +1267,15 @@ details[open] > summary .chapter-chevron {
 }
 
 /* ── Flip clock (meeting + interview countdowns) ─────────────────── */
-.fc-clock { display: inline-flex; flex-direction: column; gap: 0.375rem; }
+.fc-clock { display: inline-flex; flex-direction: column; gap: var(--space-xs); }
 .fc-title {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #64748b;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-muted);
 }
-.fc-cells { display: flex; align-items: flex-start; gap: 0.375rem; }
-.fc-cell { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
-.fc-digits { display: flex; gap: 0.125rem; }
+.fc-cells { display: flex; align-items: flex-start; gap: var(--space-xs); }
+.fc-cell { display: flex; flex-direction: column; align-items: center; gap: var(--space-2xs); }
+.fc-digits { display: flex; gap: var(--space-3xs); }
 .fc-tile {
   position: relative;
   display: grid;
@@ -1344,8 +1283,8 @@ details[open] > summary .chapter-chevron {
   width: 1.9rem;
   height: 2.5rem;
   border-radius: 0.5rem;
-  background: #181818;
-  color: #eee;
+  background: var(--color-ink);
+  color: var(--color-paper);
   font-size: 1.5rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -1353,8 +1292,8 @@ details[open] > summary .chapter-chevron {
   overflow: hidden;
   perspective: 300px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 6px 14px -6px rgba(0, 0, 0, 0.55);
+    inset 0 1px 0 color-mix(in oklab, var(--color-paper) 6%, transparent),
+    0 6px 14px -6px color-mix(in oklab, var(--color-ink) 55%, transparent);
 }
 .fc-tile::after {
   content: "";
@@ -1363,7 +1302,7 @@ details[open] > summary .chapter-chevron {
   right: 0;
   top: 50%;
   height: 1px;
-  background: rgba(0, 0, 0, 0.6);
+  background: color-mix(in oklab, var(--color-ink) 60%, transparent);
 }
 .fc-digit {
   grid-area: 1 / 1;
@@ -1372,11 +1311,9 @@ details[open] > summary .chapter-chevron {
   backface-visibility: hidden;
 }
 .fc-label {
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #94a3b8;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-muted);
 }
 @keyframes fc-flip {
   from { transform: rotateX(-90deg); opacity: 0.4; }
@@ -1395,7 +1332,9 @@ details[open] > summary .chapter-chevron {
     opacity: 0;
   }
   .hv-btn--view {
-    background-color: #024059;
+    background-color: var(--color-paper-2);
+    border-color: var(--color-rule);
+    color: var(--color-ink);
   }
 }
 
@@ -1405,15 +1344,15 @@ details[open] > summary .chapter-chevron {
    static wrapped row when the user prefers reduced motion. */
 .marquee {
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, var(--color-ink) 7%, var(--color-ink) 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, var(--color-ink) 7%, var(--color-ink) 93%, transparent);
 }
 .marquee-track {
   display: flex;
   width: max-content;
   align-items: center;
-  gap: 2.5rem;
-  padding-right: 2.5rem;
+  gap: var(--space-xl);
+  padding-right: var(--space-xl);
   animation: marquee-scroll 40s linear infinite;
 }
 .marquee:hover .marquee-track,

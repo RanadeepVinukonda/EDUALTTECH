@@ -18,7 +18,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="font-display font-semibold text-ink-900 mb-4">
-              <svg className="h-6 w-6 mb-2" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="h-6 w-6 mb-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 7v5l5 5v5H5v-5L12 7zM12 3V1h2v5l5 5v5h2V3H12z" />
               </svg>
               EduAltTech
@@ -44,16 +44,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t border-slate-200">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-slate-400">2026 EduAltTech. All rights reserved.</p>
-            <div className="flex gap-4">
-              {/* Social links would go here */}
-              <span className="text-slate-400 hover:text-brand-600 transition-colors">
-                GitHub
-              </span>
-              <span className="text-slate-400 hover:text-brand-600 transition-colors">
-                Twitter
-              </span>
-            </div>
+            <p className="text-xs text-slate-400">© {new Date().getFullYear()} EduAltTech.</p>
           </div>
         </div>
       </div>

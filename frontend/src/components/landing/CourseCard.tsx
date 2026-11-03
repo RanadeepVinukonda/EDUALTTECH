@@ -11,6 +11,7 @@ export interface CourseCardCourse {
   thumbnailUrl?: string | null;
   category?: string | null;
   domain?: string | null;
+  tags?: string[] | null;
   features?: string[] | null;
   pricePaise?: number;
   currency?: string;
@@ -45,10 +46,16 @@ export default function CourseCard({
   unavailable?: boolean;
   className?: string;
 }) {
-  const { slug, title, description, thumbnailUrl, category, domain, pricePaise, currency = "INR" } = course;
+  const { slug, title, description, thumbnailUrl, category, domain, tags, features, pricePaise, currency = "INR" } = course;
   const link = href ?? `/courses/${slug}`;
   const price = priceLabel ?? (typeof pricePaise === "number" ? formatPrice(pricePaise, currency) : null);
   const eyebrow = domain || category;
+  const visibleTags = (tags ?? []).filter(Boolean).slice(0, 3);
+  const remainingTagCount = Math.max(0, (tags ?? []).filter(Boolean).length - visibleTags.length);
+  const hasCertificate = (features ?? []).some((feature) => {
+    const text = feature.toLowerCase();
+    return text.includes("certificate") && !/\b(no|not|without)\b/.test(text);
+  });
   const showProgress = typeof progressPct === "number";
   const pct = showProgress ? Math.min(100, Math.max(0, progressPct as number)) : 0;
 
@@ -77,19 +84,32 @@ export default function CourseCard({
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        {eyebrow && (
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-            {eyebrow}
-          </p>
-        )}
         <h3 className="line-clamp-2 font-display text-base font-semibold leading-snug text-ink-900">
           {title}
         </h3>
+        {eyebrow && <p className="mt-1 text-xs text-slate-500">{eyebrow}</p>}
 
         {description && (
           <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-slate-600">{description}</p>
         )}
-        {mentor && <p className="mt-3 text-xs text-slate-500">Mentor · {mentor}</p>}
+        {(visibleTags.length > 0 || hasCertificate) && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {visibleTags.map((tag) => (
+              <span key={tag} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
+                {tag}
+              </span>
+            ))}
+            {remainingTagCount > 0 && (
+              <span className="text-xs font-medium text-slate-500">+{remainingTagCount}</span>
+            )}
+            {hasCertificate && (
+              <span className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-800">
+                Certificate included
+              </span>
+            )}
+          </div>
+        )}
+        {mentor && <p className="mt-3 text-xs text-slate-500">Mentor: {mentor}</p>}
 
         {showProgress ? (
           <div className="mt-4 space-y-2">

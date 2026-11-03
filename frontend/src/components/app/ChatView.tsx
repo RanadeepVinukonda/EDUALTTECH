@@ -193,7 +193,7 @@ export default function ChatView({ courseId, title, compact = false, roster }: {
 
       {roster && roster.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Learners</p>
+          <p className="mb-2 text-xs font-semibold text-slate-500">Learners</p>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {roster.map((p) => {
               const active = visible.some((c) => c.learnerUserId === p.id && c.id === selectedId);

@@ -27,7 +27,7 @@ const SERVICES: Service[] = [
   },
   {
     title: "Partial employment",
-    body: "Skilled people are hired to mentor a specific course — paid work, not volunteering. Access is granted per course after review.",
+    body: "Skilled people are hired to mentor a specific course, a paid role rather than volunteering. Access is granted per course after review.",
     tag: "Paid role",
   },
   {
@@ -42,12 +42,12 @@ const SERVICES: Service[] = [
   },
   {
     title: "Tuition",
-    body: "Guided tuition and coaching that runs alongside our courses — subject support, doubt sessions, and practice, online and in person.",
+    body: "Guided tuition and coaching runs alongside our courses, with subject support, doubt sessions, and practice online and in person.",
     tag: "Alongside courses",
   },
   {
     title: "Free open modules",
-    body: "Complete learning modules open to everyone — technology, alternate education, and tuition topics — with no paywall and no login.",
+    body: "Complete learning modules open to everyone, covering technology, alternate education, and tuition topics with no paywall or login.",
     tag: "Open to all",
   },
 ];
@@ -59,7 +59,7 @@ const PARTNERS = [
     photo: "/media/programs/new-era-program.jpeg",
     focus: "AI course & awareness",
     status: "Curriculum merge in progress",
-    body: "We run AI classes and awareness sessions with New Era students, and are in the process of merging this program into their curriculum — so AI becomes part of the school's regular learning.",
+    body: "We run AI classes and awareness sessions with New Era students, and are in the process of merging this program into their curriculum so AI becomes part of the school's regular learning.",
   },
   {
     name: "Sharada Vidhyalaya",
@@ -67,14 +67,14 @@ const PARTNERS = [
     photo: "/media/programs/sharada-vidhyalaya-program.jpeg",
     focus: "Idea to product development",
     status: "Running in classrooms",
-    body: "At Sharada Vidhyalaya we guide students from idea to working product — turning a problem in their world into something they build, test, and present.",
+    body: "At Sharada Vidhyalaya, we guide students from idea to working product. They turn a problem in their world into something they build, test, and present.",
   },
 ];
 
 const STEPS = [
   {
     title: "Tell us what you need",
-    body: "Learner, parent, school, or skilled practitioner — start from the service that matches you.",
+    body: "Learner, parent, school, or skilled practitioner, start from the service that matches you.",
   },
   {
     title: "We confirm the fit",
@@ -88,10 +88,10 @@ const STEPS = [
 
 export default function ServicesPage() {
   return (
-    <div className="bg-white">
+    <div className="bg-paper">
       {/* Intro */}
-      <section className="border-b border-slate-200 bg-slate-50">
-        <div className={`${wrap} py-10 sm:py-14`}>
+      <section className="border-b border-slate-200 bg-paper-2">
+        <div className={`${wrap} py-12 sm:py-16`}>
           <nav aria-label="Breadcrumb" className="mb-8">
             <ol className="flex items-center gap-1.5 text-sm text-ink-600">
               <li>
@@ -110,13 +110,12 @@ export default function ServicesPage() {
 
           <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-8">
-              <h1 className="font-display text-4xl font-semibold tracking-tight text-ink-900 sm:text-5xl sm:leading-[1.06]">
-                Learning, mentorship, and paid work under one roof.
+              <h1 className="font-display text-display-s font-semibold tracking-tight text-ink-900 leading-[1.06]">
+                Learning, mentorship and paid work.
               </h1>
             </div>
             <p className="max-w-md text-base leading-relaxed text-ink-600 lg:col-span-4 lg:pb-2">
-              Structured courses and tuition for learners, free open modules for everyone, and paid
-              mentoring roles for skilled people — across technology and alternate education.
+              Learn through courses and free resources, or earn by teaching.
             </p>
           </div>
 
@@ -133,7 +132,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Services */}
-      <section className="bg-white py-16 sm:py-24">
+      <section className="bg-paper py-12 sm:py-16">
         <div className={wrap}>
           <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -142,7 +141,7 @@ export default function ServicesPage() {
               </h2>
             </div>
             <p className="max-w-sm text-sm leading-relaxed text-ink-600">
-              Practical work, real guidance, and a clear outcome — whether you are learning, teaching,
+              Practical work, real guidance, and a clear outcome, whether you are learning, teaching,
               or running a school program.
             </p>
           </div>
@@ -170,7 +169,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Course Demand & Community Polling Deep Dive */}
-      <section id="course-demand" className="border-t border-slate-200 bg-slate-50 py-16 sm:py-24 scroll-mt-12">
+      <section id="course-demand" className="border-t border-slate-200 bg-paper-2 py-12 sm:py-16 scroll-mt-12">
         <div className={wrap}>
           <div className="max-w-3xl">
             <h2 className=" font-display text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
@@ -181,17 +180,17 @@ export default function ServicesPage() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-white p-7">
+          <div className="mt-10 grid gap-x-8 gap-y-7 border-t border-slate-200 pt-7 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="border-b border-slate-200 pb-6">
               <h3 className="font-display text-lg font-semibold text-ink-900">
                 Demand discovery
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Learners propose and evaluate new course concepts — from autonomous AI systems and electronic music production to embedded robotics and academic coaching.
+                Learners propose and evaluate new course concepts, from autonomous AI systems and electronic music production to embedded robotics and academic coaching.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-7">
+            <div className="border-b border-slate-200 pb-6">
               <h3 className="font-display text-lg font-semibold text-ink-900">
                 One member, one vote
               </h3>
@@ -200,12 +199,12 @@ export default function ServicesPage() {
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-7">
+            <div className="border-b border-slate-200 pb-6">
               <h3 className="font-display text-lg font-semibold text-ink-900">
                 Direct course creation
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Winning proposals unlock full development: our team outlines practical roadmaps, structures chapters, and hires industry mentors with paid contracts.
+                Winning proposals move into development. Our team outlines practical roadmaps, structures chapters, and hires industry mentors with paid contracts.
               </p>
             </div>
           </div>
@@ -232,7 +231,7 @@ export default function ServicesPage() {
       </section>
 
       {/* School partnerships */}
-      <section className="border-y border-slate-200 bg-slate-50 py-16 sm:py-24">
+      <section className="border-y border-slate-200 bg-paper-2 py-12 sm:py-16">
         <div className={wrap}>
           <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -245,15 +244,15 @@ export default function ServicesPage() {
             </p>
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          <div className="mt-8 grid gap-8 lg:grid-cols-2">
             {PARTNERS.map((p) => (
               <article
                 key={p.name}
-                className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition-colors hover:border-brand-300"
+                className="group flex flex-col overflow-hidden border-y border-slate-200 bg-paper transition-colors hover:border-brand-600"
               >
                 <ProgramReveal logo={p.logo} photo={p.photo} name={p.name} />
 
-                <div className="flex flex-1 flex-col p-7 sm:p-8">
+                <div className="flex flex-1 flex-col py-5 sm:py-6">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <h3 className="font-display text-xl font-semibold text-ink-900">{p.name}</h3>
                     <span className="rounded-md border border-brand-200 bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
@@ -272,7 +271,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Process */}
-      <section className="bg-white py-16 sm:py-24">
+      <section className="bg-paper py-12 sm:py-16">
         <div className={wrap}>
           <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -281,7 +280,7 @@ export default function ServicesPage() {
               </h2>
             </div>
             <p className="max-w-sm text-sm leading-relaxed text-ink-600">
-              Learning, enrolling a student, or teaching — the path is short and nothing is granted
+              Learning, enrolling a student, or teaching. The path is short, and access is not granted
               automatically.
             </p>
           </div>

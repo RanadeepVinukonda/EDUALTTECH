@@ -151,8 +151,8 @@ function AssignDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
       onConfirm={submit}
     >
       <p>
-        Creates an ACTIVE MENTOR participation in the chosen course. The backend rejects users who already participate
-        in that course (<span className="font-mono text-xs">ALREADY_PARTICIPANT</span>).
+        Creates an active mentor participation in the chosen course. A user who already participates cannot be assigned
+        again.
       </p>
 
       <div className="mt-4 space-y-4">

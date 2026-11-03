@@ -122,8 +122,8 @@ export default function ResumeUploader({
       />
 
       {resumeName ? (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
             <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
               <DescriptionOutlined fontSize="small" />
             </span>
@@ -137,33 +137,36 @@ export default function ResumeUploader({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-slate-100 pt-3 sm:border-0 sm:pt-0">
             <button
               type="button"
               onClick={viewResume}
               disabled={opening}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-ink-800 transition hover:bg-slate-100 disabled:opacity-50"
+              aria-label={opening ? "Opening resume" : "View resume"}
+              title={opening ? "Opening resume" : "View resume"}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-ink-800 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 disabled:opacity-50"
             >
-              <OpenInNew fontSize="inherit" />
-              {opening ? "Opening…" : "View"}
+              <OpenInNew fontSize="small" />
             </button>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={busy}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-ink-800 transition hover:bg-slate-100 disabled:opacity-50"
+              aria-label="Replace resume"
+              title="Replace resume"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-ink-800 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 disabled:opacity-50"
             >
-              <CloudUploadOutlined fontSize="inherit" />
-              Replace
+              <CloudUploadOutlined fontSize="small" />
             </button>
             <button
               type="button"
               onClick={removeResume}
               disabled={busy}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+              aria-label="Remove resume"
+              title="Remove resume"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-700 transition hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600/40 disabled:opacity-50"
             >
-              <DeleteOutlined fontSize="inherit" />
-              Remove
+              <DeleteOutlined fontSize="small" />
             </button>
           </div>
         </div>

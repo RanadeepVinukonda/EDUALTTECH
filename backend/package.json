@@ -13,6 +13,7 @@
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "seed": "tsx prisma/seed.ts",
+    "seed:learning-paths": "tsx prisma/seed-learning-paths.ts",
     "seed:test-course": "tsx scripts/seed-test-course.ts",
     "db:reset": "tsx scripts/reset-db.ts"
   },

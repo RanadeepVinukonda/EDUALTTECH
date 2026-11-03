@@ -23,7 +23,7 @@ export default function FinalCTA() {
               className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 font-display font-semibold text-ink-900 hover:bg-slate-100 transition-colors"
             >
               Start Learning
-              <svg className="w-4 h-4 inline" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-4 h-4 inline" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M7 10l5 5 5-5" />
               </svg>
             </Link>
@@ -34,7 +34,7 @@ export default function FinalCTA() {
               className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-white/25 px-8 py-4 font-display font-semibold text-white hover:bg-white/10 transition-colors"
             >
               Become a Mentor
-              <svg className="w-4 h-4 inline" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-4 h-4 inline" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M7 10l5 5 5-5" />
               </svg>
             </Link>

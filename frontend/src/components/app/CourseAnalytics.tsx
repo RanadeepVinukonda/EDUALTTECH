@@ -48,7 +48,7 @@ export default function CourseAnalyticsView({ slug }: { slug: string }) {
           { label: "Published lessons", value: data.totalLessons },
         ].map((stat) => (
           <div key={stat.label} className="rounded-xl border border-slate-200 bg-white p-4">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{stat.label}</dt>
+            <dt className="text-xs font-semibold text-slate-500">{stat.label}</dt>
             <dd className="mt-1 font-display text-2xl font-semibold text-ink-900">{stat.value}</dd>
           </div>
         ))}
@@ -60,7 +60,7 @@ export default function CourseAnalyticsView({ slug }: { slug: string }) {
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-slate-200 text-xs font-semibold text-slate-500">
                 <th className="px-4 py-3">Learner</th>
                 <th className="px-4 py-3 tabular-nums">Progress</th>
                 <th className="px-4 py-3 tabular-nums">Lessons</th>

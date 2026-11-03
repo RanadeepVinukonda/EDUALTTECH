@@ -45,7 +45,7 @@ export default function BrandPhilosophy() {
               className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-700"
             >
               Start Exploring
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M7 10l5 5 5-5" />
               </svg>
             </Link>

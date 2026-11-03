@@ -10,6 +10,7 @@ export interface CourseListItem {
   category: string;
   type: CourseType;
   domain: string;
+  tags: string[];
   features: string[];
   gradeLevel: string | null;
   pricePaise: number;
@@ -163,11 +164,41 @@ export interface ResourceArticleCard {
   coverUrl: string | null;
   tags: string[];
   views: number;
+  isPublished?: boolean;
   createdAt: string;
   updatedAt: string;
   category?: { id: string; name: string; slug: string; icon: string | null };
   subcategory?: { id: string; name: string; slug: string } | null;
   author?: { firstName: string; lastName: string; avatarUrl: string | null } | null;
+}
+
+export interface ResourceLearningPathArticle {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  estimatedMinutes: number;
+  tags: string[];
+  createdAt: string;
+}
+
+export interface ResourceLearningPathSubcategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  order: number;
+  articles: ResourceLearningPathArticle[];
+}
+
+export interface ResourceLearningPathCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  order: number;
+  articles: ResourceLearningPathArticle[];
+  subcategories: ResourceLearningPathSubcategory[];
 }
 
 export interface ResourceArticleDetail extends ResourceArticleCard {
@@ -257,4 +288,3 @@ export interface ActivePollResponse {
   userVoteOptionId?: string | null;
   userVotedOptionId?: string | null;
 }
-

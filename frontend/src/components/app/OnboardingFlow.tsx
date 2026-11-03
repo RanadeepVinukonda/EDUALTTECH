@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiPatch, ApiError } from "@/lib/api";
 import { useAuth } from "@/components/app/AuthProvider";
@@ -14,12 +14,36 @@ import ResumeUploader from "./ResumeUploader";
 import type { Me } from "@/lib/app-types";
 
 const EDUCATION = ["School", "Undergraduate", "Postgraduate", "Professional", "Other"];
+const DRAFT_KEY = "onboarding:draft";
+
+interface OnboardingDraft {
+  step: 0 | 1;
+  username: string;
+  mobile: string;
+  educationLevel: string;
+  institution: string;
+  fieldOfStudy: string;
+  gradYear: string;
+  experience: string;
+}
+
+function isOnboardingDraft(value: unknown): value is OnboardingDraft {
+  if (!value || typeof value !== "object") return false;
+  const draft = value as Record<string, unknown>;
+  return (
+    (draft.step === 0 || draft.step === 1) &&
+    ["username", "mobile", "educationLevel", "institution", "fieldOfStudy", "gradYear", "experience"]
+      .every((key) => typeof draft[key] === "string")
+  );
+}
 
 export default function OnboardingFlow() {
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const initializedUserId = useRef<string | null>(null);
 
   // Step 1 fields
   const [username, setUsername] = useState("");
@@ -42,14 +66,47 @@ export default function OnboardingFlow() {
       router.replace("/dashboard");
       return;
     }
-    setUsername(user.username ?? "");
-    setMobile(user.mobile ?? "");
-    setEducationLevel(user.educationLevel ?? "");
-    setInstitution(user.institution ?? "");
-    setFieldOfStudy(user.fieldOfStudy ?? "");
-    setGradYear(user.gradYear ? String(user.gradYear) : "");
-    setExperience(user.experience ?? "");
+    if (initializedUserId.current === user.id) return;
+    initializedUserId.current = user.id;
+    setDraftReady(false);
+
+    const storedDraft = sessionStorage.getItem(`${DRAFT_KEY}:${user.id}`);
+    let draft: OnboardingDraft | null = null;
+    if (storedDraft) {
+      try {
+        const parsed: unknown = JSON.parse(storedDraft);
+        if (isOnboardingDraft(parsed)) draft = parsed;
+        else sessionStorage.removeItem(`${DRAFT_KEY}:${user.id}`);
+      } catch {
+        sessionStorage.removeItem(`${DRAFT_KEY}:${user.id}`);
+      }
+    }
+
+    setStep(draft?.step ?? 0);
+    setUsername(draft?.username ?? user.username ?? "");
+    setMobile(draft?.mobile ?? user.mobile ?? "");
+    setEducationLevel(draft?.educationLevel ?? user.educationLevel ?? "");
+    setInstitution(draft?.institution ?? user.institution ?? "");
+    setFieldOfStudy(draft?.fieldOfStudy ?? user.fieldOfStudy ?? "");
+    setGradYear(draft?.gradYear ?? (user.gradYear ? String(user.gradYear) : ""));
+    setExperience(draft?.experience ?? user.experience ?? "");
+    setDraftReady(true);
   }, [loading, user, router]);
+
+  useEffect(() => {
+    if (!draftReady || !user || user.onboardingDone || initializedUserId.current !== user.id) return;
+    const draft: OnboardingDraft = {
+      step: step === 1 ? 1 : 0,
+      username,
+      mobile,
+      educationLevel,
+      institution,
+      fieldOfStudy,
+      gradYear,
+      experience,
+    };
+    sessionStorage.setItem(`${DRAFT_KEY}:${user.id}`, JSON.stringify(draft));
+  }, [draftReady, user, step, username, mobile, educationLevel, institution, fieldOfStudy, gradYear, experience]);
 
   async function saveStep1() {
     if (username.trim()) {
@@ -76,6 +133,8 @@ export default function OnboardingFlow() {
   }
 
   async function submit(done: boolean) {
+    if (!user) return;
+    const userId = user.id;
     setSaving(true);
     try {
       const year = gradYear ? Number(gradYear) : null;
@@ -90,6 +149,7 @@ export default function OnboardingFlow() {
         ...(experience.trim() ? { experience: experience.trim() } : {}),
       });
       await refresh();
+      sessionStorage.removeItem(`${DRAFT_KEY}:${userId}`);
       notifySuccess(done ? "You're all set!" : "Saved — you can update this anytime in Profile.");
       router.replace("/dashboard");
     } catch (err) {
@@ -103,7 +163,7 @@ export default function OnboardingFlow() {
     }
   }
 
-  if (loading || !user) {
+  if (loading || !user || !draftReady) {
     return (
       <div className="grid min-h-dvh place-items-center">
         <Spinner />
@@ -122,7 +182,7 @@ export default function OnboardingFlow() {
       {step === 0 ? (
         <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
           <h1 className="font-display text-2xl font-semibold text-ink-900">Welcome, {user.firstName}</h1>
-          <p className="mt-1 text-xs font-medium uppercase tracking-wider text-ink-500">Step 1 of 2 · Basic profile</p>
+          <p className="mt-1 text-sm font-medium text-muted">Step 1 of 2: Basic profile</p>
           <p className="mt-2 text-sm text-slate-600">
             Let&apos;s set up your profile picture, unique username, and contact details.
           </p>
@@ -176,7 +236,7 @@ export default function OnboardingFlow() {
       ) : (
         <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
           <h1 className="font-display text-2xl font-semibold text-ink-900">Education, experience &amp; resume</h1>
-          <p className="mt-1 text-xs font-medium uppercase tracking-wider text-ink-500">Step 2 of 2 · Background</p>
+          <p className="mt-1 text-sm font-medium text-muted">Step 2 of 2: Background</p>
           <p className="mt-2 text-sm text-slate-500">
             Help us personalize your learning path, or prepare your profile for mentor applications.
           </p>

@@ -55,6 +55,7 @@ export interface LearningCourse {
   thumbnailUrl: string | null;
   category: string;
   domain: string;
+  tags?: string[];
   features: string[];
 }
 
@@ -255,6 +256,7 @@ export interface WishlistItem {  id: string;
     description: string;
     category: string;
     domain: string;
+    tags?: string[];
     features: string[];
     pricePaise: number;
     currency: string;

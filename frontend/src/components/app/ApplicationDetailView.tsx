@@ -92,31 +92,31 @@ export default function ApplicationDetailView({ id }: { id: string }) {
         : "Ended";
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <nav aria-label="Breadcrumb" className="text-xs font-medium text-slate-500">
         <Link href="/dashboard/mentor" className="hover:text-ink-700">
           Mentor
         </Link>
         <span aria-hidden> / </span>
-        <span className="text-ink-700">Application</span>
+        <span aria-current="page" className="text-ink-800">Application</span>
       </nav>
 
-      <header>
-        <h1 className="font-display text-2xl font-semibold text-ink-900">{application.course.title}</h1>
-        <p className="mt-1 text-sm text-slate-500">Mentor application</p>
+      <header className="border-b border-slate-200 pb-5">
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink-900">{application.course.title}</h1>
+        <p className="mt-1 text-sm text-slate-600">Mentor application</p>
       </header>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Status</p>
+      <section className="rounded-lg border border-slate-200 bg-paper p-5">
+        <p className="text-xs font-semibold text-slate-600">Application status</p>
         <p className={`mt-1 font-display text-lg font-semibold ${meta.tone}`}>{meta.label}</p>
         <p className="mt-2 text-sm text-slate-600">{meta.next}</p>
       </section>
 
       {application.status === "INTERVIEW_SCHEDULED" && (application.interviewAt || application.interviewUrl) && (
-        <section className="rounded-xl border border-indigo-200 bg-indigo-50 p-5 text-sm">
-          <h2 className="font-display font-semibold text-indigo-900">Interview details</h2>
+        <section className="rounded-lg border border-brand-200 bg-brand-50/60 p-5 text-sm">
+          <h2 className="font-display font-semibold text-brand-900">Interview details</h2>
           {application.interviewAt && (
-            <p className="mt-2 text-indigo-800">Scheduled for {formatDate(application.interviewAt)}</p>
+            <p className="mt-2 text-brand-900">Scheduled for {formatDate(application.interviewAt)}</p>
           )}
           {(application.interviewUrl || interviewStatus) && (
             <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -138,7 +138,7 @@ export default function ApplicationDetailView({ id }: { id: string }) {
                     className={
                       interviewStatus === "Live now"
                         ? "font-semibold text-green-700"
-                        : "font-semibold text-indigo-700"
+                        : "font-semibold text-brand-800"
                     }
                   >
                     {interviewStatus}
@@ -150,7 +150,7 @@ export default function ApplicationDetailView({ id }: { id: string }) {
         </section>
       )}
 
-      <dl className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 text-sm">
+      <dl className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-paper p-5 text-sm">
         <div>
           <dt className="font-semibold text-ink-700">Reference</dt>
           <dd className="mt-0.5 font-mono text-slate-600">{application.id}</dd>
@@ -190,7 +190,7 @@ export default function ApplicationDetailView({ id }: { id: string }) {
         </div>
       </dl>
 
-      <p className="text-sm text-slate-500">
+      <p className="border-l-2 border-slate-300 pl-4 text-sm leading-relaxed text-slate-600">
         Editing or withdrawing an application is not currently supported. To apply for a different
         course, start a new application.
       </p>

@@ -33,7 +33,11 @@ export default function RouteError({
           {homeLabel}
         </Link>
       </div>
-      {error.digest && <p className="mt-6 font-mono text-xs text-slate-400">Reference: {error.digest}</p>}
+      {error.digest && (
+        <p className="mt-6 text-xs text-slate-500">
+          Reference: <code className="font-mono">{error.digest}</code>
+        </p>
+      )}
     </div>
   );
 }

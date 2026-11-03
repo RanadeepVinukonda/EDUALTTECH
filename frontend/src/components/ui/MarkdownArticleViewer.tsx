@@ -46,7 +46,7 @@ function CodeBlockWithCopy({ code, lang }: { code: string; lang: string }) {
             <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
           </div>
-          <span className="ml-2 font-mono text-[11px] font-bold tracking-wider text-slate-400">
+          <span className="ml-2 text-xs font-semibold text-slate-400">
             {displayLang}
           </span>
         </div>

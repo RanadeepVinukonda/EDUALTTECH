@@ -50,8 +50,8 @@ export default function OrdersView() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold text-ink-900">Orders</h1>
-        <p className="text-sm text-slate-500">Your purchases and their payment status.</p>
+        <h1 className="font-display text-2xl font-semibold text-ink">Orders</h1>
+        <p className="text-sm text-muted">Your purchases and their payment status.</p>
       </header>
 
       {orders.length === 0 ? (
@@ -65,25 +65,25 @@ export default function OrdersView() {
           }
         />
       ) : (
-        <ol className="flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+        <ol className="flex flex-col divide-y divide-rule border-y border-rule bg-paper">
           {orders.map((o) => {
             const isOpen = open === o.id;
             const payment = o.payments?.[0] ?? null;
             return (
               <li key={o.id} className="p-4 sm:p-5">
                 <div className="flex flex-wrap items-start gap-4">
-                  <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                  <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-paper-2">
                     <CoverImage src={o.course.thumbnailUrl} alt="" fallback="" className="h-full w-full" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-ink-900">{o.course.title}</p>
-                    <p className="mt-0.5 text-sm text-slate-500">
-                      Ref <span className="font-mono text-ink-700">{o.orderNumber}</span> · {formatDate(o.createdAt)}
+                    <p className="font-semibold text-ink">{o.course.title}</p>
+                    <p className="mt-0.5 text-sm text-muted">
+                      Ref <span className="font-mono text-ink-2">{o.orderNumber}</span>, {formatDate(o.createdAt)}
                     </p>
                     <p className="mt-1 text-sm">
                       <span className={STATUS_TONE[o.status]}>{STATUS_LABEL[o.status]}</span>
-                      <span className="text-slate-400"> · </span>
-                      <span className="font-semibold text-ink-900">{formatPrice(o.amountPaise, o.currency)}</span>
+                      <span className="text-rule">, </span>
+                      <span className="font-semibold text-ink">{formatPrice(o.amountPaise, o.currency)}</span>
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
@@ -104,7 +104,7 @@ export default function OrdersView() {
                 </div>
 
                 {isOpen && (
-                  <dl className="mt-4 grid gap-x-6 gap-y-2 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
+                  <dl className="mt-4 grid gap-x-6 gap-y-2 border-y border-rule bg-paper-2 p-4 text-sm sm:grid-cols-2">
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Order number</dt>
                       <dd className="font-mono text-ink-900">{o.orderNumber}</dd>

@@ -63,7 +63,7 @@ export default function SignupForm({
   return (
     <div className="space-y-6">
       <OAuthButtons next={next} />
-      <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-slate-400">
+      <div className="flex items-center gap-3 text-xs text-slate-400">
         <span className="h-px flex-1 bg-slate-200" /> or <span className="h-px flex-1 bg-slate-200" />
       </div>
       <form onSubmit={submit} className="space-y-4" noValidate>
@@ -93,7 +93,7 @@ export default function SignupForm({
                 href={`/login?email=${encodeURIComponent(email.trim())}`}
                 className="font-semibold underline hover:text-danger/90"
               >
-                Already have an account? Sign in →
+                Sign in
               </Link>
             </p>
           )}

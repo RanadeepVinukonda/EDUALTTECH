@@ -9,7 +9,6 @@ import { formatDate } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import CourseCard from "@/components/landing/CourseCard";
 import { meetingLabel } from "@/components/landing/CourseCardLive";
 
 export default function MentorDashboardView() {
@@ -43,68 +42,97 @@ export default function MentorDashboardView() {
   );
 
   return (
-    <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="font-display text-2xl font-semibold text-ink-900">Mentor</h1>
-        <p className="mt-1 text-sm text-slate-500">Your teaching assignments and applications.</p>
+    <div className="mx-auto flex max-w-6xl flex-col gap-8">
+      <header className="flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink-900">Mentor</h1>
+          <p className="mt-1 text-sm text-slate-600">Assignments and application follow-up, in one place.</p>
+        </div>
+        <Link
+          href="/dashboard/mentor/apply"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-paper px-4 py-2 text-sm font-semibold text-ink-700 transition hover:border-brand-500 hover:text-brand-800"
+        >
+          Find a course to teach
+        </Link>
       </header>
 
       <section aria-labelledby="teaching-h">
-        <h2 id="teaching-h" className="font-display text-lg font-semibold text-ink-900">
-          Teaching
-        </h2>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="teaching-h" className="font-display text-lg font-semibold text-ink-900">Current assignments</h2>
+          <p className="text-xs text-slate-500">{courses.length} assigned course{courses.length === 1 ? "" : "s"}</p>
+        </div>
         {courses.length === 0 ? (
-          <div className="mt-3">
+          <div>
             <EmptyState
               title="No teaching assignments"
               description="You are not assigned to teach any course yet. Accepted mentors appear here once assigned. Apply from a course page."
             />
           </div>
         ) : (
-          <div className="mt-3 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 bg-paper">
             {courses.map((c) => (
-              <CourseCard
-                key={c.id}
-                course={c.course}
-                href={`/dashboard/mentor/courses/${c.course.slug}`}
-                badge={c.course.status !== "PUBLISHED" ? c.course.status.toLowerCase() : undefined}
-                priceLabel="Mentoring"
-                viewLabel="Open teaching workspace"
-                stats={[
-                  { label: "Students", value: String(c.course._count?.participants ?? 0) },
-                  { label: "Lessons live", value: `${c.lessonsPublished ?? 0}/${c.lessonsTotal ?? 0}` },
-                  { label: "Next meeting", value: c.nextMeetingAt ? meetingLabel(c.nextMeetingAt) : "Not scheduled" },
-                ]}
-              />
+              <li key={c.id} className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="truncate font-display text-base font-semibold text-ink-900">{c.course.title}</h3>
+                    {c.course.status !== "PUBLISHED" && (
+                      <span className="rounded bg-amber-50 px-2 py-1 text-[11px] font-semibold capitalize text-amber-900">
+                        {c.course.status.toLowerCase()}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-slate-600">{c.course.category}</p>
+                  <dl className="mt-3 grid grid-cols-2 gap-x-5 gap-y-2 sm:grid-cols-3">
+                    <div>
+                      <dt className="text-xs font-semibold text-slate-600">Learners</dt>
+                      <dd className="mt-0.5 text-sm font-semibold tabular-nums text-ink-900">{c.course._count?.participants ?? 0}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold text-slate-600">Lessons live</dt>
+                      <dd className="mt-0.5 text-sm font-semibold tabular-nums text-ink-900">{c.lessonsPublished ?? 0}/{c.lessonsTotal ?? 0}</dd>
+                    </div>
+                    <div className="col-span-2 sm:col-span-1">
+                      <dt className="text-xs font-semibold text-slate-600">Next meeting</dt>
+                      <dd className="mt-0.5 text-sm font-semibold text-ink-900">{c.nextMeetingAt ? meetingLabel(c.nextMeetingAt) : "Not scheduled"}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <Link
+                  href={`/dashboard/mentor/courses/${c.course.slug}`}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+                >
+                  Open workspace
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </section>
 
       {acceptedUnassigned.map((a) => (
-        <p key={a.id} role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          You were accepted for <strong>{a.course.title}</strong>, but no teaching assignment is active yet.
-          Your workspace will appear once assigned.
+        <p key={a.id} role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <strong>{a.course.title}</strong>. Your application was accepted, but a teaching assignment is not active yet. Your workspace will appear once assigned.
         </p>
       ))}
 
       <section aria-labelledby="apps-h">
-        <h2 id="apps-h" className="font-display text-lg font-semibold text-ink-900">
-          Your applications
-        </h2>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="apps-h" className="font-display text-lg font-semibold text-ink-900">Application tracking</h2>
+          <p className="text-xs text-slate-500">{apps.length} application{apps.length === 1 ? "" : "s"}</p>
+        </div>
         {apps.length === 0 ? (
-          <div className="mt-3">
+          <div>
             <EmptyState
               title="No applications yet"
               description="Apply to teach a course and track its review status here."
             />
           </div>
         ) : (
-          <ul className="mt-3 flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+          <ul className="flex flex-col divide-y divide-slate-200 rounded-lg border border-slate-200 bg-paper">
             {apps.map((a) => {
               const meta = APPLICATION_STATUS_META[a.status];
               return (
-                <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+                <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-5">
                   <div className="min-w-0">
                     <p className="font-semibold text-ink-900">{a.course.title}</p>
                     <p className="mt-0.5 text-sm text-slate-500">
@@ -114,9 +142,9 @@ export default function MentorDashboardView() {
                   </div>
                   <Link
                     href={`/dashboard/mentor/applications/${a.id}`}
-                    className="text-sm font-semibold text-brand-700 hover:text-brand-800"
+                    className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-brand-800 transition hover:bg-brand-50"
                   >
-                    View application →
+                    Review status
                   </Link>
                 </li>
               );

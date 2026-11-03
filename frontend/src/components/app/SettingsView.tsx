@@ -52,27 +52,27 @@ export default function SettingsView() {
   const archived = Boolean(user.deactivationScheduledAt) && user.isActive;
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8">
       <header>
-        <h1 className="font-display text-3xl font-semibold text-ink-900">Account settings</h1>
-        <p className="mt-1 text-[15px] text-slate-500">
-          Manage your contact details and account status. Your learning profile lives on your profile page.
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Account settings</h1>
+        <p className="mt-2 text-[15px] text-muted">
+          Manage your account details; update your learning profile on its page.
         </p>
       </header>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="font-display text-lg font-semibold text-ink-900">Account</h2>
+      <section className="border-y border-rule bg-paper px-5 py-6 sm:px-7">
+        <h2 className="font-display text-lg font-semibold text-ink">Account</h2>
         <dl className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <dt className="text-sm font-semibold text-ink-700">Email</dt>
-            <dd className="mt-1 text-[15px] text-slate-600">{user.email}</dd>
+            <dt className="text-sm font-semibold text-ink-2">Email</dt>
+            <dd className="mt-1 text-[15px] text-muted">{user.email}</dd>
           </div>
           <div>
-            <dt className="text-sm font-semibold text-ink-700">Account type</dt>
-            <dd className="mt-1 text-[15px] text-slate-600">{user.role === "ADMIN" ? "Administrator" : "Member"}</dd>
+            <dt className="text-sm font-semibold text-ink-2">Account type</dt>
+            <dd className="mt-1 text-[15px] text-muted">{user.role === "ADMIN" ? "Administrator" : "Member"}</dd>
           </div>
         </dl>
-        <p className="mt-4 text-sm text-slate-500">
+        <p className="mt-4 text-sm text-muted">
           Personal details and your learning profile are on the{" "}
           <Link href="/dashboard/profile" className="font-semibold text-brand-700 hover:underline">
             profile page
@@ -81,16 +81,16 @@ export default function SettingsView() {
         </p>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="font-display text-lg font-semibold text-ink-900">Mobile number</h2>
-        <p className="mb-4 mt-1 text-sm text-slate-500">
+      <section className="border-y border-rule bg-paper px-5 py-6 sm:px-7">
+        <h2 className="font-display text-lg font-semibold text-ink">Mobile number</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">
           Required to purchase paid courses or apply as a mentor. We only ask when you need it.
         </p>
         <MobileVerification />
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="font-display text-lg font-semibold text-ink-900">Account status</h2>
+      <section className="border-y border-rule bg-paper px-5 py-6 sm:px-7">
+        <h2 className="font-display text-lg font-semibold text-ink">Account status</h2>
 
         {archived ? (
           <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
@@ -113,7 +113,7 @@ export default function SettingsView() {
             </p>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-muted">
             Your account is active. You can archive it to schedule deactivation in 30 days, or deactivate it right away.
             Deactivated accounts keep their data and can be reactivated by signing in again.
           </p>

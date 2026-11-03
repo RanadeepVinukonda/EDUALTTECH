@@ -171,12 +171,12 @@ export default function AdminApplicationReview({ id }: { id: string }) {
       <Panel title="Submission">
         <div className="space-y-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Qualification</p>
+            <p className="text-xs font-semibold text-slate-500">Qualification</p>
             <p className="mt-1 whitespace-pre-wrap text-[15px] text-ink-900">{application.qualification}</p>
           </div>
           {application.message && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Message</p>
+              <p className="text-xs font-semibold text-slate-500">Message</p>
               <p className="mt-1 whitespace-pre-wrap text-[15px] text-ink-900">{application.message}</p>
             </div>
           )}

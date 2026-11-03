@@ -57,7 +57,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   if (error) {
     return (
       <div className={`${wrap} py-24`}>
-        <div role="alert" className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center">
+        <div role="alert" className="mx-auto max-w-md border-y border-slate-200 bg-paper-2 p-8">
           <h1 className="font-display text-xl font-semibold text-ink-900">We couldn&apos;t load this course</h1>
           <p className="mt-2 text-ink-600">There was a problem reaching the server. Please try again.</p>
           <div className="mt-6 flex justify-center gap-3">
@@ -124,10 +124,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-paper">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
+      <div className="border-b border-slate-200 bg-paper-2">
       <div className={`${wrap} pt-6`}>
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-1.5 text-sm text-ink-600">
@@ -155,15 +156,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
       </div>
 
       {/* Course header */}
-      <header className={`${wrap} pb-6 pt-5`}>
-        <h1 className="max-w-[820px] font-display text-[30px] font-semibold leading-[1.14] tracking-tight text-ink-900 break-words sm:text-[42px]">
+      <header className={`${wrap} pb-8 pt-7 sm:pt-10`}>
+        <h1 className="max-w-[900px] font-display text-display-s font-semibold leading-[1.08] tracking-tight text-ink-900 break-words">
           {course.title}
         </h1>
-        <p className="mt-2 text-[13px] font-medium uppercase tracking-wider text-ink-500">
-          {typeLabel}
-          {course.domain && <span className="text-ink-500"> · {course.domain}</span>}
+        <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-500">
+          <span>{typeLabel}</span>
+          {course.domain && <span className="border-l border-rule pl-3">{course.domain}</span>}
         </p>
-        <p className="mt-3 max-w-3xl text-[15.5px] leading-7 text-ink-600">{course.description}</p>
+        <p className="mt-4 max-w-3xl text-lead leading-7 text-ink-600">{course.description}</p>
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-500">
           <span>Self-paced</span>
           {course.level && (
@@ -180,9 +181,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           )}
         </div>
       </header>
+      </div>
 
       {/* Section tabs */}
-      <nav aria-label="Course sections" className="border-y border-slate-200">
+      <nav aria-label="Course sections" className="border-b border-slate-200 bg-paper">
         <div className={`${wrap} -mb-px flex gap-6 overflow-x-auto`}>
           <a href="#about" className="whitespace-nowrap border-b-2 border-ink-900 py-3.5 text-[14px] font-medium text-ink-900">
             Overview
@@ -190,16 +192,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           <a href="#syllabus" className="whitespace-nowrap border-b-2 border-transparent py-3.5 text-[14px] font-medium text-ink-500 hover:border-slate-300 hover:text-ink-900">
             Syllabus
           </a>
-          <a href="#instructors" className="whitespace-nowrap border-b-2 border-transparent py-3.5 text-[14px] font-medium text-ink-500 hover:border-slate-300 hover:text-ink-900">
-            Instructors
-          </a>
           <a href="#mentors" className="whitespace-nowrap border-b-2 border-transparent py-3.5 text-[14px] font-medium text-ink-500 hover:border-slate-300 hover:text-ink-900">
             Mentors
           </a>
         </div>
       </nav>
 
-      <div className={`${wrap} grid gap-12 py-10 lg:grid-cols-[minmax(0,1fr)_360px]`}>
+      <div className={`${wrap} grid gap-10 py-8 sm:py-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-16`}>
         <main className="min-w-0">
           {/* What you'll learn + skills */}
           <section id="about" aria-labelledby="learn-heading" className="scroll-mt-24">
@@ -230,43 +229,26 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               </p>
             )}
 
-            {/* Prerequisites & Target Audience */}
-            {(Boolean(course.prerequisites?.length) || Boolean(course.targetAudience)) && (
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                {course.prerequisites && course.prerequisites.length > 0 && (
-                  <div className="rounded-xl border border-slate-200 bg-white p-5">
-                    <h3 className="font-display text-sm font-semibold text-ink-900">
-                      Prerequisites
-                    </h3>
-                    <ul className="mt-3 space-y-1.5">
-                      {course.prerequisites.map((p) => (
-                        <li key={p} className="flex items-start gap-2 text-xs text-slate-700">
-                          <span aria-hidden className="mt-2 h-px w-3 shrink-0 bg-slate-300" />
-                          <span>{p}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {course.targetAudience && (
-                  <div className="rounded-xl border border-slate-200 bg-white p-5">
-                    <h3 className="font-display text-sm font-semibold text-ink-900">
-                      Target Audience
-                    </h3>
-                    <p className="mt-3 text-xs leading-relaxed text-slate-700">
-                      {course.targetAudience}
-                    </p>
-                  </div>
-                )}
+            {course.prerequisites && course.prerequisites.length > 0 && (
+              <div className="mt-8 rounded-xl border border-slate-200 bg-white p-5">
+                <h3 className="font-display text-sm font-semibold text-ink-900">
+                  Prerequisites
+                </h3>
+                <ul className="mt-3 space-y-1.5">
+                  {course.prerequisites.map((p) => (
+                    <li key={p} className="flex items-start gap-2 text-xs text-slate-700">
+                      <span aria-hidden className="mt-2 h-px w-3 shrink-0 bg-slate-300" />
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
             {skills.length > 0 && (
               <>
                 <h3 className="mt-8 font-display text-[18px] font-semibold text-ink-900">Skills you&apos;ll gain</h3>
-                <p className="mt-2 text-[14.5px] leading-7 text-ink-700">
-                  {skills.join(" · ")}
-                </p>
+                <p className="mt-2 text-[14.5px] leading-7 text-ink-700">{skills.join(", ")}</p>
               </>
             )}
 
@@ -277,28 +259,17 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               </>
             )}
 
-            {/* Bridge: Courses -> Free Supplementary Resources */}
-            <div className="mt-10 border-t border-slate-200 pt-6">
-              <h3 className="font-display text-base font-semibold text-ink-900">
-                Free supplementary guides
-              </h3>
-              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-600">
-                Study the concepts independently before or alongside this course in our open knowledge library.
-              </p>
-              <Link href="/resources" className="mt-3 inline-flex text-sm font-semibold text-brand-700 hover:text-brand-800">
-                Explore free resources →
-              </Link>
-            </div>
           </section>
 
           {/* Syllabus */}
-          <section id="syllabus" aria-labelledby="syllabus-heading" className="mt-12 scroll-mt-24">
+          <section id="syllabus" aria-labelledby="syllabus-heading" className="mt-12 scroll-mt-24 border-t border-slate-200 pt-8">
             <h2 id="syllabus-heading" className="font-display text-[22px] font-semibold text-ink-900 sm:text-[26px]">
               Syllabus
             </h2>
-            <p className="mt-1 text-[13px] text-ink-500">
-              {course.chapters.length} {course.chapters.length === 1 ? "module" : "modules"}
-              {lessonsTotal > 0 && ` · ${lessonsTotal} lessons`} · Self-paced
+            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-500">
+              <span>{course.chapters.length} {course.chapters.length === 1 ? "module" : "modules"}</span>
+              {lessonsTotal > 0 && <span className="border-l border-rule pl-3">{lessonsTotal} lessons</span>}
+              <span className="border-l border-rule pl-3">Self-paced</span>
             </p>
             {course.chapters.length > 0 ? (
               <div className="mt-2 divide-y divide-slate-200 border-b border-slate-200">
@@ -316,12 +287,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                           <span className="block text-[16.5px] font-semibold leading-6 text-ink-900">{ch.title}</span>
                           <span className="mt-0.5 block text-[13px] text-ink-500">
                             {chapterLessons} {chapterLessons === 1 ? "lesson" : "lessons"}
-                            {published.length > 0 && published.length < chapterLessons && ` · ${published.length} available now`}
+                            {published.length > 0 && published.length < chapterLessons && ` (${published.length} available now)`}
                           </span>
                         </span>
                         <ExpandMore
                           fontSize="small"
-                          className="mt-1 shrink-0 text-ink-500 transition-transform group-open:rotate-180"
+                          className="mt-1 shrink-0 text-ink-500 transition-transform motion-reduce:transition-none group-open:rotate-180"
                         />
                       </summary>
 
@@ -333,7 +304,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                           ch.topics.map((t) => (
                             <div key={t.id} className="mt-3 first:mt-0">
                               {hasMultipleTopics && (
-                                <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-wider text-ink-500">{t.title}</p>
+                                <p className="mb-1.5 text-sm font-medium text-ink-500">{t.title}</p>
                               )}
                               {t.lessons.length > 0 ? (
                                 <ul>
@@ -366,39 +337,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             )}
           </section>
 
-          {/* Instructors */}
-          <section id="instructors" aria-labelledby="instructors-heading" className="mt-12 scroll-mt-24">
-            <h2 id="instructors-heading" className="font-display text-[22px] font-semibold text-ink-900 sm:text-[26px]">
-              Instructor
-            </h2>
-            <div className="mt-4 flex gap-4 rounded-xl border border-slate-200 p-5">
-              <div className="grid h-[72px] w-[72px] shrink-0 place-items-center overflow-hidden rounded-xl bg-slate-100 text-xl font-semibold text-ink-700">
-                {course.createdBy ? (
-                  <CoverImage
-                    src={course.createdBy.avatarUrl}
-                    alt=""
-                    fallback={`${course.createdBy.firstName[0] ?? ""}${course.createdBy.lastName[0] ?? ""}`.toUpperCase()}
-                  />
-                ) : (
-                  <span>EA</span>
-                )}
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-[17px] font-semibold text-ink-900">
-                  {course.createdBy ? `${course.createdBy.firstName} ${course.createdBy.lastName}` : "EduAltTech"}
-                </h3>
-                <p className="text-[13px] text-ink-500">
-                  {course.createdBy ? "Course instructor" : "Offered by EduAltTech"}
-                </p>
-                <p className="mt-1.5 text-[14px] leading-6 text-ink-600">
-                  {course.createdBy?.bio || "Leads this course and its curriculum."}
-                </p>
-              </div>
-            </div>
-          </section>
-
           {/* Mentors */}
-          <section id="mentors" aria-labelledby="mentors-heading" className="mt-12 scroll-mt-24">
+          <section id="mentors" aria-labelledby="mentors-heading" className="mt-12 scroll-mt-24 border-t border-slate-200 pt-8">
             <h2 id="mentors-heading" className="font-display text-[22px] font-semibold text-ink-900 sm:text-[26px]">
               Course mentors
             </h2>
@@ -432,7 +372,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </div>
                 <p className="mt-5 font-display text-base font-semibold text-ink-900">Waiting for a mentor</p>
                 <p className="mx-auto mt-1 max-w-md text-sm text-ink-600">
-                  No mentor is assigned to this course yet. Check back soon — you can still apply to mentor below.
+                  No mentor is assigned to this course yet. Check back soon, or apply to mentor below.
                 </p>
               </div>
             )}
@@ -441,7 +381,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
         {/* Enrolment rail */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+          <div className="overflow-hidden border border-slate-200 bg-paper-2">
             <div className="relative aspect-video">
               {course.thumbnailUrl ? (
                 <CoverImage src={course.thumbnailUrl} alt={course.title} fallback="" />
@@ -457,7 +397,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <CourseActions courseId={course.id} slug={course.slug} pricePaise={course.pricePaise} currency={course.currency} />
           </div>
 
-          <dl className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 px-5 text-[13.5px]">
+          <dl className="mt-4 divide-y divide-slate-200 border-y border-slate-200 px-4 text-[13.5px]">
             {course.enrolledCount > 0 && (
               <div className="flex items-center justify-between gap-4 py-3">
                 <dt className="text-ink-600">Learners enrolled</dt>
@@ -485,7 +425,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           </dl>
 
           <p className="mt-3 text-[11.5px] leading-relaxed text-ink-500">
-            Seats are limited. Learning content unlocks only after confirmed enrolment.
+            Seats are limited. Learning content becomes available after confirmed enrolment.
           </p>
           <div className="mt-5 flex flex-col gap-2 text-sm">
             <Link href="/courses" className="font-semibold text-brand-700 hover:text-brand-800">
