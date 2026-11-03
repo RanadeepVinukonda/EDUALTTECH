@@ -13,3 +13,7 @@ npm-debug.log*
 .vercel
 .turbo
 tsconfig.tsbuildinfo
+.hallmark
+.claude
+.freebuff
+
