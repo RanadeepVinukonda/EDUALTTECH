@@ -7,7 +7,6 @@ import TrustCredibility from "@/components/landing/TrustCredibility";
 import Offerings from "@/components/landing/Offerings";
 import CurriculumPreview from "@/components/landing/CurriculumPreview";
 import Pathway from "@/components/landing/Pathway";
-import HowItWorksSection from "@/components/landing/HowItWorksSection";
 
 export const metadata: Metadata = {
   title: "EduAltTech — Practical Learning, Alternate Skills & Working Mentors",
@@ -35,9 +34,6 @@ export default function HomePage() {
 
       {/* 6. How It Works */}
       <Pathway />
-
-      {/* 7. How Learning Works */}
-      <HowItWorksSection />
 
       {/* 9. Final Call to Action */}
       <section className="bg-ink-900 py-16 sm:py-24">

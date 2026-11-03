@@ -19,21 +19,21 @@ const FEATURES: Feature[] = [
     title: "Find your course",
     content:
       "Browse by track, category, or skill. Every course shows its roadmap, chapters, mentor, and price before you commit.",
-    image: "/media/photos/EAT2.jpg",
+    image: "/media/photos/find course.jpg",
   },
   {
     id: "Enroll and start",
     title: "Enroll and start",
     content:
       "Create a free account, enroll, and work through chapters at your own pace. Free open notes need no login.",
-    image: "/media/photos/EAT3.jpg",
+    image: "/media/photos/enroll.jpg",
   },
   {
     id: "Learn with a mentor",
     title: "Learn with a mentor",
     content:
       "Submit projects, get feedback, and book 1-on-1 check-ins with the practitioner who built the course.",
-    image: "/media/photos/EAT4.jpg",
+    image: "/media/photos/start learning.jpg",
   },
 ];
 
