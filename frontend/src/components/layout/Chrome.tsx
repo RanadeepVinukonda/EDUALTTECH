@@ -6,6 +6,7 @@ import PublicFooter from "./PublicFooter";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import DashboardShell from "@/components/app/DashboardShell";
 import { useAuth } from "@/components/app/AuthProvider";
+import Spinner from "@/components/ui/Spinner";
 
 // Auth transitions render with no page chrome at all.
 const AUTH_BARE = [
@@ -25,7 +26,7 @@ const AUTH_FLOW = ["/checkout"];
 
 export default function Chrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const matches = (p: string) => pathname === p || pathname.startsWith(`${p}/`);
 
@@ -42,6 +43,17 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
   if (matches("/dashboard")) return bare;
 
   if (AUTH_BARE.some(matches)) return bare;
+
+  if (loading) {
+    return (
+      <>
+        <OfflineBanner />
+        <main id="main" className="grid flex-1 place-items-center">
+          <Spinner label="Checking your session..." />
+        </main>
+      </>
+    );
+  }
 
   // Signed-in users see their own workspace nav on every page - never the
   // marketing header. Public routes still keep the footer.

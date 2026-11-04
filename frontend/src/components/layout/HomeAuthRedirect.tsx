@@ -2,22 +2,17 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { hasSession } from "@/lib/auth";
+import { useAuth } from "@/components/app/AuthProvider";
 
 export default function HomeAuthRedirect() {
   const router = useRouter();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    let active = true;
-    hasSession()
-      .then((yes) => {
-        if (active && yes) router.replace("/dashboard");
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [router]);
+    if (!loading && user) {
+      router.replace(user.role === "ADMIN" ? "/dashboard/admin" : "/dashboard");
+    }
+  }, [loading, router, user]);
 
   return null;
 }

@@ -7,7 +7,7 @@ import Menu from "@mui/icons-material/Menu";
 import Close from "@mui/icons-material/Close";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { cn } from "@/lib/cn";
-import { hasSession } from "@/lib/auth";
+import { useAuth } from "@/components/app/AuthProvider";
 import LinkButton from "@/components/ui/LinkButton";
 import BrandLogo from "@/components/brand/BrandLogo";
 import ResourcesCategoryMenu, { useResourceTopics } from "@/components/layout/ResourcesCategoryMenu";
@@ -23,8 +23,8 @@ const NAV = [
 export default function PublicHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
   const [resourcesMobileOpen, setResourcesMobileOpen] = useState(false);
+  const { user } = useAuth();
   const topics = useResourceTopics();
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
@@ -32,20 +32,6 @@ export default function PublicHeader() {
     setResourcesMobileOpen(false);
     setOpen(false);
   }, [pathname]);
-
-  useEffect(() => {
-    let active = true;
-    hasSession()
-      .then((yes) => {
-        if (active) setSignedIn(yes);
-      })
-      .catch(() => {
-        if (active) setSignedIn(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   return (
     <header className="sticky top-0 z-40 border-b border-rule bg-paper/95 backdrop-blur">
@@ -81,9 +67,9 @@ export default function PublicHeader() {
             ),
           )}
           <span className="mx-1 h-5 w-px bg-rule" aria-hidden />
-          {signedIn ? (
+          {user ? (
             <Link
-              href="/dashboard"
+              href={user.role === "ADMIN" ? "/dashboard/admin" : "/dashboard"}
               className="rounded-md px-3.5 py-2 text-sm font-semibold text-accent transition-colors hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               Dashboard
@@ -179,9 +165,9 @@ export default function PublicHeader() {
             )}
           </ul>
           <div className="mt-3 flex flex-col gap-2 border-t border-rule pt-3">
-            {signedIn ? (
+            {user ? (
               <Link
-                href="/dashboard"
+                href={user.role === "ADMIN" ? "/dashboard/admin" : "/dashboard"}
                 onClick={() => setOpen(false)}
                 className="rounded-md px-3 py-2 text-center text-sm font-semibold text-accent transition-colors hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               >

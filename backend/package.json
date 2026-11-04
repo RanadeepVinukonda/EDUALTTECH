@@ -5,6 +5,7 @@
   "description": "Edu-Alt-Tech API - Express 5 + TypeScript + Prisma + Supabase Postgres",
   "main": "dist/server.js",
   "scripts": {
+    "predev": "prisma generate",
     "dev": "tsx watch src/server.ts",
     "build": "prisma generate && tsc -p tsconfig.json",
     "start": "node dist/server.js",
