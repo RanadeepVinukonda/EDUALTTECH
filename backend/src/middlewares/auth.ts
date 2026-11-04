@@ -14,7 +14,7 @@ async function attach(req: Request<any>): Promise<boolean> {
   if (!auth) return false;
 
   const user = await prisma.user.findUnique({
-    where: { id: auth.id },
+    where: { email: auth.email },
     select: { id: true, email: true, role: true, isActive: true },
   });
   if (!user || !user.isActive) return false;

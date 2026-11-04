@@ -3,7 +3,7 @@ import { createHash, randomInt } from "node:crypto";
 import { z } from "zod";
 import { config, isProd } from "../../config/env.js";
 import { prisma } from "../../lib/prisma.js";
-import { supabaseAdmin, getUserByToken } from "../../lib/supabase.js";
+import { supabaseAdmin } from "../../lib/supabase.js";
 import { uploadPublic, uploadPrivate, signedUrl, removePrivate, assertUploadable, assertPublicImage, contentTypeFor } from "../../lib/storage.js";
 import { sendEmail, layout } from "../../lib/email.js";
 import { audit } from "../../lib/audit.js";
@@ -191,8 +191,9 @@ router.post(
       );
     }
     const tokens = await signIn(email, password);
-    const authUser = await getUserByToken(tokens.accessToken);
-    const found = authUser ? await prisma.user.findUnique({ where: { id: authUser.id } }) : null;
+    // Resolve the local profile by email (the stable identity). The Supabase user
+    // id can drift from the stored profile id after auth-user recreation.
+    const found = await prisma.user.findUnique({ where: { email } });
     if (!found) throw ApiError.unauthorized("Incorrect email or password");
     const user = await applyArchiveDeadline(found);
     // Deactivated accounts sign in to reach the reactivation prompt; the
@@ -393,8 +394,7 @@ router.post(
   async (req, res) => {
     const { email, password } = body<{ email: string; password: string }>(req);
     const tokens = await signIn(email, password);
-    const authUser = await getUserByToken(tokens.accessToken);
-    const found = authUser ? await prisma.user.findUnique({ where: { id: authUser.id } }) : null;
+    const found = await prisma.user.findUnique({ where: { email } });
     if (!found) throw ApiError.notFound("Account not found");
     const user = found.isActive
       ? found
@@ -622,7 +622,7 @@ router.post("/oauth/sync", authLimiter, async (req, res) => {
   const authUser = data?.user;
   if (error || !authUser?.email) throw ApiError.unauthorized("Invalid token");
 
-  let user = await prisma.user.findUnique({ where: { id: authUser.id } });
+  let user = await prisma.user.findUnique({ where: { email: authUser.email } });
   if (!user) {
     const meta = (authUser.user_metadata ?? {}) as Record<string, unknown>;
     const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : "");
@@ -638,7 +638,7 @@ router.post("/oauth/sync", authLimiter, async (req, res) => {
       audit(user.id, "user.registered", "user", user.id, { via: "oauth" });
     } catch {
       // A concurrent request may have created it already.
-      user = await prisma.user.findUnique({ where: { id: authUser.id } });
+      user = await prisma.user.findUnique({ where: { email: authUser.email } });
     }
   }
   if (!user) throw ApiError.badRequest("Could not provision your account. Please sign in again.");
