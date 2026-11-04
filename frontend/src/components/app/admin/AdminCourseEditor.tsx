@@ -24,7 +24,7 @@ import { AdminHeader, Panel, Skeleton, StatusPill, statusTone, useAsync } from "
 import { MediaPicker, MediaReference } from "./cms-ui";
 import AdminRoadmapBuilder from "./AdminRoadmapBuilder";
 import AdminParticipants from "./AdminParticipants";
-import AdminNewCourseWizard from "./AdminNewCourseWizard";
+import AdminNewCourseWizard, { CATEGORY_OPTIONS } from "./AdminNewCourseWizard";
 
 const MAX_PAISE = 10_000_000;
 
@@ -231,6 +231,7 @@ function CourseForm({
   const urlInvalid = thumbnailUrl.trim().length > 0 && !isUrl(thumbnailUrl.trim());
   const thumbMissing = thumbnailUrl.trim().length === 0;
   const featureList = features.map((f) => f.trim()).filter(Boolean);
+  const categoryOptions = Array.from(new Set([category, ...CATEGORY_OPTIONS].filter(Boolean)));
   const formValid =
     title.trim().length >= 3 &&
     description.trim().length >= 10 &&
@@ -380,7 +381,13 @@ function CourseForm({
                 </div>
                 <div>
                   <label htmlFor="c-category" className="mb-1 block text-sm font-semibold text-ink-700">Category</label>
-                  <Input id="c-category" value={category} icon={<Category fontSize="small" />} onChange={(e) => setCategory(e.target.value)} maxLength={60} placeholder="Programming, Design, Music…" />
+                  <Select id="c-category" value={category} icon={<Category fontSize="small" />} onChange={(e) => setCategory(e.target.value)}>
+                    {categoryOptions.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
                 <div>
                   <label htmlFor="c-level" className="mb-1 block text-sm font-semibold text-ink-700">Level</label>
