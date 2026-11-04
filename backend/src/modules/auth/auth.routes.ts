@@ -257,9 +257,10 @@ router.post(
   validate({ body: z.object({ email: emailSchema }) }),
   async (req, res) => {
     const { email } = body<{ email: string }>(req);
+    const redirectTo = `${config.appBaseUrl}/reset-password`;
     const user = await prisma.user.findUnique({ where: { email } });
+    let delivered = false;
     if (user) {
-      const redirectTo = `${config.appBaseUrl}/reset-password`;
       try {
         const { data } = await supabaseAdmin().auth.admin.generateLink({
           type: "recovery",
@@ -268,9 +269,8 @@ router.post(
         });
         const link =
           data?.properties && "action_link" in data.properties ? data.properties.action_link : undefined;
-        let sent = false;
         if (link) {
-          sent = await sendEmail({
+          delivered = await sendEmail({
             to: email,
             subject: "Reset your EduAltTech password",
             html: layout(
@@ -281,14 +281,14 @@ router.post(
             ),
           });
         }
-        if (!sent) {
-          // Branded send failed/unavailable - fall back to Supabase's own mailer.
-          await sendSupabaseRecoveryEmail(email, redirectTo);
-        }
       } catch (err) {
         logger.error("forgot-password failed", { err: String(err) });
-        await sendSupabaseRecoveryEmail(email, redirectTo);
       }
+    }
+    if (!delivered) {
+      // Branded send unavailable, or a Supabase-only account (e.g. OAuth) without a
+      // local profile - let Supabase's own mailer deliver the recovery link.
+      await sendSupabaseRecoveryEmail(email, redirectTo);
     }
     // Always the same response - no account-existence oracle.
     res.json({ success: true, data: { ok: true } });
