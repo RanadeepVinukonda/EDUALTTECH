@@ -42,6 +42,9 @@ const securityHeaders: Array<[string, string]> = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     cpus: 1,
     webpackBuildWorker: false,

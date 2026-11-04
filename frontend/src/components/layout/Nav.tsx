@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { cn } from "@/lib/cn";
 import { MenuOutlined, CloseOutlined } from "@mui/icons-material";
-
-const MOBILE_BREAKPOINT = "md";
 
 export function Nav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

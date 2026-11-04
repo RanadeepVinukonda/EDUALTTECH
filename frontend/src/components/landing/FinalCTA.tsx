@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { cn } from "@/lib/cn";
 
 export default function FinalCTA() {
   return (

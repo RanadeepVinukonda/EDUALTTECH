@@ -6,7 +6,6 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import Search from "@mui/icons-material/Search";
 import { api } from "@/lib/api";
 import type {
-  ResourceLearningPathArticle,
   ResourceLearningPathCategory,
 } from "@/lib/types";
 import { cn } from "@/lib/cn";
@@ -15,12 +14,6 @@ interface Props {
   pathname: string;
   onNavigate: () => void;
   mobile?: boolean;
-}
-
-interface LearningPathLesson {
-  article: ResourceLearningPathArticle;
-  category: string;
-  chapter: string;
 }
 
 export default function WorkspaceResourcesDropdown({

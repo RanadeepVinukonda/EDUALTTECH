@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { cn } from "@/lib/cn";
 
 const FOOTER_LINKS = {
   about: { title: "About", href: "/about" },

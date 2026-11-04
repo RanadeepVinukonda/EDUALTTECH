@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import ArrowForward from "@mui/icons-material/ArrowForward";
-import { cn } from "@/lib/cn";
 
 interface PollOption {
   id: string;
