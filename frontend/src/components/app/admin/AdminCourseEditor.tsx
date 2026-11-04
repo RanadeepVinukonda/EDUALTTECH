@@ -211,6 +211,19 @@ function CourseForm({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
+  const [resourceCategories, setResourceCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiGet<{ categories: { name: string }[] }>("/resources/categories")
+      .then((res) => {
+        if (!cancelled) setResourceCategories(res.categories.map((c) => c.name).filter(Boolean));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const dirty =
     title !== initial.title ||
@@ -231,7 +244,7 @@ function CourseForm({
   const urlInvalid = thumbnailUrl.trim().length > 0 && !isUrl(thumbnailUrl.trim());
   const thumbMissing = thumbnailUrl.trim().length === 0;
   const featureList = features.map((f) => f.trim()).filter(Boolean);
-  const categoryOptions = Array.from(new Set([category, ...CATEGORY_OPTIONS].filter(Boolean)));
+  const categoryOptions = Array.from(new Set([category, ...CATEGORY_OPTIONS, ...resourceCategories].filter(Boolean)));
   const formValid =
     title.trim().length >= 3 &&
     description.trim().length >= 10 &&
