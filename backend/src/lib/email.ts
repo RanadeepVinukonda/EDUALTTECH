@@ -37,6 +37,8 @@ export function layout(title: string, intro: string, ctaLabel?: string, ctaUrl?:
   </div></body></html>`;
 }
 
+let warnedTestSender = false;
+
 /**
  * Sends via Resend REST (no SDK dependency). Failures are logged and swallowed -
  * callers must never let email delivery corrupt a business transaction.
@@ -47,6 +49,13 @@ export async function sendEmail(input: EmailInput): Promise<boolean> {
     logger.warn("email skipped - RESEND_API_KEY not set", { to: input.to, subject });
     return false;
   }
+  if (!warnedTestSender && config.email.from.includes("onboarding@resend.dev")) {
+    warnedTestSender = true;
+    logger.warn(
+      "email is using the Resend test sender (onboarding@resend.dev) - it can only deliver to the Resend account owner's address. Verify a domain and set EMAIL_FROM to an address on it.",
+      { from: config.email.from },
+    );
+  }
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -54,7 +63,8 @@ export async function sendEmail(input: EmailInput): Promise<boolean> {
       body: JSON.stringify({ from: config.email.from, to: [input.to], subject, html: input.html }),
     });
     if (!res.ok) {
-      logger.error("email send failed", { status: res.status, subject });
+      const detail = await res.text().catch(() => "");
+      logger.error("email send failed", { status: res.status, subject, to: input.to, detail: detail.slice(0, 500) });
       return false;
     }
     return true;

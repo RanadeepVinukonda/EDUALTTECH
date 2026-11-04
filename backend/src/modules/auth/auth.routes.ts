@@ -11,6 +11,7 @@ import { requireAuth } from "../../middlewares/auth.js";
 import { authLimiter, codeLimiter, passwordResetLimiter } from "../../middlewares/rate-limit.js";
 import { validate, body } from "../../middlewares/validate.js";
 import { ApiError } from "../../utils/ApiError.js";
+import { logger } from "../../utils/logger.js";
 import { DEV_CODE, sendEmailCode, verifyEmailCode, hasVerifiedCode, consumeCodes, hashEquals } from "./auth.service.js";
 
 const router = Router();
@@ -222,6 +223,34 @@ router.post("/logout", requireAuth, async (req, res) => {
   res.json({ success: true, data: { ok: true } });
 });
 
+/**
+ * Fallback delivery path: asks Supabase to send its own recovery email using the
+ * project's configured SMTP. Used when the branded Resend email cannot be sent
+ * (missing key, unverified sender domain, provider rejection, ...).
+ */
+async function sendSupabaseRecoveryEmail(email: string, redirectTo: string): Promise<boolean> {
+  try {
+    const url = `${config.supabase.url}/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        apikey: config.supabase.anonKey,
+        Authorization: `Bearer ${config.supabase.anonKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+      logger.error("supabase recovery email failed", { status: res.status });
+      return false;
+    }
+    return true;
+  } catch (err) {
+    logger.error("supabase recovery email error", { err: String(err) });
+    return false;
+  }
+}
+
 router.post(
   "/forgot-password",
   passwordResetLimiter,
@@ -230,24 +259,35 @@ router.post(
     const { email } = body<{ email: string }>(req);
     const user = await prisma.user.findUnique({ where: { email } });
     if (user) {
-      const { data } = await supabaseAdmin().auth.admin.generateLink({
-        type: "recovery",
-        email,
-        options: { redirectTo: `${config.appBaseUrl}/reset-password` },
-      });
-      const link =
-        data?.properties && "action_link" in data.properties ? data.properties.action_link : undefined;
-      if (link) {
-        await sendEmail({
-          to: email,
-          subject: "Reset your EduAltTech password",
-          html: layout(
-            "Reset your password",
-            "We received a request to reset your password. This link expires shortly and can only be used once.",
-            "Reset password",
-            link,
-          ),
+      const redirectTo = `${config.appBaseUrl}/reset-password`;
+      try {
+        const { data } = await supabaseAdmin().auth.admin.generateLink({
+          type: "recovery",
+          email,
+          options: { redirectTo },
         });
+        const link =
+          data?.properties && "action_link" in data.properties ? data.properties.action_link : undefined;
+        let sent = false;
+        if (link) {
+          sent = await sendEmail({
+            to: email,
+            subject: "Reset your EduAltTech password",
+            html: layout(
+              "Reset your password",
+              "We received a request to reset your password. This link expires shortly and can only be used once.",
+              "Reset password",
+              link,
+            ),
+          });
+        }
+        if (!sent) {
+          // Branded send failed/unavailable - fall back to Supabase's own mailer.
+          await sendSupabaseRecoveryEmail(email, redirectTo);
+        }
+      } catch (err) {
+        logger.error("forgot-password failed", { err: String(err) });
+        await sendSupabaseRecoveryEmail(email, redirectTo);
       }
     }
     // Always the same response - no account-existence oracle.
