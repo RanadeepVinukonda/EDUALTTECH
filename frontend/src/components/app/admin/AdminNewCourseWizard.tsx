@@ -11,6 +11,7 @@ import Quiz from "@mui/icons-material/Quiz";
 import Groups from "@mui/icons-material/Groups";
 import Add from "@mui/icons-material/Add";
 import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
+import EditOutlined from "@mui/icons-material/EditOutlined";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
@@ -897,6 +898,7 @@ export default function AdminNewCourseWizard() {
                   <div key={sec.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                     <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
                       <input
+                        id={`resource-section-title-${sec.id}`}
                         type="text"
                         value={sec.title}
                         onChange={(e) => {
@@ -905,8 +907,18 @@ export default function AdminNewCourseWizard() {
                             prev.map((s) => (s.id === sec.id ? { ...s, title: val } : s)),
                           );
                         }}
+                        aria-label={`Section ${_secIdx + 1} title`}
                         className="font-semibold text-xs text-ink-900 bg-transparent outline-none flex-1"
                       />
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById(`resource-section-title-${sec.id}`)?.focus()}
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                        aria-label={`Edit section ${_secIdx + 1} title`}
+                        title="Edit section title"
+                      >
+                        <EditOutlined fontSize="small" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => {
@@ -986,27 +998,39 @@ export default function AdminNewCourseWizard() {
                       <label className="text-xs font-semibold text-slate-500">
                         Sub-lesson article title
                       </label>
-                      <input
-                        type="text"
-                        value={activeSubLesson.title}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setSections((prev) =>
-                            prev.map((s) =>
-                              s.id === activeSecId
-                                ? {
-                                    ...s,
-                                    subLessons: s.subLessons.map((sub) =>
-                                      sub.id === activeSubLesson.id ? { ...sub, title: val } : sub,
-                                    ),
-                                  }
-                                : s,
-                            ),
-                          );
-                        }}
-                        className="w-full text-lg font-semibold text-ink-900 bg-transparent outline-none focus:underline"
-                        placeholder="Sub-lesson title…"
-                      />
+                      <div className="flex items-center gap-1">
+                        <input
+                          id={`resource-lesson-title-${activeSubLesson.id}`}
+                          type="text"
+                          value={activeSubLesson.title}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSections((prev) =>
+                              prev.map((s) =>
+                                s.id === activeSecId
+                                  ? {
+                                      ...s,
+                                      subLessons: s.subLessons.map((sub) =>
+                                        sub.id === activeSubLesson.id ? { ...sub, title: val } : sub,
+                                      ),
+                                    }
+                                  : s,
+                              ),
+                            );
+                          }}
+                          className="w-full text-lg font-semibold text-ink-900 bg-transparent outline-none focus:underline"
+                          placeholder="Sub-lesson title…"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById(`resource-lesson-title-${activeSubLesson.id}`)?.focus()}
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                          aria-label="Edit sub-lesson title"
+                          title="Edit sub-lesson title"
+                        >
+                          <EditOutlined fontSize="small" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 text-xs font-semibold">
@@ -1266,6 +1290,7 @@ export default function AdminNewCourseWizard() {
                           Week {modIdx + 1}
                         </span>
                         <input
+                          id={`course-week-title-${mod.id}`}
                           type="text"
                           value={mod.title}
                           onChange={(e) => {
@@ -1277,6 +1302,15 @@ export default function AdminNewCourseWizard() {
                           className="text-base sm:text-lg font-semibold text-ink-900 bg-transparent outline-none flex-1 focus:underline"
                           placeholder="Week Module Title…"
                         />
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById(`course-week-title-${mod.id}`)?.focus()}
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                          aria-label={`Edit week ${modIdx + 1} name`}
+                          title="Edit week name"
+                        >
+                          <EditOutlined fontSize="small" />
+                        </button>
                       </div>
                       <div className="mt-1.5 text-xs text-slate-500">
                         <span>{mod.items.length} learning milestones</span>
@@ -1324,6 +1358,7 @@ export default function AdminNewCourseWizard() {
                                 {typeConfig.label}
                               </span>
                               <input
+                                id={`course-milestone-title-${item.id}`}
                                 type="text"
                                 value={item.title}
                                 onChange={(e) => {
@@ -1344,11 +1379,22 @@ export default function AdminNewCourseWizard() {
                                 className="font-semibold text-sm text-ink-900 bg-transparent outline-none flex-1 min-w-36 focus:underline"
                                 placeholder="Topic / Item title…"
                               />
+                              <button
+                                type="button"
+                                onClick={() => document.getElementById(`course-milestone-title-${item.id}`)?.focus()}
+                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-white hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                                aria-label="Edit milestone title"
+                                title="Edit milestone title"
+                              >
+                                <EditOutlined fontSize="small" />
+                              </button>
                             </div>
-                            <input
-                              type="text"
-                              value={item.mentorNotes}
-                              onChange={(e) => {
+                            <div className="mt-1 flex items-center gap-1">
+                              <input
+                                id={`course-mentor-note-${item.id}`}
+                                type="text"
+                                value={item.mentorNotes}
+                                onChange={(e) => {
                                   const val = e.target.value;
                                   setModules((prev) =>
                                     prev.map((m) =>
@@ -1362,10 +1408,20 @@ export default function AdminNewCourseWizard() {
                                         : m,
                                     ),
                                   );
-                              }}
-                              className="w-full text-xs text-slate-500 mt-1 bg-transparent outline-none focus:text-slate-800"
-                              placeholder="Note for Mentor: e.g. Mentor records walkthrough with demo code"
-                            />
+                                }}
+                                className="w-full text-xs text-slate-500 bg-transparent outline-none focus:text-slate-800"
+                                placeholder="Note for Mentor: e.g. Mentor records walkthrough with demo code"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => document.getElementById(`course-mentor-note-${item.id}`)?.focus()}
+                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-white hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                                aria-label="Edit mentor note"
+                                title="Edit mentor note"
+                              >
+                                <EditOutlined fontSize="small" />
+                              </button>
+                            </div>
                           </div>
                         </div>
 

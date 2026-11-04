@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 import { requireAuth, requireRole, optionalAuth } from "../../middlewares/auth.js";
@@ -214,6 +214,12 @@ router.get("/admin/all", async (_req, res) => {
       polls: polls.map((p) => ({
         ...p,
         totalVotes: p._count.votes,
+        options: p.options.map((option) => ({
+          ...option,
+          votes: option.voteCount,
+          learningOutcomes: option.outcomes,
+          isWinningOption: option.isWinner,
+        })),
       })),
     },
   });
@@ -237,7 +243,7 @@ const pollCreateSchema = z.object({
   endDate: z.coerce.date().nullable().optional(),
   allowVoteChange: z.boolean().default(true),
   hideResultsUntilClosed: z.boolean().default(false),
-  options: z.array(optionInputSchema).min(1).max(20),
+  options: z.array(optionInputSchema).min(2, "A poll requires at least two proposals.").max(20),
 });
 
 router.post(
@@ -278,29 +284,30 @@ router.post(
   },
 );
 
-router.all(
-  ["/admin/polls/:id", "/admin/:id", "/admin/polls/:id/status", "/admin/:id/status"],
-  validate({
-    body: z.object({
-      title: z.string().trim().min(3).max(160).optional(),
-      description: z.string().trim().min(5).max(2000).optional(),
-      status: z.enum(["DRAFT", "OPEN", "CLOSED"]).optional(),
-      startDate: z.coerce.date().nullable().optional(),
-      endDate: z.coerce.date().nullable().optional(),
-      allowVoteChange: z.boolean().optional(),
-      hideResultsUntilClosed: z.boolean().optional(),
-    }),
+const pollUpdatePaths = ["/admin/polls/:id", "/admin/:id", "/admin/polls/:id/status", "/admin/:id/status"];
+const validatePollUpdate = validate({
+  body: z.object({
+    title: z.string().trim().min(3).max(160).optional(),
+    description: z.string().trim().min(5).max(2000).optional(),
+    status: z.enum(["DRAFT", "OPEN", "CLOSED"]).optional(),
+    startDate: z.coerce.date().nullable().optional(),
+    endDate: z.coerce.date().nullable().optional(),
+    allowVoteChange: z.boolean().optional(),
+    hideResultsUntilClosed: z.boolean().optional(),
   }),
-  async (req, res) => {
-    const input = body<Record<string, unknown>>(req);
-    const poll = await prisma.coursePoll.update({
-      where: { id: req.params.id },
-      data: input as never,
-    });
-    audit(req.user!.id, "poll.updated", "coursePoll", poll.id);
-    res.json({ success: true, data: { poll } });
-  },
-);
+});
+async function updatePoll(req: Request<{ id: string }>, res: Response) {
+  const input = body<Record<string, unknown>>(req);
+  const poll = await prisma.coursePoll.update({
+    where: { id: req.params.id },
+    data: input as never,
+  });
+  audit(req.user!.id, "poll.updated", "coursePoll", poll.id);
+  res.json({ success: true, data: { poll } });
+}
+
+router.put(pollUpdatePaths, validatePollUpdate, updatePoll);
+router.patch(pollUpdatePaths, validatePollUpdate, updatePoll);
 
 /** Admin publishes / posts the poll live to all users */
 router.post(

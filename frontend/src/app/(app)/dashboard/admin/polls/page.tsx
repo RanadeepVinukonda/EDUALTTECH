@@ -6,11 +6,12 @@ import HowToVote from "@mui/icons-material/HowToVote";
 import Add from "@mui/icons-material/Add";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import Close from "@mui/icons-material/Close";
+import Delete from "@mui/icons-material/Delete";
 import EmojiEvents from "@mui/icons-material/EmojiEvents";
 import School from "@mui/icons-material/School";
 import Stop from "@mui/icons-material/Stop";
 import Campaign from "@mui/icons-material/Campaign";
-import { apiGet, apiPost, apiPut } from "@/lib/api";
+import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 import type { CoursePollItem } from "@/lib/types";
 import { cn } from "@/lib/cn";
 import Spinner from "@/components/ui/Spinner";
@@ -74,6 +75,8 @@ export default function AdminPollsPage() {
         // Select active or first poll
         const active = res.polls.find((p) => p.status === "OPEN") || res.polls[0];
         setSelectedPoll(active);
+      } else {
+        setSelectedPoll(null);
       }
     } catch {
       // ignore
@@ -129,14 +132,16 @@ export default function AdminPollsPage() {
     try {
       const formattedOptions = optionsDraft.map((opt, i) => ({
         title: opt.title.trim(),
-        category: opt.category.trim(),
+        category: opt.category.trim() || "General",
+        domain: opt.category.trim() || "General",
         description: opt.description.trim(),
         difficulty: opt.difficulty,
-        durationWeeks: Number(opt.durationWeeks) || 6,
-        learningOutcomes: opt.learningOutcomes
+        estimatedDuration: `${Number(opt.durationWeeks)} weeks`,
+        outcomes: opt.learningOutcomes
           .split(",")
           .map((s) => s.trim())
-          .filter(Boolean),
+          .filter(Boolean)
+          .slice(0, 10),
         orderIndex: i,
       }));
 
@@ -145,9 +150,9 @@ export default function AdminPollsPage() {
         description: pollDescription.trim(),
         status: publishImmediately ? "OPEN" : "DRAFT",
         startDate: pollStartDate ? new Date(pollStartDate).toISOString() : undefined,
-        endDate: pollEndDate ? new Date(pollEndDate).toISOString() : undefined,
+        endDate: pollEndDate ? new Date(`${pollEndDate}T23:59:59.999Z`).toISOString() : undefined,
         allowVoteChange,
-        showLiveResults,
+        hideResultsUntilClosed: !showLiveResults,
         options: formattedOptions,
       });
 
@@ -165,6 +170,32 @@ export default function AdminPollsPage() {
       alert(err instanceof Error ? err.message : "Failed to create poll");
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function handleDeletePoll(pollId: string) {
+    const poll = polls.find((item) => item.id === pollId);
+    if (!poll) return;
+    if (
+      !confirm(
+        `Delete "${poll.title}" permanently?\n\nThis also deletes its proposals and votes. This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    setActionLoading(`delete-${pollId}`);
+    try {
+      await apiDelete(`/polls/admin/polls/${pollId}`);
+      setPolls((current) => current.filter((item) => item.id !== pollId));
+      setSelectedPoll((current) => (current?.id === pollId ? null : current));
+      setSuccessMessage(`Poll "${poll.title}" was deleted.`);
+      setTimeout(() => setSuccessMessage(null), 6000);
+      await loadPolls();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete poll");
+    } finally {
+      setActionLoading(null);
     }
   }
 
@@ -320,43 +351,57 @@ export default function AdminPollsPage() {
               {polls.map((p) => {
                 const isSelected = p.id === activePoll?.id;
                 const pVotes = p.options.reduce((acc, o) => acc + o.votes, 0);
+                const deleting = actionLoading === `delete-${p.id}`;
 
                 return (
-                  <button
+                  <div
                     key={p.id}
-                    type="button"
-                    onClick={() => setSelectedPoll(p)}
                     className={cn(
-                      "w-full rounded-lg border p-4 text-left transition-colors",
+                      "flex items-stretch gap-2 rounded-lg border p-2 transition-colors",
                       isSelected
                         ? "border-brand-600 bg-brand-50/40 shadow-xs"
                         : "border-slate-200 bg-white hover:border-slate-300"
                     )}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                          p.status === "OPEN"
-                            ? "bg-brand-50 text-brand-800"
-                            : p.status === "CLOSED"
-                            ? "bg-slate-100 text-ink-700"
-                            : "bg-paper-2 text-ink-700"
-                        )}
-                      >
-                        {statusLabel(p.status)}
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        {pVotes} votes
-                      </span>
-                    </div>
-                    <p className="mt-2 font-display text-sm font-semibold text-ink-900 line-clamp-1">
-                      {p.title}
-                    </p>
-                    <p className="mt-0.5 text-xs text-slate-500 line-clamp-1">
-                      {p.options.length} proposed courses
-                    </p>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPoll(p)}
+                      aria-pressed={isSelected}
+                      className="min-w-0 flex-1 p-2 text-left"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                            p.status === "OPEN"
+                              ? "bg-brand-50 text-brand-800"
+                              : p.status === "CLOSED"
+                                ? "bg-slate-100 text-ink-700"
+                                : "bg-paper-2 text-ink-700"
+                          )}
+                        >
+                          {statusLabel(p.status)}
+                        </span>
+                        <span className="text-xs text-slate-500">{pVotes} votes</span>
+                      </div>
+                      <p className="mt-2 line-clamp-1 font-display text-sm font-semibold text-ink-900">
+                        {p.title}
+                      </p>
+                      <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">
+                        {p.options.length} proposed courses
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDeletePoll(p.id)}
+                      disabled={deleting || actionLoading !== null}
+                      aria-label={`Delete poll ${p.title}`}
+                      title="Delete poll and its votes"
+                      className="inline-flex min-h-11 w-11 shrink-0 items-center justify-center self-center rounded-lg text-danger transition-colors hover:bg-danger/5 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Delete fontSize="small" />
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -608,10 +653,14 @@ export default function AdminPollsPage() {
 
             <form onSubmit={handleCreatePoll} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Poll title *</label>
+                <label htmlFor="poll-title" className="block text-xs font-semibold text-slate-700 mb-1">Poll title *</label>
+                <p className="mb-1 text-[11px] text-slate-500">A short name learners will see for this vote. Use 3–160 characters.</p>
                 <input
+                  id="poll-title"
                   type="text"
                   required
+                  minLength={3}
+                  maxLength={160}
                   value={pollTitle}
                   onChange={(e) => setPollTitle(e.target.value)}
                   placeholder="e.g. Q1 curriculum prioritization vote"
@@ -620,9 +669,14 @@ export default function AdminPollsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+                <label htmlFor="poll-description" className="block text-xs font-semibold text-slate-700 mb-1">Description *</label>
+                <p className="mb-1 text-[11px] text-slate-500">Explain the purpose of the poll and how learners should choose. At least 5 characters.</p>
                 <textarea
+                  id="poll-description"
                   rows={2}
+                  required
+                  minLength={5}
+                  maxLength={2000}
                   value={pollDescription}
                   onChange={(e) => setPollDescription(e.target.value)}
                   placeholder="Explain why learners are voting and how winning courses are published..."
@@ -632,8 +686,10 @@ export default function AdminPollsPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Start date</label>
+                  <label htmlFor="poll-start-date" className="block text-xs font-semibold text-slate-700 mb-1">Start date (optional)</label>
+                  <p className="mb-1 text-[11px] text-slate-500">Reference date for this poll. Polls are not scheduled automatically; posting live opens voting immediately.</p>
                   <input
+                    id="poll-start-date"
                     type="date"
                     value={pollStartDate}
                     onChange={(e) => setPollStartDate(e.target.value)}
@@ -641,8 +697,10 @@ export default function AdminPollsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">End date</label>
+                  <label htmlFor="poll-end-date" className="block text-xs font-semibold text-slate-700 mb-1">End date (optional)</label>
+                  <p className="mb-1 text-[11px] text-slate-500">Voting remains open through this date, then votes are rejected. Leave blank for no deadline.</p>
                   <input
+                    id="poll-end-date"
                     type="date"
                     value={pollEndDate}
                     onChange={(e) => setPollEndDate(e.target.value)}
@@ -652,23 +710,29 @@ export default function AdminPollsPage() {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <label className="flex cursor-pointer items-start gap-2 text-xs font-semibold text-slate-700">
                   <input
                     type="checkbox"
                     checked={allowVoteChange}
                     onChange={(e) => setAllowVoteChange(e.target.checked)}
                     className="rounded text-brand-600 focus:ring-brand-500"
                   />
-                  <span>Allow learners to change vote before close</span>
+                  <span>
+                    Allow learners to change vote
+                    <span className="mt-0.5 block font-normal text-slate-500">When off, each learner is locked to their first vote.</span>
+                  </span>
                 </label>
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <label className="flex cursor-pointer items-start gap-2 text-xs font-semibold text-slate-700">
                   <input
                     type="checkbox"
                     checked={showLiveResults}
                     onChange={(e) => setShowLiveResults(e.target.checked)}
                     className="rounded text-brand-600 focus:ring-brand-500"
                   />
-                  <span>Show live results to participants</span>
+                  <span>
+                    Show live results
+                    <span className="mt-0.5 block font-normal text-slate-500">When off, learners cannot see vote counts until the poll is closed. Admins can still see results.</span>
+                  </span>
                 </label>
 
                 <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-brand-200 bg-brand-50 p-3 text-xs font-semibold text-brand-900 sm:col-span-2">
@@ -691,8 +755,9 @@ export default function AdminPollsPage() {
               <div className="space-y-4 border-t border-slate-200 pt-4">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-semibold text-slate-700">
-                    Proposed courses ({optionsDraft.length})
+                    Proposed courses ({optionsDraft.length}) *
                   </label>
+                  <p className="ml-3 text-[11px] text-slate-500">Add at least 2 options for learners to compare; each option becomes a proposal in the poll.</p>
                   <button
                     type="button"
                     onClick={addOptionDraft}
@@ -721,9 +786,13 @@ export default function AdminPollsPage() {
 
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div>
+                        <label htmlFor={`proposal-title-${idx}`} className="mb-1 block text-[11px] font-semibold text-slate-700">Course title *</label>
                         <input
+                          id={`proposal-title-${idx}`}
                           type="text"
                           required
+                          minLength={2}
+                          maxLength={160}
                           value={opt.title}
                           onChange={(e) => updateOptionDraft(idx, "title", e.target.value)}
                           placeholder="Course title (e.g. Distributed Systems in Go)"
@@ -731,18 +800,27 @@ export default function AdminPollsPage() {
                         />
                       </div>
                       <div>
+                        <label htmlFor={`proposal-category-${idx}`} className="mb-1 block text-[11px] font-semibold text-slate-700">Category</label>
                         <input
+                          id={`proposal-category-${idx}`}
                           type="text"
                           value={opt.category}
                           onChange={(e) => updateOptionDraft(idx, "category", e.target.value)}
                           placeholder="Category (e.g. Computer Science)"
                           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800"
                         />
+                        <p className="mt-1 text-[10px] text-slate-500">Groups similar proposals; blank uses General.</p>
                       </div>
                     </div>
 
+                    <label htmlFor={`proposal-description-${idx}`} className="block text-[11px] font-semibold text-slate-700">Course description *</label>
+                    <p className="text-[11px] text-slate-500">Summarize what the proposed course covers. At least 5 characters.</p>
                     <textarea
+                      id={`proposal-description-${idx}`}
                       rows={2}
+                      required
+                      minLength={5}
+                      maxLength={1000}
                       value={opt.description}
                       onChange={(e) => updateOptionDraft(idx, "description", e.target.value)}
                       placeholder="Concise overview of curriculum and practical outcomes..."
@@ -751,7 +829,9 @@ export default function AdminPollsPage() {
 
                     <div className="grid gap-3 sm:grid-cols-3">
                       <div>
+                        <label htmlFor={`proposal-difficulty-${idx}`} className="mb-1 block text-[11px] font-semibold text-slate-700">Difficulty</label>
                         <select
+                          id={`proposal-difficulty-${idx}`}
                           value={opt.difficulty}
                           onChange={(e) => updateOptionDraft(idx, "difficulty", e.target.value)}
                           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800"
@@ -760,25 +840,34 @@ export default function AdminPollsPage() {
                           <option value="Intermediate">Intermediate</option>
                           <option value="Advanced">Advanced</option>
                         </select>
+                        <p className="mt-1 text-[10px] text-slate-500">The expected learner starting level.</p>
                       </div>
                       <div>
+                        <label htmlFor={`proposal-duration-${idx}`} className="mb-1 block text-[11px] font-semibold text-slate-700">Duration (weeks)</label>
                         <input
+                          id={`proposal-duration-${idx}`}
                           type="number"
                           min={1}
+                          step={1}
+                          required
                           value={opt.durationWeeks}
                           onChange={(e) => updateOptionDraft(idx, "durationWeeks", Number(e.target.value))}
                           placeholder="Duration in weeks"
                           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800"
                         />
+                        <p className="mt-1 text-[10px] text-slate-500">Estimated time to complete the course.</p>
                       </div>
                       <div>
+                        <label htmlFor={`proposal-outcomes-${idx}`} className="mb-1 block text-[11px] font-semibold text-slate-700">Learning outcomes</label>
                         <input
+                          id={`proposal-outcomes-${idx}`}
                           type="text"
                           value={opt.learningOutcomes}
                           onChange={(e) => updateOptionDraft(idx, "learningOutcomes", e.target.value)}
                           placeholder="Outcomes (comma-separated)"
                           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800"
                         />
+                        <p className="mt-1 text-[10px] text-slate-500">Comma-separated; up to 10 skills or takeaways.</p>
                       </div>
                     </div>
                   </div>
