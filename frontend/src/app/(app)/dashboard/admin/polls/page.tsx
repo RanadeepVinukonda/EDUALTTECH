@@ -15,6 +15,7 @@ import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 import type { CoursePollItem } from "@/lib/types";
 import { cn } from "@/lib/cn";
 import Spinner from "@/components/ui/Spinner";
+import { CATEGORY_OPTIONS } from "@/components/app/admin/AdminNewCourseWizard";
 
 interface NewOptionDraft {
   title: string;
@@ -65,6 +66,28 @@ export default function AdminPollsPage() {
   const [creating, setCreating] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [resourceCategories, setResourceCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiGet<{ categories: { name: string }[] }>("/resources/categories")
+      .then((res) => {
+        if (!cancelled) setResourceCategories(res.categories.map((c) => c.name).filter(Boolean));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const proposalCategoryOptions = Array.from(
+    new Set([
+      ...CATEGORY_OPTIONS,
+      ...resourceCategories,
+      ...optionsDraft.map((opt) => opt.category),
+      "General",
+    ].filter(Boolean))
+  );
 
   async function loadPolls() {
     setLoading(true);
@@ -801,14 +824,18 @@ export default function AdminPollsPage() {
                       </div>
                       <div>
                         <label htmlFor={`proposal-category-${idx}`} className="mb-1 block text-[11px] font-semibold text-slate-700">Category</label>
-                        <input
+                        <select
                           id={`proposal-category-${idx}`}
-                          type="text"
                           value={opt.category}
                           onChange={(e) => updateOptionDraft(idx, "category", e.target.value)}
-                          placeholder="Category (e.g. Computer Science)"
                           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800"
-                        />
+                        >
+                          {proposalCategoryOptions.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
                         <p className="mt-1 text-[10px] text-slate-500">Groups similar proposals; blank uses General.</p>
                       </div>
                     </div>
