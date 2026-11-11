@@ -8,6 +8,7 @@ const PARTNERS = [
   { src: "/media/logos/sharada_vidhyalaya.jpeg", name: "Sharada Vidhyalaya" },
   { src: "/media/logos/joy.jpeg", name: "Joy E.M. High School" },
   { src: "/media/logos/newerahyd.jpeg", name: "New Era Educational Institutions" },
+  { src: "/media/logos/st Antony.jpeg", name: "St. Anthony's Schools" },
 ];
 
 /**
@@ -57,7 +58,7 @@ export default function PartnerStrip({
             </ul>
           </div>
         ) : (
-          <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {PARTNERS.map((p) => (
               <li
                 key={p.name}
