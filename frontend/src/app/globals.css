@@ -1339,9 +1339,9 @@ details[open] > summary .chapter-chevron {
 }
 
 /* ── Partner logo marquee ─────────────────────────────────────────────
-   Duplicate the logo set twice inside .marquee-track, then translate by
-   -50% for a seamless loop. Pauses on hover/focus, and collapses to a
-   static wrapped row when the user prefers reduced motion. */
+   Duplicate the logo set inside .marquee-track, then translate by -50%
+   for a seamless loop. Pauses on hover/focus, and collapses to a static
+   wrapped row of unique logos when the user prefers reduced motion. */
 .marquee {
   overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, var(--color-ink) 7%, var(--color-ink) 93%, transparent);
@@ -1371,5 +1371,8 @@ details[open] > summary .chapter-chevron {
     width: 100%;
     padding-right: 0;
     animation: none;
+  }
+  .marquee-track > [aria-hidden="true"] {
+    display: none;
   }
 }

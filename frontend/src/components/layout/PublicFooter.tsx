@@ -10,9 +10,9 @@ import BrandLogo from "@/components/brand/BrandLogo";
 
 const SOCIAL = [
   { label: "LinkedIn", href: "https://www.linkedin.com/company/edu-alt-tech", Icon: LinkedInIcon },
-  { label: "Instagram", href: null, Icon: InstagramIcon },
+  { label: "Instagram", href: "https://www.instagram.com/edu_alt_tech?rpxt=dDAwM3NuOTBxd3V1", Icon: InstagramIcon },
   { label: "YouTube", href: null, Icon: YouTubeIcon },
-  { label: "Facebook", href: null, Icon: FacebookIcon },
+  { label: "Facebook", href: "https://www.facebook.com/share/1A5wVtFiQc/", Icon: FacebookIcon },
 ];
 
 const QUICK_LINKS = [
@@ -89,6 +89,8 @@ export default function PublicFooter() {
                   <a
                     key={label}
                     href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     title={`Follow us on ${label}`}
                     aria-label={`Follow EduAltTech on ${label}`}
                     className={`${className} transition-colors hover:border-accent hover:bg-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus`}
