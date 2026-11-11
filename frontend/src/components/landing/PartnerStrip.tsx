@@ -7,8 +7,8 @@ const PARTNERS = [
   { src: "/media/logos/new_era.jpg", name: "New Era" },
   { src: "/media/logos/sharada_vidhyalaya.jpeg", name: "Sharada Vidhyalaya" },
   { src: "/media/logos/joy.jpeg", name: "Joy E.M. High School" },
-  { src: "/media/logos/newerahyd.jpeg", name: "New Era Educational Institutions" },
-  { src: "/media/logos/st Antony.jpeg", name: "St. Anthony's Schools" },
+  { src: "/media/logos/newerahyd.png", name: "New Era Educational Institutions" },
+  { src: "/media/logos/st Antony.png", name: "St. Anthony's Schools" },
 ];
 
 /**
