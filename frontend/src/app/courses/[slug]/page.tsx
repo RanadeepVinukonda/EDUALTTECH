@@ -397,6 +397,21 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <CourseActions courseId={course.id} slug={course.slug} pricePaise={course.pricePaise} currency={course.currency} />
           </div>
 
+          <div className="mt-4 flex items-center gap-3 rounded-xl border border-emerald-200/80 bg-emerald-50/70 p-3 shadow-xs">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/media/logos/msme-seeklogo.png"
+              alt="MSME Government of India"
+              className="h-8 w-auto object-contain shrink-0"
+              width={32}
+              height={32}
+            />
+            <div className="text-[11.5px] leading-snug text-emerald-950">
+              <span className="font-semibold block">MSME Approved Certificate</span>
+              <span className="text-[10px] text-emerald-800">Govt. of India Registered Enterprise</span>
+            </div>
+          </div>
+
           <dl className="mt-4 divide-y divide-slate-200 border-y border-slate-200 px-4 text-[13.5px]">
             {course.enrolledCount > 0 && (
               <div className="flex items-center justify-between gap-4 py-3">

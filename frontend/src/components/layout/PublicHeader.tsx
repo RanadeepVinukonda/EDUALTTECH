@@ -36,9 +36,27 @@ export default function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-rule bg-paper/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2" aria-label="Edu Alt Tech home">
-          <BrandLogo withWordmark wordmarkClassName="text-sm sm:text-base" />
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2" aria-label="Edu Alt Tech home">
+            <BrandLogo withWordmark wordmarkClassName="text-sm sm:text-base" />
+          </Link>
+
+          {/* MSME Approved Trust Badge */}
+          <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-rule/80">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/media/logos/msme-seeklogo.png"
+              alt="MSME Government of India"
+              className="h-6 w-auto object-contain shrink-0"
+              width={24}
+              height={24}
+            />
+            <div className="flex flex-col text-left">
+              <span className="text-[10.5px] font-bold text-ink leading-none">MSME Approved</span>
+              <span className="text-[9px] font-mono text-muted leading-tight">Govt. of India</span>
+            </div>
+          </div>
+        </div>
 
         <nav aria-label="Primary" className="ml-auto hidden items-center gap-1 lg:flex">
           {NAV.map((item) =>

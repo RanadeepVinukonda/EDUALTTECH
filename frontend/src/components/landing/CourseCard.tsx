@@ -103,8 +103,16 @@ export default function CourseCard({
               <span className="text-xs font-medium text-slate-500">+{remainingTagCount}</span>
             )}
             {hasCertificate && (
-              <span className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-800">
-                Certificate included
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-800">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/media/logos/msme-seeklogo.png"
+                  alt="MSME"
+                  className="h-3.5 w-auto object-contain shrink-0"
+                  width={14}
+                  height={14}
+                />
+                <span>MSME Certificate Included</span>
               </span>
             )}
           </div>

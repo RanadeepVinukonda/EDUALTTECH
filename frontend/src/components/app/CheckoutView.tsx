@@ -194,6 +194,21 @@ export default function CheckoutView({ slug }: { slug: string }) {
                 ? "Payments are processed securely by Razorpay. Access is granted only after your payment is confirmed."
                 : "This course is free - enroll to start learning."}
             </p>
+
+            {/* MSME Approved Trust Seal */}
+            <div className="mt-4 flex items-center gap-2.5 rounded-lg border border-emerald-200/80 bg-emerald-50/60 p-2.5 text-xs text-emerald-950">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/media/logos/msme-seeklogo.png"
+                alt="MSME Government of India"
+                className="h-6 w-auto object-contain shrink-0"
+                width={24}
+                height={24}
+              />
+              <div className="leading-tight">
+                <span className="font-semibold">MSME Approved Certificate</span> · Govt. of India Registered Enterprise
+              </div>
+            </div>
           </section>
 
           <section className="rounded-xl border border-slate-200 bg-white p-6">

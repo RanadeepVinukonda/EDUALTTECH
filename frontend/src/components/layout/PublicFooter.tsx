@@ -44,6 +44,22 @@ export default function PublicFooter() {
             <p className="max-w-xs text-sm leading-relaxed text-ink-2">
               Practical courses in applied AI, engineering systems, and tuition, mentored by skilled practitioners. A product by Setsuzoku.
             </p>
+
+            {/* MSME Approved Trust Badge */}
+            <div className="flex items-center gap-3 rounded-2xl border border-rule bg-white p-3 shadow-2xs max-w-[280px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/media/logos/msme-seeklogo.png"
+                alt="MSME Government of India"
+                className="h-10 w-auto object-contain shrink-0"
+                width={40}
+                height={40}
+              />
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-ink">MSME Approved</div>
+                <div className="text-[10.5px] text-muted leading-tight">Govt. of India Registered Enterprise</div>
+              </div>
+            </div>
           </div>
 
           <div className="lg:col-span-2">

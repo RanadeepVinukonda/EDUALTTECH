@@ -80,6 +80,18 @@ export default function AboutPage() {
           </p>
 
           <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-200 pt-6 text-xs font-semibold text-slate-600">
+            <li className="flex items-center gap-1.5 text-brand-800">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/media/logos/msme-seeklogo.png"
+                alt="MSME"
+                className="h-4 w-auto object-contain shrink-0"
+                width={16}
+                height={16}
+              />
+              <span>MSME Approved (Govt. of India)</span>
+            </li>
+            <li aria-hidden className="h-1 w-1 rounded-full bg-slate-300" />
             <li>Courses</li>
             <li aria-hidden className="h-1 w-1 rounded-full bg-slate-300" />
             <li>Alternate education</li>

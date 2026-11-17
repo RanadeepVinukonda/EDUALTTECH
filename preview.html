@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduAltTech — Visual Design Transformation Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ["Sora", "sans-serif"],
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          },
+          colors: {
+            paper: "#f8faf8",
+            "paper-2": "#f1f5f2",
+            "paper-3": "#e6ede8",
+            ink: "#0f2027",
+            "ink-2": "#2c3e50",
+            "ink-navy": "#024059",
+            brand: {
+              50: "#f0fff5",
+              100: "#d7f5e1",
+              200: "#b0e8c5",
+              300: "#82d5a0",
+              500: "#038c3e",
+              600: "#026b2f",
+              700: "#025926",
+              800: "#034f25",
+              900: "#023a1c",
+              950: "#012312",
+            },
+            rule: "#e2e8e4",
+          },
+          boxShadow: {
+            elev1: "0 1px 2px rgba(2, 64, 89, 0.04)",
+            elev2: "0 2px 8px rgba(2, 64, 89, 0.06), 0 1px 2px rgba(2, 64, 89, 0.04)",
+            elev3: "0 8px 24px rgba(2, 64, 89, 0.08), 0 2px 6px rgba(2, 64, 89, 0.04)",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #f8faf8;
+      color: #0f2027;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .ruled-notebook {
+      background-image: repeating-linear-gradient(
+        transparent,
+        transparent 27px,
+        rgba(3, 140, 62, 0.07) 28px
+      );
+    }
+    .dot-grid {
+      background-image: radial-gradient(rgba(2, 64, 89, 0.12) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    /* 3D Certificate Perspective */
+    .cert-wrap {
+      perspective: 1000px;
+    }
+    .cert-card {
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+      transform-style: preserve-3d;
+    }
+    /* Pulse glow */
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.04); }
+    }
+    .pulse-glow {
+      animation: pulse-subtle 3s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Masthead Navigation Bar -->
+  <header class="sticky top-0 z-40 border-b border-rule bg-white/90 backdrop-blur-md">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white font-display font-extrabold text-lg shadow-sm">
+          E
+        </div>
+        <div>
+          <span class="font-display font-extrabold text-lg tracking-tight text-ink-navy">EduAltTech</span>
+          <span class="ml-2 rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-brand-800">
+            Interactive Visual Preview
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-slate-500 hidden sm:inline">
+          Showing: Pure Visual Components (No Code)
+        </span>
+        <button
+          onclick="triggerCommandMenu()"
+          class="inline-flex items-center gap-2 rounded-xl border border-rule bg-paper px-3 py-1.5 text-xs font-semibold text-ink-navy shadow-xs hover:border-brand-300 transition"
+        >
+          <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span>Quick Finder</span>
+          <kbd class="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-500 border border-slate-200">⌘K</kbd>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Header Banner -->
+  <div class="border-b border-rule bg-gradient-to-b from-paper-2/60 via-paper to-white py-10 sm:py-14">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-mono font-semibold uppercase text-brand-800">
+          <span class="h-1.5 w-1.5 rounded-full bg-brand-500"></span>
+          Modern High-Craft Architecture
+        </div>
+        <h1 class="mt-3 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+          Visual Comparison: Current vs. Upgraded
+        </h1>
+        <p class="mt-3 text-base text-slate-600 leading-relaxed">
+          Side-by-side interactive visual comparisons across key surfaces of EduAltTech. Demonstrating how open-source components from the Awwwards &amp; Godly ecosystems modernize the UI into an authentic, tactile, and interactive experience with zero AI slop.
+        </p>
+      </div>
+
+      <!-- Quick Section Navigation Tabs -->
+      <div class="mt-8 flex flex-wrap gap-2 border-t border-rule/80 pt-6">
+        <a href="#section-cards" class="rounded-xl border border-rule bg-white px-3.5 py-1.5 text-xs font-semibold text-ink hover:border-brand-500 hover:text-brand-700 transition">
+          1. Course Spotlight Card
+        </a>
+        <a href="#section-mobile" class="rounded-xl border border-rule bg-white px-3.5 py-1.5 text-xs font-semibold text-ink hover:border-brand-500 hover:text-brand-700 transition">
+          2. Mobile Sticky Drawer
+        </a>
+        <a href="#section-team" class="rounded-xl border border-rule bg-white px-3.5 py-1.5 text-xs font-semibold text-ink hover:border-brand-500 hover:text-brand-700 transition">
+          3. Editorial Team Cards
+        </a>
+        <a href="#section-cmdk" class="rounded-xl border border-rule bg-white px-3.5 py-1.5 text-xs font-semibold text-ink hover:border-brand-500 hover:text-brand-700 transition">
+          4. Global Command Palette (⌘K)
+        </a>
+        <a href="#section-roadmap" class="rounded-xl border border-rule bg-white px-3.5 py-1.5 text-xs font-semibold text-ink hover:border-brand-500 hover:text-brand-700 transition">
+          5. Visual Milestone Tree
+        </a>
+        <a href="#section-cert" class="rounded-xl border border-rule bg-white px-3.5 py-1.5 text-xs font-semibold text-ink hover:border-brand-500 hover:text-brand-700 transition">
+          6. 3D Tilt Verifiable Credential
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <main class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-20">
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- SECTION 1: COURSE SPOTLIGHT CARD -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section id="section-cards" class="scroll-mt-20">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-rule">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-wider text-brand-700 font-semibold">01 · Card Architecture</span>
+          <h2 class="mt-1 font-display text-2xl sm:text-3xl font-bold text-ink">Course Discovery Card</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Replacing standard flat border cards with subtle mouse-following radial spotlight illumination and tabular indicators.
+          </p>
+        </div>
+        <span class="rounded-lg bg-brand-50 border border-brand-200 px-3 py-1 text-xs font-semibold text-brand-800">
+          Interactive Hover Demo
+        </span>
+      </div>
+
+      <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-start">
+        <!-- CURRENT CARD -->
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <span class="font-mono text-xs font-semibold uppercase text-slate-500">Current Design</span>
+            <span class="rounded bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">Static Border</span>
+          </div>
+
+          <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <div class="relative aspect-[16/10] bg-slate-100 flex items-center justify-center">
+              <span class="font-display font-bold text-slate-400">Course Thumbnail (16:10)</span>
+              <div class="absolute top-3 left-3 rounded bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 border">
+                Applied AI
+              </div>
+            </div>
+            <div class="p-5">
+              <h3 class="font-display text-base font-bold text-slate-800">
+                Applied AI &amp; Python Systems
+              </h3>
+              <p class="mt-2 text-xs text-slate-500 leading-relaxed">
+                Foundations of generative models, local LLM orchestration, and building autonomous agents.
+              </p>
+              <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-600">
+                <span class="font-bold text-sm text-slate-900">₹699</span>
+                <span class="rounded bg-slate-100 px-3 py-1 font-semibold text-slate-700">Explore Course →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPGRADED SPOTLIGHT CARD -->
+        <div class="rounded-3xl border border-brand-200 bg-white p-6 shadow-elev2">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-brand-500"></span>
+              <span class="font-mono text-xs font-semibold uppercase text-brand-800">Upgraded Design (Motion Primitives + Spotlight)</span>
+            </div>
+            <span class="rounded bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-800">Move mouse over card</span>
+          </div>
+
+          <!-- Dynamic Spotlight Container -->
+          <div
+            id="spotlight-demo-card"
+            class="relative mt-5 overflow-hidden rounded-2xl border border-rule bg-white shadow-elev1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev3"
+            onmousemove="handleSpotlight(event)"
+            onmouseleave="resetSpotlight()"
+          >
+            <!-- Radial Glow Layer -->
+            <div
+              id="spotlight-glow"
+              class="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300"
+              style="background: radial-gradient(350px circle at 50% 50%, rgba(3, 140, 62, 0.14), transparent 75%);"
+            ></div>
+
+            <div class="relative z-10">
+              <!-- Visual Header with Frosted Glass Badges -->
+              <div class="relative aspect-[16/10] overflow-hidden bg-paper-2">
+                <div class="h-full w-full bg-gradient-to-tr from-brand-950 via-ink-navy to-emerald-900 flex flex-col justify-end p-5 text-white">
+                  <div class="font-mono text-[10px] text-brand-300 uppercase tracking-widest">Setsuzoku Track · Cohort 04</div>
+                  <div class="font-display text-lg font-bold text-white mt-1">Applied AI &amp; Python Systems</div>
+                </div>
+
+                <div class="absolute inset-x-3 top-3 flex items-center justify-between pointer-events-none">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-ink-navy shadow-xs border border-rule backdrop-blur-md">
+                    <span>Applied AI</span>
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-ink/85 px-2.5 py-1 text-[10.5px] font-medium text-white shadow-xs backdrop-blur-md">
+                    <span class="h-1.5 w-1.5 rounded-full bg-brand-400"></span>
+                    <span>12 Seats Left</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Content Body with Dedicated Tangible Specs -->
+              <div class="p-5">
+                <div class="flex items-center gap-2">
+                  <span class="rounded bg-brand-50 border border-brand-200 px-2 py-0.5 text-[10px] font-mono font-semibold text-brand-800">
+                    MSME Certified Track
+                  </span>
+                  <span class="text-xs text-slate-400">·</span>
+                  <span class="text-xs text-slate-500 font-medium">4 Weeks Duration</span>
+                </div>
+
+                <h3 class="mt-2.5 font-display text-lg font-bold text-ink leading-snug">
+                  Applied AI, Orchestration &amp; Autonomous Agents
+                </h3>
+                <p class="mt-1.5 text-xs text-slate-600 leading-relaxed">
+                  Learn directly with software engineers. Build deployed agent tools, vector search, and clean production APIs with real code reviews.
+                </p>
+
+                <!-- Spec Checkpoints -->
+                <div class="mt-4 grid grid-cols-2 gap-2 border-t border-rule/70 pt-3 text-[11.5px] text-ink-2 font-medium">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-brand-600 font-bold">✓</span>
+                    <span>Weekly 1:1 Live Review</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-brand-600 font-bold">✓</span>
+                    <span>Public GitHub Repo</span>
+                  </div>
+                </div>
+
+                <!-- Footer with Hover Reveal Button -->
+                <div class="mt-5 flex items-center justify-between border-t border-rule/70 pt-4">
+                  <div>
+                    <span class="font-display text-xl font-extrabold text-ink">₹699</span>
+                    <span class="block text-[10px] text-slate-400">One-time enrollment</span>
+                  </div>
+
+                  <button class="inline-flex items-center gap-1.5 rounded-xl bg-ink-navy px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-600 shadow-sm">
+                    <span>Explore Track</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- SECTION 2: MOBILE DETAIL & STICKY DRAWER (VAUL PATTERN) -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section id="section-mobile" class="scroll-mt-20">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-rule">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-wider text-brand-700 font-semibold">02 · Mobile UX &amp; Task Order</span>
+          <h2 class="mt-1 font-display text-2xl sm:text-3xl font-bold text-ink">Course Detail Mobile Flow</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Solving the bottom-scrolling problem with an interactive iOS-grade sticky bottom sheet (Vaul Pattern).
+          </p>
+        </div>
+        <button
+          onclick="toggleMobileDrawer()"
+          class="rounded-xl bg-brand-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-brand-700 transition"
+        >
+          📱 Test Mobile Sheet Drawer
+        </button>
+      </div>
+
+      <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-start">
+        <!-- CURRENT MOBILE PROBLEM -->
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <span class="font-mono text-xs font-semibold uppercase text-slate-500">Current Mobile Flow</span>
+            <span class="rounded bg-rose-50 border border-rose-200 text-rose-700 px-2 py-0.5 text-[11px] font-semibold">CTA Buried at Bottom</span>
+          </div>
+
+          <div class="mx-auto mt-6 max-w-xs overflow-hidden rounded-[36px] border-4 border-slate-800 bg-white shadow-xl">
+            <!-- Simulated Phone Screen -->
+            <div class="h-6 w-32 mx-auto rounded-b-xl bg-slate-800 mb-2"></div>
+            <div class="p-4 space-y-3 h-96 overflow-y-auto text-xs">
+              <div class="rounded-lg bg-slate-100 p-2 text-center text-slate-400 font-mono text-[10px]">
+                Header &amp; Title
+              </div>
+              <div class="h-20 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
+                Course Description
+              </div>
+              <div class="p-2 border rounded-lg space-y-1">
+                <div class="font-bold">Module 1: Foundations (6 lessons)</div>
+                <div class="text-slate-400">Module 2: Advanced Logic (8 lessons)</div>
+                <div class="text-slate-400">Module 3: Project Deployment (5 lessons)</div>
+                <div class="text-slate-400 text-[10px]">...User scrolls past 30 more items...</div>
+              </div>
+              <div class="h-16 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
+                Mentors List
+              </div>
+              <!-- CTA at very end -->
+              <div class="rounded-xl border-2 border-brand-500 bg-brand-50 p-3 text-center">
+                <span class="font-bold text-brand-900 block">Enrollment Action Sits Here</span>
+                <span class="text-[10px] text-slate-500">User had to scroll entire page to find this</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPGRADED MOBILE FLOW WITH STICKY SHEET -->
+        <div class="rounded-3xl border border-brand-200 bg-white p-6 shadow-elev2">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-brand-500"></span>
+              <span class="font-mono text-xs font-semibold uppercase text-brand-800">Upgraded (Sticky Action Bar + Bottom Drawer)</span>
+            </div>
+            <span class="rounded bg-brand-50 border border-brand-200 text-brand-800 px-2 py-0.5 text-[11px] font-semibold">Immediate Action</span>
+          </div>
+
+          <div class="mx-auto mt-6 max-w-xs relative overflow-hidden rounded-[36px] border-4 border-slate-800 bg-paper shadow-2xl h-[420px]">
+            <!-- Simulated Phone Screen with Active Sticky Bar -->
+            <div class="h-5 w-32 mx-auto rounded-b-xl bg-slate-800"></div>
+
+            <div class="p-4 space-y-3 h-[330px] overflow-y-auto text-xs">
+              <div class="inline-flex rounded bg-brand-50 px-2 py-0.5 text-[9px] font-bold text-brand-800">
+                EDUCATION · APPLIED AI
+              </div>
+              <h4 class="font-display text-sm font-bold text-ink">Applied AI &amp; Python Systems</h4>
+              <p class="text-[11px] text-slate-600 leading-snug">
+                Learn modern computational thinking and AI architecture with live mentors in Kakinada.
+              </p>
+
+              <div class="rounded-xl border border-rule bg-white p-2.5">
+                <div class="font-semibold text-[11px] text-ink">Syllabus Overview</div>
+                <div class="text-[10px] text-slate-500 mt-1">Module 1 · 6 lessons</div>
+                <div class="text-[10px] text-slate-500">Module 2 · 8 lessons</div>
+              </div>
+            </div>
+
+            <!-- Sticky Bottom Floating Action Bar -->
+            <div class="absolute bottom-0 inset-x-0 border-t border-rule bg-white/95 p-3 backdrop-blur-md flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-mono text-slate-500 uppercase">Enrollment</span>
+                <div class="font-display text-sm font-bold text-ink">₹699</div>
+              </div>
+              <button
+                onclick="toggleMobileDrawer()"
+                class="rounded-xl bg-brand-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-brand-700 transition"
+              >
+                Enroll &amp; Pick Mentor →
+              </button>
+            </div>
+
+            <!-- Simulated Bottom Drawer (Hidden by default, toggled via JS) -->
+            <div
+              id="simulated-drawer"
+              class="absolute inset-x-0 bottom-0 bg-white border-t-2 border-brand-600 rounded-t-3xl p-4 shadow-2xl transition-all duration-300 translate-y-full"
+            >
+              <div class="mx-auto h-1 w-8 rounded-full bg-slate-300 mb-3"></div>
+              <div class="flex items-center justify-between">
+                <h5 class="font-display text-xs font-bold text-ink">Confirm Enrollment</h5>
+                <button onclick="toggleMobileDrawer()" class="text-xs text-slate-400 hover:text-slate-600">✕</button>
+              </div>
+              <div class="mt-2 space-y-2 text-[11px]">
+                <div class="rounded-lg border p-2 bg-paper-2 flex items-center justify-between">
+                  <span>Selected Mentor</span>
+                  <span class="font-semibold text-brand-700">Aditya V. (4 seats free)</span>
+                </div>
+                <div class="rounded-lg border p-2 bg-paper-2 flex items-center justify-between">
+                  <span>Total Payable</span>
+                  <span class="font-bold text-ink">₹699</span>
+                </div>
+                <button class="w-full rounded-lg bg-brand-600 py-2 font-semibold text-white text-xs mt-1">
+                  Proceed to Razorpay Checkout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- SECTION 3: EDITORIAL TEAM SHOWCASE -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section id="section-team" class="scroll-mt-20">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-rule">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-wider text-brand-700 font-semibold">03 · Human Credibility</span>
+          <h2 class="mt-1 font-display text-2xl sm:text-3xl font-bold text-ink">Founding Team &amp; Mentor Cards</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Transforming tiny 80px circle avatars into authoritative editorial portrait cards with disciplines and bios.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-start">
+        <!-- CURRENT DESIGN -->
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <span class="font-mono text-xs font-semibold uppercase text-slate-500">Current Design</span>
+            <span class="rounded bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">80px Circle Avatar</span>
+          </div>
+
+          <div class="mt-6 flex items-center gap-4 rounded-2xl border border-slate-200 p-4">
+            <div class="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-slate-200 flex items-center justify-center font-display font-bold text-slate-500 text-lg">
+              AV
+            </div>
+            <div class="min-w-0">
+              <h3 class="font-display text-base font-semibold text-slate-900">Aditya Varma</h3>
+              <p class="text-xs font-medium text-brand-700">Founder &amp; Engineering Lead</p>
+              <p class="mt-1 text-xs text-slate-400">No bio, credentials or active tracks displayed.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPGRADED EDITORIAL CARD -->
+        <div class="rounded-3xl border border-brand-200 bg-white p-6 shadow-elev2">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-brand-500"></span>
+              <span class="font-mono text-xs font-semibold uppercase text-brand-800">Upgraded Editorial Portrait Card</span>
+            </div>
+            <span class="rounded bg-brand-50 border border-brand-200 text-brand-800 px-2 py-0.5 text-[11px] font-semibold">High Authority</span>
+          </div>
+
+          <div class="mt-6 overflow-hidden rounded-2xl border border-rule bg-white shadow-elev1 hover:border-brand-500 transition-all duration-300">
+            <div class="p-6">
+              <div class="flex items-start gap-4">
+                <div class="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-rule bg-paper-2 flex items-center justify-center text-xl font-extrabold text-brand-800 font-display shadow-xs">
+                  AV
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between">
+                    <h3 class="font-display text-lg font-bold text-ink">Aditya Varma</h3>
+                    <span class="rounded-full bg-brand-50 border border-brand-200 px-2.5 py-0.5 text-[10px] font-mono font-semibold uppercase text-brand-800">
+                      Founding Team
+                    </span>
+                  </div>
+                  <p class="text-xs font-semibold text-brand-700">Founder &amp; Lead Systems Architect</p>
+                  <p class="text-[11px] text-slate-400 font-mono mt-0.5">Kakinada, Andhra Pradesh</p>
+                </div>
+              </div>
+
+              <p class="mt-4 text-xs leading-relaxed text-slate-600">
+                10+ years engineering scalable systems. Building EduAltTech to bring rigorous, artifact-based technology education and paid livelihood for mentors to tier-2/tier-3 India.
+              </p>
+
+              <div class="mt-4 flex flex-wrap items-center gap-1.5 border-t border-rule/70 pt-3">
+                <span class="rounded-md bg-paper-2 px-2 py-0.5 text-[10px] font-medium text-ink-2">
+                  Applied AI
+                </span>
+                <span class="rounded-md bg-paper-2 px-2 py-0.5 text-[10px] font-medium text-ink-2">
+                  System Architecture
+                </span>
+                <span class="rounded-md bg-paper-2 px-2 py-0.5 text-[10px] font-medium text-ink-2">
+                  Full Stack
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- SECTION 4: GLOBAL COMMAND PALETTE (CMDK) -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section id="section-cmdk" class="scroll-mt-20">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-rule">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-wider text-brand-700 font-semibold">04 · Keyboard Velocity</span>
+          <h2 class="mt-1 font-display text-2xl sm:text-3xl font-bold text-ink">Global Command Palette (⌘K)</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            A fast, keyboard-first switcher for students and mentors to jump to courses, lessons, and meeting schedules.
+          </p>
+        </div>
+        <button
+          onclick="triggerCommandMenu()"
+          class="rounded-xl bg-ink-navy px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-brand-600 transition"
+        >
+          ⌨️ Open Live Palette (⌘K)
+        </button>
+      </div>
+
+      <div class="mt-8 rounded-3xl border border-brand-200 bg-white p-6 shadow-elev2">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <span class="font-mono text-xs font-semibold uppercase text-brand-800">Visual Palette Interface (Embedded Preview)</span>
+          <span class="text-xs text-slate-400">Press ⌘K or click button above to test interactive modal</span>
+        </div>
+
+        <div class="mt-6 mx-auto max-w-xl overflow-hidden rounded-2xl border border-rule bg-white shadow-elev3">
+          <div class="flex items-center border-b border-rule px-4 py-3 bg-paper">
+            <svg class="h-4 w-4 text-slate-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search courses, lessons, free tutorials, or actions..."
+              class="w-full bg-transparent text-sm text-ink outline-none placeholder:text-slate-400"
+              value="Applied AI"
+              readonly
+            />
+            <kbd class="rounded bg-white px-2 py-0.5 font-mono text-[10px] text-slate-400 border border-slate-200">ESC</kbd>
+          </div>
+
+          <div class="p-2 space-y-1 text-sm">
+            <div class="px-3 py-1 font-mono text-[10px] font-semibold text-slate-400 uppercase">Courses</div>
+            <div class="flex items-center justify-between rounded-lg bg-brand-50 px-3 py-2 text-brand-900 font-semibold cursor-pointer">
+              <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-brand-600"></span>
+                <span>Applied AI &amp; Python Systems</span>
+              </div>
+              <span class="text-xs text-brand-700">Jump to Course →</span>
+            </div>
+
+            <div class="flex items-center justify-between rounded-lg px-3 py-2 text-ink-2 hover:bg-paper-2 cursor-pointer">
+              <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-slate-300"></span>
+                <span>AI for School Students (Genesis &amp; Sharada)</span>
+              </div>
+              <span class="text-xs text-slate-400">Curriculum</span>
+            </div>
+
+            <div class="px-3 py-1 font-mono text-[10px] font-semibold text-slate-400 uppercase mt-2">Free Knowledge Library</div>
+            <div class="flex items-center justify-between rounded-lg px-3 py-2 text-ink-2 hover:bg-paper-2 cursor-pointer">
+              <span>Vector Search &amp; Embeddings Explained</span>
+              <span class="text-xs text-slate-400">8 min read</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- SECTION 5: VISUAL CURRICULUM ROADMAP TREE -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section id="section-roadmap" class="scroll-mt-20">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-rule">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-wider text-brand-700 font-semibold">05 · Learner Progression</span>
+          <h2 class="mt-1 font-display text-2xl sm:text-3xl font-bold text-ink">Visual Milestone Roadmap</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Replacing standard text accordions with an interactive timeline node tree displaying verifiable milestones.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 rounded-3xl border border-brand-200 bg-white p-6 sm:p-8 shadow-elev2">
+        <div class="max-w-2xl mx-auto space-y-6">
+
+          <!-- NODE 1: COMPLETED -->
+          <div class="flex gap-4">
+            <div class="flex flex-col items-center">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-white font-bold text-sm shadow-sm">
+                ✓
+              </div>
+              <div class="h-full w-0.5 bg-brand-500 my-1"></div>
+            </div>
+            <div class="flex-1 pb-6">
+              <div class="rounded-2xl border border-brand-200 bg-brand-50/50 p-4">
+                <div class="flex items-center justify-between">
+                  <span class="font-mono text-[11px] font-semibold text-brand-800 uppercase">Milestone 01 · Completed</span>
+                  <span class="text-xs text-brand-700 font-medium">100% Passed</span>
+                </div>
+                <h4 class="mt-1 font-display text-sm font-bold text-ink">Computational Foundations &amp; Python Logic</h4>
+                <p class="mt-1 text-xs text-slate-600">Clean functions, control flows, data structures, and test suites.</p>
+                <div class="mt-2.5 inline-flex items-center gap-1.5 rounded-md bg-white px-2 py-1 text-[11px] font-mono text-brand-900 border border-brand-200">
+                  <span>Artifact:</span>
+                  <span class="font-semibold">github.com/learner/python-logic (Verified)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- NODE 2: IN PROGRESS (PULSE) -->
+          <div class="flex gap-4">
+            <div class="flex flex-col items-center">
+              <div class="relative flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 border-2 border-brand-600 text-brand-700 font-bold text-sm">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-60"></span>
+                02
+              </div>
+              <div class="h-full w-0.5 bg-slate-200 my-1"></div>
+            </div>
+            <div class="flex-1 pb-6">
+              <div class="rounded-2xl border-2 border-brand-600 bg-white p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                  <span class="font-mono text-[11px] font-semibold text-brand-800 uppercase">Milestone 02 · Active Now</span>
+                  <span class="rounded bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-900">Live Office Hours Wed</span>
+                </div>
+                <h4 class="mt-1 font-display text-sm font-bold text-ink">Autonomous Tool Calling &amp; API Orchestration</h4>
+                <p class="mt-1 text-xs text-slate-600">Connecting models to local databases, executing tools, and error recovery.</p>
+                <div class="mt-3 flex items-center justify-between text-xs">
+                  <span class="font-medium text-slate-500">Progress: 4 of 6 lessons completed</span>
+                  <span class="font-bold text-brand-700">66%</span>
+                </div>
+                <div class="mt-1.5 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                  <div class="h-full bg-brand-600 rounded-full" style="width: 66%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- NODE 3: LOCKED -->
+          <div class="flex gap-4">
+            <div class="flex flex-col items-center">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 border border-slate-300 text-slate-400 font-mono text-sm">
+                🔒
+              </div>
+            </div>
+            <div class="flex-1">
+              <div class="rounded-2xl border border-slate-200 bg-paper-2/60 p-4 opacity-75">
+                <div class="font-mono text-[11px] font-semibold text-slate-400 uppercase">Milestone 03 · Locked</div>
+                <h4 class="mt-1 font-display text-sm font-bold text-slate-700">Full Production Deployment &amp; Live PR Review</h4>
+                <p class="mt-1 text-xs text-slate-500">Graduation capstone evaluated directly by a working practitioner.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- SECTION 6: 3D TILT VERIFIABLE CERTIFICATE -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section id="section-cert" class="scroll-mt-20">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-rule">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-wider text-brand-700 font-semibold">06 · Tangible Proof of Work</span>
+          <h2 class="mt-1 font-display text-2xl sm:text-3xl font-bold text-ink">3D Tilt Verifiable Credential</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            A milestone credential featuring interactive perspective tilt, official MSME Government seal, and public commit verification.
+          </p>
+        </div>
+        <span class="rounded-lg bg-brand-50 border border-brand-200 px-3 py-1 text-xs font-semibold text-brand-800">
+          Move Mouse to Tilt
+        </span>
+      </div>
+
+      <div class="mt-8 flex justify-center cert-wrap">
+        <div
+          id="cert-card"
+          class="cert-card relative w-full max-w-xl rounded-3xl border border-emerald-300/80 bg-gradient-to-br from-white via-paper to-brand-50/40 p-8 shadow-elev3 cursor-pointer"
+          onmousemove="handleCertTilt(event)"
+          onmouseleave="resetCertTilt()"
+        >
+          <!-- Corner Watermark Seal -->
+          <div class="flex items-start justify-between border-b border-rule/80 pb-6">
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-700 text-white font-display font-extrabold text-xl shadow-sm">
+                E
+              </div>
+              <div>
+                <h3 class="font-display text-lg font-bold text-ink-navy">EduAltTech Credential</h3>
+                <span class="text-[10px] font-mono text-slate-400">Setsuzoku Enterprise Education</span>
+              </div>
+            </div>
+
+            <!-- Official MSME Stamp -->
+            <div class="flex items-center gap-2 rounded-xl border border-emerald-300 bg-white px-3 py-1.5 shadow-2xs">
+              <img src="/media/logos/msme-seeklogo.png" alt="MSME Logo" class="h-6 w-auto object-contain" />
+              <div>
+                <span class="text-xs font-bold text-emerald-800 block">MSME Approved</span>
+                <span class="font-mono text-[9px] text-slate-500">Govt. of India</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="py-8">
+            <span class="text-xs font-mono uppercase tracking-wider text-muted font-medium">This certifies that</span>
+            <div class="font-display text-2xl sm:text-3xl font-extrabold text-ink mt-1">
+              Rajesh Kumar Varma
+            </div>
+            <p class="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-md">
+              has completed all rigorous milestones, code reviews, and live artifact deployments in
+              <strong class="text-ink"> Applied AI &amp; Python Systems (Cohort 04)</strong>.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-4 border-t border-rule/80 pt-6 text-xs">
+            <div>
+              <span class="block font-mono text-[10px] text-slate-400 uppercase">Verification Hash</span>
+              <span class="font-mono text-brand-800 font-semibold text-[11px]">eat-cert-2026-88a9df2</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="rounded-lg bg-white border border-rule px-3 py-1.5 font-semibold text-ink-navy shadow-xs text-xs">
+                View GitHub Artifact
+              </span>
+              <span class="rounded-lg bg-brand-600 px-3 py-1.5 font-semibold text-white shadow-xs text-xs">
+                Verify Credential ✓
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive Modal Command Palette (Triggered by ⌘K) -->
+  <div
+    id="command-modal"
+    class="fixed inset-0 z-50 hidden items-start justify-center bg-ink-navy/40 p-4 pt-20 backdrop-blur-xs"
+    onclick="if(event.target === this) triggerCommandMenu()"
+  >
+    <div class="w-full max-w-xl overflow-hidden rounded-2xl border border-rule bg-white shadow-2xl">
+      <div class="flex items-center border-b border-rule px-4 py-3 bg-paper">
+        <svg class="h-4 w-4 text-slate-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          id="cmd-input"
+          type="text"
+          placeholder="Search anything in EduAltTech..."
+          class="w-full bg-transparent text-sm text-ink outline-none"
+          oninput="filterCommands(this.value)"
+        />
+        <kbd onclick="triggerCommandMenu()" class="cursor-pointer rounded bg-white px-2 py-0.5 font-mono text-[10px] text-slate-400 border border-slate-200">ESC</kbd>
+      </div>
+      <div id="cmd-list" class="max-h-72 overflow-y-auto p-2 space-y-1 text-sm">
+        <div class="px-3 py-1 font-mono text-[10px] font-semibold text-slate-400 uppercase">Quick Jump</div>
+        <div class="cmd-item flex items-center justify-between rounded-lg px-3 py-2 text-ink hover:bg-brand-50 hover:text-brand-900 cursor-pointer">
+          <span>Explore All 24+ Courses</span>
+          <span class="text-xs text-slate-400">/courses</span>
+        </div>
+        <div class="cmd-item flex items-center justify-between rounded-lg px-3 py-2 text-ink hover:bg-brand-50 hover:text-brand-900 cursor-pointer">
+          <span>Free Knowledge &amp; Tutorials Library</span>
+          <span class="text-xs text-slate-400">/resources</span>
+        </div>
+        <div class="cmd-item flex items-center justify-between rounded-lg px-3 py-2 text-ink hover:bg-brand-50 hover:text-brand-900 cursor-pointer">
+          <span>Learner Dashboard &amp; Roadmap</span>
+          <span class="text-xs text-slate-400">/dashboard</span>
+        </div>
+        <div class="cmd-item flex items-center justify-between rounded-lg px-3 py-2 text-ink hover:bg-brand-50 hover:text-brand-900 cursor-pointer">
+          <span>Apply to Mentor a Cohort (Paid Role)</span>
+          <span class="text-xs text-slate-400">/mentor</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-24 border-t border-rule bg-white py-8 text-center text-xs text-slate-500">
+    EduAltTech Visual Architecture · Built with Next.js 15, Tailwind v4 &amp; Motion · Powered by Setsuzoku
+  </footer>
+
+  <!-- Interactivity Scripts -->
+  <script>
+    // Spotlight Effect
+    function handleSpotlight(e) {
+      const card = document.getElementById('spotlight-demo-card');
+      const glow = document.getElementById('spotlight-glow');
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      glow.style.opacity = '1';
+      glow.style.background = `radial-gradient(350px circle at ${x}px ${y}px, rgba(3, 140, 62, 0.16), transparent 75%)`;
+    }
+    function resetSpotlight() {
+      const glow = document.getElementById('spotlight-glow');
+      glow.style.opacity = '0';
+    }
+
+    // Mobile Sheet Toggle
+    let drawerOpen = false;
+    function toggleMobileDrawer() {
+      const drawer = document.getElementById('simulated-drawer');
+      drawerOpen = !drawerOpen;
+      if (drawerOpen) {
+        drawer.classList.remove('translate-y-full');
+      } else {
+        drawer.classList.add('translate-y-full');
+      }
+    }
+
+    // Command Menu Trigger
+    function triggerCommandMenu() {
+      const modal = document.getElementById('command-modal');
+      const isHidden = modal.classList.contains('hidden');
+      if (isHidden) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('cmd-input').focus();
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    // Keyboard shortcut for Cmd+K / Ctrl+K
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        triggerCommandMenu();
+      }
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('command-modal');
+        if (!modal.classList.contains('hidden')) {
+          triggerCommandMenu();
+        }
+      }
+    });
+
+    // Simple Command Filter
+    function filterCommands(query) {
+      const q = query.toLowerCase();
+      const items = document.querySelectorAll('.cmd-item');
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        item.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    // 3D Certificate Tilt Effect
+    function handleCertTilt(e) {
+      const card = document.getElementById('cert-card');
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -9;
+      const rotateY = ((x - centerX) / centerX) * 9;
+      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    }
+    function resetCertTilt() {
+      const card = document.getElementById('cert-card');
+      card.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+    }
+  </script>
+</body>
+</html>
