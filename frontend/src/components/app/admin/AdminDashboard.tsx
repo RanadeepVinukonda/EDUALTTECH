@@ -7,7 +7,6 @@ import MenuBook from "@mui/icons-material/MenuBook";
 import PeopleAlt from "@mui/icons-material/PeopleAlt";
 import School from "@mui/icons-material/School";
 import Handshake from "@mui/icons-material/Handshake";
-import CurrencyRupee from "@mui/icons-material/CurrencyRupee";
 import AssignmentInd from "@mui/icons-material/AssignmentInd";
 import Payment from "@mui/icons-material/Payment";
 import CheckCircle from "@mui/icons-material/CheckCircle";
