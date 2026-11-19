@@ -201,18 +201,40 @@ export default function MarkdownArticleViewer({ content, className }: MarkdownAr
       }
       if (trimmed.startsWith("## ")) {
         flushList(`${lineKey}-flush`);
+        const rawHeading = trimmed.slice(3);
+        const headingId = rawHeading
+          .replace(/[*`_]/g, "")
+          .trim()
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "-");
         elements.push(
-          <h2 key={lineKey} className="mt-7 mb-3 border-b border-slate-100 pb-1.5 font-display text-xl font-bold text-ink-900">
-            {renderInlineText(trimmed.slice(3))}
+          <h2
+            key={lineKey}
+            id={headingId}
+            className="mt-7 mb-3 scroll-mt-24 border-b border-slate-100 pb-1.5 font-display text-xl font-bold text-ink-900"
+          >
+            {renderInlineText(rawHeading)}
           </h2>
         );
         return;
       }
       if (trimmed.startsWith("# ")) {
         flushList(`${lineKey}-flush`);
+        const rawHeading = trimmed.slice(2);
+        const headingId = rawHeading
+          .replace(/[*`_]/g, "")
+          .trim()
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "-");
         elements.push(
-          <h1 key={lineKey} className="mt-8 mb-4 font-display text-2xl sm:text-3xl font-extrabold text-ink-900">
-            {renderInlineText(trimmed.slice(2))}
+          <h1
+            key={lineKey}
+            id={headingId}
+            className="mt-8 mb-4 scroll-mt-24 font-display text-2xl sm:text-3xl font-extrabold text-ink-900"
+          >
+            {renderInlineText(rawHeading)}
           </h1>
         );
         return;

@@ -7,7 +7,6 @@ import ThumbUp from "@mui/icons-material/ThumbUp";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import Add from "@mui/icons-material/Add";
 import HowToVote from "@mui/icons-material/HowToVote";
-import ArrowForward from "@mui/icons-material/ArrowForward";
 import Lock from "@mui/icons-material/Lock";
 import { apiGet, apiPost, ApiError } from "@/lib/api";
 import type { ActivePollResponse, PollOptionItem } from "@/lib/types";
@@ -15,6 +14,15 @@ import { notifyError, notifySuccess } from "@/lib/notify";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/components/app/AuthProvider";
 import Spinner from "@/components/ui/Spinner";
+
+const QUICK_IDEAS = [
+  "AI Agents",
+  "Flutter Apps",
+  "3D Blender",
+  "Music Production",
+  "Embedded Robotics",
+  "UI/UX Systems",
+];
 
 export default function CommunityCoursePoll() {
   const { user } = useAuth();
@@ -73,6 +81,10 @@ export default function CommunityCoursePoll() {
   }, [reloadKey]);
 
   const totalVotes = options.reduce((acc, p) => acc + (p.votes || 0), 0);
+  const isHeadToHead = options.length === 2;
+  const firstPct =
+    isHeadToHead && totalVotes > 0 ? Math.round(((options[0].votes || 0) / totalVotes) * 100) : 50;
+  const secondPct = isHeadToHead ? 100 - firstPct : 50;
 
   async function handleVote(optionId: string) {
     if (!user) {
@@ -84,28 +96,26 @@ export default function CommunityCoursePoll() {
     setVoting(optionId);
 
     const prevOptionId = userVotedOptionId;
-    // Optimistic update
     setUserVotedOptionId(optionId);
     setOptions((current) =>
       current.map((opt) => {
         if (opt.id === optionId) return { ...opt, votes: opt.votes + 1 };
         if (opt.id === prevOptionId) return { ...opt, votes: Math.max(0, opt.votes - 1) };
         return opt;
-      })
+      }),
     );
 
     if (pollId) {
       try {
         await apiPost(`/polls/${pollId}/vote`, { optionId });
       } catch (err) {
-        // Revert on error
         setUserVotedOptionId(prevOptionId);
         setOptions((current) =>
           current.map((opt) => {
             if (opt.id === optionId) return { ...opt, votes: Math.max(0, opt.votes - 1) };
             if (opt.id === prevOptionId) return { ...opt, votes: opt.votes + 1 };
             return opt;
-          })
+          }),
         );
         notifyError(err instanceof ApiError ? err.message : "Could not record your vote. Try again.");
       } finally {
@@ -137,33 +147,34 @@ export default function CommunityCoursePoll() {
   }
 
   return (
-    <section id="community-poll" className="bg-white py-16 sm:py-24 border-b border-slate-200 scroll-mt-12">
+    <section id="community-poll" className="scroll-mt-12 bg-paper py-10 sm:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Logged-out Account Notice */}
         {!user && (
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-brand-200 bg-brand-50/60 p-4 sm:p-5 shadow-xs">
-            <div className="flex items-center gap-3">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-600 text-white">
+          <div className="mb-8 flex flex-col justify-between gap-4 rounded-2xl border border-ink-200/80 bg-[#024059] p-5 text-white shadow-elev2 sm:flex-row sm:items-center sm:px-6">
+            <div className="flex items-start gap-3.5 sm:items-center">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/15 text-white">
                 <Lock fontSize="small" />
               </span>
               <div>
-                <p className="text-sm font-semibold text-ink-900">
-                  Course voting is exclusively open to logged-in learners
+                <p className="font-display text-sm font-semibold text-white sm:text-base">
+                  Sign in to cast your verified vote
                 </p>
-                <p className="text-xs text-slate-600">
-                  Sign in or create an account to cast your vote and prevent duplicate submissions.
+                <p className="mt-0.5 text-xs text-white/80">
+                  Voting is restricted to logged-in learner accounts so every voice counts once.
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex shrink-0 flex-wrap items-center gap-2.5">
               <Link
                 href="/login?next=/polls"
-                className="rounded-xl border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-4 text-xs font-semibold text-white transition hover:bg-white/20"
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
-                className="rounded-xl bg-brand-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-brand-700 transition"
+                className="inline-flex h-10 items-center justify-center rounded-xl bg-[#038c3e] px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-[#026b2f]"
               >
                 Create account
               </Link>
@@ -171,204 +182,285 @@ export default function CommunityCoursePoll() {
           </div>
         )}
 
-        <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
-          {/* Left Column: Heading and Context */}
-          <div className="lg:col-span-5">
-            {pollTitle && (
-              <h2 className="font-display text-section font-semibold tracking-tight text-ink-900 leading-tight">
-                {pollTitle}
-              </h2>
+        {/* Active Showdown Question & Live Tug-of-War Meter */}
+        {(pollTitle || pollDescription) && !loading && !loadError && options.length > 0 && (
+          <div className="mb-8 rounded-3xl border border-rule bg-[#ffffff] p-6 shadow-elev1 sm:p-8">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <div className="inline-flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-[0.12em] text-[#025926]">
+                  <span className="h-2 w-2 rounded-full bg-[#038c3e]" aria-hidden="true" />
+                  Current Showdown
+                </div>
+                {pollTitle && (
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+                    {pollTitle}
+                  </h2>
+                )}
+                {pollDescription && (
+                  <p className="mt-2 text-sm leading-relaxed text-ink-2 sm:text-base">
+                    {pollDescription}
+                  </p>
+                )}
+              </div>
+
+              <div className="shrink-0 rounded-2xl border border-rule bg-paper px-5 py-3 text-left lg:text-right">
+                <span className="block font-mono text-[10.5px] font-semibold uppercase tracking-wider text-muted">
+                  Total Votes Cast
+                </span>
+                <span className="mt-0.5 block font-mono text-2xl font-bold text-ink">
+                  {totalVotes.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Live Head-to-Head Tug-of-War Bar (for 2-option showdowns) */}
+            {isHeadToHead && (
+              <div className="mt-6 border-t border-rule pt-5">
+                <div className="mb-2 flex items-center justify-between gap-4 text-xs font-semibold">
+                  <span className="truncate text-[#025926]">
+                    01 · {options[0].title} ({totalVotes > 0 ? `${firstPct}%` : "0%"})
+                  </span>
+                  <span className="truncate text-right text-[#024059]">
+                    ({totalVotes > 0 ? `${secondPct}%` : "0%"}) {options[1].title} · 02
+                  </span>
+                </div>
+                <div className="flex h-3 w-full overflow-hidden rounded-full bg-paper-2 p-0.5">
+                  <div
+                    className="h-full rounded-l-full bg-[#025926] transition-all duration-500"
+                    style={{ width: `${totalVotes > 0 ? firstPct : 50}%` }}
+                  />
+                  <div className="w-0.5 shrink-0 bg-[#ffffff]" />
+                  <div
+                    className="h-full rounded-r-full bg-[#024059] transition-all duration-500"
+                    style={{ width: `${totalVotes > 0 ? secondPct : 50}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Side-by-Side Full-Width Ballot Cards */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-rule bg-[#ffffff] py-16 shadow-elev1">
+            <Spinner label="Loading current course proposals..." />
+          </div>
+        ) : loadError ? (
+          <div role="alert" className="rounded-3xl border border-rule bg-[#ffffff] p-8 text-center shadow-elev1">
+            <h3 className="font-display text-lg font-semibold text-ink">Course proposals could not be loaded</h3>
+            <p className="mt-2 text-sm text-ink-2">{loadError}</p>
+            <button
+              type="button"
+              onClick={() => setReloadKey((key) => key + 1)}
+              className="mt-5 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ink transition hover:bg-paper-2"
+            >
+              Try again
+            </button>
+          </div>
+        ) : options.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-rule bg-[#ffffff] p-12 text-center shadow-elev1">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-paper-2 text-muted">
+              <HowToVote sx={{ fontSize: 32 }} />
+            </div>
+            <h4 className="mt-4 font-display text-lg font-semibold text-ink">
+              Nothing to vote on right now
+            </h4>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-2">
+              There are currently no active course proposals open for voting. Suggest a skill or topic below for the next cycle!
+            </p>
+          </div>
+        ) : (
+          <div className="relative">
+            {isHeadToHead && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-rule bg-[#ffffff] font-mono text-xs font-extrabold tracking-wider text-ink shadow-elev2 md:flex"
+              >
+                VS
+              </div>
             )}
 
-            {pollDescription && (
-              <p className="mt-4 text-base leading-relaxed text-slate-600">{pollDescription}</p>
-            )}
+            <div
+              className={cn(
+                "grid gap-6",
+                isHeadToHead ? "md:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3",
+              )}
+            >
+              {options.map((option, index) => {
+                const hasVoted = userVotedOptionId === option.id;
+                const percentage =
+                  totalVotes > 0 ? Math.round(((option.votes || 0) / totalVotes) * 100) : 0;
+                const isAltBrand = index % 2 === 1;
 
-            <div className="mt-8 rounded-xl bg-slate-50 p-6 border border-slate-200 shadow-xs">
-              <h3 className="text-sm font-semibold text-ink-900 flex items-center gap-2">
-                <Add fontSize="small" className="text-brand-600" />
-                Want a specific skill or course?
+                return (
+                  <article
+                    key={option.id}
+                    className={cn(
+                      "flex flex-col overflow-hidden rounded-3xl border-2 bg-[#ffffff] shadow-elev1 transition-all duration-200 hover:-translate-y-1 hover:shadow-elev2",
+                      hasVoted
+                        ? isAltBrand
+                          ? "border-[#024059] ring-4 ring-[#024059]/10"
+                          : "border-[#025926] ring-4 ring-[#025926]/10"
+                        : "border-rule hover:border-brand-300",
+                    )}
+                  >
+                    <div className="flex flex-1 flex-col p-6 sm:p-8">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={cn(
+                              "rounded-lg px-2.5 py-1 font-mono text-[11px] font-bold text-white",
+                              isAltBrand ? "bg-[#024059]" : "bg-[#025926]",
+                            )}
+                          >
+                            Candidate {String(index + 1).padStart(2, "0")}
+                          </span>
+                          {option.difficulty && (
+                            <span className="rounded-full border border-rule bg-paper-2 px-2.5 py-0.5 text-xs font-semibold text-ink-2">
+                              {option.difficulty}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-right font-mono">
+                          <span className="text-xl font-bold text-ink">{percentage}%</span>
+                          <span className="ml-1.5 text-xs text-muted">
+                            ({(option.votes || 0).toLocaleString()} votes)
+                          </span>
+                        </div>
+                      </div>
+
+                      {option.category && option.category !== "General" && (
+                        <p className="mt-4 font-mono text-[11px] font-semibold uppercase tracking-wider text-muted">
+                          {option.category}
+                          {option.durationWeeks ? ` · ~${option.durationWeeks} weeks` : ""}
+                        </p>
+                      )}
+
+                      <h3 className="mt-1.5 font-display text-xl font-semibold leading-snug text-ink sm:text-2xl">
+                        {option.title}
+                      </h3>
+
+                      <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-2 sm:text-base">
+                        {option.description}
+                      </p>
+
+                      {option.learningOutcomes && option.learningOutcomes.length > 0 && (
+                        <ul className="mt-5 space-y-1.5 border-t border-rule pt-4 text-xs text-ink-2">
+                          {option.learningOutcomes.slice(0, 4).map((outc) => (
+                            <li key={outc} className="flex items-start gap-2">
+                              <CheckCircle
+                                sx={{ fontSize: 15 }}
+                                className={cn("mt-0.5 shrink-0", isAltBrand ? "text-[#024059]" : "text-[#038c3e]")}
+                                aria-hidden
+                              />
+                              <span>{outc}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Progress Bar + Full-Width Vote Button */}
+                      <div className="mt-6 pt-2">
+                        <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-paper-2">
+                          <div
+                            className={cn(
+                              "h-full rounded-full transition-all duration-500 ease-out",
+                              isAltBrand ? "bg-[#024059]" : "bg-[#038c3e]",
+                            )}
+                            style={{ width: `${Math.max(percentage, totalVotes > 0 ? 3 : 0)}%` }}
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleVote(option.id)}
+                          disabled={voting === option.id}
+                          aria-label={`Vote for ${option.title}`}
+                          className={cn(
+                            "inline-flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white shadow-sm transition active:scale-[0.99] disabled:opacity-60",
+                            hasVoted
+                              ? "bg-ink text-white"
+                              : isAltBrand
+                                ? "bg-[#024059] hover:bg-ink-800"
+                                : "bg-[#025926] hover:bg-brand-800",
+                          )}
+                        >
+                          {hasVoted ? (
+                            <>
+                              <CheckCircle sx={{ fontSize: 18 }} aria-hidden />
+                              <span>Voted for Candidate {String(index + 1).padStart(2, "0")}</span>
+                            </>
+                          ) : (
+                            <>
+                              <ThumbUp sx={{ fontSize: 17 }} aria-hidden />
+                              <span>Vote for this course</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Full-Width Horizontal "Pitch a Course Idea" Studio Strip */}
+        <div className="mt-10 rounded-3xl border border-rule bg-paper-2 p-6 sm:p-8">
+          <div className="grid gap-6 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-5">
+              <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-ink sm:text-xl">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-[#025926] text-white">
+                  <Add fontSize="small" />
+                </span>
+                Pitch a course for the next ballot
               </h3>
-              <p className="mt-1 text-xs text-slate-600">
-                Send us a technology, academic, or creative topic. Suggestions are reviewed before they appear in a future poll.
+              <p className="mt-2 text-sm leading-relaxed text-ink-2">
+                Want a technology, academic, or creative topic that isn&apos;t listed? Send it in — top community requests enter the next voting showdown.
               </p>
+            </div>
 
-              <form onSubmit={handleSuggest} className="mt-4 flex flex-col sm:flex-row gap-2">
+            <div className="lg:col-span-7">
+              <div className="mb-3 flex flex-wrap gap-1.5">
+                {QUICK_IDEAS.map((idea) => (
+                  <button
+                    key={idea}
+                    type="button"
+                    onClick={() => setCustomSkill(idea)}
+                    className="cursor-pointer rounded-full border border-rule bg-[#ffffff] px-3 py-1 text-xs font-medium text-ink-2 shadow-elev1 transition hover:border-brand-300 hover:bg-brand-50 hover:text-[#025926]"
+                  >
+                    + {idea}
+                  </button>
+                ))}
+              </div>
+
+              <form onSubmit={handleSuggest} className="flex flex-col gap-2.5 sm:flex-row">
                 <input
                   type="text"
                   value={customSkill}
                   onChange={(e) => setCustomSkill(e.target.value)}
-                  placeholder="e.g. Jazz Piano, Flutter, 3D Blender..."
+                  placeholder="Type a course or skill you want us to teach next…"
                   aria-label="Suggest a course or skill"
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
+                  className="h-11 flex-1 rounded-xl border border-rule bg-[#ffffff] px-4 text-sm text-ink placeholder:text-muted focus:border-[#025926] focus:outline-none focus:ring-2 focus:ring-[#025926]/20"
                 />
                 <button
                   type="submit"
                   disabled={suggesting}
-                  className="inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-700 shrink-0 disabled:opacity-50"
+                  className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-[#025926] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 disabled:opacity-50"
                 >
                   {suggesting ? "Submitting…" : "Submit suggestion"}
                 </button>
               </form>
 
               {suggestSuccess && (
-                <p className="mt-3 text-xs font-semibold text-brand-700 flex items-center gap-1.5 animate-in fade-in duration-200">
+                <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-[#025926]">
                   <CheckCircle fontSize="inherit" />
                   Skill submitted to curriculum wishlist for review!
                 </p>
               )}
             </div>
-
-            {pollId && options.length > 0 && (
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
-                <span>Total votes: <strong className="font-semibold text-slate-700">{totalVotes.toLocaleString()}</strong></span>
-                <Link
-                  href="/polls#past-polls"
-                  className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-brand-700 hover:underline"
-                >
-                  <span>View past winners</span>
-                  <ArrowForward fontSize="inherit" />
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column: Live Poll Cards or Honest Empty State */}
-          <div className="lg:col-span-7">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 rounded-xl border border-slate-200 bg-slate-50/50">
-                <Spinner label="Loading current course proposals..." />
-              </div>
-            ) : loadError ? (
-              <div role="alert" className="rounded-xl border border-rule bg-paper p-8 text-center">
-                <h3 className="font-display text-lg font-semibold text-ink-900">Course proposals could not be loaded</h3>
-                <p className="mt-2 text-sm text-ink-2">{loadError}</p>
-                <button
-                  type="button"
-                  onClick={() => setReloadKey((key) => key + 1)}
-                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-                >
-                  Try again
-                </button>
-              </div>
-            ) : options.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-12 text-center">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-slate-100 text-slate-400">
-                  <HowToVote sx={{ fontSize: 32 }} />
-                </div>
-                <h4 className="mt-4 font-display text-lg font-semibold text-ink-900">
-                  Nothing to vote on right now
-                </h4>
-                <p className="mt-2 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-                  There are currently no active course proposals open for voting. Check back soon for the next cycle, or suggest a skill or topic you would like us to teach next!
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {options.map((option) => {
-                  const hasVoted = userVotedOptionId === option.id;
-                  const percentage = Math.round(((option.votes || 0) / (totalVotes || 1)) * 100);
-
-                  return (
-                    <div
-                      key={option.id}
-                      className={cn(
-                        "relative overflow-hidden rounded-xl border p-5 sm:p-6 transition-colors duration-200",
-                        hasVoted
-                          ? "border-brand-500 bg-brand-50/20 ring-1 ring-brand-500/20"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      )}
-                    >
-                      {/* Background progress fill bar */}
-                      <div
-                        className="absolute inset-y-0 left-0 -z-10 w-full origin-left bg-brand-100/40 transition-transform duration-700 ease-out"
-                        style={{ transform: `scaleX(${Math.max(percentage, 4) / 100})` }}
-                      />
-
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                            {option.category && option.category !== "General" && (
-                              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-                                {option.category}
-                              </span>
-                            )}
-                            {option.difficulty && (
-                              <span className="text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
-                                {option.difficulty}
-                              </span>
-                            )}
-                            {option.durationWeeks && (
-                              <span className="text-[11px] font-semibold text-slate-500">
-                                ~{option.durationWeeks} weeks
-                              </span>
-                            )}
-                          </div>
-
-                          <h4 className="font-display text-base sm:text-lg font-semibold text-ink-900 truncate">
-                            {option.title}
-                          </h4>
-
-                          <p className="mt-1 text-xs sm:text-sm text-slate-600 line-clamp-2">
-                            {option.description}
-                          </p>
-
-                          {option.learningOutcomes && option.learningOutcomes.length > 0 && (
-                            <div className="mt-2.5 flex flex-wrap gap-1.5">
-                              {option.learningOutcomes.slice(0, 3).map((outc) => (
-                                <span
-                                  key={outc}
-                                  className="rounded-md bg-white/80 border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600"
-                                >
-                                  ✓ {outc}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                          <div className="text-right">
-                            <span className="font-mono text-base font-semibold text-ink-900">
-                              {(option.votes || 0).toLocaleString()}
-                            </span>
-                            <span className="text-xs text-slate-500 ml-1">votes</span>
-                            <div className="font-mono text-xs font-semibold text-brand-700">
-                              {percentage}%
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => handleVote(option.id)}
-                            disabled={voting === option.id}
-                            aria-label={`Vote for ${option.title}`}
-                            className={cn(
-                              "inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition",
-                              hasVoted
-                                ? "bg-brand-700 text-white hover:bg-brand-800"
-                                : "bg-brand-600 text-white hover:bg-brand-700 active:scale-95"
-                            )}
-                          >
-                            {hasVoted ? (
-                              <>
-                                <CheckCircle fontSize="inherit" />
-                                <span>Your Vote</span>
-                              </>
-                            ) : (
-                              <>
-                                <ThumbUp fontSize="inherit" />
-                                <span>Vote</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         </div>
       </div>

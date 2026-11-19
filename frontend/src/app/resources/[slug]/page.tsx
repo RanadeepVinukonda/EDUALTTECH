@@ -1,17 +1,14 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { publicFetchStrict } from "@/lib/server-api";
-import type { ResourceArticleDetail } from "@/lib/types";
+import type { ResourceArticleDetailResponse } from "@/lib/types";
 import LinkButton from "@/components/ui/LinkButton";
 import ResourceArticleReader from "@/components/resources/ResourceArticleReader";
 
-interface ArticleResponse {
-  article: ResourceArticleDetail;
-}
-
-function loadArticle(slug: string) {
-  return publicFetchStrict<ArticleResponse>(`/resources/article/${slug}`, {}, 120);
-}
+const loadArticle = cache((slug: string) =>
+  publicFetchStrict<ResourceArticleDetailResponse>(`/resources/article/${slug}`, {}, 120),
+);
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -39,7 +36,16 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const { data, error } = await loadArticle(slug);
 
-  if (data?.article) return <ResourceArticleReader article={data.article} />;
+  if (data?.article) {
+    const hydratedArticle = {
+      ...data.article,
+      isBookmarked: data.isBookmarked ?? data.article.isBookmarked,
+      prevArticle: data.prev ?? data.article.prevArticle ?? null,
+      nextArticle: data.next ?? data.article.nextArticle ?? null,
+      linkedCourse: data.article.linkedCourse ?? data.article.relatedCourse ?? null,
+    };
+    return <ResourceArticleReader article={hydratedArticle} />;
+  }
 
   if (error) {
     return (

@@ -30,73 +30,52 @@ export default function HomePage() {
 
       <Pathway />
 
-      <section className="border-t border-rule bg-paper-2 py-12 sm:py-16">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <div className="lg:col-span-5">
-            <h2 className="max-w-md font-display text-section font-semibold tracking-tight text-ink leading-tight">
-              Beyond the course
-            </h2>
-          </div>
-          <nav aria-label="More ways to learn" className="lg:col-span-7">
-            <ul className="divide-y divide-rule border-y border-rule">
-              <li>
-                <Link
-                  href="/resources"
-                  className="flex min-h-16 items-center justify-between gap-4 py-4 font-medium text-ink transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-                >
-                  Free resources
-                  <ArrowForward fontSize="small" aria-hidden />
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/polls"
-                  className="flex min-h-16 items-center justify-between gap-4 py-4 font-medium text-ink transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-                >
-                  Course polls
-                  <ArrowForward fontSize="small" aria-hidden />
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/mentor"
-                  className="flex min-h-16 items-center justify-between gap-4 py-4 font-medium text-ink transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-                >
-                  Mentoring
-                  <ArrowForward fontSize="small" aria-hidden />
-                </Link>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </section>
-
-      <section className="bg-brand-900 py-12 sm:py-16">
+      <section className="bg-brand-900 py-14 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-section font-semibold leading-tight text-white">
-            Mentored courses. Paid teaching.
-          </h2>
-          <div className="mt-10 grid border-t border-white/25 sm:grid-cols-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="font-display text-section font-semibold leading-tight text-white">
+              Mentored courses. Paid teaching.
+            </h2>
+            <p className="max-w-md text-sm leading-relaxed text-brand-100/85">
+              Start learning with working mentors, vote on upcoming cohorts, or teach a course you know well.
+            </p>
+          </div>
+          <div className="mt-10 grid border-t border-white/20 sm:grid-cols-2 lg:grid-cols-4">
             <Link
               href="/courses"
-              className="flex min-h-28 flex-col justify-between gap-5 border-b border-white/25 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:border-b-0 sm:border-r sm:pr-6"
+              className="group flex min-h-28 flex-col justify-between gap-5 border-b border-white/20 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:border-r sm:pr-6 lg:border-b-0"
             >
               <span className="font-display text-lg font-semibold">Courses</span>
-              <span className="inline-flex items-center gap-2 text-sm">Explore courses <ArrowForward fontSize="small" aria-hidden /></span>
+              <span className="inline-flex items-center gap-2 text-sm text-brand-100 group-hover:text-white">
+                Explore courses <ArrowForward fontSize="small" aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+              </span>
             </Link>
             <Link
               href="/mentor"
-              className="flex min-h-28 flex-col justify-between gap-5 border-b border-white/25 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:border-b-0 sm:border-r sm:px-6"
+              className="group flex min-h-28 flex-col justify-between gap-5 border-b border-white/20 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:pl-6 lg:border-b-0 lg:border-r lg:px-6"
             >
               <span className="font-display text-lg font-semibold">Mentoring</span>
-              <span className="inline-flex items-center gap-2 text-sm">Explore mentoring <ArrowForward fontSize="small" aria-hidden /></span>
+              <span className="inline-flex items-center gap-2 text-sm text-brand-100 group-hover:text-white">
+                Apply to mentor <ArrowForward fontSize="small" aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+              </span>
             </Link>
             <Link
               href="/resources"
-              className="flex min-h-28 flex-col justify-between gap-5 border-b border-white/25 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:border-b-0 sm:pl-6"
+              className="group flex min-h-28 flex-col justify-between gap-5 border-b border-white/20 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:border-b-0 sm:border-r sm:pr-6 lg:px-6"
             >
               <span className="font-display text-lg font-semibold">Open resources</span>
-              <span className="inline-flex items-center gap-2 text-sm">Browse free lessons <ArrowForward fontSize="small" aria-hidden /></span>
+              <span className="inline-flex items-center gap-2 text-sm text-brand-100 group-hover:text-white">
+                Browse free lessons <ArrowForward fontSize="small" aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+            <Link
+              href="/polls"
+              className="group flex min-h-28 flex-col justify-between gap-5 py-5 text-white transition-colors hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:pl-6"
+            >
+              <span className="font-display text-lg font-semibold">Course polls</span>
+              <span className="inline-flex items-center gap-2 text-sm text-brand-100 group-hover:text-white">
+                Vote on next topics <ArrowForward fontSize="small" aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+              </span>
             </Link>
           </div>
         </div>

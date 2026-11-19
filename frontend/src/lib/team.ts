@@ -15,6 +15,5 @@ export const TEAM: TeamMember[] = [
   { name: "Ranadeep", title: "Full Stack Developer, Client Relations", image: "/media/newTeam/Ranaadeep.jpeg" },
   { name: "Hemanth", title: "Full Stack Developer", image: "/media/newTeam/Hemanth.jpeg" },
   { name: "Chandhini", title: "Project Coordinator, AI Development", image: "/media/newTeam/alrihab.jpg" },
-  { name: "Priya", title: "Graphic Designer", image: "/media/newTeam/Priya.jpeg" },
   { name: "Gnana", title: "Frontend Developer", image: "/media/newTeam/Gnana.jpeg" },
 ];

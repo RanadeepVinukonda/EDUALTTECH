@@ -42,9 +42,9 @@ export default function CurriculumPreview() {
   }, [reloadKey]);
 
   return (
-    <section className="bg-white py-12 sm:py-16 border-b border-slate-200">
+    <section className="border-b border-rule bg-paper-2 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8 border-b border-slate-200">
+        <div className="flex flex-col gap-6 border-b border-rule pb-8 md:flex-row md:items-end md:justify-between">
           <SectionHeading
             title="Courses with mentors"
             lead="Learn through practical, mentor-led courses."

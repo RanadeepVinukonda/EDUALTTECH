@@ -46,23 +46,19 @@ export default function CourseCard({
   unavailable?: boolean;
   className?: string;
 }) {
-  const { slug, title, description, thumbnailUrl, category, domain, tags, features, pricePaise, currency = "INR" } = course;
+  const { slug, title, description, thumbnailUrl, category, domain, tags, pricePaise, currency = "INR" } = course;
   const link = href ?? `/courses/${slug}`;
   const price = priceLabel ?? (typeof pricePaise === "number" ? formatPrice(pricePaise, currency) : null);
   const eyebrow = domain || category;
   const visibleTags = (tags ?? []).filter(Boolean).slice(0, 3);
   const remainingTagCount = Math.max(0, (tags ?? []).filter(Boolean).length - visibleTags.length);
-  const hasCertificate = (features ?? []).some((feature) => {
-    const text = feature.toLowerCase();
-    return text.includes("certificate") && !/\b(no|not|without)\b/.test(text);
-  });
   const showProgress = typeof progressPct === "number";
   const pct = showProgress ? Math.min(100, Math.max(0, progressPct as number)) : 0;
 
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition-colors hover:border-slate-300",
+        "group relative flex flex-col overflow-hidden rounded-xl border border-rule bg-[#ffffff] shadow-elev1 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-elev2",
         className,
       )}
     >
@@ -74,46 +70,38 @@ export default function CourseCard({
         />
       )}
 
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-        <CoverImage src={thumbnailUrl ?? null} alt="" fallback={category ?? title} className="h-full w-full object-cover" />
+      <div className="relative aspect-[16/10] overflow-hidden bg-paper-2">
+        <CoverImage
+          src={thumbnailUrl ?? null}
+          alt=""
+          fallback={category ?? title}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+        />
         {badge && (
-          <span className="absolute left-3 top-3 rounded-md bg-white/95 px-2 py-1 text-[11px] font-semibold text-ink-900 backdrop-blur">
+          <span className="absolute left-3 top-3 rounded-md bg-[#ffffff]/95 px-2.5 py-1 text-[11px] font-semibold text-ink shadow-elev1 backdrop-blur">
             {badge}
           </span>
         )}
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="line-clamp-2 font-display text-base font-semibold leading-snug text-ink-900">
+        <h3 className="line-clamp-2 font-display text-base font-semibold leading-snug text-ink transition-colors group-hover:text-brand-800">
           {title}
         </h3>
-        {eyebrow && <p className="mt-1 text-xs text-slate-500">{eyebrow}</p>}
+        {eyebrow && <p className="mt-1 text-xs text-muted">{eyebrow}</p>}
 
         {description && (
-          <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-slate-600">{description}</p>
+          <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-ink-2">{description}</p>
         )}
-        {(visibleTags.length > 0 || hasCertificate) && (
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        {visibleTags.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
             {visibleTags.map((tag) => (
-              <span key={tag} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
+              <span key={tag} className="rounded-full border border-rule bg-paper-2 px-2.5 py-0.5 text-[11.5px] font-medium text-ink-2">
                 {tag}
               </span>
             ))}
             {remainingTagCount > 0 && (
-              <span className="text-xs font-medium text-slate-500">+{remainingTagCount}</span>
-            )}
-            {hasCertificate && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-800">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/media/logos/msme-seeklogo.png"
-                  alt="MSME"
-                  className="h-3.5 w-auto object-contain shrink-0"
-                  width={14}
-                  height={14}
-                />
-                <span>MSME Certificate Included</span>
-              </span>
+              <span className="text-xs font-medium text-muted">+{remainingTagCount}</span>
             )}
           </div>
         )}

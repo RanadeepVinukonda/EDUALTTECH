@@ -15,6 +15,9 @@ function translate(err: unknown): ApiError {
     if (err.code === "P2025") return ApiError.notFound("Resource not found");
     if (err.code === "P2003") return ApiError.badRequest("Related resource is missing");
   }
+  if (err instanceof Prisma.PrismaClientInitializationError) {
+    return new ApiError(503, "Database is reconnecting. Please try again in a few moments.", "DATABASE_UNAVAILABLE");
+  }
   if (err instanceof SyntaxError && "body" in err) return ApiError.badRequest("Malformed JSON body");
   return new ApiError(500, "Something went wrong. Please try again.");
 }

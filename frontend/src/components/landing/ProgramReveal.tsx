@@ -29,7 +29,7 @@ export default function ProgramReveal({
       onClick={() => setOpen((v) => !v)}
       aria-pressed={open}
       aria-label={open ? `Hide photos from our ${name} program` : `Show photos from our ${name} program`}
-      className={`group relative flex h-56 w-full touch-manipulation items-center justify-center overflow-hidden border-b border-slate-100 bg-slate-50 p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 ${
+      className={`group relative flex h-60 w-full cursor-pointer touch-manipulation items-center justify-center overflow-hidden border-b border-rule bg-[#ffffff] p-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 ${
         className ?? ""
       }`}
     >
@@ -37,18 +37,26 @@ export default function ProgramReveal({
         src={logo}
         alt={name}
         fallback={name}
-        className={`h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-0 group-active:opacity-0 ${
-          open ? "opacity-0" : ""
+        className={`h-full max-h-36 w-full object-contain transition-all duration-300 group-hover:scale-95 group-hover:opacity-0 group-active:opacity-0 ${
+          open ? "scale-95 opacity-0" : ""
         }`}
       />
       <CoverImage
         src={photo}
         alt={`${name} program`}
         fallback={name}
-        className={`absolute inset-0 transition-opacity duration-300 group-hover:opacity-100 group-active:opacity-100 ${
+        className={`absolute inset-0 h-full w-full object-cover transition-all duration-300 group-hover:scale-[1.03] group-hover:opacity-100 group-active:opacity-100 ${
           open ? "opacity-100" : "opacity-0"
         }`}
       />
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute bottom-3 right-3 rounded-full border border-rule/80 bg-paper/95 px-2.5 py-1 text-[11px] font-medium text-ink-2 shadow-elev1 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-0 ${
+          open ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        Hover or tap for classroom photo
+      </span>
     </button>
   );
 }

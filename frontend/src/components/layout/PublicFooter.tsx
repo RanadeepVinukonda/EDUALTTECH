@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
-import YouTubeIcon from "@mui/icons-material/YouTube";
 import FacebookIcon from "@mui/icons-material/Facebook";
 
 import BrandLogo from "@/components/brand/BrandLogo";
@@ -11,7 +10,6 @@ import BrandLogo from "@/components/brand/BrandLogo";
 const SOCIAL = [
   { label: "LinkedIn", href: "https://www.linkedin.com/company/edu-alt-tech", Icon: LinkedInIcon },
   { label: "Instagram", href: "https://www.instagram.com/edu_alt_tech?rpxt=dDAwM3NuOTBxd3V1", Icon: InstagramIcon },
-  { label: "YouTube", href: null, Icon: YouTubeIcon },
   { label: "Facebook", href: "https://www.facebook.com/share/1A5wVtFiQc/", Icon: FacebookIcon },
 ];
 
@@ -19,7 +17,7 @@ const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
   { href: "/resources", label: "Free Resources" },
-  { href: "/services#course-demand", label: "Vote on courses" },
+  { href: "/polls", label: "Vote on courses" },
   { href: "/services", label: "Services" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -46,18 +44,21 @@ export default function PublicFooter() {
             </p>
 
             {/* MSME Approved Trust Badge */}
-            <div className="flex items-center gap-3 rounded-2xl border border-rule bg-white p-3 shadow-2xs max-w-[280px]">
+            <div className="flex max-w-[300px] items-center gap-3.5 rounded-xl border border-brand-200/80 bg-[#ffffff] p-3.5 shadow-elev1">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/media/logos/msme-seeklogo.png"
                 alt="MSME Government of India"
-                className="h-10 w-auto object-contain shrink-0"
-                width={40}
-                height={40}
+                className="h-11 w-auto shrink-0 object-contain"
+                width={44}
+                height={44}
               />
               <div className="min-w-0">
-                <div className="text-xs font-bold text-ink">MSME Approved</div>
-                <div className="text-[10.5px] text-muted leading-tight">Govt. of India Registered Enterprise</div>
+                <div className="text-[10px] font-mono font-semibold uppercase tracking-wider text-brand-700">
+                  Govt. of India
+                </div>
+                <div className="text-xs font-bold text-ink">MSME Approved Enterprise</div>
+                <div className="text-[11px] leading-tight text-muted">Ministry of MSME Registered</div>
               </div>
             </div>
           </div>
@@ -86,8 +87,8 @@ export default function PublicFooter() {
                   info@edualttech.com
                 </a>
               </p>
-              <p className="text-xs text-muted">
-                School Partnerships: Genesis, Sharada Vidhyalaya, New Era, MamaSparsh.
+              <p className="text-xs leading-relaxed text-muted">
+                School Partnerships: Genesis, Sharada Vidhyalaya, New Era, MamaSparsh, Joy E.M. High School, New Era Educational Institutions, St. Anthony&apos;s Schools.
               </p>
               <p className="text-xs text-muted">A product by Setsuzoku.</p>
             </address>

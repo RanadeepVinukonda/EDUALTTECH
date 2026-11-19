@@ -21,6 +21,7 @@ const CODE_MESSAGES: Record<string, string> = {
   MOBILE_VERIFICATION_REQUIRED: "Verify your mobile number to continue.",
   LAST_ADMIN: "You can’t remove the last remaining admin.",
   NETWORK: "We couldn’t reach the server. Check your connection and try again.",
+  DATABASE_UNAVAILABLE: "Database is connecting. Please wait a moment and try again.",
 };
 
 export function isApiError(err: unknown): err is ApiError {

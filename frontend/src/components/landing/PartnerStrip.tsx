@@ -32,26 +32,26 @@ export default function PartnerStrip({
       aria-label="Schools and organizations we work with"
       className={cn("bg-slate-50", divider && "border-y border-slate-200", className)}
     >
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <p className="text-center text-xs font-semibold text-slate-500">
+      <div className={cn("mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", divider ? "py-8" : "py-2")}>
+        <p className="text-center text-xs font-mono font-semibold uppercase tracking-[0.12em] text-muted">
           School and learning partners
         </p>
 
         {scroll ? (
-          <div className="marquee mt-6">
+          <div className="marquee mt-6 py-1">
             <ul className="marquee-track list-none">
               {[...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS].map((p, i) => (
                 <li
                   key={`${p.name}-${i}`}
                   aria-hidden={i >= PARTNERS.length || undefined}
-                  className="flex h-28 w-64 shrink-0 items-center justify-center px-6 sm:h-32 sm:w-80 sm:px-8"
+                  className="flex h-24 w-56 shrink-0 items-center justify-center rounded-xl border border-rule/70 bg-[#ffffff] px-6 py-3 shadow-elev1 sm:h-28 sm:w-64"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={p.src}
                     alt={p.name}
                     loading="lazy"
-                    className="max-h-20 sm:max-h-24 w-auto max-w-full object-contain opacity-95 transition-opacity duration-300 hover:opacity-100"
+                    className="max-h-16 sm:max-h-20 w-auto max-w-full object-contain opacity-95 transition-opacity duration-300 hover:opacity-100"
                   />
                 </li>
               ))}
@@ -62,7 +62,7 @@ export default function PartnerStrip({
             {PARTNERS.map((p) => (
               <li
                 key={p.name}
-                className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-6 transition hover:border-slate-300 "
+                className="flex flex-col items-center gap-3 rounded-xl border border-rule bg-[#ffffff] p-6 shadow-elev1 transition hover:border-brand-300 hover:shadow-elev2"
               >
                 <div className="flex h-20 items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
