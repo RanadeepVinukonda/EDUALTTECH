@@ -85,57 +85,40 @@ export default function AboutPage() {
             </ol>
           </nav>
 
-          <div className="grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
-            <div className="lg:col-span-7">
-              <h1 className="max-w-2xl font-display text-display-s font-semibold leading-[1.06] tracking-tight text-white">
-                Practical skills and paid teaching.
-              </h1>
-              <p className="mt-3.5 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg">
-                Learners build practical skills in AI, engineering, and creative arts — while skilled practitioners earn by mentoring and teaching.
-              </p>
+          <div className="max-w-3xl">
+            <h1 className="font-display text-display-s font-semibold leading-[1.06] tracking-tight text-white sm:text-display-m">
+              Practical skills and paid teaching.
+            </h1>
+            <p className="mt-3.5 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg">
+              Learners build practical skills in AI, engineering, and creative arts - while skilled practitioners earn by mentoring and teaching.
+            </p>
 
-              <ul className="mt-5 flex flex-wrap items-center gap-2">
-                {HERO_PILLARS.map((item) => (
-                  <li
-                    key={item}
-                    className="rounded-lg border border-white/25 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
+            <ul className="mt-5 flex flex-wrap items-center gap-2">
+              {HERO_PILLARS.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-lg border border-white/25 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/courses"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ffffff] px-5 text-sm font-semibold text-[#025926] shadow-sm transition hover:bg-brand-50"
-                >
-                  Explore courses
-                  <ArrowForward sx={{ fontSize: 16 }} aria-hidden />
-                </Link>
-                <Link
-                  href="/mentor"
-                  className="inline-flex h-11 items-center justify-center rounded-xl border border-white/30 bg-white/15 px-5 text-sm font-semibold text-white transition hover:bg-white/25"
-                >
-                  Become a mentor
-                </Link>
-              </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/courses"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ffffff] px-5 text-sm font-semibold text-[#025926] shadow-sm transition hover:bg-brand-50"
+              >
+                Explore courses
+                <ArrowForward sx={{ fontSize: 16 }} aria-hidden />
+              </Link>
+              <Link
+                href="/mentor"
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-white/30 bg-white/15 px-5 text-sm font-semibold text-white transition hover:bg-white/25"
+              >
+                Become a mentor
+              </Link>
             </div>
-
-            <figure className="lg:col-span-5">
-              <div className="overflow-hidden rounded-2xl bg-brand-800 shadow-elev3 ring-2 ring-white/20">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/media/photos/EAT4.jpg"
-                  alt="Students working with a mentor during a classroom session in Kakinada"
-                  className="aspect-[16/10] w-full object-cover"
-                />
-              </div>
-              <figcaption className="mt-2.5 flex items-center justify-between text-xs font-medium text-white/80">
-                <span>Classroom session, Kakinada</span>
-                <span>Partner school program</span>
-              </figcaption>
-            </figure>
           </div>
         </div>
       </section>
