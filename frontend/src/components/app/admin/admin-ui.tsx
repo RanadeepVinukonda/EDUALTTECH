@@ -53,24 +53,21 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]) {
 export function AdminHeader({
   title,
   description,
-  badge,
   actions,
 }: {
   title: string;
   description?: string;
-  badge?: React.ReactNode;
   actions?: React.ReactNode;
 }) {
   return (
-    <header className="flex flex-col gap-4 border-b border-rule pb-5 sm:flex-row sm:items-end sm:justify-between">
+    <header className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-5">
       <div className="min-w-0">
-        {badge && <div className="mb-2">{badge}</div>}
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-[28px]">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink-900 sm:text-[28px]">
           {title}
         </h1>
-        {description && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-2">{description}</p>}
+        {description && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-600">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
   );
 }
@@ -80,110 +77,49 @@ export function MetricCard({
   value,
   hint,
   href,
-  icon,
-  trend,
   tone = "default",
-  className,
 }: {
   label: string;
   value: React.ReactNode;
   hint?: string;
   href?: string;
-  icon?: React.ReactNode;
-  trend?: { value: string; isPositive?: boolean };
-  tone?: "default" | "warn" | "danger" | "success" | "brand";
-  className?: string;
+  tone?: "default" | "warn" | "danger";
 }) {
   const inner = (
-    <div className="flex h-full flex-col justify-between">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-mono font-semibold uppercase tracking-[0.12em] text-muted truncate">
-            {label}
-          </p>
-          <p
-            className={cn(
-              "mt-2 font-display text-2xl sm:text-[28px] font-semibold leading-tight tracking-tight tabular-nums",
-              tone === "warn"
-                ? "text-amber-700"
-                : tone === "danger"
-                  ? "text-red-700"
-                  : tone === "success"
-                    ? "text-[#025926]"
-                    : tone === "brand"
-                      ? "text-brand-700"
-                      : "text-ink",
-            )}
-          >
-            {value}
-          </p>
-        </div>
-        {icon && (
-          <div
-            className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border shadow-xs transition-transform duration-200 group-hover:scale-105",
-              tone === "warn"
-                ? "border-amber-200 bg-amber-50 text-amber-700"
-                : tone === "danger"
-                  ? "border-red-200 bg-red-50 text-red-700"
-                  : tone === "success"
-                    ? "border-brand-200 bg-brand-50 text-brand-700"
-                    : "border-rule/80 bg-paper-2 text-ink-2 group-hover:border-brand-300 group-hover:bg-brand-50/60 group-hover:text-brand-800",
-            )}
-          >
-            {icon}
-          </div>
+    <>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-semibold text-slate-600">{label}</p>
+        {href && (
+          <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-brand-600">
+            <path d="M4 12 12 4M6 4h6v6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         )}
       </div>
-
-      {(hint || trend || href) && (
-        <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-rule/70 pt-2.5 text-xs">
-          {hint && <span className="truncate text-ink-2/80 font-medium">{hint}</span>}
-          {trend && (
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold",
-                trend.isPositive !== false
-                  ? "bg-brand-50 text-brand-700 border border-brand-200/60"
-                  : "bg-red-50 text-red-700 border border-red-200/60",
-              )}
-            >
-              {trend.value}
-            </span>
-          )}
-          {href && (
-            <svg
-              aria-hidden
-              viewBox="0 0 16 16"
-              className="h-3.5 w-3.5 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-brand-700"
-            >
-              <path d="M4 12 12 4M6 4h6v6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </div>
-      )}
-    </div>
+      <p
+        className={cn(
+          "mt-3 font-display text-[28px] font-semibold leading-none tracking-tight tabular-nums",
+          tone === "warn" ? "text-amber-700" : tone === "danger" ? "text-red-700" : "text-ink-900",
+        )}
+      >
+        {value}
+      </p>
+      {hint && <p className="mt-2.5 text-xs leading-snug text-slate-500">{hint}</p>}
+    </>
   );
-
-  const containerClasses = cn(
-    "group relative overflow-hidden rounded-2xl border bg-[#ffffff] p-5 shadow-elev1 transition-all duration-200",
+  const cls = cn(
+    "group border-t-2 bg-paper-2/70 px-4 py-3.5",
     tone === "warn"
-      ? "border-amber-200/90 bg-amber-50/25"
+      ? "border-amber-400"
       : tone === "danger"
-        ? "border-red-200/90 bg-red-50/25"
-        : tone === "brand"
-          ? "border-brand-200/90 bg-brand-50/20"
-          : "border-rule hover:border-brand-300",
-    href && "hover:-translate-y-0.5 hover:shadow-elev2 cursor-pointer",
-    className,
+        ? "border-red-400"
+        : "border-slate-300",
   );
-
   return href ? (
-    <Link href={href} className={containerClasses}>
+    <Link href={href} className={cn(cls, "transition hover:border-brand-500")}>
       {inner}
     </Link>
   ) : (
-    <div className={containerClasses}>{inner}</div>
+    <div className={cls}>{inner}</div>
   );
 }
 
@@ -192,34 +128,24 @@ export function Panel({
   description,
   actions,
   children,
-  className,
 }: {
   title?: string;
   description?: string;
   actions?: React.ReactNode;
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <section className={cn("min-w-0 rounded-2xl border border-rule bg-[#ffffff] shadow-elev1 overflow-hidden", className)}>
+    <section className="min-w-0 rounded-lg border border-slate-200 bg-paper shadow-elev1">
       {(title || actions) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule bg-paper/60 px-5 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-paper-2/60 px-4 py-3 sm:px-5">
           <div className="min-w-0">
-            {title && (
-              <h2 className="font-display text-base font-semibold tracking-tight text-ink sm:text-lg">
-                {title}
-              </h2>
-            )}
-            {description && (
-              <p className="mt-0.5 text-xs text-ink-2 leading-relaxed sm:text-sm">
-                {description}
-              </p>
-            )}
+            {title && <h2 className="font-display text-[15px] font-semibold tracking-tight text-ink-900">{title}</h2>}
+            {description && <p className="mt-0.5 text-sm text-slate-500">{description}</p>}
           </div>
           {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
       )}
-      <div className="min-w-0 p-5 sm:p-6">{children}</div>
+      <div className="min-w-0 p-4 sm:p-5">{children}</div>
     </section>
   );
 }
