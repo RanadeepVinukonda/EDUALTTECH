@@ -190,7 +190,7 @@ export default function DashboardView() {
   return (
     <div className="mx-auto max-w-6xl space-y-12">
       {/* 1. Personalized Welcome & Pulse Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-rule/80 bg-gradient-to-br from-[#025926]/[0.05] via-paper to-paper-2 p-6 sm:p-8 shadow-elev1">
+      <section className="relative overflow-hidden rounded-3xl border border-rule bg-white p-6 sm:p-8 shadow-elev1">
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-[#025926]">
@@ -228,7 +228,7 @@ export default function DashboardView() {
         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 border-t border-rule/70 pt-6">
           <Link
             href="/dashboard/my-learning"
-            className="group flex flex-col justify-between rounded-2xl border border-rule/70 bg-white/80 p-4 shadow-2xs transition hover:border-brand-300 hover:bg-white hover:shadow-xs"
+            className="group flex flex-col justify-between rounded-2xl border border-rule bg-paper-2/60 p-4 shadow-2xs transition hover:border-brand-300 hover:bg-paper hover:shadow-xs"
           >
             <div className="flex items-center justify-between text-muted group-hover:text-[#025926]">
               <span className="text-xs font-medium">Enrolled Courses</span>
@@ -242,7 +242,7 @@ export default function DashboardView() {
 
           <Link
             href="/dashboard/progress"
-            className="group flex flex-col justify-between rounded-2xl border border-rule/70 bg-white/80 p-4 shadow-2xs transition hover:border-brand-300 hover:bg-white hover:shadow-xs"
+            className="group flex flex-col justify-between rounded-2xl border border-rule bg-paper-2/60 p-4 shadow-2xs transition hover:border-brand-300 hover:bg-paper hover:shadow-xs"
           >
             <div className="flex items-center justify-between text-muted group-hover:text-[#025926]">
               <span className="text-xs font-medium">Live Sessions</span>
@@ -258,7 +258,7 @@ export default function DashboardView() {
 
           <Link
             href="/dashboard/mentor"
-            className="group flex flex-col justify-between rounded-2xl border border-rule/70 bg-white/80 p-4 shadow-2xs transition hover:border-brand-300 hover:bg-white hover:shadow-xs"
+            className="group flex flex-col justify-between rounded-2xl border border-rule bg-paper-2/60 p-4 shadow-2xs transition hover:border-brand-300 hover:bg-paper hover:shadow-xs"
           >
             <div className="flex items-center justify-between text-muted group-hover:text-[#025926]">
               <span className="text-xs font-medium">Mentorship</span>
@@ -280,7 +280,7 @@ export default function DashboardView() {
 
           <Link
             href="/dashboard/notifications"
-            className="group flex flex-col justify-between rounded-2xl border border-rule/70 bg-white/80 p-4 shadow-2xs transition hover:border-brand-300 hover:bg-white hover:shadow-xs"
+            className="group flex flex-col justify-between rounded-2xl border border-rule bg-paper-2/60 p-4 shadow-2xs transition hover:border-brand-300 hover:bg-paper hover:shadow-xs"
           >
             <div className="flex items-center justify-between text-muted group-hover:text-[#025926]">
               <span className="text-xs font-medium">Updates</span>
@@ -302,7 +302,7 @@ export default function DashboardView() {
             return (
               <div
                 key={app.id}
-                className="relative overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50/70 via-white to-indigo-50/40 p-5 sm:p-6 shadow-elev1"
+                className="relative overflow-hidden rounded-2xl border border-purple-200/90 bg-white p-5 sm:p-6 shadow-elev1"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-start gap-4">
@@ -350,7 +350,7 @@ export default function DashboardView() {
       {/* 3. Live Session Spotlight Alert */}
       {upcoming && (
         <section aria-labelledby="live-session-heading">
-          <div className="relative overflow-hidden rounded-2xl border border-brand-200 bg-gradient-to-r from-brand-50/80 via-white to-emerald-50/40 p-5 sm:p-6 shadow-elev1">
+          <div className="relative overflow-hidden rounded-2xl border border-brand-200/90 bg-white p-5 sm:p-6 shadow-elev1">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-4">
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#025926] text-white shadow-sm">
