@@ -120,7 +120,7 @@ const DEMAND_PILLARS = [
 const PARTNERS = [
   {
     name: "New Era",
-    logo: "/media/logos/new_era.jpg",
+    logo: "/media/logos/new_era.png",
     photo: "/media/programs/new-era-program.jpeg",
     focus: "AI course & awareness",
     status: "Curriculum merge in progress",
@@ -128,7 +128,7 @@ const PARTNERS = [
   },
   {
     name: "Sharada Vidhyalaya",
-    logo: "/media/logos/sharada_vidhyalaya.jpeg",
+    logo: "/media/logos/sharada_vidhyalaya.png",
     photo: "/media/programs/sharada-vidhyalaya-program.jpeg",
     focus: "Idea to product development",
     status: "Running in classrooms",

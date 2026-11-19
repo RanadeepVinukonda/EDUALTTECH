@@ -4,9 +4,9 @@ import { cn } from "@/lib/cn";
 const PARTNERS = [
   { src: "/media/logos/genesis.png", name: "Genesis" },
   { src: "/media/logos/mamasparsh.png", name: "MamaSparsh" },
-  { src: "/media/logos/new_era.jpg", name: "New Era" },
-  { src: "/media/logos/sharada_vidhyalaya.jpeg", name: "Sharada Vidhyalaya" },
-  { src: "/media/logos/joy.jpeg", name: "Joy E.M. High School" },
+  { src: "/media/logos/new_era.png", name: "New Era" },
+  { src: "/media/logos/sharada_vidhyalaya.png", name: "Sharada Vidhyalaya" },
+  { src: "/media/logos/joy.png", name: "Joy E.M. High School" },
   { src: "/media/logos/newerahyd.png", name: "New Era Educational Institutions" },
   { src: "/media/logos/st Antony.png", name: "St. Anthony's Schools" },
 ];
@@ -38,20 +38,20 @@ export default function PartnerStrip({
         </p>
 
         {scroll ? (
-          <div className="marquee mt-6 py-1">
+          <div className="marquee mt-6 py-2">
             <ul className="marquee-track list-none">
               {[...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS].map((p, i) => (
                 <li
                   key={`${p.name}-${i}`}
                   aria-hidden={i >= PARTNERS.length || undefined}
-                  className="flex h-24 w-56 shrink-0 items-center justify-center rounded-xl border border-rule/70 bg-[#ffffff] px-6 py-3 shadow-elev1 sm:h-28 sm:w-64"
+                  className="flex h-28 w-56 shrink-0 items-center justify-center px-6 sm:h-32 sm:w-72 sm:px-8"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={p.src}
                     alt={p.name}
                     loading="lazy"
-                    className="max-h-16 sm:max-h-20 w-auto max-w-full object-contain opacity-95 transition-opacity duration-300 hover:opacity-100"
+                    className="max-h-20 sm:max-h-24 w-auto max-w-full object-contain opacity-95 transition-all duration-300 hover:scale-105 hover:opacity-100"
                   />
                 </li>
               ))}
@@ -62,15 +62,15 @@ export default function PartnerStrip({
             {PARTNERS.map((p) => (
               <li
                 key={p.name}
-                className="flex flex-col items-center gap-3 rounded-xl border border-rule bg-[#ffffff] p-6 shadow-elev1 transition hover:border-brand-300 hover:shadow-elev2"
+                className="flex flex-col items-center gap-3 p-5 transition"
               >
-                <div className="flex h-20 items-center justify-center">
+                <div className="flex h-28 items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={p.src}
                     alt={p.name}
                     loading="lazy"
-                    className="max-h-16 w-auto max-w-full object-contain opacity-95 transition duration-300 hover:opacity-100"
+                    className="max-h-20 sm:max-h-24 w-auto max-w-full object-contain opacity-95 transition duration-300 hover:scale-105 hover:opacity-100"
                   />
                 </div>
                 <span className="text-center text-xs font-semibold text-ink-800">{p.name}</span>
