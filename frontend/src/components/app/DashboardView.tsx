@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import School from "@mui/icons-material/School";
@@ -38,52 +38,32 @@ function getApplicationMeta(status: string) {
     case "INTERVIEW_SCHEDULED":
       return {
         label: "Interview Scheduled",
-        toneClass: "bg-brand-50 text-[#025926] border-brand-200",
-        dotClass: "bg-[#025926]",
-        iconBgClass: "bg-[#025926] text-white",
-        borderClass: "border-brand-200/90",
-        btnClass: "border-brand-300 text-[#025926] hover:bg-brand-50",
+        textColor: "text-[#025926]",
         desc: "Great news! Your application has advanced to the faculty evaluation interview. Our team is coordinating the calendar slot. Check your email or notifications for details.",
       };
     case "UNDER_REVIEW":
       return {
         label: "Under Review",
-        toneClass: "bg-amber-50 text-amber-700 border-amber-200",
-        dotClass: "bg-amber-600",
-        iconBgClass: "bg-amber-600 text-white",
-        borderClass: "border-amber-200/90",
-        btnClass: "border-amber-300 text-amber-800 hover:bg-amber-50",
+        textColor: "text-amber-800",
         desc: "A curriculum lead is reviewing your project portfolio and syllabus submission. Reviews typically complete within 2–3 business days.",
       };
     case "ACCEPTED":
       return {
         label: "Application Approved",
-        toneClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
-        dotClass: "bg-emerald-600",
-        iconBgClass: "bg-[#025926] text-white",
-        borderClass: "border-emerald-200/90",
-        btnClass: "border-emerald-300 text-emerald-800 hover:bg-emerald-50",
+        textColor: "text-emerald-800",
         desc: "You are approved as a mentor! Your teaching workspace is ready for course management and student assignments.",
       };
     case "REJECTED":
       return {
         label: "Not Selected",
-        toneClass: "bg-slate-50 text-slate-700 border-slate-200",
-        dotClass: "bg-slate-500",
-        iconBgClass: "bg-slate-600 text-white",
-        borderClass: "border-rule",
-        btnClass: "border-rule text-slate-700 hover:bg-paper-2",
+        textColor: "text-slate-600",
         desc: "Thank you for applying. While this application was not selected, you are invited to apply for other upcoming topics.",
       };
     case "SUBMITTED":
     default:
       return {
         label: "Application Submitted",
-        toneClass: "bg-blue-50 text-blue-700 border-blue-200",
-        dotClass: "bg-blue-600",
-        iconBgClass: "bg-blue-600 text-white",
-        borderClass: "border-blue-200/90",
-        btnClass: "border-blue-300 text-blue-800 hover:bg-blue-50",
+        textColor: "text-blue-800",
         desc: "Your mentor application is in our review queue. No further action is required from you right now.",
       };
   }
@@ -126,7 +106,6 @@ export default function DashboardView() {
   const [discover, setDiscover] = useState<CourseListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
-  const [activeCategory, setActiveCategory] = useState<string>("ALL");
 
   const load = useCallback(async () => {
     setError(null);
@@ -171,21 +150,6 @@ export default function DashboardView() {
     if (user?.role === "ADMIN") router.replace("/dashboard/admin");
   }, [user, router]);
 
-  const categories = useMemo(() => {
-    if (!discover || discover.length === 0) return ["ALL"];
-    const cats = new Set<string>();
-    discover.forEach((c) => {
-      if (c.category) cats.add(c.category);
-    });
-    return ["ALL", ...Array.from(cats)];
-  }, [discover]);
-
-  const filteredDiscover = useMemo(() => {
-    if (!discover) return [];
-    if (activeCategory === "ALL") return discover.slice(0, 6);
-    return discover.filter((c) => c.category === activeCategory).slice(0, 6);
-  }, [discover, activeCategory]);
-
   if (user?.role === "ADMIN") {
     return (
       <div className="grid min-h-[50vh] place-items-center">
@@ -199,6 +163,7 @@ export default function DashboardView() {
   const upcoming = data.upcomingMeetings[0];
   const unread = data.unreadNotifications + data.unreadMessages;
   const enrolledCount = data.learning.length;
+  const explore = (discover ?? []).slice(0, 3);
 
   return (
     <div className="mx-auto max-w-6xl space-y-12">
@@ -303,7 +268,7 @@ export default function DashboardView() {
         </div>
       </section>
 
-      {/* 2. High-Priority Mentor Application Tracker */}
+      {/* 2. Mentor Application Tracker */}
       {data.applications.length > 0 && (
         <section aria-labelledby="mentor-apps-heading" className="space-y-4">
           {data.applications.map((app) => {
@@ -311,51 +276,30 @@ export default function DashboardView() {
             return (
               <div
                 key={app.id}
-                className={cn(
-                  "relative overflow-hidden rounded-2xl border bg-white p-5 sm:p-6 shadow-elev1",
-                  meta.borderClass,
-                )}
+                className="relative rounded-2xl border border-rule bg-white p-5 sm:p-6 shadow-2xs"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-start gap-4">
-                    <span
-                      className={cn(
-                        "grid h-12 w-12 shrink-0 place-items-center rounded-xl shadow-sm",
-                        meta.iconBgClass,
-                      )}
-                    >
-                      <Handshake sx={{ fontSize: 26 }} />
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-xs font-semibold",
-                            meta.toneClass,
-                          )}
-                        >
-                          <span className={cn("h-2 w-2 rounded-full animate-pulse", meta.dotClass)} />
-                          {meta.label}
-                        </span>
-                        <span className="text-xs text-muted">
-                          Applied {formatDate(app.createdAt)}
-                        </span>
-                      </div>
-                      <h2 id="mentor-apps-heading" className="mt-1.5 font-display text-lg font-bold text-ink">
-                        Mentor Application: {app.course.title}
-                      </h2>
-                      <p className="mt-1 text-xs sm:text-sm text-ink-2 max-w-2xl leading-relaxed">
-                        {meta.desc}
-                      </p>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className={cn("font-semibold uppercase tracking-wider", meta.textColor)}>
+                        {meta.label}
+                      </span>
+                      <span className="text-muted">·</span>
+                      <span className="text-muted">
+                        Applied {formatDate(app.createdAt)}
+                      </span>
                     </div>
+                    <h2 id="mentor-apps-heading" className="mt-1.5 font-display text-lg font-bold text-ink">
+                      Mentor Application: {app.course.title}
+                    </h2>
+                    <p className="mt-1 text-xs sm:text-sm text-ink-2 max-w-2xl leading-relaxed">
+                      {meta.desc}
+                    </p>
                   </div>
 
                   <Link
                     href={`/dashboard/mentor/applications/${app.id}`}
-                    className={cn(
-                      "inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border bg-white px-4 text-xs sm:text-sm font-semibold shadow-2xs transition",
-                      meta.btnClass,
-                    )}
+                    className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-rule bg-white px-4 text-xs sm:text-sm font-semibold text-ink shadow-2xs transition hover:border-brand-300 hover:text-[#025926]"
                   >
                     View application details
                     <ArrowForward sx={{ fontSize: 15 }} />
@@ -370,31 +314,28 @@ export default function DashboardView() {
       {/* 3. Live Session Spotlight Alert */}
       {upcoming && (
         <section aria-labelledby="live-session-heading">
-          <div className="relative overflow-hidden rounded-2xl border border-brand-200/90 bg-white p-5 sm:p-6 shadow-elev1">
+          <div className="relative rounded-2xl border border-rule bg-white p-5 sm:p-6 shadow-2xs">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#025926] text-white shadow-sm">
-                  <Videocam sx={{ fontSize: 26 }} />
-                </span>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-brand-200 bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-800">
-                      <span className="h-2 w-2 rounded-full bg-[#025926] animate-pulse" />
-                      Next Live Session
-                    </span>
-                    {new Date(upcoming.scheduledAt).getTime() > now && (
-                      <span className="text-xs font-semibold text-[#025926]">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="font-semibold uppercase tracking-wider text-[#025926]">
+                    Next Live Session
+                  </span>
+                  {new Date(upcoming.scheduledAt).getTime() > now && (
+                    <>
+                      <span className="text-muted">·</span>
+                      <span className="font-medium text-muted">
                         Starts in {formatCountdown(new Date(upcoming.scheduledAt).getTime() - now)}
                       </span>
-                    )}
-                  </div>
-                  <h2 id="live-session-heading" className="mt-1.5 font-display text-lg font-bold text-ink">
-                    {upcoming.title}
-                  </h2>
-                  <p className="mt-1 text-xs sm:text-sm text-muted">
-                    {upcoming.course.title} · {formatDate(upcoming.scheduledAt)} · {upcoming.durationMin} min
-                  </p>
+                    </>
+                  )}
                 </div>
+                <h2 id="live-session-heading" className="mt-1.5 font-display text-lg font-bold text-ink">
+                  {upcoming.title}
+                </h2>
+                <p className="mt-1 text-xs sm:text-sm text-muted">
+                  {upcoming.course.title} · {formatDate(upcoming.scheduledAt)} · {upcoming.durationMin} min
+                </p>
               </div>
 
               <a
@@ -541,45 +482,24 @@ export default function DashboardView() {
         )}
       </section>
 
-      {/* 5. Explore Courses with Category Filters */}
-      {filteredDiscover.length > 0 && (
+      {/* 5. Explore Courses */}
+      {explore.length > 0 && (
         <section>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="font-display text-2xl font-semibold text-ink">Explore courses</h2>
-              <p className="mt-1 text-sm text-muted">Handpicked courses in technology, engineering, and creative arts.</p>
+              <p className="mt-1 text-sm text-muted">Recent courses in the catalogue.</p>
             </div>
             <Link
               href="/dashboard/courses"
               className="text-sm font-semibold text-[#025926] underline-offset-4 hover:underline"
             >
-              View all 35+ courses
+              View all
             </Link>
           </div>
 
-          {/* Interactive Category Chips */}
-          {categories.length > 1 && (
-            <div className="mb-6 flex flex-wrap gap-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setActiveCategory(cat)}
-                  className={cn(
-                    "cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition",
-                    activeCategory === cat
-                      ? "bg-[#025926] text-white shadow-xs"
-                      : "border border-rule bg-white text-ink-2 hover:border-brand-300 hover:text-[#025926]",
-                  )}
-                >
-                  {cat === "ALL" ? "All Courses" : cat}
-                </button>
-              ))}
-            </div>
-          )}
-
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredDiscover.map((c) => (
+            {explore.map((c) => (
               <li key={c.id} className="min-w-0">
                 <CourseCardLive course={c} />
               </li>
@@ -606,10 +526,10 @@ export default function DashboardView() {
         </div>
 
         {enrolledCount === 0 ? (
-          <div className="rounded-2xl border border-rule/80 bg-white p-6 shadow-2xs">
+          <div className="rounded-2xl border border-rule bg-white p-6 shadow-2xs">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-start gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+                <span className="mt-1 text-amber-700">
                   <EmojiEvents sx={{ fontSize: 24 }} />
                 </span>
                 <div>
@@ -624,7 +544,7 @@ export default function DashboardView() {
               </div>
               <Link
                 href="/dashboard/courses"
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-rule bg-paper-2 px-4 text-xs font-semibold text-ink transition hover:border-brand-300 hover:bg-brand-50"
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-rule bg-white px-4 text-xs font-semibold text-ink transition hover:border-brand-300 hover:text-[#025926]"
               >
                 Enroll to start tracking
                 <ArrowForward sx={{ fontSize: 13 }} />
@@ -647,7 +567,7 @@ export default function DashboardView() {
           href="/resources"
           className="group rounded-2xl border border-rule bg-white p-5 shadow-2xs transition hover:border-brand-300 hover:shadow-xs"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-[#025926] transition group-hover:scale-105">
+          <div className="text-[#025926]">
             <MenuBook fontSize="small" />
           </div>
           <h3 className="mt-3 font-display text-sm font-semibold text-ink group-hover:text-[#025926]">
@@ -662,7 +582,7 @@ export default function DashboardView() {
           href="/dashboard/mentor"
           className="group rounded-2xl border border-rule bg-white p-5 shadow-2xs transition hover:border-brand-300 hover:shadow-xs"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-[#025926] transition group-hover:scale-105">
+          <div className="text-[#025926]">
             <Handshake fontSize="small" />
           </div>
           <h3 className="mt-3 font-display text-sm font-semibold text-ink group-hover:text-[#025926]">
@@ -677,10 +597,10 @@ export default function DashboardView() {
           href="/dashboard/orders"
           className="group rounded-2xl border border-rule bg-white p-5 shadow-2xs transition hover:border-brand-300 hover:shadow-xs"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 transition group-hover:scale-105">
+          <div className="text-[#025926]">
             <ReceiptLong fontSize="small" />
           </div>
-          <h3 className="mt-3 font-display text-sm font-semibold text-ink group-hover:text-emerald-700">
+          <h3 className="mt-3 font-display text-sm font-semibold text-ink group-hover:text-[#025926]">
             Orders & Receipts
           </h3>
           <p className="mt-1 text-xs text-muted leading-relaxed">

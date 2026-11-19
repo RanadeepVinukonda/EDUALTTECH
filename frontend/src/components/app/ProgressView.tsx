@@ -155,11 +155,7 @@ function Summary({ label, value }: { label: string; value: number }) {
 function StatusPill({ complete }: { complete: boolean }) {
   return (
     <span
-      className={
-        complete
-          ? "rounded-full bg-paper-2 px-3 py-1 text-xs font-semibold text-accent"
-          : "rounded-full bg-paper-2 px-3 py-1 text-xs font-semibold text-ink-2"
-      }
+      className={complete ? "text-xs font-semibold text-[#025926]" : "text-xs font-medium text-muted"}
     >
       {complete ? "Completed" : "In progress"}
     </span>
