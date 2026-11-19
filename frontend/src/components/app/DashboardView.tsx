@@ -40,8 +40,11 @@ function getApplicationMeta(status: string) {
     case "INTERVIEW_SCHEDULED":
       return {
         label: "Interview Scheduled",
-        toneClass: "bg-purple-50 text-purple-700 border-purple-200",
-        dotClass: "bg-purple-600",
+        toneClass: "bg-brand-50 text-[#025926] border-brand-200",
+        dotClass: "bg-[#025926]",
+        iconBgClass: "bg-[#025926] text-white",
+        borderClass: "border-brand-200/90",
+        btnClass: "border-brand-300 text-[#025926] hover:bg-brand-50",
         desc: "Great news! Your application has advanced to the faculty evaluation interview. Our team is coordinating the calendar slot. Check your email or notifications for details.",
       };
     case "UNDER_REVIEW":
@@ -49,6 +52,9 @@ function getApplicationMeta(status: string) {
         label: "Under Review",
         toneClass: "bg-amber-50 text-amber-700 border-amber-200",
         dotClass: "bg-amber-600",
+        iconBgClass: "bg-amber-600 text-white",
+        borderClass: "border-amber-200/90",
+        btnClass: "border-amber-300 text-amber-800 hover:bg-amber-50",
         desc: "A curriculum lead is reviewing your project portfolio and syllabus submission. Reviews typically complete within 2–3 business days.",
       };
     case "ACCEPTED":
@@ -56,6 +62,9 @@ function getApplicationMeta(status: string) {
         label: "Application Approved",
         toneClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
         dotClass: "bg-emerald-600",
+        iconBgClass: "bg-[#025926] text-white",
+        borderClass: "border-emerald-200/90",
+        btnClass: "border-emerald-300 text-emerald-800 hover:bg-emerald-50",
         desc: "You are approved as a mentor! Your teaching workspace is ready for course management and student assignments.",
       };
     case "REJECTED":
@@ -63,6 +72,9 @@ function getApplicationMeta(status: string) {
         label: "Not Selected",
         toneClass: "bg-slate-50 text-slate-700 border-slate-200",
         dotClass: "bg-slate-500",
+        iconBgClass: "bg-slate-600 text-white",
+        borderClass: "border-rule",
+        btnClass: "border-rule text-slate-700 hover:bg-paper-2",
         desc: "Thank you for applying. While this application was not selected, you are invited to apply for other upcoming topics.",
       };
     case "SUBMITTED":
@@ -71,6 +83,9 @@ function getApplicationMeta(status: string) {
         label: "Application Submitted",
         toneClass: "bg-blue-50 text-blue-700 border-blue-200",
         dotClass: "bg-blue-600",
+        iconBgClass: "bg-blue-600 text-white",
+        borderClass: "border-blue-200/90",
+        btnClass: "border-blue-300 text-blue-800 hover:bg-blue-50",
         desc: "Your mentor application is in our review queue. No further action is required from you right now.",
       };
   }
@@ -302,11 +317,19 @@ export default function DashboardView() {
             return (
               <div
                 key={app.id}
-                className="relative overflow-hidden rounded-2xl border border-purple-200/90 bg-white p-5 sm:p-6 shadow-elev1"
+                className={cn(
+                  "relative overflow-hidden rounded-2xl border bg-white p-5 sm:p-6 shadow-elev1",
+                  meta.borderClass,
+                )}
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-start gap-4">
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-purple-600 text-white shadow-sm">
+                    <span
+                      className={cn(
+                        "grid h-12 w-12 shrink-0 place-items-center rounded-xl shadow-sm",
+                        meta.iconBgClass,
+                      )}
+                    >
                       <Handshake sx={{ fontSize: 26 }} />
                     </span>
                     <div className="min-w-0">
@@ -335,7 +358,10 @@ export default function DashboardView() {
 
                   <Link
                     href={`/dashboard/mentor/applications/${app.id}`}
-                    className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-purple-300 bg-white px-4 text-xs sm:text-sm font-semibold text-purple-700 shadow-2xs transition hover:bg-purple-50"
+                    className={cn(
+                      "inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border bg-white px-4 text-xs sm:text-sm font-semibold shadow-2xs transition",
+                      meta.btnClass,
+                    )}
                   >
                     View application details
                     <ArrowForward sx={{ fontSize: 15 }} />
@@ -652,10 +678,10 @@ export default function DashboardView() {
           href="/dashboard/mentor"
           className="group rounded-2xl border border-rule bg-white p-5 shadow-2xs transition hover:border-brand-300 hover:shadow-xs"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-700 transition group-hover:scale-105">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-[#025926] transition group-hover:scale-105">
             <Handshake fontSize="small" />
           </div>
-          <h3 className="mt-3 font-display text-sm font-semibold text-ink group-hover:text-purple-700">
+          <h3 className="mt-3 font-display text-sm font-semibold text-ink group-hover:text-[#025926]">
             Mentor & Teaching Hub
           </h3>
           <p className="mt-1 text-xs text-muted leading-relaxed">
