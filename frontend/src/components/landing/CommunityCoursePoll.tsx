@@ -316,7 +316,7 @@ export default function CommunityCoursePoll() {
                             Candidate {String(index + 1).padStart(2, "0")}
                           </span>
                           {option.difficulty && (
-                            <span className="rounded-full border border-rule bg-paper-2 px-2.5 py-0.5 text-xs font-semibold text-ink-2">
+                            <span className="rounded-md border border-rule bg-paper-2 px-2.5 py-0.5 text-xs font-semibold text-ink-2">
                               {option.difficulty}
                             </span>
                           )}
@@ -429,7 +429,7 @@ export default function CommunityCoursePoll() {
                     key={idea}
                     type="button"
                     onClick={() => setCustomSkill(idea)}
-                    className="cursor-pointer rounded-full border border-rule bg-[#ffffff] px-3 py-1 text-xs font-medium text-ink-2 shadow-elev1 transition hover:border-brand-300 hover:bg-brand-50 hover:text-[#025926]"
+                    className="cursor-pointer rounded-lg border border-rule bg-[#ffffff] px-3 py-1.5 text-xs font-medium text-ink-2 shadow-2xs transition hover:border-brand-300 hover:bg-brand-50 hover:text-[#025926]"
                   >
                     + {idea}
                   </button>

@@ -11,9 +11,7 @@ import Handshake from "@mui/icons-material/Handshake";
 import EmojiEvents from "@mui/icons-material/EmojiEvents";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import CheckCircle from "@mui/icons-material/CheckCircle";
-import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import NotificationsNone from "@mui/icons-material/NotificationsNone";
-import TrendingUp from "@mui/icons-material/TrendingUp";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import { apiGet } from "@/lib/api";
 import { describeError } from "@/lib/errors";
@@ -96,7 +94,7 @@ function DashboardSkeleton() {
     <div className="space-y-10" role="status" aria-live="polite">
       <span className="sr-only">Loading your dashboard…</span>
       <div className="rounded-3xl border border-rule/80 bg-paper p-6 sm:p-8">
-        <Skeleton className="h-6 w-32 rounded-full" />
+        <Skeleton className="h-6 w-32 rounded-lg" />
         <Skeleton className="mt-4 h-10 w-72 sm:w-96" />
         <Skeleton className="mt-2 h-4 w-60" />
         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 border-t border-rule/70 pt-6">
@@ -208,11 +206,7 @@ export default function DashboardView() {
       <section className="relative overflow-hidden rounded-3xl border border-rule bg-white p-6 sm:p-8 shadow-elev1">
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-[#025926]">
-              <School sx={{ fontSize: 15 }} />
-              <span>Learner Studio</span>
-            </div>
-            <h1 className="mt-3 font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl lg:text-4xl">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl lg:text-4xl">
               {getGreeting(user?.firstName)}
             </h1>
             <p className="mt-2 text-sm sm:text-base leading-relaxed text-ink-2">
@@ -336,7 +330,7 @@ export default function DashboardView() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+                            "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-xs font-semibold",
                             meta.toneClass,
                           )}
                         >
@@ -384,7 +378,7 @@ export default function DashboardView() {
                 </span>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-semibold text-brand-800">
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-brand-200 bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-800">
                       <span className="h-2 w-2 rounded-full bg-[#025926] animate-pulse" />
                       Next Live Session
                     </span>
@@ -472,14 +466,10 @@ export default function DashboardView() {
         </div>
 
         {enrolledCount === 0 ? (
-          <div className="overflow-hidden rounded-3xl border border-rule/80 bg-white p-6 sm:p-8 shadow-elev1">
+          <div className="overflow-hidden rounded-2xl border border-rule bg-white p-6 sm:p-8 shadow-elev1">
             <div className="grid gap-6 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-8">
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-[#025926]">
-                  <AutoAwesome sx={{ fontSize: 14 }} />
-                  <span>Start Your Skill Journey</span>
-                </div>
-                <h3 className="mt-3 font-display text-xl sm:text-2xl font-bold text-ink">
+                <h3 className="font-display text-xl sm:text-2xl font-bold text-ink">
                   Ready to master in-demand skills with 1-on-1 mentors?
                 </h3>
                 <p className="mt-2 text-sm sm:text-base leading-relaxed text-ink-2 max-w-2xl">
@@ -487,19 +477,19 @@ export default function DashboardView() {
                   and focused on building real portfolio capstones for a flat price of ₹699.
                 </p>
 
-                <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="flex items-center gap-2.5 rounded-xl border border-rule/70 bg-paper-2/60 px-3.5 py-2.5">
+                <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-ink-2">
+                  <span className="inline-flex items-center gap-1.5">
                     <CheckCircle sx={{ fontSize: 16, color: "#025926" }} />
-                    <span className="text-xs font-medium text-ink">Hands-on Capstones</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 rounded-xl border border-rule/70 bg-paper-2/60 px-3.5 py-2.5">
+                    Hands-on Capstones
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
                     <CheckCircle sx={{ fontSize: 16, color: "#025926" }} />
-                    <span className="text-xs font-medium text-ink">1-on-1 Mentorship</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 rounded-xl border border-rule/70 bg-paper-2/60 px-3.5 py-2.5">
+                    1-on-1 Mentorship
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
                     <CheckCircle sx={{ fontSize: 16, color: "#025926" }} />
-                    <span className="text-xs font-medium text-ink">Flat ₹699 Lifetime</span>
-                  </div>
+                    Flat ₹699 Lifetime
+                  </span>
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-3">
@@ -519,7 +509,7 @@ export default function DashboardView() {
                 </div>
               </div>
 
-              <div className="lg:col-span-4 rounded-2xl border border-rule/80 bg-paper-2/70 p-5">
+              <div className="lg:col-span-4 rounded-xl border border-rule bg-white p-5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted">
                   Popular Starter Tracks
                 </p>
@@ -576,7 +566,7 @@ export default function DashboardView() {
                   type="button"
                   onClick={() => setActiveCategory(cat)}
                   className={cn(
-                    "cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition",
+                    "cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition",
                     activeCategory === cat
                       ? "bg-[#025926] text-white shadow-xs"
                       : "border border-rule bg-white text-ink-2 hover:border-brand-300 hover:text-[#025926]",
@@ -647,13 +637,7 @@ export default function DashboardView() {
       </section>
 
       {/* 7. Community Course Poll (Showdown) */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-[#025926]">
-            <TrendingUp sx={{ fontSize: 13 }} />
-            Community Voice
-          </span>
-        </div>
+      <section>
         <CommunityCoursePoll />
       </section>
 
